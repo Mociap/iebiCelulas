@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo do Mês</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="Logo.png" alt="Logo da Igreja" class="mb-4">
+        <div class="form-group">
+            <label for="rede">Rede</label>
+            <select class="form-control" id="rede" required onchange="alterarCorRede(this.value); carregarSupervisores(this.value)"></select>
+        </div>
+        <div class="form-group">
+            <label for="supervisor">Supervisão</label>
+            <select class="form-control" id="supervisor" required onchange="carregarLideres(this.value)"></select>
+        </div>
+        <div class="form-group">
+            <label for="lider">Líder</label>
+            <select class="form-control" id="lider" required></select>
+        </div>
+        <div class="form-group">
+            <label for="nomeCelula">Nome da Célula</label>
+            <input type="text" class="form-control" id="nomeCelula" readonly>
+        </div>
+        <div id="resumoMes"></div>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        var selectRedes = document.getElementById('rede');
+        var selectSupervisores = document.getElementById('supervisor');
+        var selectLideres = document.getElementById('lider');
+        var nomeCelulaInput = document.getElementById('nomeCelula');
+
+        // Preencher o dropdown de redes em ordem alfabética
+        bancoDeDados.collection('rede').orderBy('nomerede').get().then((querySnapshot) => {
+            const option = document.createElement('option');
+            option.value = '';
+            option.text = 'Selecione uma rede';
+            selectRedes.add(option);
+
+            querySnapshot.forEach((doc) => {
+                const option = document.createElement('option');
+                option.value = doc.data().nomerede;
+                option.text = doc.data().nomerede;
+                selectRedes.add(option);
+            });
+        });
+
+        // Função para carregar os supervisores com base na rede selecionada
+        function carregarSupervisores(rede) {
+            selectSupervisores.innerHTML = '';
+            selectLideres.innerHTML = '';
+            nomeCelulaInput.value = ''; // Limpar o valor do campo de texto
+
+            if (rede) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione um supervisor';
+                selectSupervisores.add(option);
+
+                bancoDeDados.collection('estruturacelula')
+                    .where('rede', '==', rede)
+                    .get()
+                    .then((querySnapshot) => {
+                        const supervisores = new Set();
+                        querySnapshot.forEach((doc) => {
+                            supervisores.add(doc.data().supervisor);
+                        });
+
+                        supervisores.forEach((supervisor) => {
+                            const option = document.createElement('option');
+                            option.value = supervisor;
+                            option.text = supervisor;
+                            selectSupervisores.add(option);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar supervisores:', error);
+                    });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione uma rede primeiro';
+                selectSupervisores.add(option);
+            }
+        }
+
+        // Função para carregar os líderes com base no supervisor selecionado
+        function carregarLideres(supervisor) {
+            selectLideres.innerHTML = '';
+            nomeCelulaInput.value = ''; // Limpar o valor do campo de texto
+
+            if (supervisor) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione um líder';
+                selectLideres.add(option);
+
+                bancoDeDados.collection('estruturacelula')
+                    .where('supervisor', '==', supervisor)
+                    .get()
+                    .then((querySnapshot) => {
+                        const lideres = new Set();
+                        querySnapshot.forEach((doc) => {
+                            lideres.add(doc.data().conclider);
+                        });
+
+                        lideres.forEach((lider) => {
+                            const option = document.createElement('option');
+                            option.value = lider;
+                            option.text = lider;
+                            selectLideres.add(option);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar líderes:', error);
+                    });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione um supervisor primeiro';
+                selectLideres.add(option);
+            }
+        }
+
+        // Função para atualizar o nome da célula
+        function atualizarNomeCelula() {
+            const rede = selectRedes.value;
+            const supervisor = selectSupervisores.value;
+            const lider = selectLideres.value;
+
+            if (rede && supervisor && lider) {
+                bancoDeDados.collection('estruturacelula')
+                    .where('rede', '==', rede)
+                    .where('supervisor', '==', supervisor)
+                    .where('conclider', '==', lider)
+                    .get()
+                    .then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            nomeCelulaInput.value = doc.data().nomecelula;
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao buscar nome da célula:', error);
+                    });
+            } else {
+                nomeCelulaInput.value = '';
+            }
+        }
+
+        // Adicionar eventos de alteração para as dropdowns
+        selectRedes.addEventListener('change', atualizarNomeCelula);
+        selectSupervisores.addEventListener('change', atualizarNomeCelula);
+        selectLideres.addEventListener('change', atualizarNomeCelula);
+
+        // Função para alterar a cor da caixa de acordo com a rede escolhida
+        function alterarCorRede(rede) {
+            var selectRede = document.getElementById('rede');
+            var cores = {
+                'AMARELA': '#FFFF00',
+                'AZUL': '#0000FF',
+                'ROXA': '#800080',
+                'LARANJA': '#FFA500',
+                'VERMELHA': '#FF0000',
+                'BLACK': '#000000',
+                'VERDE': '#008000'
+            };
+
+            var cor = cores[rede] || '#000000';
+            selectRede.style.backgroundColor = cor;
+            selectRede.style.color = (cor === '#000000' || cor === '#800080' || cor === '#0000FF') ? '#FFFFFF' : '#000000';
+        }
+    </script>
+</body>
+</html>
