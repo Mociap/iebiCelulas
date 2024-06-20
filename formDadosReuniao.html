@@ -244,8 +244,16 @@
                     .where('lidercelula', '==', lider)
                     .get()
                     .then((querySnapshot) => {
-                        var qtdMembros = 0;
+                        var membros = [];
                         querySnapshot.forEach((doc) => {
+                            membros.push({ id: doc.id, nome: doc.data().nome });
+                        });
+
+                        // Ordenar os membros por nome
+                        membros.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                        var qtdMembros = 0;
+                        membros.forEach((membro) => {
                             qtdMembros++;
 
                             const div = document.createElement('div');
@@ -254,14 +262,14 @@
                             const input = document.createElement('input');
                             input.type = 'checkbox';
                             input.classList.add('form-check-input');
-                            input.id = `membro-${doc.id}`;
-                            input.value = doc.data().nome; // Armazenar o nome do membro
+                            input.id = `membro-${membro.id}`;
+                            input.value = membro.nome;
                             input.addEventListener('change', atualizarMembroPresentes);
 
                             const label = document.createElement('label');
                             label.classList.add('form-check-label');
-                            label.htmlFor = `membro-${doc.id}`;
-                            label.textContent = doc.data().nome;
+                            label.htmlFor = `membro-${membro.id}`;
+                            label.textContent = membro.nome;
 
                             div.appendChild(input);
                             div.appendChild(label);
@@ -332,14 +340,18 @@
                 presenca: presenca,
                 qtdVisitantes: parseInt(qtdVisitantes),
                 kgAlimento: parseFloat(kgAlimento),
-                oferta: parseFloat(oferta),
+                oferta: parseFloat(
+                    oferta),
                 qtdMembros: parseInt(qtdMembros),
                 membroPresentes: parseInt(membroPresentes)
             })
             .then(function() {
                 alert('Dados da reunião enviados com sucesso!');
-                formulario.reset();
-                location.reload(); // Atualizar a página
+                var rede = document.getElementById('rede').value;
+                var supervisor = document.getElementById('supervisor').value;
+                var lider = document.getElementById('lider').value;
+                var url = `resumoMes.html?rede=${encodeURIComponent(rede)}&supervisor=${encodeURIComponent(supervisor)}&lider=${encodeURIComponent(lider)}`;
+                window.location.href = url;
             })
             .catch(function(error) {
                 alert('Erro ao enviar dados da reunião: ' + error.message);
@@ -347,4 +359,4 @@
         });
     </script>
 </body>
-</html
+</html>
