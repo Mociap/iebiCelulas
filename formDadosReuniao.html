@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados da Reunião</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            padding-top: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px 10px 0 0;
+        }
+        .header img {
+            max-width: 200px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 20px auto;
+        }
+        .btn-primary {
+            background-color: #000;
+            border-color: #000;
+        }
+        .btn-primary:hover {
+            background-color: #333;
+            border-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4">Dados da Reunião</h2>
+        <div class="divider"></div>
+        <form id="reuniaoForm">
+            <div class="form-group">
+                <label for="data">Data da Reunião</label>
+                <input type="date" class="form-control" id="data" required>
+            </div>
+            <div class="form-group" style="display: none;">
+                <label for="ano">Ano</label>
+                <input type="number" class="form-control" id="ano" readonly>
+            </div>
+            <div class="form-group" style="display: none;">
+                <label for="mesAno">Mês/Ano</label>
+                <input type="text" class="form-control" id="mesAno" readonly>
+            </div>
+            <div class="form-group">
+                <label for="rede">Rede</label>
+                <select class="form-control" id="rede" required onchange="alterarCorRede(this.value); carregarSupervisores(this.value)"></select>
+            </div>
+            <div class="form-group">
+                <label for="supervisor">Supervisor</label>
+                <select class="form-control" id="supervisor" required onchange="carregarLideres(this.value)"></select>
+            </div>
+            <div class="form-group">
+                <label for="lider">Líder</label>
+                <select class="form-control" id="lider" required onchange="carregarCelula(this.value); carregarMembros(this.value)"></select>
+            </div>
+            <div class="form-group">
+                <label for="celula">Célula</label>
+                <input type="text" class="form-control" id="celula" readonly>
+            </div>
+            <div class="form-group">
+                <label>Presença</label>
+                <div id="presencaContainer"></div>
+            </div>
+            <div class="form-group">
+                <label for="qtdVisitantes">Quantidade de Visitantes</label>
+                <input type="number" class="form-control" id="qtdVisitantes" required>
+            </div>
+            <div class="form-group">
+                <label for="kgAlimento">Kg de Alimento</label>
+                <input type="number" class="form-control" id="kgAlimento" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="oferta">Oferta</label>
+                <input type="number" class="form-control" id="oferta" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="qtdMembros">Quantidade de Membros</label>
+                <input type="number" class="form-control" id="qtdMembros" readonly>
+            </div>
+            <div class="form-group">
+                <label for="membroPresentes">Membros Presentes</label>
+                <input type="number" class="form-control" id="membroPresentes" readonly>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">Enviar</button>
+        </form>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        // Referência ao formulário
+        var formulario = document.getElementById('reuniaoForm');
+        var selectRedes = document.getElementById('rede');
+        var selectSupervisores = document.getElementById('supervisor');
+        var selectLideres = document.getElementById('lider');
+        var inputCelula = document.getElementById('celula');
+        var presencaContainer = document.getElementById('presencaContainer');
+
+        // Obter o ano e mês/ano a partir da data selecionada
+        var inputData = document.getElementById('data');
+        var inputAno = document.getElementById('ano');
+        var inputMesAno = document.getElementById('mesAno');
+
+        inputData.addEventListener('change', function() {
+            var dataEscolhida = new Date(this.value);
+            inputAno.value = dataEscolhida.getFullYear();
+            var mes = String(dataEscolhida.getMonth() + 1).padStart(2, '0');
+            var ano = dataEscolhida.getFullYear();
+            inputMesAno.value = mes + '/' + ano;
+        });
+
+        // Preencher o dropdown de redes em ordem alfabética
+        bancoDeDados.collection('rede').orderBy('nomerede').get().then((querySnapshot) => {
+            const option = document.createElement('option');
+            option.value = '';
+            option.text = 'Selecione uma rede';
+            selectRedes.add(option);
+
+            querySnapshot.forEach((doc) => {
+                const option = document.createElement('option');
+                option.value = doc.data().nomerede;
+                option.text = doc.data().nomerede;
+                selectRedes.add(option);
+            });
+        });
+
+        // Função para carregar os supervisores com base na rede selecionada
+        function carregarSupervisores(rede) {
+            selectSupervisores.innerHTML = '';
+            selectLideres.innerHTML = '';
+            inputCelula.value = '';
+            presencaContainer.innerHTML = '';
+
+            if (rede) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione um supervisor';
+                selectSupervisores.add(option);
+
+                bancoDeDados.collection('estruturacelula')
+                    .where('rede', '==', rede)
+                    .get()
+                    .then((querySnapshot) => {
+                        const supervisores = new Set();
+                        querySnapshot.forEach((doc) => {
+                            supervisores.add(doc.data().supervisor);
+                        });
+
+                        supervisores.forEach((supervisor) => {
+                            const option = document.createElement('option');
+                            option.value = supervisor;
+                            option.text = supervisor;
+                            selectSupervisores.add(option);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar supervisores:', error);
+                    });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione uma rede primeiro';
+                selectSupervisores.add(option);
+            }
+        }
+
+        // Função para carregar os líderes com base no supervisor selecionado
+        function carregarLideres(supervisor) {
+            selectLideres.innerHTML = '';
+            inputCelula.value = '';
+            presencaContainer.innerHTML = '';
+
+            if (supervisor) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione um líder';
+                selectLideres.add(option);
+
+                bancoDeDados.collection('estruturacelula')
+                    .where('supervisor', '==', supervisor)
+                    .get()
+                    .then((querySnapshot) => {
+                        const lideres = new Set();
+                        querySnapshot.forEach((doc) => {
+                            lideres.add(doc.data().conclider);
+                        });
+
+                        lideres.forEach((lider) => {
+                            const option = document.createElement('option');
+                            option.value = lider;
+                            option.text = lider;
+                            selectLideres.add(option);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar líderes:', error);
+                    });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione um supervisor primeiro';
+                selectLideres.add(option);
+            }
+        }
+
+        // Função para carregar a célula com base no líder selecionado
+        function carregarCelula(lider) {
+            if (lider) {
+                bancoDeDados.collection('estruturacelula')
+                    .where('conclider', '==', lider)
+                    .get()
+                    .then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            inputCelula.value = doc.data().nomecelula;
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar célula:', error);
+                    });
+            } else {
+                inputCelula.value = '';
+            }
+        }
+
+        // Função para carregar a lista de membros com base no líder selecionado
+        function carregarMembros(lider) {
+            presencaContainer.innerHTML = '';
+            var qtdMembrosInput = document.getElementById('qtdMembros');
+            qtdMembrosInput.value = '';
+            var membrosPresentesInput = document.getElementById('membroPresentes');
+            membrosPresentesInput.value = '';
+
+            if (lider) {
+                bancoDeDados.collection('membros')
+                    .where('lidercelula', '==', lider)
+                    .get()
+                    .then((querySnapshot) => {
+                        var membros = [];
+                        querySnapshot.forEach((doc) => {
+                            membros.push({ id: doc.id, nome: doc.data().nome });
+                        });
+
+                        // Ordenar os membros por nome
+                        membros.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                        var qtdMembros = 0;
+                        membros.forEach((membro) => {
+                            qtdMembros++;
+
+                            const div = document.createElement('div');
+                            div.classList.add('form-check');
+
+                            const input = document.createElement('input');
+                            input.type = 'checkbox';
+                            input.classList.add('form-check-input');
+                            input.id = `membro-${membro.id}`;
+                            input.value = membro.nome;
+                            input.addEventListener('change', atualizarMembroPresentes);
+
+                            const label = document.createElement('label');
+                            label.classList.add('form-check-label');
+                            label.htmlFor = `membro-${membro.id}`;
+                            label.textContent = membro.nome;
+
+                            div.appendChild(input);
+                            div.appendChild(label);
+                            presencaContainer.appendChild(div);
+                        });
+
+                        qtdMembrosInput.value = qtdMembros;
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar membros:', error);
+                    });
+            }
+        }
+
+        // Função para atualizar o campo Membros Presentes
+        function atualizarMembroPresentes() {
+            var membrosPresentesInput = document.getElementById('membroPresentes');
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            membrosPresentesInput.value = checkboxes.length;
+        }
+
+        // Função para alterar a cor da caixa de acordo com a rede escolhida
+        function alterarCorRede(rede) {
+            var selectRede = document.getElementById('rede');
+            var cores = {
+                'AMARELA': '#FFD700',
+                'AZUL': '#000080',
+                'ROXA': '#4B0082',
+                'LARANJA': '#FF8C00',
+                'VERMELHA': '#8B0000',
+                'BLACK': '#000000',
+                'VERDE': '#006400'
+            };
+
+            var cor = cores[rede] || '#000000';
+            selectRede.style.backgroundColor = cor;
+            selectRede.style.color = '#FFFFFF';
+        }
+
+        // Adicionar evento de envio do formulário
+        formulario.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var ano = document.getElementById('ano').value;
+            var mesAno = document.getElementById('mesAno').value;
+            var data = document.getElementById('data').value;
+            var rede = document.getElementById('rede').value;
+            var supervisor = document.getElementById('supervisor').value
+            var lider = document.getElementById('lider').value;
+            var celula = document.getElementById('celula').value;
+            var presenca = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(function(checkbox) {
+                return checkbox.value;
+            });
+            var qtdVisitantes = document.getElementById('qtdVisitantes').value;
+            var kgAlimento = document.getElementById('kgAlimento').value;
+            var oferta = document.getElementById('oferta').value;
+            var qtdMembros = document.getElementById('qtdMembros').value;
+            var membroPresentes = document.getElementById('membroPresentes').value;
+
+            bancoDeDados.collection('reuniao').add({
+                ano: parseInt(ano),
+                mesAno: mesAno,
+                data: new Date(data),
+                rede: rede,
+                supervisor: supervisor,
+                lider: lider,
+                celula: celula,
+                presenca: presenca,
+                qtdVisitantes: parseInt(qtdVisitantes),
+                kgAlimento: parseFloat(kgAlimento),
+                oferta: parseFloat(oferta),
+                qtdMembros: parseInt(qtdMembros),
+                membroPresentes: parseInt(membroPresentes)
+            })
+            .then(function() {
+                alert('Dados da reunião enviados com sucesso!');
+                var url = `resumoMes.html?rede=${encodeURIComponent(rede)}&supervisor=${encodeURIComponent(supervisor)}&lider=${encodeURIComponent(lider)}&data=${encodeURIComponent(data)}&celula=${encodeURIComponent(celula)}`;
+                window.location.href = url;
+            })
+            .catch(function(error) {
+                alert('Erro ao enviar dados da reunião: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>
