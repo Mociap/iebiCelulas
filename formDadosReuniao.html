@@ -4,24 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dados da Reunião</title>
+    <link rel="shortcut icon" href="assets/logobranco.png" type="image/png">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <style>
         body {
             background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            padding-top: 100px;
         }
         .container {
             max-width: 500px;
-            margin-top: 50px;
+            margin-top: 20px;
             background-color: #fff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+        .header {
+            background-color: #000;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header img {
+            max-width: 150px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 20px auto;
+        }
+        .btn-primary {
+            background-color: #000;
+            border-color: #000;
+        }
+        .btn-primary:hover {
+            background-color: #333;
+            border-color: #333;
+        }
     </style>
 </head>
 <body>
+    <div class="header">
+        <img src="assets/logobranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+    </div>
     <div class="container">
         <h2 class="text-center mb-4">Dados da Reunião</h2>
+        <div class="divider"></div>
         <form id="reuniaoForm">
             <div class="form-group">
                 <label for="data">Data da Reunião</label>
@@ -295,18 +332,18 @@
         function alterarCorRede(rede) {
             var selectRede = document.getElementById('rede');
             var cores = {
-                'AMARELA': '#FFFF00',
-                'AZUL': '#0000FF',
-                'ROXA': '#800080',
-                'LARANJA': '#FFA500',
-                'VERMELHA': '#FF0000',
+                'AMARELA': '#FFD700',
+                'AZUL': '#000080',
+                'ROXA': '#4B0082',
+                'LARANJA': '#FF8C00',
+                'VERMELHA': '#8B0000',
                 'BLACK': '#000000',
-                'VERDE': '#008000'
+                'VERDE': '#006400'
             };
 
             var cor = cores[rede] || '#000000';
             selectRede.style.backgroundColor = cor;
-            selectRede.style.color = (cor === '#000000' || cor === '#800080' || cor === '#0000FF') ? '#FFFFFF' : '#000000';
+            selectRede.style.color = '#FFFFFF';
         }
 
         // Adicionar evento de envio do formulário
@@ -317,7 +354,7 @@
             var mesAno = document.getElementById('mesAno').value;
             var data = document.getElementById('data').value;
             var rede = document.getElementById('rede').value;
-            var supervisor = document.getElementById('supervisor').value;
+            var supervisor = document.getElementById('supervisor').value
             var lider = document.getElementById('lider').value;
             var celula = document.getElementById('celula').value;
             var presenca = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(function(checkbox) {
@@ -340,8 +377,7 @@
                 presenca: presenca,
                 qtdVisitantes: parseInt(qtdVisitantes),
                 kgAlimento: parseFloat(kgAlimento),
-                oferta: parseFloat(
-                    oferta),
+                oferta: parseFloat(oferta),
                 qtdMembros: parseInt(qtdMembros),
                 membroPresentes: parseInt(membroPresentes)
             })
@@ -350,7 +386,8 @@
                 var rede = document.getElementById('rede').value;
                 var supervisor = document.getElementById('supervisor').value;
                 var lider = document.getElementById('lider').value;
-                var url = `resumoMes.html?rede=${encodeURIComponent(rede)}&supervisor=${encodeURIComponent(supervisor)}&lider=${encodeURIComponent(lider)}`;
+                var data = document.getElementById('data').value; // Adicionando esta linha
+                var url = `resumoMes.html?rede=${encodeURIComponent(rede)}&supervisor=${encodeURIComponent(supervisor)}&lider=${encodeURIComponent(lider)}&data=${encodeURIComponent(data)}`; // Modificando esta linha
                 window.location.href = url;
             })
             .catch(function(error) {

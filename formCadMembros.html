@@ -4,20 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulário de Cadastro de Membros</title>
-    <link rel="shortcut icon" href="3.png" type="image/png">
+    <link rel="shortcut icon" href="assets/logobranco.png" type="image/png">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
         body {
             background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            padding-top: 100px;
         }
         .container {
             max-width: 500px;
-            margin-top: 50px;
+            margin-top: 20px;
             background-color: #fff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #000;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header img {
+            max-width: 150px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 30px auto;
+        }
+        .btn-primary {
+            background-color: #000;
+            border-color: #000;
+        }
+        .btn-primary:hover {
+            background-color: #333;
+            border-color: #333;
         }
         .choice-chip {
             display: inline-flex;
@@ -31,7 +63,7 @@
             transition: background-color 0.3s;
         }
         .choice-chip.selected {
-            background-color: #007bff;
+            background-color: #000;
             color: #fff;
         }
         .choice-chip .material-icons {
@@ -40,8 +72,12 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <img src="assets/logobranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+    </div>
     <div class="container">
-        <h2 class="text-center mb-4">Cadastro de Membros</h2>
+        <h2 class="text-center mb-4 font-weight-bold">Cadastro de Membros</h2>
+        <div class="divider"></div>
         <form id="memberForm">
             <div class="form-group">
                 <label for="nome">Nome Conforme RG</label>
