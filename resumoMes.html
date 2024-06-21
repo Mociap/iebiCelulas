@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resumo do Mês</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
-    <link rel="shortcut icon" href="/3.ico" type="image/x-icon">
-    <link rel="icon" href="/3.ico" type="image/x-icon">
     <style>
         body {
             background-color: #f8f9fa;
             font-family: 'Montserrat', sans-serif;
             color: #333;
-            padding-top: 100px;
+            padding-top: 0;
         }
         .container {
             max-width: 500px;
@@ -25,17 +24,13 @@
         }
         .header {
             background-color: #000;
-            padding: 10px;
+            padding: 20px;
             text-align: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border-radius: 10px 10px 0 0;
         }
         .header img {
-            max-width: 150px;
+            max-width: 200px;
         }
         .thank-you-message {
             margin-top: 20px;
@@ -71,7 +66,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
     </div>
     <div class="container">
         <div class="thank-you-message">
@@ -95,7 +90,7 @@
             <p>- Oferta do Amor: <span id="ofertaAmor"></span></p>
         </div>
         <div class="footer-logo">
-            <img src="/Logo.png" alt="Logo">
+            <img src="./Logo.png" alt="Logo">
         </div>
     </div>
 
