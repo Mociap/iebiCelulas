@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar e Editar Coleção</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Visualizar e Editar Coleção</h2>
+        <div class="form-group">
+            <label for="colecao">Selecione a coleção:</label>
+            <select class="form-control" id="colecao">
+                <option value="">Selecione uma opção</option>
+                <option value="rede">Rede</option>
+                <option value="estruturacelula">Estrutura Célula</option>
+                <option value="membros">Membros</option>
+                <option value="reuniao">Reunião</option>
+            </select>
+        </div>
+        <table class="table table-striped" id="tabelaDados">
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        // Referências aos elementos do formulário
+        var selectColecao = document.getElementById('colecao');
+        var tabelaDados = document.getElementById('tabelaDados');
+
+        // Função para exibir os dados na tabela
+        function exibirDados(colecao) {
+            const thead = tabelaDados.getElementsByTagName('thead')[0];
+            const tbody = tabelaDados.getElementsByTagName('tbody')[0];
+            thead.innerHTML = ''; // Limpar o cabeçalho da tabela
+            tbody.innerHTML = ''; // Limpar o conteúdo da tabela
+
+            bancoDeDados.collection(colecao).get()
+                .then(querySnapshot => {
+                    if (querySnapshot.size > 0) {
+                        // Criar a linha de cabeçalho com os nomes dos campos
+                        const tr = document.createElement('tr');
+                        const campos = Object.keys(querySnapshot.docs[0].data());
+                        campos.forEach(campo => {
+                            const th = document.createElement('th');
+                            th.textContent = campo;
+                            tr.appendChild(th);
+                        });
+                        thead.appendChild(tr);
+
+                        // Criar as linhas de dados
+                        querySnapshot.forEach(doc => {
+                            const tr = document.createElement('tr');
+                            const dados = doc.data();
+                            Object.values(dados).forEach(valor => {
+                                const td = document.createElement('td');
+                                td.contentEditable = true; // Tornar a célula editável
+                                td.addEventListener('blur', () => atualizarDados(doc.id, dados, td.textContent, td.cellIndex));
+                                td.textContent = valor;
+                                tr.appendChild(td);
+                            });
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        const tr = document.createElement('tr');
+                        const td = document.createElement('td');
+                        td.textContent = 'Nenhum dado encontrado.';
+                        td.colSpan = 3; // Definir a largura da célula para ocupar todas as colunas
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao exibir dados:', error);
+                });
+        }
+
+        // Função para atualizar os dados no Firebase
+        function atualizarDados(id, dados, novoValor, indice) {
+            const campo = Object.keys(dados)[indice];
+            const novosDados = { ...dados, [campo]: novoValor };
+            bancoDeDados.collection(selectColecao.value).doc(id).set(novosDados)
+                .then(() => {
+                    console.log('Dados atualizados com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar dados:', error);
+                });
+        }
+
+        // Adicionar evento de mudança ao dropdown de coleções
+        selectColecao.addEventListener('change', () => {
+            const colecao = selectColecao.value;
+            if (colecao) {
+                exibirDados(colecao);
+            }
+        });
+    </script>
+</body>
+</html>
