@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dados da Reunião</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <style>
@@ -54,7 +54,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <img src="/logobranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
     </div>
     <div class="container">
         <h2 class="text-center mb-4">Dados da Reunião</h2>
@@ -383,11 +383,7 @@
             })
             .then(function() {
                 alert('Dados da reunião enviados com sucesso!');
-                var rede = document.getElementById('rede').value;
-                var supervisor = document.getElementById('supervisor').value;
-                var lider = document.getElementById('lider').value;
-                var data = document.getElementById('data').value; // Adicionando esta linha
-                var url = `resumoMes.html?rede=${encodeURIComponent(rede)}&supervisor=${encodeURIComponent(supervisor)}&lider=${encodeURIComponent(lider)}&data=${encodeURIComponent(data)}`; // Modificando esta linha
+                var url = `resumoMes.html?rede=${encodeURIComponent(rede)}&supervisor=${encodeURIComponent(supervisor)}&lider=${encodeURIComponent(lider)}&data=${encodeURIComponent(data)}&celula=${encodeURIComponent(celula)}`;
                 window.location.href = url;
             })
             .catch(function(error) {

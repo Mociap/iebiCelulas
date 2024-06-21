@@ -6,8 +6,8 @@
     <title>Resumo do Mês</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
-    <link rel="shortcut icon" href="assets/3.ico" type="image/x-icon">
-    <link rel="icon" href="assets/3.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/3.ico" type="image/x-icon">
+    <link rel="icon" href="/3.ico" type="image/x-icon">
     <style>
         body {
             background-color: #f8f9fa;
@@ -71,7 +71,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="assets/logobranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <img src="/logobranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
     </div>
     <div class="container">
         <div class="thank-you-message">
@@ -95,7 +95,7 @@
             <p>- Oferta do Amor: <span id="ofertaAmor"></span></p>
         </div>
         <div class="footer-logo">
-            <img src="assets/Logo.png" alt="Logo">
+            <img src="/Logo.png" alt="Logo">
         </div>
     </div>
 
@@ -124,8 +124,13 @@
         // Obter os valores dos parâmetros de consulta da URL
         var urlParams = new URLSearchParams(window.location.search);
         var data = urlParams.get('data');
-        var rede = urlParams.get('rede');
+        var celula = urlParams.get('celula');
         var lider = urlParams.get('lider');
+
+        // Logs para depuração
+        console.log("Parâmetros da URL:", urlParams.toString());
+        console.log("Valor de 'celula':", celula);
+        console.log("Valor decodificado de 'celula':", decodeURIComponent(celula || 'Não especificada'));
 
         // Função para obter Mês/Ano
         function obterMesAno(dataString) {
@@ -138,7 +143,19 @@
         // Função para calcular e exibir os KPIs
         function calcularKPIs(mesAno) {
             console.log("Buscando dados para o mês/ano:", mesAno);
-            db.collection("reuniao").where("mesAno", "==", mesAno).get()
+            
+            // Criar a consulta base
+            let query = db.collection("reuniao").where("mesAno", "==", mesAno);
+
+            if (lider) {
+                query = query.where("lider", "==", lider);
+            }
+            if (celula) {
+                query = query.where("celula", "==", celula);
+            }
+
+            // Executar a consulta
+            query.get()
             .then((querySnapshot) => {
                 console.log("Número de documentos encontrados:", querySnapshot.size);
                 let somaMembroPresentes = 0;
@@ -188,11 +205,11 @@
 
         // Preencher o mês/ano do relatório, nome da célula e líder
         document.getElementById('reportMesAno').textContent = obterMesAno(decodeURIComponent(data));
-        document.getElementById('nomeCelula').textContent = decodeURIComponent(rede || '');
-        document.getElementById('nomeLider').textContent = decodeURIComponent(lider || '');
+        document.getElementById('nomeCelula').textContent = decodeURIComponent(celula || 'Não especificada');
+        document.getElementById('nomeLider').textContent = decodeURIComponent(lider || 'Não especificado');
 
         // Log para depuração
-        console.log("Parâmetros da URL:", { data, rede, lider });
+        console.log("Parâmetros da URL:", { data, celula, lider });
 
         // Calcular e exibir os KPIs
         calcularKPIs(obterMesAno(decodeURIComponent(data)));
