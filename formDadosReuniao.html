@@ -36,7 +36,7 @@
             width: 75%;
             height: 2px;
             background-color: #000;
-            margin: 20px auto;
+            margin: 30px auto;
         }
         .btn-primary {
             background-color: #000;
@@ -45,6 +45,72 @@
         .btn-primary:hover {
             background-color: #333;
             border-color: #333;
+        }
+        .form-group-switch {
+            display: flex;
+            align-items: center;
+        }
+        .switch-label {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        
+        h2.text-center {
+            margin-bottom: 15px;
+        }
+
+        .form-group-switch {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .slider.round {
+            border-radius: 24px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        .reuniao-realizada-switch {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -56,57 +122,66 @@
         <h2 class="text-center mb-4">Dados da Reunião</h2>
         <div class="divider"></div>
         <form id="reuniaoForm">
-            <div class="form-group">
-                <label for="data">Data da Reunião</label>
-                <input type="date" class="form-control" id="data" required>
+            <div class="form-group-switch reuniao-realizada-switch">
+                <label class="switch-label" for="reuniaoRealizada">Reunião Realizada</label>
+                <label class="switch">
+                    <input type="checkbox" id="reuniaoRealizada" checked>
+                    <span class="slider round"></span>
+                </label>
             </div>
-            <div class="form-group" style="display: none;">
-                <label for="ano">Ano</label>
-                <input type="number" class="form-control" id="ano" readonly>
-            </div>
-            <div class="form-group" style="display: none;">
-                <label for="mesAno">Mês/Ano</label>
-                <input type="text" class="form-control" id="mesAno" readonly>
-            </div>
-            <div class="form-group">
-                <label for="rede">Rede</label>
-                <select class="form-control" id="rede" required onchange="alterarCorRede(this.value); carregarSupervisores(this.value)"></select>
-            </div>
-            <div class="form-group">
-                <label for="supervisor">Supervisor</label>
-                <select class="form-control" id="supervisor" required onchange="carregarLideres(this.value)"></select>
-            </div>
-            <div class="form-group">
-                <label for="lider">Líder</label>
-                <select class="form-control" id="lider" required onchange="carregarCelula(this.value); carregarMembros(this.value)"></select>
-            </div>
-            <div class="form-group">
-                <label for="celula">Célula</label>
-                <input type="text" class="form-control" id="celula" readonly>
-            </div>
-            <div class="form-group">
-                <label>Presença</label>
-                <div id="presencaContainer"></div>
-            </div>
-            <div class="form-group">
-                <label for="qtdVisitantes">Quantidade de Visitantes</label>
-                <input type="number" class="form-control" id="qtdVisitantes" required>
-            </div>
-            <div class="form-group">
-                <label for="kgAlimento">Kg de Alimento</label>
-                <input type="number" class="form-control" id="kgAlimento" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="oferta">Oferta</label>
-                <input type="text" class="form-control" id="oferta" required>
-            </div>
-            <div class="form-group">
-                <label for="qtdMembros">Quantidade de Membros</label>
-                <input type="number" class="form-control" id="qtdMembros" readonly>
-            </div>
-            <div class="form-group">
-                <label for="membroPresentes">Membros Presentes</label>
-                <input type="number" class="form-control" id="membroPresentes" readonly>
+            <div id="camposReuniao">
+                <div class="form-group">
+                    <label for="data">Data da Reunião</label>
+                    <input type="date" class="form-control" id="data" required>
+                </div>
+                <div class="form-group" style="display: none;">
+                    <label for="ano">Ano</label>
+                    <input type="number" class="form-control" id="ano" readonly>
+                </div>
+                <div class="form-group" style="display: none;">
+                    <label for="mesAno">Mês/Ano</label>
+                    <input type="text" class="form-control" id="mesAno" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="rede">Rede</label>
+                    <select class="form-control" id="rede" required onchange="alterarCorRede(this.value); carregarSupervisores(this.value)"></select>
+                </div>
+                <div class="form-group">
+                    <label for="supervisor">Supervisor</label>
+                    <select class="form-control" id="supervisor" required onchange="carregarLideres(this.value)"></select>
+                </div>
+                <div class="form-group">
+                    <label for="lider">Líder</label>
+                    <select class="form-control" id="lider" required onchange="carregarCelula(this.value); carregarMembros(this.value)"></select>
+                </div>
+                <div class="form-group">
+                    <label for="celula">Célula</label>
+                    <input type="text" class="form-control" id="celula" readonly>
+                </div>
+                <div class="form-group campo-reuniao">
+                    <label>Presença</label>
+                    <div id="presencaContainer"></div>
+                </div>
+                <div class="form-group campo-reuniao">
+                    <label for="qtdVisitantes">Quantidade de Visitantes</label>
+                    <input type="number" class="form-control" id="qtdVisitantes" required>
+                </div>
+                <div class="form-group campo-reuniao">
+                    <label for="kgAlimento">Kg de Alimento</label>
+                    <input type="number" class="form-control" id="kgAlimento" step="0.01" required>
+                </div>
+                <div class="form-group campo-reuniao">
+                    <label for="oferta">Oferta</label>
+                    <input type="text" class="form-control" id="oferta" required>
+                </div>
+                <div class="form-group campo-reuniao">
+                    <label for="qtdMembros">Quantidade de Membros</label>
+                    <input type="number" class="form-control" id="qtdMembros" readonly>
+                </div>
+                <div class="form-group campo-reuniao">
+                    <label for="membroPresentes">Membros Presentes</label>
+                    <input type="number" class="form-control" id="membroPresentes" readonly>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">Enviar</button>
         </form>
@@ -352,50 +427,118 @@
             selectRede.style.color = '#FFFFFF';
         }
 
+        // Função para mostrar/ocultar campos com base no switch
+        // Funão Começa aqui
+        //--------------------------
+        function toggleCamposReuniao() {
+            var reuniaoRealizadaSwitch = document.getElementById('reuniaoRealizada');
+            var camposReuniao = document.querySelectorAll('.campo-reuniao');
+            var enviarBtn = document.getElementById('enviarBtn');
+            var lider = document.getElementById('lider').value;
+
+            // Sempre recarregar e limpar a lista de presença
+            carregarMembros(lider);
+
+            if (reuniaoRealizadaSwitch.checked) {
+                camposReuniao.forEach(function(campo) {
+                    campo.style.display = 'block';
+                    // Tornar os campos visíveis obrigatórios
+                    var inputs = campo.querySelectorAll('input, select, textarea');
+                    inputs.forEach(function(input) {
+                        if (input.id !== 'membroPresentes' && input.id !== 'qtdMembros') {
+                            input.required = true;
+                        }
+                    });
+                });
+                enviarBtn.textContent = 'Enviar';
+            } else {
+                camposReuniao.forEach(function(campo) {
+                    campo.style.display = 'none';
+                    // Remover a obrigatoriedade dos campos ocultos
+                    var inputs = campo.querySelectorAll('input, select, textarea');
+                    inputs.forEach(function(input) {
+                        input.required = false;
+                    });
+                });
+                // Limpar campos específicos
+                document.getElementById('qtdVisitantes').value = '';
+                document.getElementById('kgAlimento').value = '';
+                document.getElementById('oferta').value = '';
+                enviarBtn.textContent = 'Confirmar Não Realização';
+            }
+
+            // Limpar e atualizar o campo de membros presentes
+            document.getElementById('membroPresentes').value = '0';
+        }
+        // Adicionar evento de change ao switch
+        document.getElementById('reuniaoRealizada').addEventListener('change', toggleCamposReuniao);
+        // Chamar a função inicialmente para garantir o estado correto
+        toggleCamposReuniao();
+
         // Adicionar evento de envio do formulário
         formulario.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            var ano = document.getElementById('ano').value;
-            var mesAno = document.getElementById('mesAno').value;
             var data = document.getElementById('data').value;
-            var rede = document.getElementById('rede').value;
-            var supervisor = document.getElementById('supervisor').value
-            var lider = document.getElementById('lider').value;
             var celula = document.getElementById('celula').value;
-            var presenca = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(function(checkbox) {
-                return checkbox.value;
-            });
-            var qtdVisitantes = document.getElementById('qtdVisitantes').value;
-            var kgAlimento = document.getElementById('kgAlimento').value;
-            var oferta = document.getElementById('oferta').value.replace(/[^\d,]/g, '').replace(',', '.');
-            var qtdMembros = document.getElementById('qtdMembros').value;
-            var membroPresentes = document.getElementById('membroPresentes').value;
+            var reuniaoRealizada = document.getElementById('reuniaoRealizada').checked;
 
-            bancoDeDados.collection('reuniao').add({
-                ano: parseInt(ano),
-                mesAno: mesAno,
-                data: new Date(data),
-                rede: rede,
-                supervisor: supervisor,
-                lider: lider,
-                celula: celula,
-                presenca: presenca,
-                qtdVisitantes: parseInt(qtdVisitantes),
-                kgAlimento: parseFloat(kgAlimento),
-                oferta: parseFloat(oferta),
-                qtdMembros: parseInt(qtdMembros),
-                membroPresentes: parseInt(membroPresentes)
-            })
+            // Verificar se já existe um registro com a mesma data e célula
+            bancoDeDados.collection('reuniao')
+                .where('data', '==', data)
+                .where('celula', '==', celula)
+                .get()
+                .then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        // Já existe um registro para esta data e célula
+                        alert('Já existe um registro para esta data e célula. Por favor, verifique os dados.');
+                    } else {
+                        // Não existe registro, prosseguir com o envio
+                        enviarDadosReuniao(reuniaoRealizada);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erro ao verificar registros existentes: ", error);
+                    alert('Ocorreu um erro ao verificar os registros. Por favor, tente novamente.');
+                });
+        });
+        // Funão Termina Aqui
+        //--------------------------
+        
+        function enviarDadosReuniao(reuniaoRealizada) {
+            var dadosReuniao = {
+                reuniaoRealizada: reuniaoRealizada,
+                data: document.getElementById('data').value,
+                rede: document.getElementById('rede').value,
+                supervisor: document.getElementById('supervisor').value,
+                lider: document.getElementById('lider').value,
+                celula: document.getElementById('celula').value
+            };
+
+            if (reuniaoRealizada) {
+                // Adicione os outros campos apenas se a reunião foi realizada
+                dadosReuniao.ano = parseInt(document.getElementById('ano').value);
+                dadosReuniao.mesAno = document.getElementById('mesAno').value;
+                dadosReuniao.presenca = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(function(checkbox) {
+                    return checkbox.value;
+                });
+                dadosReuniao.qtdVisitantes = parseInt(document.getElementById('qtdVisitantes').value);
+                dadosReuniao.kgAlimento = parseFloat(document.getElementById('kgAlimento').value);
+                dadosReuniao.oferta = parseFloat(document.getElementById('oferta').value.replace(/[^\d,]/g, '').replace(',', '.'));
+                dadosReuniao.qtdMembros = parseInt(document.getElementById('qtdMembros').value);
+                dadosReuniao.membroPresentes = parseInt(document.getElementById('membroPresentes').value);
+            }
+
+            bancoDeDados.collection('reuniao').add(dadosReuniao)
             .then(function() {
-                alert('Dados da reunião enviados com sucesso!');
-                var url = `resumoMes.html?rede=${encodeURIComponent(rede)}&supervisor=${encodeURIComponent(supervisor)}&lider=${encodeURIComponent(lider)}&data=${encodeURIComponent(data)}&celula=${encodeURIComponent(celula)}`;
+                alert(reuniaoRealizada ? 'Dados da reunião enviados com sucesso!' : 'Não realização da reunião registrada com sucesso!');
+                var url = `resumoMes.html?rede=${encodeURIComponent(dadosReuniao.rede)}&supervisor=${encodeURIComponent(dadosReuniao.supervisor)}&lider=${encodeURIComponent(dadosReuniao.lider)}&data=${encodeURIComponent(dadosReuniao.data)}&celula=${encodeURIComponent(dadosReuniao.celula)}`;
                 window.location.href = url;
             })
             .catch(function(error) {
-                alert('Erro ao enviar dados da reunião: ' + error.message);
+                alert('Erro ao enviar dados: ' + error.message);
             });
-        });
+        }
     </script>
 </body>
 </html>
