@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -211,4 +212,218 @@
         calcularKPIs(obterMesAno(decodeURIComponent(data)));
     </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo do Mês</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            padding-top: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px 10px 0 0;
+        }
+        .header img {
+            max-width: 200px;
+        }
+        .thank-you-message {
+            margin-top: 20px;
+            text-align: center;
+            color: #333;
+            font-size: 0.715em;
+            line-height: 1.4;
+        }
+        .report-divider {
+            width: 75%;
+            height: 1px;
+            background-color: #000;
+            margin: 15px auto;
+        }
+        .report-title, .celula-info, .lider-info {
+            text-align: center;
+            font-weight: 700;
+            color: #000;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        #kpi-summary p {
+            margin-bottom: 5px;
+        }
+        .footer-logo {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .footer-logo img {
+            max-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+    </div>
+    <div class="container">
+        <div class="thank-you-message">
+            <p>Agradecemos pelo preenchimento dos dados da reunião.</p>
+            <p>Seus Dados foram registrados com sucesso em nosso sistema.</p>
+        </div>
+        <div class="report-divider"></div>
+        <div class="report-title">
+            Relatório do Mês: <span id="reportMesAno"></span>
+        </div>
+        <div class="celula-info">
+            Nome da Célula: <span id="nomeCelula"></span>
+        </div>
+        <div class="lider-info">
+            Líder: <span id="nomeLider"></span>
+        </div>
+        <div id="kpi-summary" class="mt-3">
+            <p>- Frequência Mês: <span id="frequencia"></span></p>
+            <p>- Quantidade de Visitações Mês: <span id="visitacoes"></span></p>
+            <p>- Valor das Ofertas Mês: <span id="ofertas"></span></p>
+            <p>- Oferta do Amor: <span id="ofertaAmor"></span></p>
+        </div>
+        <div class="footer-logo">
+            <img src="./Logo.png" alt="Logo">
+        </div>
+    </div>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firestore
+        var db = firebase.firestore();
+
+        // Obter os valores dos parâmetros de consulta da URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var data = urlParams.get('data');
+        var celula = urlParams.get('celula');
+        var lider = urlParams.get('lider');
+
+        // Logs para depuração
+        console.log("Parâmetros da URL:", urlParams.toString());
+        console.log("Valor de 'celula':", celula);
+        console.log("Valor decodificado de 'celula':", decodeURIComponent(celula || 'Não especificada'));
+
+        // Função para obter Mês/Ano
+        function obterMesAno(dataString) {
+            var data = new Date(dataString);
+            var mes = String(data.getMonth() + 1).padStart(2, '0');
+            var ano = data.getFullYear();
+            return mes + '/' + ano;
+        }
+
+        // Função para calcular e exibir os KPIs
+        function calcularKPIs(mesAno) {
+            console.log("Buscando dados para o mês/ano:", mesAno);
+            
+            // Criar a consulta base
+            let query = db.collection("reuniao").where("mesAno", "==", mesAno);
+
+            if (lider) {
+                query = query.where("lider", "==", lider);
+            }
+            if (celula) {
+                query = query.where("celula", "==", celula);
+            }
+
+            // Executar a consulta
+            query.get()
+            .then((querySnapshot) => {
+                console.log("Número de documentos encontrados:", querySnapshot.size);
+                let somaMembroPresentes = 0;
+                let somaQtdMembros = 0;
+                let somaQtdVisitantes = 0;
+                let somaOferta = 0;
+                let somaKgAlimento = 0;
+
+                querySnapshot.forEach((doc) => {
+                    let data = doc.data();
+                    console.log("Dados do documento:", data);
+                    somaMembroPresentes += Number(data.membroPresentes || 0);
+                    somaQtdMembros += Number(data.qtdMembros || 0);
+                    somaQtdVisitantes += Number(data.qtdVisitantes || 0);
+                    somaOferta += Number(data.oferta || 0);
+                    somaKgAlimento += Number(data.kgAlimento || 0);
+                });
+
+                console.log("Somas:", {
+                    somaMembroPresentes,
+                    somaQtdMembros,
+                    somaQtdVisitantes,
+                    somaOferta,
+                    somaKgAlimento
+                });
+
+                // Cálculo da frequência
+                let frequencia = somaQtdMembros > 0 ? (somaMembroPresentes / somaQtdMembros * 100).toFixed(2) + "%" : "N/A";
+
+                // Formatação dos valores
+                let visitacoes = somaQtdVisitantes.toLocaleString('pt-BR');
+                let ofertas = somaOferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR');
+
+                // Exibição dos resultados
+                document.getElementById('frequencia').textContent = frequencia;
+                document.getElementById('visitacoes').textContent = visitacoes;
+                document.getElementById('ofertas').textContent = ofertas;
+                document.getElementById('ofertaAmor').textContent = ofertaAmor;
+
+                console.log("KPIs calculados:", { frequencia, visitacoes, ofertas, ofertaAmor });
+            })
+            .catch((error) => {
+                console.log("Error getting documents: ", error);
+            });
+        }
+
+        // Preencher o mês/ano do relatório, nome da célula e líder
+        document.getElementById('reportMesAno').textContent = obterMesAno(decodeURIComponent(data));
+        document.getElementById('nomeCelula').textContent = decodeURIComponent(celula || 'Não especificada');
+        document.getElementById('nomeLider').textContent = decodeURIComponent(lider || 'Não especificado');
+
+        // Log para depuração
+        console.log("Parâmetros da URL:", { data, celula, lider });
+
+        // Calcular e exibir os KPIs
+        calcularKPIs(obterMesAno(decodeURIComponent(data)));
+    </script>
+</body>
+>>>>>>> 5df13f15c45be67e505141b02bbbffa275d8e0ef
 </html>

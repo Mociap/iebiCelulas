@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -207,3 +208,214 @@
     </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Documentos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 500px;
+            margin-top: 50px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Gerenciamento de Documentos</h2>
+
+        <!-- Parte 1: Upload em Massa de Documentos -->
+        <div id="uploadParte">
+            <h3>Upload em Massa de Documentos</h3>
+            <p id="quantidadeDocumentos"></p>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="csvFile">Selecione o arquivo CSV</label>
+                    <input type="file" class="form-control-file" id="csvFile" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Fazer Upload</button>
+            </form>
+            <div id="uploadResultado" class="mt-4"></div>
+        </div>
+
+        <!-- Parte 2: Exclusão de Documentos -->
+        <div id="excluirParte" class="mt-4">
+            <h3>Exclusão de Documentos</h3>
+            <button id="excluirBtn" class="btn btn-danger btn-block">Excluir Documentos</button>
+            <div id="excluirResultado" class="mt-4"></div>
+        </div>
+
+        <!-- Parte 3: Download em CSV -->
+        <div id="downloadParte" class="mt-4">
+            <h3>Download em CSV</h3>
+            <button id="downloadBtn" class="btn btn-success btn-block">Baixar CSV</button>
+            <div id="downloadResultado" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        // Referência aos elementos
+        var uploadForm = document.getElementById('uploadForm');
+        var uploadResultado = document.getElementById('uploadResultado');
+        var excluirBtn = document.getElementById('excluirBtn');
+        var excluirResultado = document.getElementById('excluirResultado');
+        var downloadBtn = document.getElementById('downloadBtn');
+        var downloadResultado = document.getElementById('downloadResultado');
+        var quantidadeDocumentos = document.getElementById('quantidadeDocumentos');
+
+        // Coleção fixa
+        var colecao = 'reuniao';
+
+        // Função para obter a quantidade de documentos na coleção
+        function obterQuantidadeDocumentos() {
+            bancoDeDados.collection(colecao).get()
+            .then(function(querySnapshot) {
+                var quantidade = querySnapshot.size;
+                quantidadeDocumentos.textContent = `Quantidade de documentos na coleção ${colecao}: ${quantidade}`;
+            })
+            .catch(function(error) {
+                console.error('Erro ao obter a quantidade de documentos:', error);
+            });
+        }
+
+        // Chamar a função para obter a quantidade de documentos ao carregar a página
+        obterQuantidadeDocumentos();
+
+        // Parte 1: Upload em Massa de Documentos
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var csvFile = document.getElementById('csvFile').files[0];
+            if (csvFile) {
+                var reader = new FileReader();
+                reader.onload = function() {
+                    var csvData = reader.result;
+                    var linhas = csvData.split('\n');
+
+                    var sucessos = 0;
+                    var erros = 0;
+
+                    // Obter os nomes dos campos a partir da primeira linha (cabeçalho)
+                    var campos = linhas[0].split(';');
+                    campos = campos.map(function(campo) {
+                        return campo.replace(/[^a-zA-Z0-9_]/g, ''); // Remover caracteres especiais dos nomes dos campos
+                    });
+                    var numCampos = campos.length;
+                    console.log(`Número de campos encontrados: ${numCampos}`);
+
+                    for (var i = 1; i < linhas.length; i++) { // Começar do índice 1 para ignorar o cabeçalho
+                        var valores = linhas[i].split(';');
+                        var documentoData = {};
+
+                        // Preencher os campos do objeto documentoData
+                        for (var j = 0; j < campos.length; j++) {
+                            var campo = campos[j];
+                            var valor = valores[j].trim(); // Não remover caracteres especiais dos valores
+                            documentoData[campo] = valor;
+                        }
+
+                        if (Object.keys(documentoData).length > 0) {
+                            bancoDeDados.collection(colecao).add(documentoData)
+                            .then(function() {
+                                sucessos++;
+                            })
+                            .catch(function(error) {
+                                erros++;
+                                console.error('Erro ao adicionar documento:', error);
+                            });
+                        }
+                    }
+
+                    uploadResultado.innerHTML = `<p>Upload concluído. Documentos adicionados com sucesso: ${sucessos}. Erros: ${erros}.</p>`;
+                    obterQuantidadeDocumentos(); // Atualizar a quantidade de documentos após o upload
+                }
+                reader.readAsText(csvFile);
+            } else {
+                uploadResultado.innerHTML = '<p>Nenhum arquivo selecionado.</p>';
+            }
+        });
+
+        // Parte 2: Exclusão de Documentos
+        excluirBtn.addEventListener('click', function() {
+            bancoDeDados.collection(colecao).get()
+            .then(function(querySnapshot) {
+                var batch = bancoDeDados.batch();
+                querySnapshot.forEach(function(doc) {
+                    batch.delete(doc.ref);
+                });
+                return batch.commit();
+            })
+            .then(function() {
+                excluirResultado.innerHTML = '<p>Todos os documentos foram excluídos com sucesso.</p>';
+                obterQuantidadeDocumentos(); // Atualizar a quantidade de documentos após a exclusão
+            })
+            .catch(function(error) {
+                excluirResultado.innerHTML = `<p>Erro ao excluir documentos: ${error}</p>`;
+            });
+        });
+
+        // Parte 3: Download em CSV
+        downloadBtn.addEventListener('click', function() {
+            bancoDeDados.collection(colecao).get()
+            .then(function(querySnapshot) {
+                var csvData = '\uFEFF'; // Adicionar marca de ordem de byte (BOM) para UTF-8
+                var campos = [];
+
+                querySnapshot.forEach(function(doc) {
+                    var dados = doc.data();
+                    if (campos.length === 0) {
+                        campos = Object.keys(dados);
+                        csvData += campos.join(';') + '\n';
+                    }
+                    var valores = campos.map(function(campo) {
+                        var valor = dados[campo] || '';
+                        return '"' + valor.replace(/"/g, '""') + '"'; // Escapar aspas duplas
+                    });
+                    csvData += valores.join(';') + '\n';
+                });
+
+                var csvBlob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+                var csvUrl = URL.createObjectURL(csvBlob);
+                var link = document.createElement('a');
+                link.setAttribute('href', csvUrl);
+                link.setAttribute('download', `${colecao}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            })
+            .catch(function(error) {
+                downloadResultado.innerHTML = `<p>Erro ao baixar CSV: ${error}</p>`;
+            });
+        });
+    </script>
+</body>
+</html>
+>>>>>>> 5df13f15c45be67e505141b02bbbffa275d8e0ef

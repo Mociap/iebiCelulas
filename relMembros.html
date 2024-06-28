@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -294,3 +295,276 @@
     </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membros por Célula</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .report-title {
+            text-align: center;
+            font-weight: 700;
+            color: #000;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #membrosTable {
+            margin-top: 20px;
+        }
+        #membrosTable th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .membros-lista {
+            white-space: pre-line;
+        }
+        #exportButton {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="report-title">
+            Membros por Célula
+        </div>
+        <form id="relatorioForm">
+            <div class="form-group">
+                <label for="rede">Rede:</label>
+                <select class="form-control" id="rede" onchange="alterarCorRede(this.value); carregarSupervisores(this.value)">
+                    <option value="">Selecione uma rede</option>
+                    <!-- Opções serão preenchidas via JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="supervisor">Supervisor:</label>
+                <select class="form-control" id="supervisor" onchange="gerarTabela()">
+                    <option value="">Selecione um supervisor</option>
+                    <!-- Opções serão preenchidas via JavaScript -->
+                </select>
+            </div>
+        </form>
+        <div id="membrosTableContainer" style="display: none;">
+            <table id="membrosTable" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Rede</th>
+                        <th>Supervisor</th>
+                        <th>Nome da Célula</th>
+                        <th>Total de Membros</th>
+                        <th>Membros</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão preenchidos via JavaScript -->
+                </tbody>
+            </table>
+            <button id="exportButton" class="btn btn-success" onclick="exportToExcel()">Exportar para Excel</button>
+        </div>
+    </div>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firestore
+        var db = firebase.firestore();
+
+        // Função para preencher o dropdown de redes
+        function preencherRedes() {
+            const redeSelect = document.getElementById('rede');
+            db.collection("rede").orderBy("nomerede").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    let rede = doc.data();
+                    let option = document.createElement('option');
+                    option.value = rede.nomerede;
+                    option.textContent = rede.nomerede;
+                    redeSelect.appendChild(option);
+                });
+            }).catch((error) => {
+                console.log("Erro ao buscar redes:", error);
+            });
+        }
+
+        // Função para carregar supervisores com base na rede selecionada
+        function carregarSupervisores(rede) {
+            const supervisorSelect = document.getElementById('supervisor');
+            supervisorSelect.innerHTML = '<option value="">Selecione um supervisor</option>';
+            
+            if (rede) {
+                db.collection("estruturacelula")
+                    .where("rede", "==", rede)
+                    .get()
+                    .then((querySnapshot) => {
+                        const supervisores = new Set();
+                        querySnapshot.forEach((doc) => {
+                            supervisores.add(doc.data().supervisor);
+                        });
+
+                        supervisores.forEach((supervisor) => {
+                            let option = document.createElement('option');
+                            option.value = supervisor;
+                            option.textContent = supervisor;
+                            supervisorSelect.appendChild(option);
+                        });
+                    })
+                    .catch((error) => {
+                        console.log("Erro ao carregar supervisores:", error);
+                    });
+            }
+        }
+
+        // Função para alterar a cor da caixa de acordo com a rede escolhida
+        function alterarCorRede(rede) {
+            var selectRede = document.getElementById('rede');
+            var cores = {
+                'AMARELA': '#FFD700',
+                'AZUL': '#000080',
+                'ROXA': '#4B0082',
+                'LARANJA': '#FF8C00',
+                'VERMELHA': '#8B0000',
+                'BLACK': '#000000',
+                'VERDE': '#006400'
+            };
+
+            var cor = cores[rede] || '#000000';
+            selectRede.style.backgroundColor = cor;
+            selectRede.style.color = '#FFFFFF';
+        }
+
+        // Função para gerar a tabela de membros
+        async function gerarTabela() {
+            const rede = document.getElementById('rede').value;
+            const supervisor = document.getElementById('supervisor').value;
+
+            if (!rede || !supervisor) return;
+
+            const tableBody = document.querySelector('#membrosTable tbody');
+            tableBody.innerHTML = '';
+
+            try {
+                // Buscar células da rede e supervisor selecionados
+                const celulasSnapshot = await db.collection("estruturacelula")
+                    .where("rede", "==", rede)
+                    .where("supervisor", "==", supervisor)
+                    .get();
+
+                for (const celulaDoc of celulasSnapshot.docs) {
+                    const celulaData = celulaDoc.data();
+                    const nomecelula = celulaData.nomecelula;
+
+                    // Buscar membros da célula
+                    const membrosSnapshot = await db.collection("membros")
+                        .where("rede", "==", rede)
+                        .where("nomedacelula", "==", nomecelula)
+                        .get();
+
+                    const membros = membrosSnapshot.docs.map(doc => doc.data().nome);
+                    // Ordenar os membros em ordem alfabética
+                    membros.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+                    const totalMembros = membros.length;
+
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = rede;
+                    row.insertCell(1).textContent = supervisor;
+                    row.insertCell(2).textContent = nomecelula;
+                    row.insertCell(3).textContent = totalMembros;
+                    
+                    // Verifica se há membros antes de adicionar a lista
+                    if (totalMembros > 0) {
+                        const membrosCell = row.insertCell(4);
+                        membrosCell.className = 'membros-lista';
+                        membrosCell.textContent = membros.map(membro => `- ${membro}`).join('\n');
+                    } else {
+                        row.insertCell(4).textContent = 'Nenhum membro';
+                    }
+                }
+
+                document.getElementById('membrosTableContainer').style.display = 'block';
+
+            } catch (error) {
+                console.error("Erro ao gerar tabela:", error);
+            }
+        }
+
+        // Função para exportar para Excel
+        function exportToExcel() {
+            const table = document.getElementById('membrosTable');
+            const rows = Array.from(table.rows);
+            
+            let data = [];
+            
+            // Cabeçalho
+            data.push(['Rede', 'Supervisor', 'Nome da Célula', 'Total de Membros', 'Membro']);
+            
+            // Processar cada linha da tabela
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].cells;
+                const rede = cells[0].textContent;
+                const supervisor = cells[1].textContent;
+                const nomecelula = cells[2].textContent;
+                const totalMembros = cells[3].textContent;
+                const membros = cells[4].textContent.split('\n').map(m => m.trim().substring(2));
+                
+                // Adicionar uma linha para cada membro
+                membros.forEach((membro, index) => {
+                    if (index === 0) {
+                        // Primeira linha da célula: incluir todas as informações
+                        data.push([rede, supervisor, nomecelula, totalMembros, membro]);
+                    } else {
+                        // Linhas subsequentes: deixar as primeiras colunas vazias
+                        data.push(['', '', '', '', membro]);
+                    }
+                });
+            }
+            
+            // Criar planilha
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Membros por Célula");
+            
+            // Gerar arquivo Excel
+            XLSX.writeFile(wb, "membros_por_celula.xlsx");
+        }
+
+        // Preencher as redes quando a página carregar
+        window.onload = preencherRedes;
+    </script>
+</body>
+</html>
+>>>>>>> 5df13f15c45be67e505141b02bbbffa275d8e0ef
