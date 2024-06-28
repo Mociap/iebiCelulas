@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil do Usuário - Igreja Evangélica Batista</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .profile-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-header img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .btn-update {
+            background-color: #28a745;
+            border-color: #28a745;
+            font-weight: bold;
+        }
+        .btn-update:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+        .btn-change-password {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            font-weight: bold;
+        }
+        .btn-change-password:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-header">
+                <img src="./default-avatar.png" alt="Foto de Perfil" id="profilePicture">
+                <h2>Perfil do Usuário</h2>
+            </div>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="name">Nome Completo</label>
+                    <input type="text" class="form-control" id="name" value="Nome do Usuário" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" class="form-control" id="email" value="usuario@exemplo.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Telefone</label>
+                    <input type="tel" class="form-control" id="phone" value="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label for="birthdate">Data de Nascimento</label>
+                    <input type="date" class="form-control" id="birthdate">
+                </div>
+                <div class="form-group">
+                    <label for="address">Endereço</label>
+                    <textarea class="form-control" id="address" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success btn-block btn-update">Atualizar Perfil</button>
+            </form>
+            <hr>
+            <button class="btn btn-info btn-block btn-change-password" data-toggle="modal" data-target="#changePasswordModal">Alterar Senha</button>
+        </div>
+    </div>
+
+    <!-- Modal para Alteração de Senha -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">Alterar Senha</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Senha Atual</label>
+                            <input type="password" class="form-control" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">Nova Senha</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmNewPassword">Confirmar Nova Senha</label>
+                            <input type="password" class="form-control" id="confirmNewPassword" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="changePassword()">Salvar Nova Senha</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Aqui você adicionará a lógica para atualizar o perfil
+            console.log('Tentativa de atualização de perfil');
+        });
+
+        function changePassword() {
+            // Aqui você adicionará a lógica para alterar a senha
+            console.log('Tentativa de alteração de senha');
+            $('#changePasswordModal').modal('hide');
+        }
+    </script>
+</body>
+</html>

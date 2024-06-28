@@ -87,7 +87,7 @@
             <p>- Frequência Mês: <span id="frequencia"></span></p>
             <p>- Quantidade de Visitações Mês: <span id="visitacoes"></span></p>
             <p>- Valor das Ofertas Mês: <span id="ofertas"></span></p>
-            <p>- Oferta do Amor: <span id="ofertaAmor"></span></p>
+            <p>- Colheita do Amor: <span id="ofertaAmor"></span></p>
         </div>
         <div class="footer-logo">
             <img src="./Logo.png" alt="Logo">
@@ -183,7 +183,8 @@
                 // Formatação dos valores
                 let visitacoes = somaQtdVisitantes.toLocaleString('pt-BR');
                 let ofertas = somaOferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR');
+                let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR') + " Kg";
+
 
                 // Exibição dos resultados
                 document.getElementById('frequencia').textContent = frequencia;

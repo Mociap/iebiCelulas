@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de E-mail - Igreja Evangélica Batista</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .verification-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .verification-icon {
+            font-size: 64px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .verification-message {
+            margin-bottom: 30px;
+        }
+        .btn-verify {
+            background-color: #28a745;
+            border-color: #28a745;
+            font-weight: bold;
+        }
+        .btn-verify:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="verification-container">
+            <i class="fas fa-envelope-open-text verification-icon"></i>
+            <h2>Verificação de E-mail</h2>
+            <div class="verification-message">
+                <p>Obrigado por se registrar! Por favor, verifique seu e-mail para ativar sua conta.</p>
+                <p>Se você não recebeu o e-mail de verificação, clique no botão abaixo para reenviar.</p>
+            </div>
+            <button id="resendButton" class="btn btn-success btn-verify">Reenviar E-mail de Verificação</button>
+            <div id="verificationStatus" class="mt-3"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('resendButton').addEventListener('click', function() {
+            // Aqui você adicionará a lógica para reenviar o e-mail de verificação
+            console.log('Tentativa de reenvio do e-mail de verificação');
+            
+            // Simular uma resposta do servidor (remova isso e implemente a lógica real)
+            setTimeout(function() {
+                document.getElementById('verificationStatus').innerHTML = 
+                    '<div class="alert alert-success" role="alert">' +
+                    'E-mail de verificação reenviado com sucesso!' +
+                    '</div>';
+            }, 1000);
+        });
+
+        // Função para verificar o token de verificação na URL
+        function verifyEmailToken() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            
+            if (token) {
+                // Aqui você adicionará a lógica para verificar o token com o servidor
+                console.log('Token de verificação encontrado:', token);
+                
+                // Simular uma verificação bem-sucedida (remova isso e implemente a lógica real)
+                document.querySelector('.verification-message').innerHTML = 
+                    '<p>Seu e-mail foi verificado com sucesso!</p>' +
+                    '<p>Você pode agora <a href="login.html">fazer login</a> em sua conta.</p>';
+                document.getElementById('resendButton').style.display = 'none';
+            }
+        }
+
+        // Chamar a função de verificação quando a página carregar
+        window.onload = verifyEmailToken;
+    </script>
+</body>
+</html>

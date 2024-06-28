@@ -61,7 +61,7 @@
             <div class="form-group">
                 <label for="supervisor">Supervisor:</label>
                 <select class="form-control" id="supervisor" onchange="gerarTabela()">
-                    <option value="">Selecione um supervisor</option>
+                    <option value="Todos">Todos</option>
                     <!-- Opções serão preenchidas via JavaScript -->
                 </select>
             </div>
@@ -126,7 +126,7 @@
         // Função para carregar supervisores com base na rede selecionada
         function carregarSupervisores(rede) {
             const supervisorSelect = document.getElementById('supervisor');
-            supervisorSelect.innerHTML = '<option value="">Selecione um supervisor</option>';
+            supervisorSelect.innerHTML = '<option value="Todos">Todos</option>';
             
             if (rede) {
                 db.collection("estruturacelula")
@@ -144,6 +144,8 @@
                             option.textContent = supervisor;
                             supervisorSelect.appendChild(option);
                         });
+
+                        gerarTabela(); // Chama gerarTabela após carregar os supervisores
                     })
                     .catch((error) => {
                         console.log("Erro ao carregar supervisores:", error);
@@ -174,21 +176,28 @@
             const rede = document.getElementById('rede').value;
             const supervisor = document.getElementById('supervisor').value;
 
-            if (!rede || !supervisor) return;
+            if (!rede) return;
 
             const tableBody = document.querySelector('#membrosTable tbody');
             tableBody.innerHTML = '';
 
             try {
-                // Buscar células da rede e supervisor selecionados
-                const celulasSnapshot = await db.collection("estruturacelula")
-                    .where("rede", "==", rede)
-                    .where("supervisor", "==", supervisor)
-                    .get();
+                // Buscar células da rede selecionada
+                let query = db.collection("estruturacelula").where("rede", "==", rede);
+                
+                // Se um supervisor específico foi selecionado (diferente de "Todos"), adicione à query
+                if (supervisor && supervisor !== "Todos") {
+                    query = query.where("supervisor", "==", supervisor);
+                }
+
+                const celulasSnapshot = await query.get();
+
+                let celulas = [];
 
                 for (const celulaDoc of celulasSnapshot.docs) {
                     const celulaData = celulaDoc.data();
                     const nomecelula = celulaData.nomecelula;
+                    const supervisorCelula = celulaData.supervisor;
 
                     // Buscar membros da célula
                     const membrosSnapshot = await db.collection("membros")
@@ -197,25 +206,41 @@
                         .get();
 
                     const membros = membrosSnapshot.docs.map(doc => doc.data().nome);
-                    // Ordenar os membros em ordem alfabética
                     membros.sort((a, b) => a.localeCompare(b, 'pt-BR'));
                     const totalMembros = membros.length;
 
+                    celulas.push({
+                        rede: rede,
+                        supervisor: supervisorCelula,
+                        nomecelula: nomecelula,
+                        totalMembros: totalMembros,
+                        membros: membros
+                    });
+                }
+
+                // Ordenar as células
+                celulas.sort((a, b) => {
+                    if (a.rede !== b.rede) return a.rede.localeCompare(b.rede, 'pt-BR');
+                    if (a.supervisor !== b.supervisor) return a.supervisor.localeCompare(b.supervisor, 'pt-BR');
+                    return a.nomecelula.localeCompare(b.nomecelula, 'pt-BR');
+                });
+
+                // Preencher a tabela com os dados ordenados
+                celulas.forEach(celula => {
                     const row = tableBody.insertRow();
-                    row.insertCell(0).textContent = rede;
-                    row.insertCell(1).textContent = supervisor;
-                    row.insertCell(2).textContent = nomecelula;
-                    row.insertCell(3).textContent = totalMembros;
+                    row.insertCell(0).textContent = celula.rede;
+                    row.insertCell(1).textContent = celula.supervisor;
+                    row.insertCell(2).textContent = celula.nomecelula;
+                    row.insertCell(3).textContent = celula.totalMembros;
                     
-                    // Verifica se há membros antes de adicionar a lista
-                    if (totalMembros > 0) {
+                    if (celula.totalMembros > 0) {
                         const membrosCell = row.insertCell(4);
                         membrosCell.className = 'membros-lista';
-                        membrosCell.textContent = membros.map(membro => `- ${membro}`).join('\n');
+                        membrosCell.textContent = celula.membros.map(membro => `- ${membro}`).join('\n');
                     } else {
                         row.insertCell(4).textContent = 'Nenhum membro';
                     }
-                }
+                });
 
                 document.getElementById('membrosTableContainer').style.display = 'block';
 

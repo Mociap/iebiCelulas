@@ -98,7 +98,7 @@
             </div>
             <div class="form-group">
                 <label for="oferta">Oferta</label>
-                <input type="number" class="form-control" id="oferta" step="0.01" required>
+                <input type="text" class="form-control" id="oferta" required>
             </div>
             <div class="form-group">
                 <label for="qtdMembros">Quantidade de Membros</label>
@@ -149,6 +149,16 @@
             var mes = String(dataEscolhida.getMonth() + 1).padStart(2, '0');
             var ano = dataEscolhida.getFullYear();
             inputMesAno.value = mes + '/' + ano;
+        });
+
+        // Formatação da oferta
+        document.getElementById('oferta').addEventListener('input', function(e) {
+            var value = e.target.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2) + '';
+            value = value.replace(".", ",");
+            value = value.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+            value = value.replace(/(\d)(\d{3}),/g, "$1.$2,");
+            e.target.value = 'R$ ' + value;
         });
 
         // Preencher o dropdown de redes em ordem alfabética
@@ -358,7 +368,7 @@
             });
             var qtdVisitantes = document.getElementById('qtdVisitantes').value;
             var kgAlimento = document.getElementById('kgAlimento').value;
-            var oferta = document.getElementById('oferta').value;
+            var oferta = document.getElementById('oferta').value.replace(/[^\d,]/g, '').replace(',', '.');
             var qtdMembros = document.getElementById('qtdMembros').value;
             var membroPresentes = document.getElementById('membroPresentes').value;
 
