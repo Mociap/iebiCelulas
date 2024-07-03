@@ -32,6 +32,14 @@
                 <option value="reuniao">Reunião</option>
             </select>
         </div>
+        <div class="form-group">
+            <label for="campoFiltro">Filtrar por campo:</label>
+            <select class="form-control" id="campoFiltro"></select>
+        </div>
+        <div class="form-group">
+            <label for="valorFiltro">Filtrar por valor:</label>
+            <select class="form-control" id="valorFiltro"></select>
+        </div>
         <table class="table table-striped" id="tabelaDados">
             <thead>
                 <tr></tr>
@@ -60,46 +68,54 @@
 
         // Referências aos elementos do formulário
         var selectColecao = document.getElementById('colecao');
+        var selectCampoFiltro = document.getElementById('campoFiltro');
+        var selectValorFiltro = document.getElementById('valorFiltro');
         var tabelaDados = document.getElementById('tabelaDados');
 
         // Função para exibir os dados na tabela
-        function exibirDados(colecao) {
+        function exibirDados(colecao, campoFiltro, valorFiltro) {
             const thead = tabelaDados.getElementsByTagName('thead')[0];
             const tbody = tabelaDados.getElementsByTagName('tbody')[0];
-            thead.innerHTML = ''; // Limpar o cabeçalho da tabela
-            tbody.innerHTML = ''; // Limpar o conteúdo da tabela
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
 
             bancoDeDados.collection(colecao).get()
                 .then(querySnapshot => {
                     if (querySnapshot.size > 0) {
-                        // Criar a linha de cabeçalho com os nomes dos campos
-                        const tr = document.createElement('tr');
+                        const trCabecalho = document.createElement('tr');
                         const campos = Object.keys(querySnapshot.docs[0].data());
                         campos.forEach(campo => {
                             const th = document.createElement('th');
                             th.textContent = campo;
-                            tr.appendChild(th);
+                            trCabecalho.appendChild(th);
                         });
-                        thead.appendChild(tr);
+                        thead.appendChild(trCabecalho);
 
-                        // Criar as linhas de dados
                         querySnapshot.forEach(doc => {
-                            const tr = document.createElement('tr');
+                            const trDados = document.createElement('tr');
                             const dados = doc.data();
-                            Object.values(dados).forEach(valor => {
+                            campos.forEach(campo => {
+                                const valor = dados[campo];
                                 const td = document.createElement('td');
-                                td.contentEditable = true; // Tornar a célula editável
-                                td.addEventListener('blur', () => atualizarDados(doc.id, dados, td.textContent, td.cellIndex));
-                                td.textContent = valor;
-                                tr.appendChild(td);
+                                td.contentEditable = true;
+                                td.addEventListener('blur', () => atualizarDados(doc.id, dados, td.textContent, campo));
+
+                                // Aplicar filtro único
+                                if (campoFiltro && valorFiltro && campo === campoFiltro && valor !== valorFiltro) {
+                                    trDados.style.display = 'none'; // Ocultar a linha se não corresponder ao filtro
+                                } else {
+                                    td.textContent = valor;
+                                }
+
+                                trDados.appendChild(td);
                             });
-                            tbody.appendChild(tr);
+                            tbody.appendChild(trDados);
                         });
                     } else {
                         const tr = document.createElement('tr');
                         const td = document.createElement('td');
                         td.textContent = 'Nenhum dado encontrado.';
-                        td.colSpan = 3; // Definir a largura da célula para ocupar todas as colunas
+                        td.colSpan = 3;
                         tr.appendChild(td);
                         tbody.appendChild(tr);
                     }
@@ -110,8 +126,7 @@
         }
 
         // Função para atualizar os dados no Firebase
-        function atualizarDados(id, dados, novoValor, indice) {
-            const campo = Object.keys(dados)[indice];
+        function atualizarDados(id, dados, novoValor, campo) {
             const novosDados = { ...dados, [campo]: novoValor };
             bancoDeDados.collection(selectColecao.value).doc(id).set(novosDados)
                 .then(() => {
@@ -122,11 +137,77 @@
                 });
         }
 
+        // Função para popular o dropdown de campos
+        function popularCamposFiltro(colecao) {
+            selectCampoFiltro.innerHTML = '<option value="">Selecione um campo</option>';
+            bancoDeDados.collection(colecao).get()
+                .then(querySnapshot => {
+                    if (querySnapshot.size > 0) {
+                        const campos = Object.keys(querySnapshot.docs[0].data());
+                        campos.forEach(campo => {
+                            const option = document.createElement('option');
+                            option.value = campo;
+                            option.textContent = campo;
+                            selectCampoFiltro.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao obter campos:', error);
+                });
+        }
+
+        // Função para popular o dropdown de valores
+        function popularValoresFiltro(colecao, campoFiltro) {
+            selectValorFiltro.innerHTML = '<option value="">Todos os valores</option>';
+            bancoDeDados.collection(colecao).get()
+                .then(querySnapshot => {
+                    const valoresUnicos = new Set();
+                    querySnapshot.forEach(doc => {
+                        const valor = doc.data()[campoFiltro];
+                        if (valor !== undefined && valor !== '') {
+                            valoresUnicos.add(valor);
+                        }
+                    });
+                    const valoresOrdenados = Array.from(valoresUnicos).sort();
+                    valoresOrdenados.forEach(valor => {
+                        const option = document.createElement('option');
+                        option.value = valor;
+                        option.textContent = valor;
+                        selectValorFiltro.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao obter valores:', error);
+                });
+        }
+
         // Adicionar evento de mudança ao dropdown de coleções
         selectColecao.addEventListener('change', () => {
             const colecao = selectColecao.value;
             if (colecao) {
-                exibirDados(colecao);
+                popularCamposFiltro(colecao);
+                exibirDados(colecao, '', '');
+            }
+        });
+
+        // Adicionar evento de mudança ao dropdown de campos
+        selectCampoFiltro.addEventListener('change', () => {
+            const colecao = selectColecao.value;
+            const campoFiltro = selectCampoFiltro.value;
+            if (colecao && campoFiltro) {
+                popularValoresFiltro(colecao, campoFiltro);
+                exibirDados(colecao, campoFiltro, '');
+            }
+        });
+
+        // Adicionar evento de mudança ao dropdown de valores
+        selectValorFiltro.addEventListener('change', () => {
+            const colecao = selectColecao.value;
+            const campoFiltro = selectCampoFiltro.value;
+            const valorFiltro = selectValorFiltro.value;
+            if (colecao && campoFiltro) {
+                exibirDados(colecao, campoFiltro, valorFiltro);
             }
         });
     </script>

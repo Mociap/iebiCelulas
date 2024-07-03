@@ -292,12 +292,15 @@
         }
 
         // Função para carregar os líderes com base no supervisor selecionado
+        // Função para carregar os líderes com base no supervisor selecionado e na rede selecionada
         function carregarLideres(supervisor) {
             selectLideres.innerHTML = '';
             inputCelula.value = '';
             presencaContainer.innerHTML = '';
 
-            if (supervisor) {
+            const rede = document.getElementById('rede').value; // Obtém o valor da rede selecionada
+
+            if (supervisor && rede) {
                 const option = document.createElement('option');
                 option.value = '';
                 option.text = 'Selecione um líder';
@@ -305,6 +308,7 @@
 
                 bancoDeDados.collection('estruturacelula')
                     .where('supervisor', '==', supervisor)
+                    .where('rede', '==', rede) // Adiciona a condição de busca pela rede
                     .get()
                     .then((querySnapshot) => {
                         const lideres = new Set();
@@ -322,6 +326,11 @@
                     .catch((error) => {
                         console.error('Erro ao carregar líderes:', error);
                     });
+            } else if (supervisor) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'Selecione uma rede primeiro';
+                selectLideres.add(option);
             } else {
                 const option = document.createElement('option');
                 option.value = '';
@@ -329,6 +338,7 @@
                 selectLideres.add(option);
             }
         }
+
 
         // Função para carregar a célula com base no líder selecionado
         function carregarCelula(lider) {

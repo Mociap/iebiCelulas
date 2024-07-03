@@ -81,7 +81,7 @@
         <form id="memberForm">
             <div class="form-group">
                 <label for="nome">Nome Conforme RG</label>
-                <input type="text" class="form-control" id="nome" required>
+                <input type="text" class="form-control" id="nome" required onkeyup="this.value = this.value.toUpperCase();">
                 <small id="nomeError" style="color: red; display: none;">Nome já cadastrado</small>
             </div>
             <div class="form-group">
@@ -89,16 +89,21 @@
                 <input type="date" class="form-control" id="dtnasc" required>
             </div>
             <div class="form-group">
+                <label for="cep">CEP</label>
+                <input type="text" class="form-control" id="cep" required maxlength="9" placeholder="99999-999" onkeyup="this.value = this.value.toUpperCase();">
+                <small id="cepError" style="color: red; display: none;">CEP inválido</small>
+            </div>
+            <div class="form-group">
                 <label for="bairro">Bairro</label>
-                <input type="text" class="form-control" id="bairro" required>
+                <input type="text" class="form-control" id="bairro" required readonly onkeyup="this.value = this.value.toUpperCase();">
             </div>
             <div class="form-group">
                 <label for="cidade">Cidade</label>
-                <input type="text" class="form-control" id="cidade" required>
+                <input type="text" class="form-control" id="cidade" required readonly onkeyup="this.value = this.value.toUpperCase();">
             </div>
             <div class="form-group">
                 <label for="uf">UF</label>
-                <input type="text" class="form-control" id="uf" required maxlength="2" value="PB">
+                <input type="text" class="form-control" id="uf" required maxlength="2" readonly onkeyup="this.value = this.value.toUpperCase();">
             </div>
             <div class="form-group">
                 <label>Sexo</label>
@@ -138,15 +143,15 @@
             </div>
             <div class="form-group">
                 <label for="nomedacelula">Nome da Célula</label>
-                <select class="form-control" id="nomedacelula" required></select>
+                <select class="form-control" id="nomedacelula" required onchange="this.value = this.value.toUpperCase();"></select>
             </div>
             <div class="form-group">
                 <label for="lidercelula">Nome do Líder</label>
-                <input type="text" class="form-control" id="lidercelula" required readonly>
+                <input type="text" class="form-control" id="lidercelula" required readonly onkeyup="this.value = this.value.toUpperCase();">
             </div>
             <div class="form-group">
                 <label for="rede">Rede</label>
-                <input type="text" class="form-control" id="rede" required readonly>
+                <input type="text" class="form-control" id="rede" required readonly onkeyup="this.value = this.value.toUpperCase();">
             </div>
             <div class="form-group">
                 <label>Arrolamento na Igreja</label>
@@ -196,9 +201,57 @@
         var inputNome = document.getElementById('nome');
         var nomeError = document.getElementById('nomeError');
         var cadastrarBtn = document.getElementById('cadastrarBtn');
+        var inputCep = document.getElementById('cep');
+        var inputBairro = document.getElementById('bairro');
+        var inputCidade = document.getElementById('cidade');
+        var inputUf = document.getElementById('uf');
+        var cepError = document.getElementById('cepError');
 
         // Máscara para o campo "Número do Celular"
         VMasker(inputCelular).maskPattern("(99) 99999-9999");
+
+        // Máscara para o campo CEP
+        VMasker(inputCep).maskPattern("99999-999");
+
+        // Função para buscar endereço pelo CEP
+        function buscarEnderecoPorCep(cep) {
+            var url = `https://viacep.com.br/ws/${cep}/json/`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.erro) {
+                        // CEP não encontrado
+                        inputBairro.value = '';
+                        inputCidade.value = '';
+                        inputUf.value = '';
+                        cepError.style.display = 'block'; // Exibir mensagem de erro
+                    } else {
+                        // Preencher os campos com os dados retornados
+                        inputBairro.value = data.bairro.toUpperCase();
+                        inputCidade.value = data.localidade.toUpperCase();
+                        inputUf.value = data.uf.toUpperCase();
+                        cepError.style.display = 'none'; // Ocultar mensagem de erro
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar endereço:', error);
+                    cepError.style.display = 'block'; // Exibir mensagem de erro
+                });
+        }
+
+        // Adicionar evento de blur (sair do campo) no campo CEP
+        inputCep.addEventListener('blur', function() {
+            var cep = inputCep.value.replace(/\D/g, ''); // Remover caracteres não numéricos
+            if (cep.length === 8) {
+                buscarEnderecoPorCep(cep);
+            } else {
+                cepError.style.display = 'block'; // Exibir mensagem de erro
+                inputBairro.value = '';
+                inputCidade.value = '';
+                inputUf.value = '';
+            }
+        });
 
         // Preencher o dropdown de igrejas
         bancoDeDados.collection('igreja').get().then((querySnapshot) => {
@@ -230,7 +283,7 @@
 
         // Preencher o dropdown de células e atualizar campos relacionados
         inputNomedaCelula.addEventListener('change', function() {
-            const nomedacelula = inputNomedaCelula.value;
+            const nomedacelula = inputNomedaCelula.value.toUpperCase();
 
             if (nomedacelula) {
                 bancoDeDados.collection('estruturacelula')
@@ -239,8 +292,8 @@
                     .then((querySnapshot) => {
                         querySnapshot.forEach((doc) => {
                             const dados = doc.data();
-                            inputLiderCelula.value = dados.conclider;
-                            inputRede.value = dados.rede;
+                            inputLiderCelula.value = dados.conclider.toUpperCase();
+                            inputRede.value = dados.rede.toUpperCase();
                             alterarCorRede(dados.rede); // Chama a função para alterar a cor do campo rede
                         });
                     })
@@ -263,7 +316,8 @@
                 // Adicionar opção padrão
                 const optionPadrao = document.createElement('option');
                 optionPadrao.value = '';
-                optionPadrao.text = 'Selecione uma célula';
+                optionPadrao.text =
+'Selecione uma célula';
                 optionPadrao.disabled = true;
                 optionPadrao.selected = true;
                 selectNomedaCelula.add(optionPadrao);
@@ -321,6 +375,7 @@
             // Obter valores dos campos
             var nome = document.getElementById('nome').value.toUpperCase();
             var dataNascimento = document.getElementById('dtnasc').value;
+            var cep = document.getElementById('cep').value.toUpperCase();
             var bairro = document.getElementById('bairro').value.toUpperCase();
             var cidade = document.getElementById('cidade').value.toUpperCase();
             var uf = document.getElementById('uf').value.toUpperCase();
@@ -328,9 +383,9 @@
             var estadoCivil = document.getElementById('estadoCivil').value;
             var celular = document.getElementById('celular').value;
             var igreja = document.getElementById('igreja').value;
-            var nomedacelula = document.getElementById('nomedacelula').value;
-            var lidercelula = document.getElementById('lidercelula').value;
-            var rede = document.getElementById('rede').value;
+            var nomedacelula = document.getElementById('nomedacelula').value.toUpperCase();
+            var lidercelula = document.getElementById('lidercelula').value.toUpperCase();
+            var rede = document.getElementById('rede').value.toUpperCase();
             var arrolamento = document.getElementById('arrolamento').value;
 
             // Formatar data de nascimento para dd/mm/aaaa
@@ -344,6 +399,7 @@
             bancoDeDados.collection('membros').add({
                 nome: nome,
                 dtnasc: dataNascFormatada,
+                cep: cep,
                 bairro: bairro,
                 cidade: cidade,
                 uf: uf,
@@ -386,4 +442,3 @@
     </script>
 </body>
 </html>
-
