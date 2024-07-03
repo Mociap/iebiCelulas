@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Igreja Evangélica Batista Intermares</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        .header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px 10px 0 0;
+        }
+        .header img {
+            max-width: 200px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 20px auto;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .form-row label {
+            width: 100px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .form-row select {
+            flex: 1;
+        }
+        .table {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4">DASHBOARD</h2>
+        <div class="divider"></div>
+        <form>
+            <div class="form-row">
+                <label>Rede:</label>
+                <select class="form-control" id="rede" onchange="carregarSupervisores(); alterarCorRede(this.value)">
+                    <option value="">Selecione uma rede</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Supervisor:</label>
+                <select class="form-control" id="supervisor" onchange="carregarLideres()">
+                    <option value="">Selecione um supervisor</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Líder:</label>
+                <select class="form-control" id="lider" onchange="gerarTabelaResumo()">
+                    <option value="">Selecione um líder</option>
+                </select>
+            </div>
+        </form>
+        <table class="table table-bordered" id="tabelaResumo">
+            <thead>
+                <tr><th></th></tr>
+            </thead>
+            <tbody>
+                <tr><th>Média de Membros</th></tr>
+                <tr><th>Média de Visitações</th></tr>
+                <tr><th>% Frequência</th></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+
+        // Inicializar o Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Obter uma referência para o Firestore
+        const db = firebase.firestore();
+
+        // Função para carregar as redes
+        function carregarRedes() {
+            const redeSelect = document.getElementById('rede');
+            db.collection('estruturacelula')
+                .orderBy('rede')
+                .get()
+                .then(querySnapshot => {
+                    const redes = new Set();
+                    querySnapshot.forEach(doc => {
+                        redes.add(doc.data().rede);
+                    });
+                    redes.forEach(rede => {
+                        const option = document.createElement('option');
+                        option.value = rede;
+                        option.text = rede;
+                        redeSelect.add(option);
+                    });
+                });
+        }
+
+        // Função para carregar os supervisores
+        function carregarSupervisores() {
+            const redeSelect = document.getElementById('rede');
+            const supervisorSelect = document.getElementById('supervisor');
+            const rede = redeSelect.value;
+            supervisorSelect.innerHTML = '<option value="">Selecione um supervisor</option>';
+
+            if (rede) {
+                const supervisores = new Set();
+
+                db.collection('estruturacelula')
+                    .where('rede', '==', rede)
+                    .get()
+                    .then(querySnapshot => {
+                        querySnapshot.forEach(doc => {
+                            const supervisor = doc.data().supervisor;
+                            supervisores.add(supervisor);
+                        });
+
+                        supervisores.forEach(supervisor => {
+                            const option = document.createElement('option');
+                            option.value = supervisor;
+                            option.text = supervisor;
+                            supervisorSelect.add(option);
+                        });
+
+                        carregarLideres(); // Chamar a função para carregar os líderes após atualizar os supervisores
+                    });
+            } else {
+                carregarLideres(); // Limpar a lista de líderes se nenhuma rede for selecionada
+            }
+        }
+
+        // Função para carregar os líderes
+        function carregarLideres() {
+            const redeSelect = document.getElementById('rede');
+            const supervisorSelect = document.getElementById('supervisor');
+            const liderSelect = document.getElementById('lider');
+            const rede = redeSelect.value;
+            const supervisor = supervisorSelect.value;
+            liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
+
+            if (rede && supervisor) {
+                const lideres = new Set();
+
+                db.collection('estruturacelula')
+                    .where('rede', '==', rede)
+                    .where('supervisor', '==', supervisor)
+                    .get()
+                    .then(querySnapshot => {
+                        querySnapshot.forEach(doc => {
+                            const lider = doc.data().conclider;
+                            lideres.add(lider);
+                        });
+
+                        lideres.forEach(lider => {
+                            const option = document.createElement('option');
+                            option.value = lider;
+                            option.text = lider;
+                            liderSelect.add(option);
+                        });
+                    });
+            }
+        }
+
+        // Função para alterar a cor do dropdown "rede"
+        function alterarCorRede(rede) {
+            const redeSelect = document.getElementById('rede');
+            const cores = {
+                'AMARELA': '#FFD700',
+                'AZUL': '#000080',
+                'ROXA': '#4B0082',
+                'LARANJA': '#FF8C00',
+                'VERMELHA': '#8B0000',
+                'BLACK': '#000000',
+                'VERDE': '#006400'
+            };
+
+            const cor = cores[rede] || '#000000';
+            redeSelect.style.backgroundColor = cor;
+            redeSelect.style.color = '#FFFFFF';
+        }
+
+        // Função para gerar a tabela de resumo
+        function gerarTabelaResumo() {
+            const liderSelect = document.getElementById('lider');
+            const lider = liderSelect.value;
+            const tabelaResumo = document.getElementById('tabelaResumo');
+            const thead = tabelaResumo.getElementsByTagName('thead')[0];
+            const tbody = tabelaResumo.getElementsByTagName('tbody')[0];
+
+            // Limpar a tabela
+            thead.innerHTML = '<tr><th></th></tr>';
+            tbody.innerHTML = '';
+
+            if (lider) {
+                console.log('Líder selecionado:', lider);
+
+                // Obter a data atual
+                const dataAtual = new Date();
+
+                // Obter os últimos 9 meses a partir da data atual
+                const meses = [];
+                for (let i = 0; i < 9; i++) {
+                    const mes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
+                    const mesFormatado = `${mes.getMonth() + 1}/${mes.getFullYear()}`;
+                    meses.push(mesFormatado);
+
+                    // Adicionar uma nova coluna para o mês
+                    const th = document.createElement('th');
+                    th.textContent = mesFormatado;
+                    thead.getElementsByTagName('tr')[0].appendChild(th);
+                }
+
+                // Criar uma nova linha para a média de membros
+                const trMediaMembros = document.createElement('tr');
+                const thMediaMembros = document.createElement('th');
+                thMediaMembros.textContent = 'Média de Membros';
+                trMediaMembros.appendChild(thMediaMembros);
+                tbody.appendChild(trMediaMembros);
+
+                // Criar uma nova linha para a média de visitações
+                const trMediaVisitacoes = document.createElement('tr');
+                const thMediaVisitacoes = document.createElement('th');
+                thMediaVisitacoes.textContent = 'Média de Visitações';
+                trMediaVisitacoes.appendChild(thMediaVisitacoes);
+                tbody.appendChild(trMediaVisitacoes);
+
+                // Criar uma nova linha para a % de frequência
+                const trFrequencia = document.createElement('tr');
+                const thFrequencia = document.createElement('th');
+                thFrequencia.textContent = '% Frequência';
+                trFrequencia.appendChild(thFrequencia);
+                tbody.appendChild(trFrequencia);
+
+                // Obter a média do campo "qtdMembros", "qtdVisitantes" e "% Frequência" para cada mês
+                meses.forEach((mes, index) => {
+                    const [mesNumero, ano] = mes.split('/');
+                    const mesInicio = new Date(ano, mesNumero - 1, 1);
+                    const mesFim = new Date(ano, mesNumero, 0);
+
+                    db.collection('reuniao')
+                        .where('lider', '==', lider)
+                        .where('data', '>=', mesInicio)
+                        .where('data', '<=', mesFim)
+                        .get()
+                        .then(querySnapshot => {
+                            console.log('Dados obtidos para o mês', mes);
+                            console.log(querySnapshot);
+
+                            let totalMembros = 0;
+                            let totalVisitantes = 0;
+                            let totalMembrosPresentes = 0;
+                            let quantidadeReunioes = 0;
+                            querySnapshot.forEach(doc => {
+                                const dados = doc.data();
+                                totalMembros += Number(dados.qtdMembros) || 0; // Converter para número
+                                totalVisitantes += Number(dados.qtdVisitantes) || 0; // Converter para número
+                                totalMembrosPresentes += Number(dados.membrosPresentes) || 0; // Converter para número
+                                quantidadeReunioes++;
+                            });
+                            const mediaMembros = quantidadeReunioes > 0 ? totalMembros / quantidadeReunioes : 0;
+                            const mediaVisitantes = quantidadeReunioes > 0 ? totalVisitantes / quantidadeReunioes : 0;
+                            const frequencia = quantidadeReunioes > 0 && totalMembros > 0 ? (totalMembrosPresentes / totalMembros) * 100 : 0;
+
+                            // Atualizar a tabela com a média de membros do mês
+                            const tdMembros = trMediaMembros.getElementsByTagName('td')[index];
+                            if (tdMembros) {
+                                tdMembros.textContent = mediaMembros.toFixed(1);
+                            } else {
+                                const novoTdMembros = document.createElement('td');
+                                novoTdMembros.textContent = mediaMembros.toFixed(1);
+                                trMediaMembros.appendChild(novoTdMembros);
+                            }
+
+                            // Atualizar a tabela com a média de visitações do mês
+                            const tdVisitantes = trMediaVisitacoes.getElementsByTagName('td')[index];
+                            if (tdVisitantes) {
+                                tdVisitantes.textContent = mediaVisitantes.toFixed(1);
+                            } else {
+                                const novoTdVisitantes = document.createElement('td');
+                                novoTdVisitantes.textContent = mediaVisitantes.toFixed(1);
+                                trMediaVisitacoes.appendChild(novoTdVisitantes);
+                            }
+
+                            // Atualizar a tabela com a % de frequência do mês
+                            const tdFrequencia = trFrequencia.getElementsByTagName('td')[index];
+                            if (tdFrequencia) {
+                                tdFrequencia.textContent = frequencia.toFixed(1) + '%';
+                            } else {
+                                const novoTdFrequencia = document.createElement('td');
+                                novoTdFrequencia.textContent = frequencia.toFixed(1) + '%';
+                                trFrequencia.appendChild(novoTdFrequencia);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao obter dados:', error);
+                        });
+                });
+            } else {
+                console.log('Nenhum líder selecionado');
+            }
+        }
+
+        // Carregar as redes ao carregar a página
+        window.onload = function() {
+            carregarRedes();
+        }
+    </script>
+</body>
+</html>
