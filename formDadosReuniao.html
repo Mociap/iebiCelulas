@@ -291,7 +291,6 @@
             }
         }
 
-        // Função para carregar os líderes com base no supervisor selecionado
         // Função para carregar os líderes com base no supervisor selecionado e na rede selecionada
         function carregarLideres(supervisor) {
             selectLideres.innerHTML = '';
@@ -339,6 +338,10 @@
             }
         }
 
+        // Função para inicializar o campo "Membros Presentes"
+        function inicializarMembroPresentes() {
+            document.getElementById('membroPresentes').value = 0;
+        }
 
         // Função para carregar a célula com base no líder selecionado
         function carregarCelula(lider) {
@@ -349,6 +352,8 @@
                     .then((querySnapshot) => {
                         querySnapshot.forEach((doc) => {
                             inputCelula.value = doc.data().nomecelula;
+                            inicializarMembroPresentes(); // Inicializar o campo "Membros Presentes"
+                            carregarMembros(lider); // Carregar os membros
                         });
                     })
                     .catch((error) => {
@@ -356,6 +361,7 @@
                     });
             } else {
                 inputCelula.value = '';
+                inicializarMembroPresentes(); // Inicializar o campo "Membros Presentes"
             }
         }
 
@@ -364,8 +370,6 @@
             presencaContainer.innerHTML = '';
             var qtdMembrosInput = document.getElementById('qtdMembros');
             qtdMembrosInput.value = '';
-            var membrosPresentesInput = document.getElementById('membroPresentes');
-            membrosPresentesInput.value = '';
 
             if (lider) {
                 bancoDeDados.collection('membros')
@@ -394,6 +398,12 @@
                             input.value = membro.nome;
                             input.addEventListener('change', atualizarMembroPresentes);
 
+                            // Adicionar evento de clique para depuração
+                            input.addEventListener('click', function() {
+                                console.log('Checkbox clicada:', membro.nome);
+                                atualizarMembroPresentes();
+                            });
+
                             const label = document.createElement('label');
                             label.classList.add('form-check-label');
                             label.htmlFor = `membro-${membro.id}`;
@@ -415,8 +425,12 @@
         // Função para atualizar o campo Membros Presentes
         function atualizarMembroPresentes() {
             var membrosPresentesInput = document.getElementById('membroPresentes');
-            var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            var checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                                  .filter(checkbox => checkbox.id !== 'reuniaoRealizada');
+            console.log('Checkboxes marcadas:', checkboxes);
+            console.log('Comprimento do array de checkboxes:', checkboxes.length);
             membrosPresentesInput.value = checkboxes.length;
+            console.log('Valor do campo "Membros Presentes":', membrosPresentesInput.value);
         }
 
         // Função para alterar a cor da caixa de acordo com a rede escolhida
@@ -438,8 +452,6 @@
         }
 
         // Função para mostrar/ocultar campos com base no switch
-        // Funão Começa aqui
-        //--------------------------
         function toggleCamposReuniao() {
             var reuniaoRealizadaSwitch = document.getElementById('reuniaoRealizada');
             var camposReuniao = document.querySelectorAll('.campo-reuniao');
@@ -475,11 +487,13 @@
                 document.getElementById('kgAlimento').value = '';
                 document.getElementById('oferta').value = '';
                 enviarBtn.textContent = 'Confirmar Não Realização';
-            }
 
-            // Limpar e atualizar o campo de membros presentes
-            document.getElementById('membroPresentes').value = '0';
+                // Atualizar o campo de membros presentes antes de redefinir
+                atualizarMembroPresentes();
+                document.getElementById('membroPresentes').value = '0';
+            }
         }
+
         // Adicionar evento de change ao switch
         document.getElementById('reuniaoRealizada').addEventListener('change', toggleCamposReuniao);
         // Chamar a função inicialmente para garantir o estado correto
@@ -512,9 +526,7 @@
                     alert('Ocorreu um erro ao verificar os registros. Por favor, tente novamente.');
                 });
         });
-        // Funão Termina Aqui
-        //--------------------------
-        
+
         function enviarDadosReuniao(reuniaoRealizada) {
             var dadosReuniao = {
                 reuniaoRealizada: reuniaoRealizada,
