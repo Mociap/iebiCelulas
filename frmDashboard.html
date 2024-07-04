@@ -7,6 +7,8 @@
     <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -53,6 +55,13 @@
         .table {
             margin-top: 20px;
         }
+        .table th:not(:first-child),
+        .table td:not(:first-child) {
+            text-align: center;
+        }
+        .chart-container {
+            margin-top: 30px;
+        }
     </style>
 </head>
 <body>
@@ -65,19 +74,19 @@
         <form>
             <div class="form-row">
                 <label>Rede:</label>
-                <select class="form-control" id="rede" onchange="carregarSupervisores(); alterarCorRede(this.value)">
+                <select class="form-control" id="rede">
                     <option value="">Selecione uma rede</option>
                 </select>
             </div>
             <div class="form-row">
                 <label>Supervisor:</label>
-                <select class="form-control" id="supervisor" onchange="carregarLideres()">
+                <select class="form-control" id="supervisor">
                     <option value="">Selecione um supervisor</option>
                 </select>
             </div>
             <div class="form-row">
                 <label>Líder:</label>
-                <select class="form-control" id="lider" onchange="gerarTabelaResumo()">
+                <select class="form-control" id="lider">
                     <option value="">Selecione um líder</option>
                 </select>
             </div>
@@ -87,13 +96,28 @@
                 <tr><th></th></tr>
             </thead>
             <tbody>
-                <tr><th>Média de Membros</th></tr>
-                <tr><th>Média de Visitações</th></tr>
-                <tr><th>% Frequência</th></tr>
             </tbody>
         </table>
+        <div class="divider"></div>
+        <h3 class="text-center mb-4">INDICADORES</h3>
+        <div class="divider"></div>
+        <div class="row chart-container">
+            <div class="col-md-6">
+                <canvas id="frequenciaChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="visitacoesChart"></canvas>
+            </div>
+        </div>
+        <div class="row chart-container">
+            <div class="col-md-6">
+                <canvas id="ofertaChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="colheitaChart"></canvas>
+            </div>
+        </div>
     </div>
-
     <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -116,89 +140,209 @@
         // Obter uma referência para o Firestore
         const db = firebase.firestore();
 
-        // Função para carregar as redes
-        function carregarRedes() {
-            const redeSelect = document.getElementById('rede');
-            db.collection('estruturacelula')
-                .orderBy('rede')
-                .get()
-                .then(querySnapshot => {
-                    const redes = new Set();
-                    querySnapshot.forEach(doc => {
-                        redes.add(doc.data().rede);
-                    });
-                    redes.forEach(rede => {
-                        const option = document.createElement('option');
-                        option.value = rede;
-                        option.text = rede;
-                        redeSelect.add(option);
-                    });
-                });
+        // Variáveis para armazenar as instâncias dos gráficos
+        let charts = {};
+
+        // Função utilitária para formatar números
+        function formatNumber(value, decimals = 2, prefix = '') {
+            return prefix + value.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
         }
 
-        // Função para carregar os supervisores
-        function carregarSupervisores() {
-            const redeSelect = document.getElementById('rede');
-            const supervisorSelect = document.getElementById('supervisor');
-            const rede = redeSelect.value;
-            supervisorSelect.innerHTML = '<option value="">Selecione um supervisor</option>';
-
-            if (rede) {
-                const supervisores = new Set();
-
-                db.collection('estruturacelula')
-                    .where('rede', '==', rede)
-                    .get()
-                    .then(querySnapshot => {
-                        querySnapshot.forEach(doc => {
-                            const supervisor = doc.data().supervisor;
-                            supervisores.add(supervisor);
-                        });
-
-                        supervisores.forEach(supervisor => {
-                            const option = document.createElement('option');
-                            option.value = supervisor;
-                            option.text = supervisor;
-                            supervisorSelect.add(option);
-                        });
-
-                        carregarLideres(); // Chamar a função para carregar os líderes após atualizar os supervisores
-                    });
-            } else {
-                carregarLideres(); // Limpar a lista de líderes se nenhuma rede for selecionada
-            }
+        // Função utilitária para criar elementos HTML
+        function createElement(tag, attributes = {}, textContent = '') {
+            const element = document.createElement(tag);
+            Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+            if (textContent) element.textContent = textContent;
+            return element;
         }
 
-        // Função para carregar os líderes
-        function carregarLideres() {
-            const redeSelect = document.getElementById('rede');
-            const supervisorSelect = document.getElementById('supervisor');
-            const liderSelect = document.getElementById('lider');
-            const rede = redeSelect.value;
-            const supervisor = supervisorSelect.value;
-            liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
-
-            if (rede && supervisor) {
-                const lideres = new Set();
-
-                db.collection('estruturacelula')
-                    .where('rede', '==', rede)
-                    .where('supervisor', '==', supervisor)
-                    .get()
-                    .then(querySnapshot => {
-                        querySnapshot.forEach(doc => {
-                            const lider = doc.data().conclider;
-                            lideres.add(lider);
-                        });
-
-                        lideres.forEach(lider => {
-                            const option = document.createElement('option');
-                            option.value = lider;
-                            option.text = lider;
-                            liderSelect.add(option);
-                        });
-                    });
+        // Função para carregar opções de um select baseado em uma consulta ao Firestore
+        async function carregarOpcoes(selectId, collection, field, whereClause = null) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = `<option value="">Selecione uma opção</option>`;
+            
+            let query = db.collection(collection);
+            if (whereClause) {
+                query = query.where(whereClause.field, whereClause.operator, whereClause.value);
             }
+            
+            const snapshot = await query.get();
+            const options = new Set();
+            
+            snapshot.forEach(doc => options.add(doc.data()[field]));
+            
+            options.forEach(option => {
+                const optionElement = createElement('option', { value: option }, option);
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Função para obter dados mensais
+        async function obterDadosMensais(lider, mesInicio, mesFim) {
+            const snapshot = await db.collection('reuniao')
+                .where('lider', '==', lider)
+                .where('data', '>=', mesInicio)
+                .where('data', '<=', mesFim)
+                .get();
+
+            let totalMembros = 0;
+            let totalVisitantes = 0;
+            let totalMembrosPresentes = 0;
+            let totalOfertaMes = 0;
+            let totalColheitaAmor = 0;
+            let quantidadeReunioes = 0;
+
+            snapshot.forEach(doc => {
+                const dados = doc.data();
+                totalMembros += Number(dados.qtdMembros) || 0;
+                totalVisitantes += Number(dados.qtdVisitantes) || 0;
+                totalMembrosPresentes += Number(dados.membroPresentes) || 0;
+                totalOfertaMes += Number(dados.oferta) || 0;
+                totalColheitaAmor += Number(dados.kgAlimento) || 0;
+                quantidadeReunioes++;
+            });
+
+            const mediaMembros = quantidadeReunioes > 0 ? totalMembros / quantidadeReunioes : 0;
+            const mediaVisitantes = quantidadeReunioes > 0 ? totalVisitantes / quantidadeReunioes : 0;
+            const mediaMembrosPresentes = quantidadeReunioes > 0 ? totalMembrosPresentes / quantidadeReunioes : 0;
+            const frequencia = mediaMembros > 0 ? (mediaMembrosPresentes / mediaMembros) * 100 : 0;
+
+            return {
+                mediaMembros,
+                mediaVisitantes,
+                mediaMembrosPresentes,
+                frequencia,
+                totalOfertaMes,
+                totalColheitaAmor
+            };
+        }
+
+        // Função para gerar a tabela de resumo
+        async function gerarTabelaResumo() {
+            const lider = document.getElementById('lider').value;
+            if (!lider) return;
+
+            const tabelaResumo = document.getElementById('tabelaResumo');
+            const thead = tabelaResumo.getElementsByTagName('thead')[0];
+            const tbody = tabelaResumo.getElementsByTagName('tbody')[0];
+
+            const dataAtual = new Date();
+            const meses = [];
+            const dadosMensais = [];
+
+            // Preparar cabeçalho
+            let headerHTML = '<tr><th></th>';
+            for (let i = 0; i < 9; i++) {
+                const mes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
+                const mesFormatado = `${mes.getMonth() + 1}/${mes.getFullYear()}`;
+                meses.push(mesFormatado);
+                headerHTML += `<th>${mesFormatado}</th>`;
+            }
+            headerHTML += '</tr>';
+            thead.innerHTML = headerHTML;
+
+            // Obter todos os dados mensais de uma vez
+            for (const mes of meses) {
+                const [mesNumero, ano] = mes.split('/');
+                const mesInicio = new Date(ano, mesNumero - 1, 1);
+                const mesFim = new Date(ano, mesNumero, 0);
+                const dados = await obterDadosMensais(lider, mesInicio, mesFim);
+                dadosMensais.push(dados);
+            }
+
+            const rows = [
+                { label: 'Média de Membros', key: 'mediaMembros', format: (v) => formatNumber(v, 1) },
+                { label: 'Média de Visitações', key: 'mediaVisitantes', format: (v) => formatNumber(v, 1) },
+                { label: 'Média de Membros Presentes', key: 'mediaMembrosPresentes', format: (v) => formatNumber(v, 1) },
+                { label: '% Frequência', key: 'frequencia', format: (v) => formatNumber(v, 1, '') + '%' },
+                { label: 'Oferta Mês (R$)', key: 'totalOfertaMes', format: (v) => formatNumber(v, 2) },
+                { label: 'Colheita do Amor (Kg)', key: 'totalColheitaAmor', format: (v) => formatNumber(v, 0) }
+            ];
+
+            // Construir o corpo da tabela
+            let tbodyHTML = '';
+            for (const row of rows) {
+                tbodyHTML += `<tr><th>${row.label}</th>`;
+                for (const dados of dadosMensais) {
+                    tbodyHTML += `<td>${row.format(dados[row.key])}</td>`;
+                }
+                tbodyHTML += '</tr>';
+            }
+            tbody.innerHTML = tbodyHTML;
+        }
+
+        // Função para criar/atualizar gráficos
+        function criarOuAtualizarGrafico(chartId, type, labels, data, label, backgroundColor, borderColor) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            
+            if (charts[chartId]) {
+                charts[chartId].destroy();
+            }
+
+            charts[chartId] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: label
+                            }
+                        }
+                    },
+                    plugins: {
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => formatNumber(value, 1),
+                            font: {
+                                weight: 'bold'
+                            },
+                            color: borderColor
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        // Função para gerar os gráficos
+        async function gerarGraficos() {
+            const lider = document.getElementById('lider').value;
+            if (!lider) return;
+
+            const dataAtual = new Date();
+            const meses = [];
+            const dadosMensais = [];
+
+            for (let i = 0; i < 9; i++) {
+                const mes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
+                const mesFormatado = `${mes.getMonth() + 1}/${mes.getFullYear()}`;
+                meses.push(mesFormatado);
+
+                const [mesNumero, ano] = mesFormatado.split('/');
+                const mesInicio = new Date(ano, mesNumero - 1, 1);
+                const mesFim = new Date(ano, mesNumero, 0);
+
+                const dados = await obterDadosMensais(lider, mesInicio, mesFim);
+                dadosMensais.push(dados);
+            }
+
+            criarOuAtualizarGrafico('frequenciaChart', 'bar', meses, dadosMensais.map(d => d.frequencia), '% Frequência', 'rgba(54, 162, 235, 0.5)', 'rgba(54, 162, 235, 1)');
+            criarOuAtualizarGrafico('visitacoesChart', 'bar', meses, dadosMensais.map(d => d.mediaVisitantes), 'Média de Visitações', 'rgba(255, 206, 86, 0.5)', 'rgba(255, 206, 86, 1)');
+            criarOuAtualizarGrafico('ofertaChart', 'bar', meses, dadosMensais.map(d => d.totalOfertaMes), 'Oferta Mês (R$)', 'rgba(75, 192, 192, 0.5)', 'rgba(75, 192, 192, 1)');
+            criarOuAtualizarGrafico('colheitaChart', 'bar', meses, dadosMensais.map(d => d.totalColheitaAmor), 'Colheita do Amor (Kg)', 'rgba(153, 102, 255, 0.5)', 'rgba(153, 102, 255, 1)');
         }
 
         // Função para alterar a cor do dropdown "rede"
@@ -219,131 +363,58 @@
             redeSelect.style.color = '#FFFFFF';
         }
 
-        // Função para gerar a tabela de resumo
-        function gerarTabelaResumo() {
-            const liderSelect = document.getElementById('lider');
-            const lider = liderSelect.value;
+        // Função para limpar a tabela e os gráficos
+        function limparTabelaEGraficos() {
             const tabelaResumo = document.getElementById('tabelaResumo');
-            const thead = tabelaResumo.getElementsByTagName('thead')[0];
-            const tbody = tabelaResumo.getElementsByTagName('tbody')[0];
+            tabelaResumo.innerHTML = `
+                <thead>
+                    <tr><th></th></tr>
+                </thead>
+                <tbody></tbody>
+            `;
 
-            // Limpar a tabela
-            thead.innerHTML = '<tr><th></th></tr>';
-            tbody.innerHTML = '';
-
-            if (lider) {
-                console.log('Líder selecionado:', lider);
-
-                // Obter a data atual
-                const dataAtual = new Date();
-
-                // Obter os últimos 9 meses a partir da data atual
-                const meses = [];
-                for (let i = 0; i < 9; i++) {
-                    const mes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
-                    const mesFormatado = `${mes.getMonth() + 1}/${mes.getFullYear()}`;
-                    meses.push(mesFormatado);
-
-                    // Adicionar uma nova coluna para o mês
-                    const th = document.createElement('th');
-                    th.textContent = mesFormatado;
-                    thead.getElementsByTagName('tr')[0].appendChild(th);
+            // Limpar gráficos
+            ['frequenciaChart', 'visitacoesChart', 'ofertaChart', 'colheitaChart'].forEach(chartId => {
+                if (charts[chartId]) {
+                    charts[chartId].destroy();
+                    charts[chartId] = null;
                 }
-
-                // Criar uma nova linha para a média de membros
-                const trMediaMembros = document.createElement('tr');
-                const thMediaMembros = document.createElement('th');
-                thMediaMembros.textContent = 'Média de Membros';
-                trMediaMembros.appendChild(thMediaMembros);
-                tbody.appendChild(trMediaMembros);
-
-                // Criar uma nova linha para a média de visitações
-                const trMediaVisitacoes = document.createElement('tr');
-                const thMediaVisitacoes = document.createElement('th');
-                thMediaVisitacoes.textContent = 'Média de Visitações';
-                trMediaVisitacoes.appendChild(thMediaVisitacoes);
-                tbody.appendChild(trMediaVisitacoes);
-
-                // Criar uma nova linha para a % de frequência
-                const trFrequencia = document.createElement('tr');
-                const thFrequencia = document.createElement('th');
-                thFrequencia.textContent = '% Frequência';
-                trFrequencia.appendChild(thFrequencia);
-                tbody.appendChild(trFrequencia);
-
-                // Obter a média do campo "qtdMembros", "qtdVisitantes" e "% Frequência" para cada mês
-                meses.forEach((mes, index) => {
-                    const [mesNumero, ano] = mes.split('/');
-                    const mesInicio = new Date(ano, mesNumero - 1, 1);
-                    const mesFim = new Date(ano, mesNumero, 0);
-
-                    db.collection('reuniao')
-                        .where('lider', '==', lider)
-                        .where('data', '>=', mesInicio)
-                        .where('data', '<=', mesFim)
-                        .get()
-                        .then(querySnapshot => {
-                            console.log('Dados obtidos para o mês', mes);
-                            console.log(querySnapshot);
-
-                            let totalMembros = 0;
-                            let totalVisitantes = 0;
-                            let totalMembrosPresentes = 0;
-                            let quantidadeReunioes = 0;
-                            querySnapshot.forEach(doc => {
-                                const dados = doc.data();
-                                totalMembros += Number(dados.qtdMembros) || 0; // Converter para número
-                                totalVisitantes += Number(dados.qtdVisitantes) || 0; // Converter para número
-                                totalMembrosPresentes += Number(dados.membrosPresentes) || 0; // Converter para número
-                                quantidadeReunioes++;
-                            });
-                            const mediaMembros = quantidadeReunioes > 0 ? totalMembros / quantidadeReunioes : 0;
-                            const mediaVisitantes = quantidadeReunioes > 0 ? totalVisitantes / quantidadeReunioes : 0;
-                            const frequencia = quantidadeReunioes > 0 && totalMembros > 0 ? (totalMembrosPresentes / totalMembros) * 100 : 0;
-
-                            // Atualizar a tabela com a média de membros do mês
-                            const tdMembros = trMediaMembros.getElementsByTagName('td')[index];
-                            if (tdMembros) {
-                                tdMembros.textContent = mediaMembros.toFixed(1);
-                            } else {
-                                const novoTdMembros = document.createElement('td');
-                                novoTdMembros.textContent = mediaMembros.toFixed(1);
-                                trMediaMembros.appendChild(novoTdMembros);
-                            }
-
-                            // Atualizar a tabela com a média de visitações do mês
-                            const tdVisitantes = trMediaVisitacoes.getElementsByTagName('td')[index];
-                            if (tdVisitantes) {
-                                tdVisitantes.textContent = mediaVisitantes.toFixed(1);
-                            } else {
-                                const novoTdVisitantes = document.createElement('td');
-                                novoTdVisitantes.textContent = mediaVisitantes.toFixed(1);
-                                trMediaVisitacoes.appendChild(novoTdVisitantes);
-                            }
-
-                            // Atualizar a tabela com a % de frequência do mês
-                            const tdFrequencia = trFrequencia.getElementsByTagName('td')[index];
-                            if (tdFrequencia) {
-                                tdFrequencia.textContent = frequencia.toFixed(1) + '%';
-                            } else {
-                                const novoTdFrequencia = document.createElement('td');
-                                novoTdFrequencia.textContent = frequencia.toFixed(1) + '%';
-                                trFrequencia.appendChild(novoTdFrequencia);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erro ao obter dados:', error);
-                        });
-                });
-            } else {
-                console.log('Nenhum líder selecionado');
-            }
+                const canvas = document.getElementById(chartId);
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
         }
 
-        // Carregar as redes ao carregar a página
+        // Carregar as redes ao iniciar a página
         window.onload = function() {
-            carregarRedes();
-        }
+            carregarOpcoes('rede', 'estruturacelula', 'rede');
+            limparTabelaEGraficos();
+        };
+
+        // Adicionar event listeners para os selects
+        document.getElementById('rede').addEventListener('change', function() {
+            const rede = this.value;
+            alterarCorRede(rede);
+            carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: rede });
+            document.getElementById('lider').innerHTML = '<option value="">Selecione um líder</option>';
+            limparTabelaEGraficos();
+        });
+
+        document.getElementById('supervisor').addEventListener('change', function() {
+            const rede = document.getElementById('rede').value;
+            const supervisor = this.value;
+            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: supervisor });
+            limparTabelaEGraficos();
+        });
+
+        document.getElementById('lider').addEventListener('change', function() {
+            if (this.value) {
+                gerarTabelaResumo();
+                gerarGraficos();
+            } else {
+                limparTabelaEGraficos();
+            }
+        });
     </script>
 </body>
 </html>
