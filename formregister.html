@@ -96,15 +96,63 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
+
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+        var auth = firebase.auth();
+
+        // Referência ao formulário
+        var formulario = document.getElementById('registerForm');
+
+        formulario.addEventListener('submit', function(e) {
             e.preventDefault();
-            // Aqui você adicionará a lógica de registro
-            console.log('Tentativa de registro');
-            // Por exemplo: validar senhas, enviar dados para o servidor, etc.
+
+            var nome = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var senha = document.getElementById('password').value;
+            var confirmarSenha = document.getElementById('confirmPassword').value;
+
+            if (senha !== confirmarSenha) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+
+            // Criar usuário no Firebase Authentication
+            auth.createUserWithEmailAndPassword(email, senha)
+                .then(function(userCredential) {
+                    // Usuário criado com sucesso
+                    var user = userCredential.user;
+
+                    // Adicionar informações adicionais ao Firestore
+                    return bancoDeDados.collection('usuarios').doc(user.uid).set({
+                        nome: nome,
+                        email: email,
+                        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(function() {
+                    alert('Registro realizado com sucesso!');
+                    window.location.href = 'login.html'; // Redirecionar para a página de login
+                })
+                .catch(function(error) {
+                    console.error('Erro no registro:', error);
+                    alert('Erro no registro: ' + error.message);
+                });
         });
     </script>
 </body>

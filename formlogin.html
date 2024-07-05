@@ -8,45 +8,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
-        }
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .login-logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .login-logo img {
-            width: 150px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .btn-login {
-            background-color: #007bff;
-            border-color: #007bff;
-            font-weight: bold;
-        }
-        .btn-login:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-        .forgot-password {
-            text-align: right;
-            font-size: 0.9em;
-        }
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-        }
+        /* ... (mantenha os estilos existentes) ... */
     </style>
 </head>
 <body>
@@ -85,15 +47,50 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
+
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+        var auth = firebase.auth();
+
+        // Referência ao formulário
+        var formulario = document.getElementById('loginForm');
+
+        formulario.addEventListener('submit', function(e) {
             e.preventDefault();
-            // Aqui você adicionará a lógica de autenticação
-            console.log('Tentativa de login');
-            // Por exemplo: chamar uma função de autenticação ou enviar dados para o servidor
+
+            var email = document.getElementById('email').value;
+            var senha = document.getElementById('password').value;
+
+            // Autenticar usuário no Firebase
+            auth.signInWithEmailAndPassword(email, senha)
+                .then(function(userCredential) {
+                    // Login bem-sucedido
+                    var user = userCredential.user;
+                    console.log('Usuário logado:', user.email);
+                    alert('Login realizado com sucesso!');
+                    // Redirecionar para a página principal ou dashboard
+                    window.location.href = 'dashboard.html'; // Substitua 'dashboard.html' pela sua página principal
+                })
+                .catch(function(error) {
+                    // Erro no login
+                    console.error('Erro no login:', error);
+                    alert('Erro no login: ' + error.message);
+                });
         });
     </script>
 </body>
