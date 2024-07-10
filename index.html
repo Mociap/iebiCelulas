@@ -131,13 +131,26 @@
                 <p>Registre os dados da reunião semanal.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
-            <a href="formlogin.html" class="card">
+            <div class="card" onclick="verificarStatusLogin()">
                 <i class="fas fa-chart-bar card-icon"></i>
                 <h2>Relatórios</h2>
                 <p>Visualize os relatórios das reuniões.</p>
                 <div class="btn-primary">Acessar</div>
-            </a>
+            </div>
         </div>
     </div>
+    
+    <script>
+        function verificarStatusLogin() {
+            const tempoLogin = localStorage.getItem('tempoLogin');
+            const tempoAtual = new Date().getTime();
+            
+            if (tempoLogin && (tempoAtual - tempoLogin < 5 * 60 * 1000)) {
+                window.location.href = 'frmrelatorios.html';
+            } else {
+                window.location.href = 'formlogin.html';
+            }
+        }
+    </script>
 </body>
 </html>

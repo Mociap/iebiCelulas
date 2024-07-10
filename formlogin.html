@@ -156,8 +156,10 @@
                     // Login bem-sucedido
                     var user = userCredential.user;
                     console.log('Usuário logado:', user.email);
-                    // Redirecionar para frmRelatorios.html
-                    window.location.href = 'frmRelatorios.html';
+                    // Definir o tempo de login
+                    localStorage.setItem('tempoLogin', new Date().getTime());
+                    // Redirecionar para relatorios.html
+                    window.location.href = 'frmrelatorios.html';
                 })
                 .catch(function(error) {
                     // Erro no login
