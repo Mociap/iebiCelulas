@@ -20,29 +20,37 @@
     <script type="text/javascript">
         // Definir as páginas e suas conexões
         const pages = [
-            { id: 1, label: 'index.html', color: '#FFA07A' },
-            { id: 2, label: 'HomePage.html', color: '#98FB98' },
-            { id: 3, label: 'formCadMembros.html', color: '#87CEFA' },
-            { id: 4, label: 'formDadosReuniao.html', color: '#DDA0DD' },
-            { id: 5, label: 'CardsReunioes.html', color: '#F0E68C' },
-            { id: 6, label: 'resumoMes.html', color: '#FFB6C1' },
-            { id: 7, label: 'relMembros.html', color: '#20B2AA' },
-            { id: 8, label: 'z-DadosMassa.html', color: '#D3D3D3' },
-            { id: 9, label: 'z-reuniaoMassa.html', color: '#D3D3D3' },
-            { id: 10, label: 'Editar.html', color: '#FFA500' }
+            { id: 1, label: 'index.html', color: '#FFA07A', x: 0, y: 0 },
+            { id: 2, label: 'HomePage.html', color: '#98FB98', x: 200, y: 0 },
+            { id: 3, label: 'formCadMembros.html', color: '#87CEFA', x: -200, y: 100 },
+            { id: 4, label: 'formDadosReuniao.html', color: '#DDA0DD', x: 0, y: 100 },
+            { id: 5, label: 'CardsReunioes.html', color: '#F0E68C', x: 200, y: 200 },
+            { id: 6, label: 'resumoMes.html', color: '#FFB6C1', x: 400, y: 200 },
+            { id: 7, label: 'relMembros.html', color: '#20B2AA', x: -200, y: 300 },
+            { id: 8, label: 'z-DadosMassa.html', color: '#D3D3D3', x: 0, y: 300 },
+            { id: 9, label: 'z-reuniaoMassa.html', color: '#D3D3D3', x: 200, y: 300 },
+            { id: 10, label: 'Editar.html', color: '#FFA500', x: 400, y: 300 },
+            { id: 11, label: 'formlogin.html', color: '#9b59b6', x: -400, y: 0 },
+            { id: 12, label: 'formEsqueceuSenha.html', color: '#FF69B4', x: -600, y: 100 },
+            { id: 13, label: 'formregister.html', color: '#00CED1', x: -600, y: -100 },
+            { id: 14, label: 'frmRelatorios.html', color: '#32CD32', x: -400, y: 200 }
         ];
 
         const connections = [
             { from: 1, to: 2 },  // index -> HomePage
             { from: 1, to: 3 },  // index -> formCadMembros
             { from: 1, to: 4 },  // index -> formDadosReuniao
-            { from: 1, to: 5 },  // index -> CardsReunioes
-            { from: 1, to: 7 },  // index -> relMembros
-            { from: 1, to: 8 },  // index -> z-DadosMassa
-            { from: 1, to: 9 },  // index -> z-reuniaoMassa
-            { from: 1, to: 10 }, // index -> Editar
+            { from: 1, to: 11 }, // index -> formlogin
+            { from: 11, to: 12 }, // formlogin -> formEsqueceuSenha
+            { from: 11, to: 13 }, // formlogin -> formregister
+            { from: 11, to: 14 }, // formlogin -> frmRelatorios (após autenticação bem-sucedida)
             { from: 4, to: 6 },  // formDadosReuniao -> resumoMes
-            { from: 5, to: 6 }   // CardsReunioes -> resumoMes
+            { from: 5, to: 6 },  // CardsReunioes -> resumoMes
+            { from: 14, to: 5 }, // frmRelatorios -> CardsReunioes
+            { from: 14, to: 7 }, // frmRelatorios -> relMembros
+            { from: 14, to: 8 }, // frmRelatorios -> z-DadosMassa
+            { from: 14, to: 9 }, // frmRelatorios -> z-reuniaoMassa
+            { from: 14, to: 10 } // frmRelatorios -> Editar
         ];
 
         // Criar os nós e arestas
@@ -60,7 +68,8 @@
                     face: 'Arial'
                 },
                 borderWidth: 2,
-                shadow: true
+                shadow: true,
+                fixed: false
             },
             edges: {
                 width: 2,
@@ -71,24 +80,28 @@
                 smooth: { type: 'curvedCW', roundness: 0.2 }
             },
             physics: {
-                enabled: true,
-                barnesHut: {
-                    gravitationalConstant: -2000,
-                    centralGravity: 0.3,
-                    springLength: 200,
-                    springConstant: 0.04,
-                    damping: 0.09
-                }
+                enabled: false
             },
-            layout: {
-                hierarchical: {
-                    enabled: false
-                }
+            interaction: {
+                dragNodes: true,
+                dragView: true
             }
         };
 
         // Inicializar a rede
         const network = new vis.Network(container, data, options);
+
+        // Evento para atualizar a posição do nó após ser arrastado
+        network.on("dragEnd", function (params) {
+            if (params.nodes.length > 0) {
+                var nodeId = params.nodes[0];
+                var nodePosition = network.getPositions([nodeId])[nodeId];
+                var node = nodes.get(nodeId);
+                node.x = nodePosition.x;
+                node.y = nodePosition.y;
+                nodes.update(node);
+            }
+        });
     </script>
 </body>
 </html>

@@ -5,76 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperação de Senha - Igreja Evangélica Batista</title>
     <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
         body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .header {
+            background-color: #2c2c2c;
+            padding: 20px 0;
+            text-align: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+        }
+        .header img {
+            max-width: 180px;
         }
         .forgot-password-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .forgot-password-logo {
+            background-color: #2c2c2c;
+            border-radius: 15px;
+            padding: 30px;
+            width: 300px;
             text-align: center;
-            margin-bottom: 30px;
-        }
-        .forgot-password-logo img {
-            width: 150px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: calc(100% - 40px);
+            padding: 10px 10px 10px 40px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3a3a3a;
+            color: #ffffff;
+        }
+        .form-group i {
+            position: absolute;
+            left: 10px;
+            top: 12px;
+            color:#2196F3;
+        }
+        .input-wrapper {
+            position: relative;
         }
         .btn-reset {
-            background-color: #17a2b8;
-            border-color: #17a2b8;
-            font-weight: bold;
+            background-color: #2196F3;
+            border: none;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         .btn-reset:hover {
-            background-color: #138496;
-            border-color: #117a8b;
+            background-color: #2196F3;
         }
         .login-link {
-            text-align: center;
-            margin-top: 20px;
+            margin-top: 15px;
+        }
+        a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="forgot-password-container">
-            <div class="forgot-password-logo">
-                <img src="./Logo.png" alt="Logo da Igreja">
-            </div>
-            <h2 class="text-center mb-4">Recuperação de Senha</h2>
-            <p class="text-center mb-4">Digite seu e-mail para receber as instruções de recuperação de senha.</p>
-            <form id="forgotPasswordForm">
-                <div class="form-group">
-                    <label for="email">E-mail</label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                        </div>
-                        <input type="email" class="form-control" id="email" required>
-                    </div>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
+    </div>
+    <div class="forgot-password-container">
+        <h2>Recuperação de Senha</h2>
+        <p>Digite seu e-mail para receber as instruções de recuperação de senha.</p>
+        <form id="forgotPasswordForm">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" required>
                 </div>
-                <button type="submit" class="btn btn-info btn-block btn-reset">Enviar Instruções</button>
-            </form>
-            <div class="login-link">
-                Lembrou sua senha? <a href="formlogin.html">Voltar para o login</a>
             </div>
+            <button type="submit" class="btn-reset">
+                <i class="fas fa-paper-plane"></i> Enviar Instruções
+            </button>
+        </form>
+        <div class="login-link">
+            Lembrou sua senha? <a href="formlogin.html"><i class="fas fa-sign-in-alt"></i> Voltar para o login</a>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    
     <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
@@ -98,8 +135,8 @@
             
             firebase.auth().sendPasswordResetEmail(email)
                 .then(function() {
-                    // Redirect to msgRecuperaSenha.html
-                    window.location.href = 'msgRecuperaSenha.html';
+                    alert('E-mail de recuperação de senha enviado. Por favor, verifique sua caixa de entrada.');
+                    window.location.href = 'formlogin.html';
                 })
                 .catch(function(error) {
                     console.error('Erro ao enviar e-mail de recuperação:', error);
