@@ -70,7 +70,6 @@
             transform: translate(-50%, -50%);
             z-index: 9999;
         }
-        /* Estilo para o link de voltar */
         .back-link {
             position: absolute;
             top: 10px;
@@ -87,7 +86,6 @@
 <body>
     <div class="header">
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
-        <!-- Link para voltar adicionado aqui -->
         <a href="frmRelatorios.html" class="back-link">&larr; Voltar para Relatórios</a>
     </div>
     <div class="container">
@@ -267,11 +265,11 @@
                 return;
             }
 
-            // Mostrar spinner de carregamento e esconder tabela
             document.getElementById('loadingSpinner').style.display = 'block';
             document.getElementById('resumoTableContainer').style.display = 'none';
 
             const mesAno = `${mes}/${ano}`;
+            console.log("mesAno consultado:", mesAno);
 
             const tableBody = document.querySelector('#resumoTable tbody');
             tableBody.innerHTML = '';
@@ -293,6 +291,7 @@
                 }
 
                 const celulasSnapshot = await query.get();
+                console.log("Número de células encontradas:", celulasSnapshot.size);
 
                 for (const celulaDoc of celulasSnapshot.docs) {
                     const celulaData = celulaDoc.data();
@@ -300,10 +299,13 @@
                     const supervisorCelula = celulaData.supervisor;
                     const liderCelula = celulaData.conclider;
 
+                    console.log("Consultando reuniões para célula:", nomecelula);
                     const reuniaoSnapshot = await db.collection("reuniao")
                         .where("celula", "==", nomecelula)
                         .where("mesAno", "==", mesAno)
                         .get();
+
+                    console.log("Número de reuniões encontradas:", reuniaoSnapshot.size);
 
                     let somaMembroPresentes = 0;
                     let somaQtdMembros = 0;
@@ -314,16 +316,25 @@
 
                     reuniaoSnapshot.forEach((doc) => {
                         const data = doc.data();
-                        console.log(`Reunião de ${nomecelula}:`, data.reuniaoRealizada);
+                        console.log("Dados da reunião:", data);
                         somaMembroPresentes += Number(data.membroPresentes || 0);
                         somaQtdMembros += Number(data.qtdMembros || 0);
                         somaQtdVisitantes += Number(data.qtdVisitantes || 0);
                         somaOferta += Number(data.oferta || 0);
                         somaKgAlimento += Number(data.kgAlimento || 0);
-                        if (data.reuniaoRealizada === "true") {
+                        
+                        console.log("Valor de reuniaoRealizada:", data.reuniaoRealizada);
+                        console.log("Tipo de reuniaoRealizada:", typeof data.reuniaoRealizada);
+                        
+                        if (data.reuniaoRealizada !== false) {
                             reunioesRealizadas++;
+                            console.log("Reunião contabilizada");
+                        } else {
+                            console.log("Reunião não contabilizada");
                         }
                     });
+
+                    console.log(`Reuniões realizadas para ${nomecelula}:`, reunioesRealizadas);
 
                     let frequencia = somaQtdMembros > 0 ? (somaMembroPresentes / somaQtdMembros * 100).toFixed(2) + "%" : "N/A";
                     let visitacoes = somaQtdVisitantes.toLocaleString('pt-BR');
@@ -333,7 +344,7 @@
                     const row = tableBody.insertRow();
                     row.insertCell(0).textContent = rede;
                     row.insertCell(1).textContent = supervisorCelula;
-                    row.insertCell(2).textContent = liderCelula
+                    row.insertCell(2).textContent = liderCelula;
                     row.insertCell(3).textContent = nomecelula;
                     row.insertCell(4).textContent = reunioesRealizadas;
                     row.insertCell(5).textContent = frequencia;
@@ -355,16 +366,13 @@
 
                 adicionarLinhaTotais(tableBody, totais);
 
-                // Após gerar a tabela, esperar 2 segundos
                 await new Promise(resolve => setTimeout(resolve, 2000));
 
-                // Esconder spinner de carregamento e mostrar tabela
                 document.getElementById('loadingSpinner').style.display = 'none';
                 document.getElementById('resumoTableContainer').style.display = 'block';
 
             } catch (error) {
                 console.error("Erro ao gerar tabela:", error);
-                // Em caso de erro, também esconder spinner e mostrar mensagem de erro
                 document.getElementById('loadingSpinner').style.display = 'none';
                 alert("Ocorreu um erro ao gerar a tabela. Por favor, tente novamente.");
             }

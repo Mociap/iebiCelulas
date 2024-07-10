@@ -7,6 +7,9 @@
     <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -112,6 +115,15 @@
         .reuniao-realizada-switch {
             margin-top: 20px;
         }
+        #data {
+            background-color: #fff;
+            cursor: pointer;
+            color: #495057;
+        }
+        #data:focus {
+            box-shadow: none;
+            border-color: #ced4da;
+        }
     </style>
 </head>
 <body>
@@ -132,7 +144,7 @@
             <div id="camposReuniao">
                 <div class="form-group">
                     <label for="data">Data da Reunião</label>
-                    <input type="date" class="form-control" id="data" required>
+                    <input type="text" class="form-control" id="data" placeholder="Selecione a data..." required readonly>
                 </div>
                 <div class="form-group" style="display: none;">
                     <label for="ano">Ano</label>
@@ -152,7 +164,7 @@
                 </div>
                 <div class="form-group">
                     <label for="lider">Líder</label>
-                    <select class="form-control" id="lider" required onchange="carregarCelula(this.value); carregarMembros(this.value)"></select>
+                    <select class="form-control" id="lider" required onchange="carregarCelula(this.value)"></select>
                 </div>
                 <div class="form-group">
                     <label for="celula">Célula</label>
@@ -218,12 +230,20 @@
         var inputAno = document.getElementById('ano');
         var inputMesAno = document.getElementById('mesAno');
 
-        inputData.addEventListener('change', function() {
-            var dataEscolhida = new Date(this.value);
-            inputAno.value = dataEscolhida.getFullYear();
-            var mes = String(dataEscolhida.getMonth() + 1).padStart(2, '0');
-            var ano = dataEscolhida.getFullYear();
-            inputMesAno.value = mes + '/' + ano;
+        // Inicializar o Flatpickr no campo de data
+        flatpickr("#data", {
+            dateFormat: "d/m/Y",
+            locale: "pt",
+            disableMobile: "true",
+            placeholder: "Selecione a data...",
+            allowInput: false,
+            onChange: function(selectedDates, dateStr, instance) {
+                var dataEscolhida = selectedDates[0];
+                inputAno.value = dataEscolhida.getFullYear();
+                var mes = String(dataEscolhida.getMonth() + 1).padStart(2, '0');
+                var ano = dataEscolhida.getFullYear();
+                inputMesAno.value = mes + '/' + ano;
+            }
         });
 
         // Formatação da oferta
@@ -367,7 +387,7 @@
 
         // Função para carregar a lista de membros com base no líder selecionado
         function carregarMembros(lider) {
-            presencaContainer.innerHTML = '';
+            presencaContainer.innerHTML = ''; // Limpar o container primeiro
             var qtdMembrosInput = document.getElementById('qtdMembros');
             qtdMembrosInput.value = '';
 
@@ -384,10 +404,8 @@
                         // Ordenar os membros por nome
                         membros.sort((a, b) => a.nome.localeCompare(b.nome));
 
-                        var qtdMembros = 0;
+                        var qtdMembros = membros.length; // Usar o comprimento do array membros
                         membros.forEach((membro) => {
-                            qtdMembros++;
-
                             const div = document.createElement('div');
                             div.classList.add('form-check');
 
@@ -397,12 +415,6 @@
                             input.id = `membro-${membro.id}`;
                             input.value = membro.nome;
                             input.addEventListener('change', atualizarMembroPresentes);
-
-                            // Adicionar evento de clique para depuração
-                            input.addEventListener('click', function() {
-                                console.log('Checkbox clicada:', membro.nome);
-                                atualizarMembroPresentes();
-                            });
 
                             const label = document.createElement('label');
                             label.classList.add('form-check-label');
@@ -427,10 +439,7 @@
             var membrosPresentesInput = document.getElementById('membroPresentes');
             var checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
                                   .filter(checkbox => checkbox.id !== 'reuniaoRealizada');
-            console.log('Checkboxes marcadas:', checkboxes);
-            console.log('Comprimento do array de checkboxes:', checkboxes.length);
             membrosPresentesInput.value = checkboxes.length;
-            console.log('Valor do campo "Membros Presentes":', membrosPresentesInput.value);
         }
 
         // Função para alterar a cor da caixa de acordo com a rede escolhida
@@ -458,8 +467,10 @@
             var enviarBtn = document.getElementById('enviarBtn');
             var lider = document.getElementById('lider').value;
 
-            // Sempre recarregar e limpar a lista de presença
-            carregarMembros(lider);
+            // Apenas recarregar membros se o switch estiver marcado (reunião está acontecendo)
+            if (reuniaoRealizadaSwitch.checked) {
+                carregarMembros(lider);
+            }
 
             if (reuniaoRealizadaSwitch.checked) {
                 camposReuniao.forEach(function(campo) {
@@ -507,9 +518,13 @@
             var celula = document.getElementById('celula').value;
             var reuniaoRealizada = document.getElementById('reuniaoRealizada').checked;
 
+            // Converter a data do formato dd/mm/yyyy para yyyy-mm-dd
+            var [dia, mes, ano] = data.split('/');
+            var dataFormatada = `${ano}-${mes}-${dia}`;
+
             // Verificar se já existe um registro com a mesma data e célula
             bancoDeDados.collection('reuniao')
-                .where('data', '==', data)
+                .where('data', '==', firebase.firestore.Timestamp.fromDate(new Date(dataFormatada)))
                 .where('celula', '==', celula)
                 .get()
                 .then((querySnapshot) => {
@@ -528,9 +543,12 @@
         });
 
         function enviarDadosReuniao(reuniaoRealizada) {
+            var dataInput = document.getElementById('data').value;
+            var [dia, mes, ano] = dataInput.split('/').map(Number);
+            
             var dadosReuniao = {
                 reuniaoRealizada: reuniaoRealizada,
-                data: document.getElementById('data').value,
+                data: firebase.firestore.Timestamp.fromDate(new Date(ano, mes - 1, dia, 21, 0, 0)),
                 rede: document.getElementById('rede').value,
                 supervisor: document.getElementById('supervisor').value,
                 lider: document.getElementById('lider').value,
@@ -541,9 +559,11 @@
                 // Adicione os outros campos apenas se a reunião foi realizada
                 dadosReuniao.ano = parseInt(document.getElementById('ano').value);
                 dadosReuniao.mesAno = document.getElementById('mesAno').value;
-                dadosReuniao.presenca = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(function(checkbox) {
-                    return checkbox.value;
-                });
+                dadosReuniao.presenca = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                    .filter(checkbox => checkbox.id !== 'reuniaoRealizada')
+                    .map(function(checkbox) {
+                        return checkbox.value;
+                    });
                 dadosReuniao.qtdVisitantes = parseInt(document.getElementById('qtdVisitantes').value);
                 dadosReuniao.kgAlimento = parseFloat(document.getElementById('kgAlimento').value);
                 dadosReuniao.oferta = parseFloat(document.getElementById('oferta').value.replace(/[^\d,]/g, '').replace(',', '.'));
@@ -554,7 +574,7 @@
             bancoDeDados.collection('reuniao').add(dadosReuniao)
             .then(function() {
                 alert(reuniaoRealizada ? 'Dados da reunião enviados com sucesso!' : 'Não realização da reunião registrada com sucesso!');
-                var url = `resumoMes.html?rede=${encodeURIComponent(dadosReuniao.rede)}&supervisor=${encodeURIComponent(dadosReuniao.supervisor)}&lider=${encodeURIComponent(dadosReuniao.lider)}&data=${encodeURIComponent(dadosReuniao.data)}&celula=${encodeURIComponent(dadosReuniao.celula)}`;
+                var url = `resumoMes.html?rede=${encodeURIComponent(dadosReuniao.rede)}&supervisor=${encodeURIComponent(dadosReuniao.supervisor)}&lider=${encodeURIComponent(dadosReuniao.lider)}&data=${encodeURIComponent(dataInput)}&celula=${encodeURIComponent(dadosReuniao.celula)}`;
                 window.location.href = url;
             })
             .catch(function(error) {

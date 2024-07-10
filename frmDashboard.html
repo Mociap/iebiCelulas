@@ -179,11 +179,15 @@
 
         // Função para obter dados mensais
         async function obterDadosMensais(lider, mesInicio, mesFim) {
+            console.log(`Buscando dados para o líder: ${lider}, de ${mesInicio} até ${mesFim}`);
+
             const snapshot = await db.collection('reuniao')
                 .where('lider', '==', lider)
                 .where('data', '>=', mesInicio)
                 .where('data', '<=', mesFim)
                 .get();
+
+            console.log(`Número de documentos recuperados: ${snapshot.size}`);
 
             let totalMembros = 0;
             let totalVisitantes = 0;
@@ -194,6 +198,7 @@
 
             snapshot.forEach(doc => {
                 const dados = doc.data();
+                console.log(`Dados do documento:`, dados);
                 totalMembros += Number(dados.qtdMembros) || 0;
                 totalVisitantes += Number(dados.qtdVisitantes) || 0;
                 totalMembrosPresentes += Number(dados.membroPresentes) || 0;
@@ -206,6 +211,15 @@
             const mediaVisitantes = quantidadeReunioes > 0 ? totalVisitantes / quantidadeReunioes : 0;
             const mediaMembrosPresentes = quantidadeReunioes > 0 ? totalMembrosPresentes / quantidadeReunioes : 0;
             const frequencia = mediaMembros > 0 ? (mediaMembrosPresentes / mediaMembros) * 100 : 0;
+
+            console.log(`Resultados calculados:`, {
+                mediaMembros,
+                mediaVisitantes,
+                mediaMembrosPresentes,
+                frequencia,
+                totalOfertaMes,
+                totalColheitaAmor
+            });
 
             return {
                 mediaMembros,

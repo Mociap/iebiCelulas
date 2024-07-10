@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Duplicidades na Coleção</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Verificar Duplicidades na Coleção</h2>
+        <div class="form-group">
+            <label for="colecao">Selecione a coleção:</label>
+            <select class="form-control" id="colecao">
+                <option value="">Selecione uma opção</option>
+                <option value="rede">Rede</option>
+                <option value="estruturacelula">Estrutura Célula</option>
+                <option value="membros">Membros</option>
+                <option value="reuniao">Reunião</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="campoVerificar">Selecione o campo para verificar duplicidades:</label>
+            <select class="form-control" id="campoVerificar"></select>
+        </div>
+        <button class="btn btn-primary mb-3" id="verificarDuplicidades">Verificar Duplicidades</button>
+        <table class="table table-striped" id="tabelaDados">
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        // Referências aos elementos do formulário
+        var selectColecao = document.getElementById('colecao');
+        var selectCampoVerificar = document.getElementById('campoVerificar');
+        var btnVerificarDuplicidades = document.getElementById('verificarDuplicidades');
+        var tabelaDados = document.getElementById('tabelaDados');
+
+        // Função para popular o dropdown de campos
+        function popularCampos(colecao) {
+            selectCampoVerificar.innerHTML = '<option value="">Selecione um campo</option>';
+            bancoDeDados.collection(colecao).limit(1).get()
+                .then(querySnapshot => {
+                    if (!querySnapshot.empty) {
+                        const campos = Object.keys(querySnapshot.docs[0].data());
+                        campos.forEach(campo => {
+                            const option = document.createElement('option');
+                            option.value = campo;
+                            option.textContent = campo;
+                            selectCampoVerificar.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao obter campos:', error);
+                });
+        }
+
+        // Função para verificar e exibir duplicidades
+        function verificarDuplicidades(colecao, campo) {
+            const thead = tabelaDados.getElementsByTagName('thead')[0];
+            const tbody = tabelaDados.getElementsByTagName('tbody')[0];
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            bancoDeDados.collection(colecao).get()
+                .then(querySnapshot => {
+                    const dados = {};
+                    querySnapshot.forEach(doc => {
+                        const valor = doc.data()[campo];
+                        if (valor) {
+                            if (!dados[valor]) {
+                                dados[valor] = [];
+                            }
+                            dados[valor].push({id: doc.id, ...doc.data()});
+                        }
+                    });
+
+                    const duplicados = Object.values(dados).filter(grupo => grupo.length > 1);
+
+                    if (duplicados.length > 0) {
+                        const campos = Object.keys(duplicados[0][0]).filter(c => c !== 'id');
+                        const trCabecalho = document.createElement('tr');
+                        const thAcao = document.createElement('th');
+                        thAcao.textContent = 'Ação';
+                        trCabecalho.appendChild(thAcao);
+                        campos.forEach(campo => {
+                            const th = document.createElement('th');
+                            th.textContent = campo;
+                            trCabecalho.appendChild(th);
+                        });
+                        thead.appendChild(trCabecalho);
+
+                        duplicados.forEach(grupo => {
+                            grupo.forEach(item => {
+                                const tr = document.createElement('tr');
+                                tr.dataset.id = item.id;
+                                const tdAcao = document.createElement('td');
+                                const btnExcluir = document.createElement('button');
+                                btnExcluir.textContent = 'Excluir';
+                                btnExcluir.className = 'btn btn-danger btn-sm';
+                                btnExcluir.addEventListener('click', () => excluirDocumento(colecao, item.id, tr));
+                                tdAcao.appendChild(btnExcluir);
+                                tr.appendChild(tdAcao);
+                                campos.forEach(campo => {
+                                    const td = document.createElement('td');
+                                    td.textContent = item[campo];
+                                    td.contentEditable = true;
+                                    td.addEventListener('blur', () => atualizarDados(colecao, item.id, campo, td.textContent));
+                                    tr.appendChild(td);
+                                });
+                                tbody.appendChild(tr);
+                            });
+                        });
+                    } else {
+                        const tr = document.createElement('tr');
+                        const td = document.createElement('td');
+                        td.textContent = 'Nenhuma duplicidade encontrada.';
+                        td.colSpan = 4;
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao verificar duplicidades:', error);
+                });
+        }
+
+        // Função para atualizar os dados no Firebase
+        function atualizarDados(colecao, id, campo, novoValor) {
+            bancoDeDados.collection(colecao).doc(id).update({
+                [campo]: novoValor
+            })
+            .then(() => {
+                console.log('Documento atualizado com sucesso!');
+            })
+            .catch((error) => {
+                console.error('Erro ao atualizar documento: ', error);
+            });
+        }
+
+        // Função para excluir um documento
+        function excluirDocumento(colecao, id, tr) {
+            if (confirm('Tem certeza que deseja excluir este documento?')) {
+                bancoDeDados.collection(colecao).doc(id).delete()
+                    .then(() => {
+                        console.log('Documento excluído com sucesso!');
+                        tr.remove(); // Remove a linha da tabela
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao excluir documento: ', error);
+                    });
+            }
+        }
+
+        // Adicionar evento de mudança ao dropdown de coleções
+        selectColecao.addEventListener('change', () => {
+            const colecao = selectColecao.value;
+            if (colecao) {
+                popularCampos(colecao);
+            }
+        });
+
+        // Adicionar evento de clique ao botão de verificar duplicidades
+        btnVerificarDuplicidades.addEventListener('click', () => {
+            const colecao = selectColecao.value;
+            const campo = selectCampoVerificar.value;
+            if (colecao && campo) {
+                verificarDuplicidades(colecao, campo);
+            } else {
+                alert('Por favor, selecione uma coleção e um campo para verificar duplicidades.');
+            }
+        });
+    </script>
+</body>
+</html>

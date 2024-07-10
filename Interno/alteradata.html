@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alterar Formato de Data e reuniaoRealizada - Reunião</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Alterar formato de data e reuniaoRealizada na coleção 'reuniao'</h1>
+        <div class="form-group">
+            <label for="formatoConversao">Escolha o formato de conversão:</label>
+            <select id="formatoConversao" class="form-control">
+                <option value="paraString">Timestamp para String (yyyy-mm-dd)</option>
+                <option value="paraTimestamp">String (yyyy-mm-dd) para Timestamp</option>
+                <option value="reuniaoRealizadaParaBoolean">reuniaoRealizada para Boolean</option>
+                <option value="reuniaoRealizadaParaString">reuniaoRealizada para String</option>
+                <option value="reuniaoRealizadaParaTrue">reuniaoRealizada false para true</option>
+            </select>
+        </div>
+        <button id="botaoAtualizar" class="btn btn-primary">Atualizar Dados</button>
+        <div id="status" class="mt-3"></div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        document.getElementById('botaoAtualizar').addEventListener('click', atualizarDados);
+
+        function atualizarDados() {
+            let divStatus = document.getElementById('status');
+            divStatus.innerHTML = 'Atualizando dados...';
+            let dadosAtualizados = [];
+            let formatoConversao = document.getElementById('formatoConversao').value;
+
+            bancoDeDados.collection('reuniao').get().then((querySnapshot) => {
+                let promessasAtualizacao = [];
+
+                querySnapshot.forEach((doc) => {
+                    let data = doc.data().data;
+                    let reuniaoRealizada = doc.data().reuniaoRealizada;
+                    let novaData, dataAntiga, novoReuniaoRealizada;
+
+                    if (formatoConversao === 'paraString' && data && data.toDate) {
+                        dataAntiga = data.toDate().toISOString();
+                        let date = data.toDate();
+                        novaData = date.getFullYear() + '-' + 
+                                   String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                                   String(date.getDate()).padStart(2, '0');
+                        promessasAtualizacao.push(doc.ref.update({ data: novaData }));
+                    } else if (formatoConversao === 'paraTimestamp' && typeof data === 'string') {
+                        dataAntiga = data;
+                        novaData = firebase.firestore.Timestamp.fromDate(new Date(data));
+                        promessasAtualizacao.push(doc.ref.update({ data: novaData }));
+                    } else if (formatoConversao === 'reuniaoRealizadaParaBoolean') {
+                        novoReuniaoRealizada = reuniaoRealizada === "true";
+                        promessasAtualizacao.push(doc.ref.update({ reuniaoRealizada: novoReuniaoRealizada }));
+                    } else if (formatoConversao === 'reuniaoRealizadaParaString') {
+                        novoReuniaoRealizada = reuniaoRealizada.toString();
+                        promessasAtualizacao.push(doc.ref.update({ reuniaoRealizada: novoReuniaoRealizada }));
+                    } else if (formatoConversao === 'reuniaoRealizadaParaTrue') {
+                        if (reuniaoRealizada === false) {
+                            novoReuniaoRealizada = true;
+                            promessasAtualizacao.push(doc.ref.update({ reuniaoRealizada: novoReuniaoRealizada }));
+                        }
+                    } else {
+                        return; // Pula este documento se não precisar de conversão
+                    }
+
+                    dadosAtualizados.push({
+                        id: doc.id,
+                        dataAntiga: dataAntiga,
+                        dataNova: novaData instanceof firebase.firestore.Timestamp ? novaData.toDate().toISOString() : novaData,
+                        reuniaoRealizadaAntiga: reuniaoRealizada,
+                        reuniaoRealizadaNova: novoReuniaoRealizada
+                    });
+                });
+
+                return Promise.all(promessasAtualizacao);
+            }).then(() => {
+                divStatus.innerHTML = 'Todos os dados foram atualizados com sucesso!<br><br>';
+                divStatus.innerHTML += '<strong>Dados atualizados:</strong><br>';
+                dadosAtualizados.forEach(item => {
+                    if (formatoConversao === 'reuniaoRealizadaParaBoolean' || formatoConversao === 'reuniaoRealizadaParaString' || formatoConversao === 'reuniaoRealizadaParaTrue') {
+                        divStatus.innerHTML += `ID: ${item.id}<br>reuniaoRealizada antiga: ${item.reuniaoRealizadaAntiga}<br>reuniaoRealizada nova: ${item.reuniaoRealizadaNova}<br><br>`;
+                    } else {
+                        divStatus.innerHTML += `ID: ${item.id}<br>Data antiga: ${item.dataAntiga}<br>Nova data: ${item.dataNova}<br><br>`;
+                    }
+                });
+            }).catch((erro) => {
+                divStatus.innerHTML = 'Erro ao atualizar dados: ' + erro.message;
+            });
+        }
+    </script>
+</body>
+</html>
