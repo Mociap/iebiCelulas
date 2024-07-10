@@ -9,19 +9,18 @@
     <style>
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f0f4f8;
+            background-color: #1a1a1a;
             margin: 0;
             padding: 0;
-            color: #333;
+            color: #ffffff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
         .header {
-            background-color: #ffffff;
+            background-color: #2c2c2c;
             padding: 20px 0;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .header img {
             max-width: 180px;
@@ -33,13 +32,13 @@
             justify-content: center;
             align-items: center;
             padding: 40px 20px;
-            margin-top: -5%;
+            margin-top: -10%
         }
         h1 {
             font-size: 2.5em;
             margin-bottom: 40px;
             text-align: center;
-            color: #333;
+            color: #ffffff;
         }
         .card-container {
             display: flex;
@@ -48,26 +47,50 @@
             gap: 30px;
         }
         .card {
-            background-color: #ffffff;
+            background-color: #2c2c2c;
             border-radius: 15px;
             padding: 30px;
             width: 250px;
             text-align: center;
+            transition: all 0.3s ease, background-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card:nth-child(1)::before {
+            background-color: #3498db; /* Azul */
+        }
+        .card:nth-child(2)::before {
+            background-color: #9b59b6;
+        }
+        .card:nth-child(3)::before {
+            background-color: #e74c3c;
+        }
+        .card:hover::before {
+            height: 100%;
+            opacity: 0.1;
         }
         .card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.3);
         }
         .card h2 {
             font-size: 1.5em;
             margin-bottom: 15px;
-            color: #333;
+            position: relative;
         }
         .card p {
-            color: #666;
+            color: #b3b3b3;
             font-size: 0.9em;
+            position: relative;
         }
         a {
             text-decoration: none;
@@ -109,12 +132,12 @@
 
         cardCadastroMembros.addEventListener('mouseenter', () => {
             console.log('Mouse entrou no cartão Cadastro de Membros');
-            cardCadastroMembros.style.backgroundColor = 'rgba(46, 204, 113, 0.2)'; // Verde claro
+            cardCadastroMembros.style.backgroundColor = 'rgba(52, 152, 219, 0.2)'; // Azul claro
         });
 
         cardCadastroMembros.addEventListener('mouseleave', () => {
             console.log('Mouse saiu do cartão Cadastro de Membros');
-            cardCadastroMembros.style.backgroundColor = '#ffffff';
+            cardCadastroMembros.style.backgroundColor = '#2c2c2c';
         });
 
         cardDadosReuniao.addEventListener('mouseenter', () => {
@@ -124,7 +147,7 @@
 
         cardDadosReuniao.addEventListener('mouseleave', () => {
             console.log('Mouse saiu do cartão Dados da Reunião');
-            cardDadosReuniao.style.backgroundColor = '#ffffff';
+            cardDadosReuniao.style.backgroundColor = '#2c2c2c';
         });
     </script>
 </body>
