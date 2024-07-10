@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo do Mês por Célula - Igreja Evangélica Batista Itapevi</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            padding-top: 100px;
+        }
+        .container {
+            max-width: 1200px;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #000;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header img {
+            max-width: 150px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 30px auto;
+        }
+        .btn-primary {
+            background-color: #000;
+            border-color: #000;
+        }
+        .btn-primary:hover {
+            background-color: #333;
+            border-color: #333;
+        }
+        #resumoTable {
+            margin-top: 20px;
+        }
+        #resumoTable th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        #exportButton {
+            margin-top: 20px;
+        }
+        #loadingSpinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+        /* Estilo para o link de voltar */
+        .back-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <!-- Link para voltar adicionado aqui -->
+        <a href="frmRelatorios.html" class="back-link">&larr; Voltar para Relatórios</a>
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4 font-weight-bold">Resumo do Mês por Célula</h2>
+        <div class="divider"></div>
+        <form id="relatorioForm">
+            <div class="form-group">
+                <label for="rede">Rede:</label>
+                <select class="form-control" id="rede" onchange="alterarCorRede(this.value); carregarSupervisores(this.value)">
+                    <option value="">Selecione uma rede</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="supervisor">Supervisor:</label>
+                <select class="form-control" id="supervisor">
+                    <option value="Todos">Todos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mesAno">Mês/Ano:</label>
+                <div class="d-flex">
+                    <select class="form-control mr-2" id="mes">
+                        <option value="">Mês</option>
+                        <option value="01">Janeiro</option>
+                        <option value="02">Fevereiro</option>
+                        <option value="03">Março</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Maio</option>
+                        <option value="06">Junho</option>
+                        <option value="07">Julho</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                    <select class="form-control" id="ano">
+                        <option value="">Ano</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+        <div id="loadingSpinner" style="display: none;">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Carregando...</span>
+                </div>
+            </div>
+        </div>
+        <div id="resumoTableContainer" style="display: none;">
+            <table id="resumoTable" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Rede</th>
+                        <th>Supervisor</th>
+                        <th>Líderes</th>
+                        <th>Nome da Célula</th>
+                        <th>Reuniões no Mês</th>
+                        <th>Frequência Mês</th>
+                        <th>Quantidade de Visitações Mês</th>
+                        <th>Valor das Ofertas Mês</th>
+                        <th>Colheita do Amor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <button id="exportButton" class="btn btn-primary btn-block" onclick="exportToExcel()">Exportar para Excel</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+
+        // Função para preencher as opções de rede
+        function preencherRedes() {
+            const redeSelect = document.getElementById('rede');
+            db.collection("rede").orderBy("nomerede").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    let rede = doc.data();
+                    let option = document.createElement('option');
+                    option.value = rede.nomerede;
+                    option.textContent = rede.nomerede;
+                    redeSelect.appendChild(option);
+                });
+            }).catch((error) => {
+                console.log("Erro ao buscar redes:", error);
+            });
+        }
+
+        // Função para carregar supervisores
+        function carregarSupervisores(rede) {
+            const supervisorSelect = document.getElementById('supervisor');
+            supervisorSelect.innerHTML = '<option value="Todos">Todos</option>';
+            
+            if (rede) {
+                db.collection("estruturacelula")
+                    .where("rede", "==", rede)
+                    .get()
+                    .then((querySnapshot) => {
+                        const supervisores = new Set();
+                        querySnapshot.forEach((doc) => {
+                            supervisores.add(doc.data().supervisor);
+                        });
+
+                        supervisores.forEach((supervisor) => {
+                            let option = document.createElement('option');
+                            option.value = supervisor;
+                            option.textContent = supervisor;
+                            supervisorSelect.appendChild(option);
+                        });
+                    })
+                    .catch((error) => {
+                        console.log("Erro ao carregar supervisores:", error);
+                    });
+            }
+        }
+
+        // Função para alterar a cor da rede selecionada
+        function alterarCorRede(rede) {
+            var selectRede = document.getElementById('rede');
+            var cores = {
+                'AMARELA': '#FFD700',
+                'AZUL': '#000080',
+                'ROXA': '#4B0082',
+                'LARANJA': '#FF8C00',
+                'VERMELHA': '#8B0000',
+                'BLACK': '#000000',
+                'VERDE': '#006400'
+            };
+
+            var cor = cores[rede] || '#000000';
+            selectRede.style.backgroundColor = cor;
+            selectRede.style.color = '#FFFFFF';
+        }
+
+        // Função para adicionar linha de totais à tabela
+        function adicionarLinhaTotais(tableBody, totais) {
+            const row = tableBody.insertRow();
+            row.style.fontWeight = 'bold';
+            
+            row.insertCell(0).textContent = 'TOTAIS';
+            row.insertCell(1).textContent = '';
+            row.insertCell(2).textContent = '';
+            row.insertCell(3).textContent = '';
+            row.insertCell(4).textContent = totais.reunioes;
+            row.insertCell(5).textContent = totais.frequencia + '%';
+            row.insertCell(6).textContent = totais.visitacoes;
+            row.insertCell(7).textContent = totais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            row.insertCell(8).textContent = totais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
+        }
+
+        // Função principal para gerar a tabela de resumo
+        async function gerarTabela() {
+            const rede = document.getElementById('rede').value;
+            const supervisor = document.getElementById('supervisor').value;
+            const mes = document.getElementById('mes').value;
+            const ano = document.getElementById('ano').value;
+
+            if (!rede || !mes || !ano) {
+                document.getElementById('resumoTableContainer').style.display = 'none';
+                document.getElementById('loadingSpinner').style.display = 'none';
+                return;
+            }
+
+            // Mostrar spinner de carregamento e esconder tabela
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('resumoTableContainer').style.display = 'none';
+
+            const mesAno = `${mes}/${ano}`;
+
+            const tableBody = document.querySelector('#resumoTable tbody');
+            tableBody.innerHTML = '';
+
+            let totais = {
+                reunioes: 0,
+                membroPresentes: 0,
+                qtdMembros: 0,
+                visitacoes: 0,
+                ofertas: 0,
+                ofertaAmor: 0
+            };
+
+            try {
+                let query = db.collection("estruturacelula").where("rede", "==", rede);
+                
+                if (supervisor && supervisor !== "Todos") {
+                    query = query.where("supervisor", "==", supervisor);
+                }
+
+                const celulasSnapshot = await query.get();
+
+                for (const celulaDoc of celulasSnapshot.docs) {
+                    const celulaData = celulaDoc.data();
+                    const nomecelula = celulaData.nomecelula;
+                    const supervisorCelula = celulaData.supervisor;
+                    const liderCelula = celulaData.conclider;
+
+                    const reuniaoSnapshot = await db.collection("reuniao")
+                        .where("celula", "==", nomecelula)
+                        .where("mesAno", "==", mesAno)
+                        .get();
+
+                    let somaMembroPresentes = 0;
+                    let somaQtdMembros = 0;
+                    let somaQtdVisitantes = 0;
+                    let somaOferta = 0;
+                    let somaKgAlimento = 0;
+                    let reunioesRealizadas = 0;
+
+                    reuniaoSnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        console.log(`Reunião de ${nomecelula}:`, data.reuniaoRealizada);
+                        somaMembroPresentes += Number(data.membroPresentes || 0);
+                        somaQtdMembros += Number(data.qtdMembros || 0);
+                        somaQtdVisitantes += Number(data.qtdVisitantes || 0);
+                        somaOferta += Number(data.oferta || 0);
+                        somaKgAlimento += Number(data.kgAlimento || 0);
+                        if (data.reuniaoRealizada === "true") {
+                            reunioesRealizadas++;
+                        }
+                    });
+
+                    let frequencia = somaQtdMembros > 0 ? (somaMembroPresentes / somaQtdMembros * 100).toFixed(2) + "%" : "N/A";
+                    let visitacoes = somaQtdVisitantes.toLocaleString('pt-BR');
+                    let ofertas = somaOferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR') + " kg";
+
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = rede;
+                    row.insertCell(1).textContent = supervisorCelula;
+                    row.insertCell(2).textContent = liderCelula
+                    row.insertCell(3).textContent = nomecelula;
+                    row.insertCell(4).textContent = reunioesRealizadas;
+                    row.insertCell(5).textContent = frequencia;
+                    row.insertCell(6).textContent = visitacoes;
+                    row.insertCell(7).textContent = ofertas;
+                    row.insertCell(8).textContent = ofertaAmor;
+
+                    totais.reunioes += reunioesRealizadas;
+                    totais.membroPresentes += somaMembroPresentes;
+                    totais.qtdMembros += somaQtdMembros;
+                    totais.visitacoes += somaQtdVisitantes;
+                    totais.ofertas += somaOferta;
+                    totais.ofertaAmor += somaKgAlimento;
+                }
+
+                totais.frequencia = totais.qtdMembros > 0 
+                    ? ((totais.membroPresentes / totais.qtdMembros) * 100).toFixed(2)
+                    : 0;
+
+                adicionarLinhaTotais(tableBody, totais);
+
+                // Após gerar a tabela, esperar 2 segundos
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Esconder spinner de carregamento e mostrar tabela
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('resumoTableContainer').style.display = 'block';
+
+            } catch (error) {
+                console.error("Erro ao gerar tabela:", error);
+                // Em caso de erro, também esconder spinner e mostrar mensagem de erro
+                document.getElementById('loadingSpinner').style.display = 'none';
+                alert("Ocorreu um erro ao gerar a tabela. Por favor, tente novamente.");
+            }
+        }
+
+        // Função para exportar a tabela para Excel
+        function exportToExcel() {
+            const table = document.getElementById('resumoTable');
+            const ws = XLSX.utils.table_to_sheet(table);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Resumo do Mês");
+            XLSX.writeFile(wb, "resumo_do_mes.xlsx");
+        }
+
+        // Função para preencher as opções de ano
+        function preencherAnos() {
+            const anoAtual = new Date().getFullYear();
+            const anoSelect = document.getElementById('ano');
+            for (let i = anoAtual; i >= 2024; i--) {
+                let option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                anoSelect.appendChild(option);
+            }
+        }
+
+        // Inicialização da página
+        window.onload = function() {
+            preencherRedes();
+            preencherAnos();
+        };
+
+        // Adicionar event listeners para os elementos de formulário
+        document.getElementById('rede').addEventListener('change', gerarTabela);
+        document.getElementById('supervisor').addEventListener('change', gerarTabela);
+        document.getElementById('mes').addEventListener('change', gerarTabela);
+        document.getElementById('ano').addEventListener('change', gerarTabela);
+    </script>
+</body>
+</html>

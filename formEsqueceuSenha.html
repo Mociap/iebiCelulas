@@ -66,7 +66,7 @@
                 <button type="submit" class="btn btn-info btn-block btn-reset">Enviar Instruções</button>
             </form>
             <div class="login-link">
-                Lembrou sua senha? <a href="login.html">Voltar para o login</a>
+                Lembrou sua senha? <a href="formlogin.html">Voltar para o login</a>
             </div>
         </div>
     </div>
@@ -74,12 +74,37 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
+
     <script>
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+
         document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            // Aqui você adicionará a lógica de recuperação de senha
-            console.log('Tentativa de recuperação de senha');
-            // Por exemplo: enviar e-mail com instruções de recuperação
+            var email = document.getElementById('email').value;
+            
+            firebase.auth().sendPasswordResetEmail(email)
+                .then(function() {
+                    // Redirect to msgRecuperaSenha.html
+                    window.location.href = 'msgRecuperaSenha.html';
+                })
+                .catch(function(error) {
+                    console.error('Erro ao enviar e-mail de recuperação:', error);
+                    alert('Ocorreu um erro. Por favor, tente novamente.');
+                });
         });
     </script>
 </body>

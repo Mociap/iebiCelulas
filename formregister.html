@@ -91,7 +91,7 @@
                 <button type="submit" class="btn btn-success btn-block btn-register">Registrar</button>
             </form>
             <div class="login-link">
-                Já tem uma conta? <a href="login.html">Faça login</a>
+                Já tem uma conta? <a href="formlogin.html">Faça login</a>
             </div>
         </div>
     </div>
@@ -147,11 +147,27 @@
                 })
                 .then(function() {
                     alert('Registro realizado com sucesso!');
-                    window.location.href = 'login.html'; // Redirecionar para a página de login
+                    window.location.href = 'formlogin.html'; // Redirecionar para a página de login
                 })
                 .catch(function(error) {
                     console.error('Erro no registro:', error);
-                    alert('Erro no registro: ' + error.message);
+                    let mensagemErro = 'Erro no registro: ';
+                    
+                    switch(error.code) {
+                        case 'auth/email-already-in-use':
+                            mensagemErro += 'Este e-mail já está registrado em nossa comunidade. Por favor, use outro e-mail ou entre em contato com a secretaria da igreja se precisar de ajuda.';
+                            break;
+                        case 'auth/invalid-email':
+                            mensagemErro += 'O endereço de e-mail é inválido.';
+                            break;
+                        case 'auth/weak-password':
+                            mensagemErro += 'A senha é muito fraca. Use uma senha mais forte.';
+                            break;
+                        default:
+                            mensagemErro += error.message;
+                    }
+                    
+                    alert(mensagemErro);
                 });
         });
     </script>
