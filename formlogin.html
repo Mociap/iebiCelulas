@@ -198,7 +198,7 @@
                         const currentTime = new Date().getTime();
                         if (currentTime - startTime > 20000) {
                             console.log("Tempo limite excedido. Itens faltando:", missingItems.join(', '));
-                            alert('Offline. Itens faltando: ' + missingItems.join(', '));
+                            alert('Offline. Tente Novamente.');
                         } else {
                             setTimeout(checkStorage, 100);
                         }
