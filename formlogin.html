@@ -19,6 +19,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding-top: 20px;
         }
         .header {
             background-color: #2c2c2c;
@@ -27,6 +28,7 @@
             width: 100%;
             position: fixed;
             top: 0;
+            z-index: 1000;
         }
         .header img {
             max-width: 180px;
@@ -38,7 +40,12 @@
             width: 300px;
             text-align: center;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-
+            margin-top: 50px;
+        }
+        h2 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 24px;
         }
         .form-group {
             margin-bottom: 20px;
@@ -94,6 +101,7 @@
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
     <div class="login-container">
+        <h2>Login</h2>
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">E-mail</label>
@@ -121,13 +129,11 @@
         </div>
     </div>
 
-    <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
 
     <script>
-        // Configuração do Firebase
         var configuracaoFirebase = {
             apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
             authDomain: "dbiebi.firebaseapp.com",
@@ -141,31 +147,86 @@
         var bancoDeDados = firebase.firestore();
         var auth = firebase.auth();
 
-        // Referência ao formulário
+        async function armazenarDadosUsuario(idUsuario) {
+            return new Promise((resolve) => {
+                bancoDeDados.collection("usuarios").doc(idUsuario).get().then((doc) => {
+                    if (doc.exists) {
+                        const dadosUsuario = doc.data();
+                        const nomeUsuario = dadosUsuario.nome;
+                        const funcaoUsuario = dadosUsuario.funcao;
+                        localStorage.setItem('nomeUsuario', nomeUsuario);
+                        localStorage.setItem('funcaoUsuario', funcaoUsuario);
+
+                        bancoDeDados.collection("membros").where("nome", "==", nomeUsuario).get().then((querySnapshot) => {
+                            if (!querySnapshot.empty) {
+                                const dadosMembro = querySnapshot.docs[0].data();
+                                const nomeCelula = dadosMembro.nomedacelula;
+                                localStorage.setItem('celulaUsuario', nomeCelula || '');
+
+                                bancoDeDados.collection("estruturacelula").where("nomecelula", "==", nomeCelula).get().then((estruturaSnapshot) => {
+                                    if (!estruturaSnapshot.empty) {
+                                        const dadosEstrutura = estruturaSnapshot.docs[0].data();
+                                        localStorage.setItem('liderUsuario', dadosEstrutura.conclider || '');
+                                        localStorage.setItem('supervisorUsuario', dadosEstrutura.supervisor || '');
+                                        localStorage.setItem('redeUsuario', dadosEstrutura.rede || '');
+                                    }
+                                    resolve();
+                                }).catch(() => {
+                                    resolve();
+                                });
+                            } else {
+                                resolve();
+                            }
+                        }).catch(() => {
+                            resolve();
+                        });
+                    } else {
+                        resolve();
+                    }
+                }).catch(() => {
+                    resolve();
+                });
+            });
+        }
+
         var formulario = document.getElementById('loginForm');
 
-        formulario.addEventListener('submit', function(e) {
+        formulario.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             var email = document.getElementById('email').value;
             var senha = document.getElementById('password').value;
 
-            // Autenticar usuário no Firebase
-            auth.signInWithEmailAndPassword(email, senha)
-                .then(function(userCredential) {
-                    // Login bem-sucedido
-                    var user = userCredential.user;
-                    console.log('Usuário logado:', user.email);
-                    // Definir o tempo de login
-                    localStorage.setItem('tempoLogin', new Date().getTime());
-                    // Redirecionar para relatorios.html
-                    window.location.href = 'frmrelatorios.html';
-                })
-                .catch(function(error) {
-                    // Erro no login
-                    console.error('Erro no login:', error);
-                    alert('Ops! Não foi possível fazer o login. Por favor, verifique seu e-mail e senha e tente novamente.');
-                });
+            localStorage.clear();
+
+            try {
+                const credencialUsuario = await auth.signInWithEmailAndPassword(email, senha);
+                var usuario = credencialUsuario.user;
+                localStorage.setItem('tempoLogin', new Date().getTime());
+                await armazenarDadosUsuario(usuario.uid);
+                
+                const startTime = new Date().getTime();
+                const checkStorage = () => {
+                    if (localStorage.getItem('nomeUsuario') && 
+                        localStorage.getItem('funcaoUsuario') && 
+                        localStorage.getItem('celulaUsuario') && 
+                        localStorage.getItem('liderUsuario') && 
+                        localStorage.getItem('supervisorUsuario') && 
+                        localStorage.getItem('redeUsuario')) {
+                        window.location.href = 'frmrelatorios.html';
+                    } else {
+                        const currentTime = new Date().getTime();
+                        if (currentTime - startTime > 10000) {
+                            alert('Offline');
+                        } else {
+                            setTimeout(checkStorage, 100);
+                        }
+                    }
+                };
+                checkStorage();
+            } catch (erro) {
+                // Handle error silently
+            }
         });
     </script>
 </body>

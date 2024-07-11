@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
@@ -62,9 +63,31 @@
         .chart-container {
             margin-top: 30px;
         }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
+    <a href="frmRelatorios.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
     <div class="header">
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
@@ -156,8 +179,34 @@
             return element;
         }
 
+        // Função para configurar os dropdowns baseado na função do usuário
+        function configurarDropdowns() {
+            const funcao = localStorage.getItem('funcaoUsuario');
+            const redeDropdown = document.getElementById('rede');
+            const supervisorDropdown = document.getElementById('supervisor');
+            const liderDropdown = document.getElementById('lider');
+
+            if (funcao === 'SUPERVISOR') {
+                redeDropdown.disabled = true;
+                supervisorDropdown.disabled = true;
+                liderDropdown.disabled = false;
+            } else if (funcao === 'COORDENADOR') {
+                redeDropdown.disabled = true;
+                supervisorDropdown.disabled = false;
+                liderDropdown.disabled = false;
+            } else if (funcao === 'PASTOR' || funcao === 'ADMIN') {
+                redeDropdown.disabled = false;
+                supervisorDropdown.disabled = false;
+                liderDropdown.disabled = false;
+            } else {
+                redeDropdown.disabled = true;
+                supervisorDropdown.disabled = true;
+                liderDropdown.disabled = true;
+            }
+        }
+
         // Função para carregar opções de um select baseado em uma consulta ao Firestore
-        async function carregarOpcoes(selectId, collection, field, whereClause = null) {
+        async function carregarOpcoes(selectId, collection, field, whereClause = null, selectedValue = null) {
             const select = document.getElementById(selectId);
             select.innerHTML = `<option value="">Selecione uma opção</option>`;
             
@@ -173,21 +222,20 @@
             
             options.forEach(option => {
                 const optionElement = createElement('option', { value: option }, option);
+                if (selectedValue && option === selectedValue) {
+                    optionElement.selected = true;
+                }
                 select.appendChild(optionElement);
             });
         }
 
         // Função para obter dados mensais
         async function obterDadosMensais(lider, mesInicio, mesFim) {
-            console.log(`Buscando dados para o líder: ${lider}, de ${mesInicio} até ${mesFim}`);
-
             const snapshot = await db.collection('reuniao')
                 .where('lider', '==', lider)
                 .where('data', '>=', mesInicio)
                 .where('data', '<=', mesFim)
                 .get();
-
-            console.log(`Número de documentos recuperados: ${snapshot.size}`);
 
             let totalMembros = 0;
             let totalVisitantes = 0;
@@ -198,7 +246,6 @@
 
             snapshot.forEach(doc => {
                 const dados = doc.data();
-                console.log(`Dados do documento:`, dados);
                 totalMembros += Number(dados.qtdMembros) || 0;
                 totalVisitantes += Number(dados.qtdVisitantes) || 0;
                 totalMembrosPresentes += Number(dados.membroPresentes) || 0;
@@ -211,15 +258,6 @@
             const mediaVisitantes = quantidadeReunioes > 0 ? totalVisitantes / quantidadeReunioes : 0;
             const mediaMembrosPresentes = quantidadeReunioes > 0 ? totalMembrosPresentes / quantidadeReunioes : 0;
             const frequencia = mediaMembros > 0 ? (mediaMembrosPresentes / mediaMembros) * 100 : 0;
-
-            console.log(`Resultados calculados:`, {
-                mediaMembros,
-                mediaVisitantes,
-                mediaMembrosPresentes,
-                frequencia,
-                totalOfertaMes,
-                totalColheitaAmor
-            });
 
             return {
                 mediaMembros,
@@ -399,9 +437,37 @@
             });
         }
 
+        // Função para recuperar informações do usuário
+        function recuperarInformacoesUsuario() {
+            const rede = localStorage.getItem('redeUsuario');
+            const supervisor = localStorage.getItem('supervisorUsuario');
+            const lider = localStorage.getItem('liderUsuario');
+            const celula = localStorage.getItem('celulaUsuario');
+            const funcao = localStorage.getItem('funcaoUsuario');
+
+            return { rede, supervisor, lider, celula, funcao };
+        }
+
         // Carregar as redes ao iniciar a página
         window.onload = function() {
-            carregarOpcoes('rede', 'estruturacelula', 'rede');
+            const userInfo = recuperarInformacoesUsuario();
+            configurarDropdowns();
+            carregarOpcoes('rede', 'estruturacelula', 'rede').then(() => {
+                if (userInfo.rede) {
+                    document.getElementById('rede').value = userInfo.rede;
+                    alterarCorRede(userInfo.rede);
+                    carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: userInfo.rede }, userInfo.supervisor).then(() => {
+                        if (userInfo.supervisor) {
+                            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: userInfo.supervisor }, userInfo.lider).then(() => {
+                                if (userInfo.lider) {
+                                    gerarTabelaResumo();
+                                    gerarGraficos();
+                                }
+                            });
+                        }
+                    });
+                }
+            });
             limparTabelaEGraficos();
         };
 
@@ -409,7 +475,12 @@
         document.getElementById('rede').addEventListener('change', function() {
             const rede = this.value;
             alterarCorRede(rede);
-            carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: rede });
+            const userInfo = recuperarInformacoesUsuario();
+            carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: rede }, userInfo.supervisor).then(() => {
+                if (userInfo.supervisor) {
+                    carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: userInfo.supervisor });
+                }
+            });
             document.getElementById('lider').innerHTML = '<option value="">Selecione um líder</option>';
             limparTabelaEGraficos();
         });
@@ -417,7 +488,13 @@
         document.getElementById('supervisor').addEventListener('change', function() {
             const rede = document.getElementById('rede').value;
             const supervisor = this.value;
-            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: supervisor });
+            const userInfo = recuperarInformacoesUsuario();
+            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: supervisor }, userInfo.lider).then(() => {
+                if (userInfo.lider) {
+                    gerarTabelaResumo();
+                    gerarGraficos();
+                }
+            });
             limparTabelaEGraficos();
         });
 
