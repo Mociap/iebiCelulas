@@ -64,12 +64,13 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            
         }
         .btn-login:hover {
             background-color: #1976D2;
         }
         .forgot-password, .register-link {
-            margin-top: 15px;
+            margin-top: 35px;
         }
         a {
             color: #2196F3;
@@ -77,6 +78,9 @@
         }
         a:hover {
             text-decoration: underline;
+        }
+        .spacer {
+            height: 20px; /* Ajuste este valor para aumentar ou diminuir o espaço */
         }
     </style>
 </head>
@@ -98,6 +102,7 @@
                     <input type="password" id="password" required>
                 </div>
             </div>
+            <div class="spacer"></div>
             <button type="submit" class="btn-login">
                 <i class="fas fa-sign-in-alt"></i> Entrar
             </button>
