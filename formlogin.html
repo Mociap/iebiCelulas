@@ -40,7 +40,7 @@
             width: 300px;
             text-align: center;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            margin-top: 50px;
+            margin-top: 20px;
         }
         h2 {
             color: #ffffff;
@@ -94,9 +94,37 @@
         a:hover {
             text-decoration: underline;
         }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #e74c3c;;
+            color: #ffffff;
+            padding: 0px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-button:hover {
+            background-color: #e74c3c;;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .back-button i {
+            margin-right: 0px;
+        }
     </style>
 </head>
 <body>
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
     <div class="header">
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
@@ -128,7 +156,7 @@
             Não tem uma conta? <a href="/formregister.html"><i class="fas fa-user-plus"></i> Registre-se</a>
         </div>
     </div>
-    
+
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
@@ -148,45 +176,34 @@
         var auth = firebase.auth();
 
         async function armazenarDadosUsuario(idUsuario) {
-            return new Promise((resolve) => {
-                bancoDeDados.collection("usuarios").doc(idUsuario).get().then((doc) => {
-                    if (doc.exists) {
-                        const dadosUsuario = doc.data();
-                        const nomeUsuario = dadosUsuario.nome;
-                        const funcaoUsuario = dadosUsuario.funcao;
-                        localStorage.setItem('nomeUsuario', nomeUsuario);
-                        localStorage.setItem('funcaoUsuario', funcaoUsuario);
+            console.log("Iniciando armazenamento de dados do usuário");
+            try {
+                const docUsuario = await bancoDeDados.collection("usuarios").doc(idUsuario).get();
+                if (docUsuario.exists) {
+                    const dadosUsuario = docUsuario.data();
+                    localStorage.setItem('nomeUsuario', dadosUsuario.nome);
+                    localStorage.setItem('funcaoUsuario', dadosUsuario.funcao);
+                    console.log("Dados básicos do usuário armazenados");
 
-                        bancoDeDados.collection("membros").where("nome", "==", nomeUsuario).get().then((querySnapshot) => {
-                            if (!querySnapshot.empty) {
-                                const dadosMembro = querySnapshot.docs[0].data();
-                                const nomeCelula = dadosMembro.nomedacelula;
-                                localStorage.setItem('celulaUsuario', nomeCelula || '');
+                    const queryMembro = await bancoDeDados.collection("membros").where("nome", "==", dadosUsuario.nome).get();
+                    if (!queryMembro.empty) {
+                        const dadosMembro = queryMembro.docs[0].data();
+                        localStorage.setItem('celulaUsuario', dadosMembro.nomedacelula || '');
+                        console.log("Dados de célula do usuário armazenados");
 
-                                bancoDeDados.collection("estruturacelula").where("nomecelula", "==", nomeCelula).get().then((estruturaSnapshot) => {
-                                    if (!estruturaSnapshot.empty) {
-                                        const dadosEstrutura = estruturaSnapshot.docs[0].data();
-                                        localStorage.setItem('liderUsuario', dadosEstrutura.conclider || '');
-                                        localStorage.setItem('supervisorUsuario', dadosEstrutura.supervisor || '');
-                                        localStorage.setItem('redeUsuario', dadosEstrutura.rede || '');
-                                    }
-                                    resolve();
-                                }).catch(() => {
-                                    resolve();
-                                });
-                            } else {
-                                resolve();
-                            }
-                        }).catch(() => {
-                            resolve();
-                        });
-                    } else {
-                        resolve();
+                        const queryEstrutura = await bancoDeDados.collection("estruturacelula").where("nomecelula", "==", dadosMembro.nomedacelula).get();
+                        if (!queryEstrutura.empty) {
+                            const dadosEstrutura = queryEstrutura.docs[0].data();
+                            localStorage.setItem('liderUsuario', dadosEstrutura.conclider || '');
+                            localStorage.setItem('supervisorUsuario', dadosEstrutura.supervisor || '');
+                            localStorage.setItem('redeUsuario', dadosEstrutura.rede || '');
+                            console.log("Dados de estrutura da célula armazenados");
+                        }
                     }
-                }).catch(() => {
-                    resolve();
-                });
-            });
+                }
+            } catch (erro) {
+                console.error("Erro ao armazenar dados do usuário:", erro);
+            }
         }
 
         var formulario = document.getElementById('loginForm');
@@ -200,6 +217,14 @@
             localStorage.clear();
 
             try {
+                // Verifica se já há um usuário logado
+                const usuarioAtual = auth.currentUser;
+                if (usuarioAtual) {
+                    console.log("Usuário já logado. Deslogando...");
+                    await auth.signOut();
+                }
+
+                console.log("Iniciando novo login");
                 const credencialUsuario = await auth.signInWithEmailAndPassword(email, senha);
                 var usuario = credencialUsuario.user;
                 localStorage.setItem('tempoLogin', new Date().getTime());
@@ -207,17 +232,21 @@
                 
                 const startTime = new Date().getTime();
                 const checkStorage = () => {
-                    if (localStorage.getItem('nomeUsuario') && 
-                        localStorage.getItem('funcaoUsuario') && 
-                        localStorage.getItem('celulaUsuario') && 
-                        localStorage.getItem('liderUsuario') && 
-                        localStorage.getItem('supervisorUsuario') && 
-                        localStorage.getItem('redeUsuario')) {
+                    const missingItems = [];
+                    ['nomeUsuario', 'funcaoUsuario', 'celulaUsuario', 'liderUsuario', 'supervisorUsuario', 'redeUsuario'].forEach(item => {
+                        if (!localStorage.getItem(item)) {
+                            missingItems.push(item);
+                        }
+                    });
+
+                    if (missingItems.length === 0) {
+                        console.log("Todos os dados armazenados com sucesso");
                         window.location.href = 'frmrelatorios.html';
                     } else {
                         const currentTime = new Date().getTime();
-                        if (currentTime - startTime > 5000) {
-                            alert('Offline');
+                        if (currentTime - startTime > 20000) {
+                            console.log("Tempo limite excedido. Itens faltando:", missingItems.join(', '));
+                            alert('Offline. Itens faltando: ' + missingItems.join(', '));
                         } else {
                             setTimeout(checkStorage, 100);
                         }
@@ -225,7 +254,8 @@
                 };
                 checkStorage();
             } catch (erro) {
-                // Handle error silently
+                console.error("Erro no processo de login:", erro);
+                alert("Erro no login: " + erro.message);
             }
         });
     </script>

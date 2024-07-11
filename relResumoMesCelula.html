@@ -70,23 +70,39 @@
             transform: translate(-50%, -50%);
             z-index: 9999;
         }
-        .back-link {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #fff;
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #e74c3c;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
             text-decoration: none;
-            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
         }
-        .back-link:hover {
-            text-decoration: underline;
+        .back-button:hover {
+            background-color: #e74c3c;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .back-button i {
+            margin-right: 0px;
         }
     </style>
 </head>
 <body>
+    <a href="frmRelatorios.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
     <div class="header">
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
-        <a href="frmRelatorios.html" class="back-link">&larr; Voltar para Relatórios</a>
     </div>
     <div class="container">
         <h2 class="text-center mb-4 font-weight-bold">Resumo do Mês por Célula</h2>
