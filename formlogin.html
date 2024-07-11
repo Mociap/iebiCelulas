@@ -216,7 +216,7 @@
                         window.location.href = 'frmrelatorios.html';
                     } else {
                         const currentTime = new Date().getTime();
-                        if (currentTime - startTime > 10000) {
+                        if (currentTime - startTime > 5000) {
                             alert('Offline');
                         } else {
                             setTimeout(checkStorage, 100);
