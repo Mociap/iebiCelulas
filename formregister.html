@@ -42,11 +42,11 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
         .login-container, .forgot-password-container, .register-container {
-            margin-top: 20px; /* Adicione uma margem superior */
+            margin-top: 20px;
         }  
         .register-container h2 {
             margin-top: 0;
-            margin-bottom: 20px; /* Ajuste este valor conforme necessário */
+            margin-bottom: 20px;
         }
         .form-group {
             margin-bottom: 20px;
@@ -167,7 +167,7 @@
         formulario.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            var nome = document.getElementById('name').value;
+            var nome = document.getElementById('name').value.trim().toUpperCase();
             var email = document.getElementById('email').value;
             var senha = document.getElementById('password').value;
             var confirmarSenha = document.getElementById('confirmPassword').value;
@@ -214,6 +214,10 @@
                     
                     alert(mensagemErro);
                 });
+        });
+
+        document.getElementById('name').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase();
         });
     </script>
 </body>

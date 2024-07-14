@@ -400,7 +400,9 @@
         // Adicionar evento de blur (sair do campo) no campo "Nome"
         inputNome.addEventListener('blur', function() {
             var nome = inputNome.value.toUpperCase();
-
+            this.value = this.value.trim();
+            var nome = this.value.toUpperCase();
+            
             verificarNomeExistente(nome)
                 .then(function(nomeExistente) {
                     if (nomeExistente) {
@@ -419,7 +421,7 @@
         formulario.addEventListener('submit', function(e) {
             e.preventDefault(); // Previne o envio padrão do formulário
 
-            var nome = document.getElementById('nome').value.toUpperCase();
+            var nome = document.getElementById('nome').value.trim().toUpperCase();
 
             verificarNomeExistente(nome)
                 .then(function(nomeExistente) {

@@ -64,7 +64,6 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            
         }
         .btn-login:hover {
             background-color: #1976D2;
@@ -80,7 +79,7 @@
             text-decoration: underline;
         }
         .spacer {
-            height: 20px; /* Ajuste este valor para aumentar ou diminuir o espaço */
+            height: 20px;
         }
     </style>
 </head>
@@ -133,31 +132,22 @@
         var bancoDeDados = firebase.firestore();
         var auth = firebase.auth();
 
+        if (typeof(Storage) !== "undefined") {
+            console.log("localStorage está disponível");
+        } else {
+            console.log("localStorage não está disponível");
+        }
+
         async function armazenarDadosUsuario(idUsuario) {
-            console.log("Iniciando armazenamento de dados do usuário");
             try {
                 const docUsuario = await bancoDeDados.collection("usuarios").doc(idUsuario).get();
                 if (docUsuario.exists) {
                     const dadosUsuario = docUsuario.data();
                     localStorage.setItem('nomeUsuario', dadosUsuario.nome);
-                    localStorage.setItem('funcaoUsuario', dadosUsuario.funcao);
-                    console.log("Dados básicos do usuário armazenados");
-
-                    const queryMembro = await bancoDeDados.collection("membros").where("nome", "==", dadosUsuario.nome).get();
-                    if (!queryMembro.empty) {
-                        const dadosMembro = queryMembro.docs[0].data();
-                        localStorage.setItem('celulaUsuario', dadosMembro.nomedacelula || '');
-                        console.log("Dados de célula do usuário armazenados");
-
-                        const queryEstrutura = await bancoDeDados.collection("estruturacelula").where("nomecelula", "==", dadosMembro.nomedacelula).get();
-                        if (!queryEstrutura.empty) {
-                            const dadosEstrutura = queryEstrutura.docs[0].data();
-                            localStorage.setItem('liderUsuario', dadosEstrutura.conclider || '');
-                            localStorage.setItem('supervisorUsuario', dadosEstrutura.supervisor || '');
-                            localStorage.setItem('redeUsuario', dadosEstrutura.rede || '');
-                            console.log("Dados de estrutura da célula armazenados");
-                        }
-                    }
+                    localStorage.setItem('emailUsuario', dadosUsuario.email);
+                    console.log("Dados do usuário armazenados:", dadosUsuario);
+                } else {
+                    console.log("Documento do usuário não encontrado");
                 }
             } catch (erro) {
                 console.error("Erro ao armazenar dados do usuário:", erro);
@@ -168,51 +158,53 @@
 
         formulario.addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log("Iniciando processo de login");
 
             var email = document.getElementById('email').value;
             var senha = document.getElementById('password').value;
 
-            localStorage.clear();
-
             try {
-                const usuarioAtual = auth.currentUser;
-                if (usuarioAtual) {
-                    console.log("Usuário já logado. Deslogando...");
-                    await auth.signOut();
-                }
-
-                console.log("Iniciando novo login");
+                console.log("Tentando autenticar usuário");
                 const credencialUsuario = await auth.signInWithEmailAndPassword(email, senha);
+                console.log("Usuário autenticado com sucesso");
+
                 var usuario = credencialUsuario.user;
                 localStorage.setItem('tempoLogin', new Date().getTime());
-                await armazenarDadosUsuario(usuario.uid);
-                
-                const startTime = new Date().getTime();
-                const checkStorage = () => {
-                    const missingItems = [];
-                    ['nomeUsuario', 'funcaoUsuario', 'celulaUsuario', 'liderUsuario', 'supervisorUsuario', 'redeUsuario'].forEach(item => {
-                        if (!localStorage.getItem(item)) {
-                            missingItems.push(item);
-                        }
-                    });
+                localStorage.setItem('emailUsuario', email);
+                console.log("Tempo de login e email armazenados");
 
-                    if (missingItems.length === 0) {
-                        console.log("Todos os dados armazenados com sucesso");
-                        window.location.href = 'frmRelatorios.html';
-                    } else {
-                        const currentTime = new Date().getTime();
-                        if (currentTime - startTime > 20000) {
-                            console.log("Tempo limite excedido. Itens faltando:", missingItems.join(', '));
-                            alert('Offline. Tente Novamente.');
-                        } else {
-                            setTimeout(checkStorage, 100);
-                        }
-                    }
-                };
-                checkStorage();
+                await armazenarDadosUsuario(usuario.uid);
+                console.log("Dados do usuário armazenados");
+
+                window.location.href = 'frmRelatorios.html';
             } catch (erro) {
-                console.error("Erro no processo de login:", erro);
-                alert("Erro no login: " + erro.message);
+                console.error("Erro completo:", erro);
+                console.log("Código de erro:", erro.code);
+                console.log("Mensagem de erro:", erro.message);
+                
+                let mensagem = "Ocorreu um erro durante o login. Por favor, tente novamente.";
+
+                switch(erro.code) {
+                    case 'auth/invalid-email':
+                        mensagem = "O email fornecido não é válido. Por favor, verifique e tente novamente.";
+                        break;
+                    case 'auth/user-not-found':
+                        mensagem = "Não encontramos uma conta com este email. Você gostaria de criar uma nova conta?";
+                        break;
+                    case 'auth/wrong-password':
+                        mensagem = "A senha está incorreta. Por favor, verifique e tente novamente.";
+                        break;
+                    case 'auth/too-many-requests':
+                        mensagem = "Muitas tentativas de login. Por favor, aguarde um momento antes de tentar novamente.";
+                        break;
+                    case 'auth/internal-error':
+                        if (erro.message.includes('INVALID_LOGIN_CREDENTIALS')) {
+                            mensagem = "Email ou senha inválidos. Por favor, verifique suas credenciais e tente novamente.";
+                        }
+                        break;
+                }
+
+                alert(mensagem);
             }
         });
     </script>
