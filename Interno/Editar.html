@@ -12,10 +12,8 @@
         .container {
             max-width: 800px;
             margin-top: 50px;
-            background-color: #fff;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -91,18 +89,26 @@
                         });
                         thead.appendChild(trCabecalho);
 
-                        querySnapshot.forEach(doc => {
+                        // Converter querySnapshot para array e ordenar
+                        let documents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        if (campoFiltro) {
+                            documents.sort((a, b) => {
+                                if (a[campoFiltro] < b[campoFiltro]) return -1;
+                                if (a[campoFiltro] > b[campoFiltro]) return 1;
+                                return 0;
+                            });
+                        }
+
+                        documents.forEach(doc => {
                             const trDados = document.createElement('tr');
-                            const dados = doc.data();
                             campos.forEach(campo => {
-                                const valor = dados[campo];
+                                const valor = doc[campo];
                                 const td = document.createElement('td');
                                 td.contentEditable = true;
-                                td.addEventListener('blur', () => atualizarDados(doc.id, dados, td.textContent, campo));
+                                td.addEventListener('blur', () => atualizarDados(doc.id, doc, td.textContent, campo));
 
-                                // Aplicar filtro único
                                 if (campoFiltro && valorFiltro && campo === campoFiltro && valor !== valorFiltro) {
-                                    trDados.style.display = 'none'; // Ocultar a linha se não corresponder ao filtro
+                                    trDados.style.display = 'none';
                                 } else {
                                     td.textContent = valor;
                                 }
