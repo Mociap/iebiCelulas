@@ -96,6 +96,30 @@
         .back-button i {
             margin-right: 0px;
         }
+        .header-cell {
+            font-weight: bold !important;
+            background-color: brown !important;
+            color: white !important;
+            vertical-align: middle !important;
+            text-align: center !important;
+        }
+        .subtotal-row {
+            font-weight: bold;
+            background-color: #46443b !important;
+            color: white;
+            text-align: center;
+        }
+        .total-geral-row {
+            font-weight: bold;
+            background-color: brown;
+            color: white;
+            text-align: center;
+        }
+        .table-cell {
+            vertical-align: middle !important;
+            text-align: center !important;
+        }
+
     </style>
 </head>
 <body>
@@ -113,6 +137,7 @@
                 <label for="rede">Rede:</label>
                 <select class="form-control" id="rede" onchange="alterarCorRede(this.value); carregarSupervisores(this.value)">
                     <option value="">Selecione uma rede</option>
+                    <option value="Todos">Todos</option>
                 </select>
             </div>
             <div class="form-group">
@@ -156,15 +181,15 @@
             <table id="resumoTable" class="table table-striped table-bordered">
                 <thead>
                     <tr>
-                        <th>Rede</th>
-                        <th>Supervisor</th>
-                        <th>Líderes</th>
-                        <th>Nome da Célula</th>
-                        <th>Reuniões no Mês</th>
-                        <th>Frequência Mês</th>
-                        <th>Quantidade de Visitações Mês</th>
-                        <th>Valor das Ofertas Mês</th>
-                        <th>Colheita do Amor</th>
+                        <th class="header-cell">Rede</th>
+                        <th class="header-cell">Supervisor</th>
+                        <th class="header-cell">Líderes</th>
+                        <th class="header-cell">Nome da Célula</th>
+                        <th class="header-cell">Reuniões no Mês</th>
+                        <th class="header-cell">Frequência Mês</th>
+                        <th class="header-cell">Quantidade de Visitações Mês</th>
+                        <th class="header-cell">Valor das Ofertas Mês</th>
+                        <th class="header-cell">Colheita do Amor</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -212,26 +237,33 @@
             const supervisorSelect = document.getElementById('supervisor');
             supervisorSelect.innerHTML = '<option value="Todos">Todos</option>';
             
-            if (rede) {
-                db.collection("estruturacelula")
-                    .where("rede", "==", rede)
-                    .get()
-                    .then((querySnapshot) => {
-                        const supervisores = new Set();
-                        querySnapshot.forEach((doc) => {
-                            supervisores.add(doc.data().supervisor);
-                        });
+            if (rede === "Todos") {
+                supervisorSelect.value = "Todos";
+                supervisorSelect.disabled = true;
+            } else {
+                supervisorSelect.disabled = false;
+            
+                if (rede) {
+                    db.collection("estruturacelula")
+                        .where("rede", "==", rede)
+                        .get()
+                        .then((querySnapshot) => {
+                            const supervisores = new Set();
+                            querySnapshot.forEach((doc) => {
+                                supervisores.add(doc.data().supervisor);
+                            });
 
-                        supervisores.forEach((supervisor) => {
-                            let option = document.createElement('option');
-                            option.value = supervisor;
-                            option.textContent = supervisor;
-                            supervisorSelect.appendChild(option);
+                            supervisores.forEach((supervisor) => {
+                                let option = document.createElement('option');
+                                option.value = supervisor;
+                                option.textContent = supervisor;
+                                supervisorSelect.appendChild(option);
+                            });
+                        })
+                        .catch((error) => {
+                            console.log("Erro ao carregar supervisores:", error);
                         });
-                    })
-                    .catch((error) => {
-                        console.log("Erro ao carregar supervisores:", error);
-                    });
+                }
             }
         }
 
@@ -256,29 +288,50 @@
         // Função para adicionar linha de totais à tabela
         function adicionarLinhaTotais(tableBody, totais) {
             const row = tableBody.insertRow();
-            row.style.fontWeight = 'bold';
+            row.classList.add('total-geral-row');
+            console.log("Classe 'total-geral-row' adicionada à linha de total geral");
+
+            const cell = row.insertCell(0);
+            cell.colSpan = 4; // Mesclando as colunas 1, 2, 3 e 4
+            cell.textContent = 'Total Geral';
             
-            row.insertCell(0).textContent = 'TOTAIS';
-            row.insertCell(1).textContent = '';
-            row.insertCell(2).textContent = '';
-            row.insertCell(3).textContent = '';
-            row.insertCell(4).textContent = totais.reunioes;
-            row.insertCell(5).textContent = totais.frequencia + '%';
-            row.insertCell(6).textContent = totais.visitacoes;
-            row.insertCell(7).textContent = totais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            row.insertCell(8).textContent = totais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
+            row.insertCell(1).textContent = totais.reunioes;
+            row.insertCell(2).textContent = totais.frequencia + '%';
+            row.insertCell(3).textContent = totais.visitacoes.toLocaleString('pt-BR');
+            row.insertCell(4).textContent = totais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            row.insertCell(5).textContent = totais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
+        }
+
+
+        function compararLinhas(a, b) {
+            if (a.rede < b.rede) return -1;
+            if (a.rede > b.rede) return 1;
+            if (a.supervisor < b.supervisor) return -1;
+            if (a.supervisor > b.supervisor) return 1;
+            if (a.lider < b.lider) return -1;
+            if (a.lider > b.lider) return 1;
+            return 0;
         }
 
         // Função principal para gerar a tabela de resumo
         async function gerarTabela() {
+            console.log("Função gerarTabela() chamada");
+
             const rede = document.getElementById('rede').value;
             const supervisor = document.getElementById('supervisor').value;
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
 
+            console.log("Filtros selecionados:");
+            console.log("Rede:", rede);
+            console.log("Supervisor:", supervisor);
+            console.log("Mês:", mes);
+            console.log("Ano:", ano);
+
             if (!rede || !mes || !ano) {
                 document.getElementById('resumoTableContainer').style.display = 'none';
                 document.getElementById('loadingSpinner').style.display = 'none';
+                console.log("Filtros incompletos. Tabela não gerada.");
                 return;
             }
 
@@ -300,9 +353,15 @@
                 ofertaAmor: 0
             };
 
+            let dados = [];
+
             try {
-                let query = db.collection("estruturacelula").where("rede", "==", rede);
-                
+                let query = db.collection("estruturacelula");
+
+                if (rede !== "Todos") {
+                    query = query.where("rede", "==", rede);
+                }
+
                 if (supervisor && supervisor !== "Todos") {
                     query = query.where("supervisor", "==", supervisor);
                 }
@@ -339,10 +398,10 @@
                         somaQtdVisitantes += Number(data.qtdVisitantes || 0);
                         somaOferta += Number(data.oferta || 0);
                         somaKgAlimento += Number(data.kgAlimento || 0);
-                        
+
                         console.log("Valor de reuniaoRealizada:", data.reuniaoRealizada);
                         console.log("Tipo de reuniaoRealizada:", typeof data.reuniaoRealizada);
-                        
+
                         if (data.reuniaoRealizada !== false) {
                             reunioesRealizadas++;
                             console.log("Reunião contabilizada");
@@ -358,26 +417,90 @@
                     let ofertas = somaOferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                     let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR') + " kg";
 
-                    const row = tableBody.insertRow();
-                    row.insertCell(0).textContent = rede;
-                    row.insertCell(1).textContent = supervisorCelula;
-                    row.insertCell(2).textContent = liderCelula;
-                    row.insertCell(3).textContent = nomecelula;
-                    row.insertCell(4).textContent = reunioesRealizadas;
-                    row.insertCell(5).textContent = frequencia;
-                    row.insertCell(6).textContent = visitacoes;
-                    row.insertCell(7).textContent = ofertas;
-                    row.insertCell(8).textContent = ofertaAmor;
-
-                    totais.reunioes += reunioesRealizadas;
-                    totais.membroPresentes += somaMembroPresentes;
-                    totais.qtdMembros += somaQtdMembros;
-                    totais.visitacoes += somaQtdVisitantes;
-                    totais.ofertas += somaOferta;
-                    totais.ofertaAmor += somaKgAlimento;
+                    dados.push({
+                        rede: celulaData.rede,
+                        supervisor: supervisorCelula,
+                        lider: liderCelula,
+                        nomecelula: nomecelula,
+                        reunioesRealizadas: reunioesRealizadas,
+                        frequencia: frequencia,
+                        visitacoes: visitacoes,
+                        ofertas: ofertas,
+                        ofertaAmor: ofertaAmor
+                    });
                 }
 
-                totais.frequencia = totais.qtdMembros > 0 
+                console.log("Dados antes da ordenação:", dados);
+
+                // Ordenar os dados por Rede, Supervisor e Líderes
+                dados.sort(compararLinhas);
+
+                console.log("Dados após a ordenação:", dados);
+
+                let supervisorAtual = null;
+                let subtotais = {
+                    reunioes: 0,
+                    membroPresentes: 0,
+                    qtdMembros: 0,
+                    visitacoes: 0,
+                    ofertas: 0,
+                    ofertaAmor: 0
+                };
+
+                // Preencher a tabela com os dados ordenados
+                for (const linha of dados) {
+                    console.log("Linha sendo inserida na tabela:", linha);
+
+                    if (supervisorAtual !== linha.supervisor) {
+                        if (supervisorAtual !== null) {
+                            adicionarLinhaSubtotais(tableBody, subtotais, supervisorAtual);
+                            subtotais = {
+                                reunioes: 0,
+                                membroPresentes: 0,
+                                qtdMembros: 0,
+                                visitacoes: 0,
+                                ofertas: 0,
+                                ofertaAmor: 0
+                            };
+                        }
+                        supervisorAtual = linha.supervisor;
+                    }
+
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = linha.rede;
+                    row.insertCell(1).textContent = linha.supervisor;
+                    row.insertCell(2).textContent = linha.lider;
+                    row.insertCell(3).textContent = linha.nomecelula;
+                    row.insertCell(4).textContent = linha.reunioesRealizadas;
+                    row.insertCell(5).textContent = linha.frequencia;
+                    row.insertCell(6).textContent = linha.visitacoes;
+                    row.insertCell(7).textContent = linha.ofertas;
+                    row.insertCell(8).textContent = linha.ofertaAmor;
+                    row.querySelectorAll('td').forEach(cell => cell.classList.add('table-cell'));
+
+                    subtotais.reunioes += linha.reunioesRealizadas;
+                    subtotais.membroPresentes += linha.frequencia.replace('%', '') * linha.reunioesRealizadas;
+                    subtotais.qtdMembros += linha.frequencia.replace('%', '') * 100;
+                    subtotais.visitacoes += parseInt(linha.visitacoes.replace(/\./g, ''));
+                    subtotais.ofertas += parseFloat(linha.ofertas.replace(/[R$\.]/g, '').replace(',', '.'));
+                    subtotais.ofertaAmor += parseFloat(linha.ofertaAmor.replace(/\./g, '').replace(' kg', ''));
+
+                    totais.reunioes += linha.reunioesRealizadas;
+                    totais.membroPresentes += linha.frequencia.replace('%', '') * linha.reunioesRealizadas;
+                    totais.qtdMembros += linha.frequencia.replace('%', '') * 100;
+                    totais.visitacoes += parseInt(linha.visitacoes.replace(/\./g, ''));
+                    totais.ofertas += parseFloat(linha.ofertas.replace(/[R$\.]/g, '').replace(',', '.'));
+                    totais.ofertaAmor += parseFloat(linha.ofertaAmor.replace(/\./g, '').replace(' kg', ''));
+                }
+
+                // Adicionar a última linha de subtotal
+                if (supervisorAtual !== null) {
+                    adicionarLinhaSubtotais(tableBody, subtotais, supervisorAtual);
+                }
+
+                console.log("Totais calculados:", totais);
+
+                totais.frequencia = totais.qtdMembros > 0
                     ? ((totais.membroPresentes / totais.qtdMembros) * 100).toFixed(2)
                     : 0;
 
@@ -394,6 +517,23 @@
                 alert("Ocorreu um erro ao gerar a tabela. Por favor, tente novamente.");
             }
         }
+
+        function adicionarLinhaSubtotais(tableBody, subtotais, supervisor) {
+            const row = tableBody.insertRow();
+            row.classList.add('subtotal-row');
+            console.log("Classe 'subtotal-row' adicionada à linha de subtotal");
+
+            const cell = row.insertCell(0);
+            cell.colSpan = 4;
+            cell.textContent = 'Subtotal: ' + supervisor;
+
+            row.insertCell(1).textContent = subtotais.reunioes;
+            row.insertCell(2).textContent = ((subtotais.membroPresentes / subtotais.qtdMembros) * 100).toFixed(2) + '%';
+            row.insertCell(3).textContent = subtotais.visitacoes.toLocaleString('pt-BR');
+            row.insertCell(4).textContent = subtotais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            row.insertCell(5).textContent = subtotais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
+        }
+
 
         // Função para exportar a tabela para Excel
         function exportToExcel() {
