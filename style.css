@@ -129,7 +129,7 @@ a {
 }
 .user-info {
     position: absolute;
-    top: 20px;
+    top: 5px;
     right: 20px;
     background-color: rgba(44, 44, 44, 0.8);
     padding: 10px;

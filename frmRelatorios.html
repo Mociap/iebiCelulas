@@ -16,6 +16,7 @@
     <div class="user-info">
         <p><strong>Nome:</strong> <span id="userName"></span></p>
         <p><strong>Email:</strong> <span id="userEmail"></span></p>
+        <p><strong>Função:</strong> <span id="userFuncao"></span></p>  
         <p><a href="#" id="logoutLink" class="logout-link">Sair</a></p>
     </div>
     <div class="header">
@@ -101,6 +102,8 @@
                     const queryMembro = await bancoDeDados.collection("membros").where("nome", "==", nomeUsuario).get();
                     if (!queryMembro.empty) {
                         const dadosMembro = queryMembro.docs[0].data();
+                        const funcaoMembro = dadosMembro.funcao || '';
+                        localStorage.setItem('funcaoUsuario', funcaoMembro);
                         localStorage.setItem('celulaUsuario', dadosMembro.nomedacelula || '');
 
                         const queryEstrutura = await bancoDeDados.collection("estruturacelula").where("nomecelula", "==", dadosMembro.nomedacelula).get();
@@ -122,10 +125,12 @@
             
             const userName = localStorage.getItem('nomeUsuario');
             const userEmail = localStorage.getItem('emailUsuario');
-            
+            const userFuncao = localStorage.getItem('funcaoUsuario');
+    
             document.getElementById('userName').textContent = userName || 'Não disponível';
             document.getElementById('userEmail').textContent = userEmail || 'Não disponível';
-            
+            document.getElementById('userFuncao').textContent = userFuncao || 'Não disponível';
+    
             console.log("Dados do usuário carregados:", { nome: userName, email: userEmail });
 
             document.getElementById('logoutLink').addEventListener('click', function(e) {

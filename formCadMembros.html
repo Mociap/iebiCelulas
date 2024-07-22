@@ -137,6 +137,11 @@
                 <input type="date" class="form-control" id="dtnasc" required>
             </div>
             <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" required>
+                <small id="emailError" style="color: red; display: none;">Email já cadastrado</small>
+            </div>            
+            <div class="form-group">
                 <label for="cep">CEP</label>
                 <input type="text" class="form-control" id="cep" required maxlength="9" placeholder="99999-999" onkeyup="this.value = this.value.toUpperCase();">
                 <small id="cepError" style="color: red; display: none;">CEP inválido</small>
@@ -247,6 +252,7 @@
         var inputCelular = document.getElementById('celular');
         var selectIgrejas = document.getElementById('igreja');
         var inputNome = document.getElementById('nome');
+        var email = document.getElementById('email').value;
         var nomeError = document.getElementById('nomeError');
         var cadastrarBtn = document.getElementById('cadastrarBtn');
         var inputCep = document.getElementById('cep');
@@ -397,6 +403,21 @@
                 });
         }
 
+        // Função para verificar se o email já está cadastrado
+        function verificarEmailExistente(email) {
+            return bancoDeDados.collection('membros')
+                .where('email', '==', email)
+                .get()
+                .then(function(querySnapshot) {
+                    return !querySnapshot.empty;
+                })
+                .catch(function(error) {
+                    console.error('Erro ao verificar email existente:', error);
+                    return false;
+                });
+        }
+
+
         // Adicionar evento de blur (sair do campo) no campo "Nome"
         inputNome.addEventListener('blur', function() {
             var nome = inputNome.value.toUpperCase();
@@ -417,16 +438,39 @@
                 });
         });
 
+        document.getElementById('email').addEventListener('blur', function() {
+            var email = this.value.trim();
+            
+            verificarEmailExistente(email)
+                .then(function(emailExistente) {
+                    if (emailExistente) {
+                        // Email já cadastrado
+                        document.getElementById('emailError').style.display = 'block';
+                        cadastrarBtn.disabled = true;
+                    } else {
+                        // Email não cadastrado
+                        document.getElementById('emailError').style.display = 'none';
+                        cadastrarBtn.disabled = false;
+                    }
+                });
+        });
+
         // Adicionar evento de envio do formulário
         formulario.addEventListener('submit', function(e) {
             e.preventDefault(); // Previne o envio padrão do formulário
 
             var nome = document.getElementById('nome').value.trim().toUpperCase();
+            var email = document.getElementById('email').value.trim();
 
-            verificarNomeExistente(nome)
-                .then(function(nomeExistente) {
+            Promise.all([verificarNomeExistente(nome), verificarEmailExistente(email)])
+                .then(function(results) {
+                    var nomeExistente = results[0];
+                    var emailExistente = results[1];
+
                     if (nomeExistente) {
                         alert('Este nome já está cadastrado. Por favor, use um nome diferente.');
+                    } else if (emailExistente) {
+                        alert('Este email já está cadastrado. Por favor, use um email diferente.');
                     } else {
                         // Obter valores dos campos
                         var dataNascimento = document.getElementById('dtnasc').value;
@@ -453,6 +497,7 @@
                         // Adicionar dados ao Firestore
                         bancoDeDados.collection('membros').add({
                             nome: nome,
+                            email: email,
                             dtnasc: dataNascFormatada,
                             cep: cep,
                             bairro: bairro,
@@ -477,10 +522,11 @@
                     }
                 })
                 .catch(function(error) {
-                    console.error('Erro ao verificar nome existente:', error);
-                    alert('Ocorreu um erro ao verificar o nome. Por favor, tente novamente.');
+                    console.error('Erro ao verificar nome ou email existente:', error);
+                    alert('Ocorreu um erro ao verificar o nome ou email. Por favor, tente novamente.');
                 });
         });
+
 
         // Função para alternar a seleção dos ChoiceChips
         function toggleChoiceChip(chip) {
