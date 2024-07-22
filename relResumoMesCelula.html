@@ -111,7 +111,7 @@
         }
         .total-geral-row {
             font-weight: bold;
-            background-color: brown;
+            background-color: brown !important;
             color: white;
             text-align: center;
         }
@@ -185,6 +185,7 @@
                         <th class="header-cell">Supervisor</th>
                         <th class="header-cell">Líderes</th>
                         <th class="header-cell">Nome da Célula</th>
+                        <th class="header-cell">Qtd de Membros</th>
                         <th class="header-cell">Reuniões no Mês</th>
                         <th class="header-cell">Frequência Mês</th>
                         <th class="header-cell">Quantidade de Visitações Mês</th>
@@ -285,24 +286,7 @@
             selectRede.style.color = '#FFFFFF';
         }
 
-        // Função para adicionar linha de totais à tabela
-        function adicionarLinhaTotais(tableBody, totais) {
-            const row = tableBody.insertRow();
-            row.classList.add('total-geral-row');
-            console.log("Classe 'total-geral-row' adicionada à linha de total geral");
-
-            const cell = row.insertCell(0);
-            cell.colSpan = 4; // Mesclando as colunas 1, 2, 3 e 4
-            cell.textContent = 'Total Geral';
-            
-            row.insertCell(1).textContent = totais.reunioes;
-            row.insertCell(2).textContent = totais.frequencia + '%';
-            row.insertCell(3).textContent = totais.visitacoes.toLocaleString('pt-BR');
-            row.insertCell(4).textContent = totais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            row.insertCell(5).textContent = totais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
-        }
-
-
+        
         function compararLinhas(a, b) {
             if (a.rede < b.rede) return -1;
             if (a.rede > b.rede) return 1;
@@ -417,11 +401,19 @@
                     let ofertas = somaOferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                     let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR') + " kg";
 
+                    // Consulta adicional para obter a quantidade de membros da célula
+                    const membroSnapshot = await db.collection("membros")
+                        .where("nomedacelula", "==", nomecelula)
+                        .get();
+
+                    const qtdMembros = membroSnapshot.size;
+
                     dados.push({
                         rede: celulaData.rede,
                         supervisor: supervisorCelula,
                         lider: liderCelula,
                         nomecelula: nomecelula,
+                        qtdMembros: qtdMembros,
                         reunioesRealizadas: reunioesRealizadas,
                         frequencia: frequencia,
                         visitacoes: visitacoes,
@@ -471,23 +463,24 @@
                     row.insertCell(1).textContent = linha.supervisor;
                     row.insertCell(2).textContent = linha.lider;
                     row.insertCell(3).textContent = linha.nomecelula;
-                    row.insertCell(4).textContent = linha.reunioesRealizadas;
-                    row.insertCell(5).textContent = linha.frequencia;
-                    row.insertCell(6).textContent = linha.visitacoes;
-                    row.insertCell(7).textContent = linha.ofertas;
-                    row.insertCell(8).textContent = linha.ofertaAmor;
+                    row.insertCell(4).textContent = linha.qtdMembros;
+                    row.insertCell(5).textContent = linha.reunioesRealizadas;
+                    row.insertCell(6).textContent = linha.frequencia;
+                    row.insertCell(7).textContent = linha.visitacoes;
+                    row.insertCell(8).textContent = linha.ofertas;
+                    row.insertCell(9).textContent = linha.ofertaAmor;
                     row.querySelectorAll('td').forEach(cell => cell.classList.add('table-cell'));
 
                     subtotais.reunioes += linha.reunioesRealizadas;
                     subtotais.membroPresentes += linha.frequencia.replace('%', '') * linha.reunioesRealizadas;
-                    subtotais.qtdMembros += linha.frequencia.replace('%', '') * 100;
+                    subtotais.qtdMembros += linha.qtdMembros;
                     subtotais.visitacoes += parseInt(linha.visitacoes.replace(/\./g, ''));
                     subtotais.ofertas += parseFloat(linha.ofertas.replace(/[R$\.]/g, '').replace(',', '.'));
                     subtotais.ofertaAmor += parseFloat(linha.ofertaAmor.replace(/\./g, '').replace(' kg', ''));
 
                     totais.reunioes += linha.reunioesRealizadas;
                     totais.membroPresentes += linha.frequencia.replace('%', '') * linha.reunioesRealizadas;
-                    totais.qtdMembros += linha.frequencia.replace('%', '') * 100;
+                    totais.qtdMembros += linha.qtdMembros;
                     totais.visitacoes += parseInt(linha.visitacoes.replace(/\./g, ''));
                     totais.ofertas += parseFloat(linha.ofertas.replace(/[R$\.]/g, '').replace(',', '.'));
                     totais.ofertaAmor += parseFloat(linha.ofertaAmor.replace(/\./g, '').replace(' kg', ''));
@@ -527,13 +520,31 @@
             cell.colSpan = 4;
             cell.textContent = 'Subtotal: ' + supervisor;
 
-            row.insertCell(1).textContent = subtotais.reunioes;
-            row.insertCell(2).textContent = ((subtotais.membroPresentes / subtotais.qtdMembros) * 100).toFixed(2) + '%';
-            row.insertCell(3).textContent = subtotais.visitacoes.toLocaleString('pt-BR');
-            row.insertCell(4).textContent = subtotais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            row.insertCell(5).textContent = subtotais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
+            row.insertCell(1).textContent = subtotais.qtdMembros; // Adicionado subtotal de Qtd de Membros
+            row.insertCell(2).textContent = subtotais.reunioes;
+            row.insertCell(3).textContent = ((subtotais.membroPresentes / subtotais.qtdMembros) * 100).toFixed(2) + '%';
+            row.insertCell(4).textContent = subtotais.visitacoes.toLocaleString('pt-BR');
+            row.insertCell(5).textContent = subtotais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            row.insertCell(6).textContent = subtotais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
         }
 
+        // Função para adicionar linha de totais à tabela
+        function adicionarLinhaTotais(tableBody, totais) {
+            const row = tableBody.insertRow();
+            row.classList.add('total-geral-row');
+            console.log("Classe 'total-geral-row' adicionada à linha de total geral");
+
+            const cell = row.insertCell(0);
+            cell.colSpan = 4; // Mesclando as colunas 1, 2, 3, 4
+            cell.textContent = 'Total Geral';
+            
+            row.insertCell(1).textContent = totais.qtdMembros; // Adicionado total de Qtd de Membros
+            row.insertCell(2).textContent = totais.reunioes;
+            row.insertCell(3).textContent = totais.frequencia + '%';
+            row.insertCell(4).textContent = totais.visitacoes.toLocaleString('pt-BR');
+            row.insertCell(5).textContent = totais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            row.insertCell(6).textContent = totais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
+        }
 
         // Função para exportar a tabela para Excel
         function exportToExcel() {
