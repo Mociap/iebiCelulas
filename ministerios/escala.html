@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Eventos</title>
+    <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<style>
+    body {
+        font-family: 'Nunito', sans-serif;
+        background-color: #1a1a1a;
+        color: #ffffff;
+        margin: 0;
+        padding: 0px;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 20px auto;
+        background-color: #2c2c2c;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .header {
+        background-color: #2c2c2c;
+        padding: 20px 0;
+        text-align: center;
+        position: relative;
+        z-index: 1000;
+    }
+    .header img {
+        max-width: 180px;
+    }
+    .divider {
+        width: 75%;
+        height: 2px;
+        background-color: #3498db;
+        margin: 30px auto;
+    }
+    .back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background-color: #3498db;
+        color: #ffffff;
+        padding: 10px;
+        border-radius: 30px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        transition: all 0.3s ease;
+        z-index: 1001;
+    }
+    .back-button:hover {
+        background-color: #2980b9;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .back-button i {
+        margin-right: 0px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0;
+    }
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #3498db;
+    }
+    th {
+        background-color: #2c3e50;
+        color: #ffffff;
+    }
+    .pagination {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .pagination button {
+        background-color: #3498db;
+        border: none;
+        color: #ffffff;
+        padding: 10px 20px;
+        margin: 0 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .pagination button:hover {
+        background-color: #2980b9;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+</style>
+
+</head>
+
+<body>
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="header">
+        <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4 font-weight-bold">Agenda de Eventos</h2>
+        <div class="divider"></div>
+        <div class="pagination">
+            <button id="prevButton">&lt; Anterior</button>
+            <button id="nextButton">Próximo &gt;</button>
+        </div>
+        <table id="eventTable">
+            <thead>
+                <tr>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th>Evento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Bateria</td>
+                    <td><select id="bateriaDropdown"></select></td>
+                </tr>
+                <tr>
+                    <td>Baixo</td>
+                    <td><select id="baixoDropdown"></select></td>
+                </tr>
+                <tr>
+                    <td>Teclado</td>
+                    <td><select id="tecladoDropdown"></select></td>
+                </tr>
+                <tr>
+                    <td>Guitarra</td>
+                    <td><select id="guitarraDropdown"></select></td>
+                </tr>
+                <tr>
+                    <td>Violão</td>
+                    <td><select id="violaoDropdown"></select></td>
+                </tr>
+                <tr>
+                    <td>Vocal</td>
+                    <td><select id="vocalDropdown"></select></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" style="text-align: center;">
+                        <button id="saveButton">Salvar</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>        
+    </div>   
+
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+        loadInstrumentistas();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var tableHead = document.querySelector('#eventTable thead tr:first-child');
+            var tableEventRow = document.querySelector('#eventTable thead tr:last-child');
+            var prevButton = document.getElementById('prevButton');
+            var nextButton = document.getElementById('nextButton');
+
+            var currentPage = 0;
+            var eventsPerPage = 5;
+
+            function displayEvents(startIndex, agendaId) {
+                tableHead.innerHTML = '<th></th>';
+                tableEventRow.innerHTML = '<th>Evento</th>';
+
+                bancoDeDados.collection('agenda').doc(agendaId).get()
+                    .then(function(doc) {
+                        if (doc.exists) {
+                            var louvor = doc.data().louvor || {};
+                            var instrumentos = ["bateria", "baixo", "teclado", "guitarra", "violao", "vocal"];
+
+                            instrumentos.forEach(function(instrumento) {
+                                var dropdown = document.getElementById(instrumento + "Dropdown");
+                                var instrumentista = louvor[instrumento];
+
+                                if (instrumentista) {
+                                    dropdown.value = instrumentista;
+                                }
+                            });
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error("Erro ao obter dados da agenda:", error);
+                    });
+
+                bancoDeDados.collection('agenda')
+                    .orderBy('Data')
+                    .startAt(startIndex)
+                    .limit(eventsPerPage)
+                    .get()
+                    .then(function(querySnapshot) {
+                        querySnapshot.forEach(function(doc) {
+                            var event = doc.data();
+                            var dateCell = document.createElement('th');
+                            var eventCell = document.createElement('th');
+
+                            var eventDate = event.Data.toDate();
+                            var dayOfWeek = eventDate.toLocaleDateString('pt-BR', { weekday: 'short' }).toUpperCase();
+                            var formattedDate = eventDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase();
+
+                            dateCell.innerHTML = '<div style="text-align: center;">' + dayOfWeek + '<br>' + formattedDate + '</div>';
+                            eventCell.textContent = event.evento;
+
+                            tableHead.appendChild(dateCell);
+                            tableEventRow.appendChild(eventCell);
+                        });
+
+                        prevButton.disabled = currentPage === 0;
+                        nextButton.disabled = querySnapshot.size < eventsPerPage;
+                    })
+                    .catch(function(error) {
+                        console.error("Erro ao obter eventos: ", error);
+                    });
+            }
+
+            function getStartIndex(page) {
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (page === 0) {
+                    return bancoDeDados.collection('agenda')
+                        .where('Data', '>=', today)
+                        .orderBy('Data')
+                        .limit(eventsPerPage)
+                        .get()
+                        .then(function(querySnapshot) {
+                            if (querySnapshot.empty) {
+                                return null;
+                            }
+                            return querySnapshot.docs[0];
+                        });
+                } else {
+                    return bancoDeDados.collection('agenda')
+                        .where('Data', '>=', today)
+                        .orderBy('Data')
+                        .limit(page * eventsPerPage)
+                        .get()
+                        .then(function(querySnapshot) {
+                            if (querySnapshot.empty) {
+                                return null;
+                            }
+                            return querySnapshot.docs[querySnapshot.docs.length - 1];
+                        });
+                }
+            }
+
+            prevButton.addEventListener('click', function() {
+                if (currentPage > 0) {
+                    currentPage--;
+                    getStartIndex(currentPage)
+                        .then(function(startIndex) {
+                            if (startIndex) {
+                                var agendaId = startIndex.id;
+                                displayEvents(startIndex, agendaId);
+                            }
+                        });
+                }
+            });
+
+            nextButton.addEventListener('click', function() {
+                currentPage++;
+                getStartIndex(currentPage)
+                    .then(function(startIndex) {
+                        if (startIndex) {
+                            var agendaId = startIndex.id;
+                            displayEvents(startIndex, agendaId);
+                        } else {
+                            currentPage--;
+                        }
+                    });
+            });
+
+            document.getElementById("saveButton").addEventListener("click", function() {
+                var agendaId = "ID_DO_DOCUMENTO_DA_AGENDA"; // Substitua pelo ID do documento da agenda correspondente
+
+                var louvor = {};
+                var instrumentos = ["bateria", "baixo", "teclado", "guitarra", "violao", "vocal"];
+
+                instrumentos.forEach(function(instrumento) {
+                    var dropdown = document.getElementById(instrumento + "Dropdown");
+                    var instrumentista = dropdown.options[dropdown.selectedIndex].text;
+                    louvor[instrumento] = instrumentista;
+                });
+
+                bancoDeDados.collection("agenda").doc(agendaId).update({
+                    louvor: louvor
+                })
+                .then(function() {
+                    console.log("Instrumentistas salvos com sucesso!");
+                })
+                .catch(function(error) {
+                    console.error("Erro ao salvar instrumentistas:", error);
+                });
+            });
+
+            getStartIndex(currentPage)
+                .then(function(startIndex) {
+                    if (startIndex) {
+                        console.log("Índice inicial encontrado:", startIndex);
+                        var agendaId = startIndex.id;
+                        displayEvents(startIndex, agendaId);
+                    } else {
+                        console.log("Nenhum índice inicial encontrado. Buscando eventos a partir da data atual.");
+                        bancoDeDados.collection('agenda')
+                            .where('Data', '>=', new Date())
+                            .orderBy('Data')
+                            .limit(eventsPerPage)
+                            .get()
+                            .then(function(querySnapshot) {
+                                if (!querySnapshot.empty) {
+                                    console.log("Eventos encontrados a partir da data atual:", querySnapshot.docs);
+                                    var agendaId = querySnapshot.docs[0].id;
+                                    displayEvents(querySnapshot.docs[0], agendaId);
+                                } else {
+                                    console.log("Nenhum evento encontrado a partir da data atual.");
+                                }
+                            })
+                            .catch(function(error) {
+                                console.error("Erro ao buscar eventos a partir da data atual:", error);
+                            });
+                    }
+                })
+                .catch(function(error) {
+                    console.error("Erro ao obter o índice inicial:", error);
+                });
+        });
+
+        function loadInstrumentistas() {
+            var instrumentos = ["bateria", "baixo", "teclado", "guitarra", "violao", "vocal"];
+
+            instrumentos.forEach(function(instrumento) {
+                var dropdown = document.getElementById(instrumento + "Dropdown");
+
+                if (dropdown) {
+                    // Adiciona a opção "Selecione..." no início do dropdown
+                    var defaultOption = document.createElement("option");
+                    defaultOption.value = "";
+                    defaultOption.text = "Selecione...";
+                    dropdown.appendChild(defaultOption);
+
+                    bancoDeDados.collection("louvor")
+                        .where("instrumento", "==", instrumento)
+                        .get()
+                        .then(function(querySnapshot) {
+                            querySnapshot.forEach(function(doc) {
+                                var option = document.createElement("option");
+                                option.value = doc.id;
+                                option.text = doc.data().nome;
+                                dropdown.appendChild(option);
+                            });
+
+                            // Verifica se há opções além de "Selecione..."
+                            if (dropdown.options.length === 1) {
+                                dropdown.disabled = true;
+                            } else {
+                                dropdown.disabled = false;
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error("Erro ao carregar instrumentistas:", error);
+                        });
+                } else {
+                    console.error("Elemento dropdown não encontrado para o instrumento: " + instrumento);
+                }
+            });
+        }
+    </script>
+</body>
+
+
+
+
+</html>

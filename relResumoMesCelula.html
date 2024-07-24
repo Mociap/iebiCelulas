@@ -217,9 +217,34 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.firestore();
 
+        // Função para recuperar informações do usuário
+        function recuperarInformacoesUsuario() {
+            const rede = localStorage.getItem('redeUsuario');
+            const supervisor = localStorage.getItem('supervisorUsuario');
+            const funcao = localStorage.getItem('funcaoUsuario');
+            return { rede, supervisor, funcao };
+        }
+
         // Função para preencher as opções de rede
         function preencherRedes() {
             const redeSelect = document.getElementById('rede');
+            const supervisorSelect = document.getElementById('supervisor');
+            const userInfo = recuperarInformacoesUsuario();
+
+            if (userInfo.funcao === 'SUPERVISOR') {
+                redeSelect.disabled = true;
+                supervisorSelect.disabled = true;
+            } else if (userInfo.funcao === 'COORDENADOR') {
+                redeSelect.disabled = true;
+                supervisorSelect.disabled = false;
+            } else if (userInfo.funcao === 'PASTOR' || userInfo.funcao === 'ADMIN') {
+                redeSelect.disabled = false;
+                supervisorSelect.disabled = false;
+            } else {
+                redeSelect.disabled = true;
+                supervisorSelect.disabled = true;
+            }
+
             db.collection("rede").orderBy("nomerede").get().then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
                     let rede = doc.data();
@@ -228,6 +253,12 @@
                     option.textContent = rede.nomerede;
                     redeSelect.appendChild(option);
                 });
+
+                if (userInfo.rede) {
+                    redeSelect.value = userInfo.rede;
+                    alterarCorRede(userInfo.rede);
+                    carregarSupervisores(userInfo.rede);
+                }
             }).catch((error) => {
                 console.log("Erro ao buscar redes:", error);
             });
@@ -238,11 +269,17 @@
             const supervisorSelect = document.getElementById('supervisor');
             supervisorSelect.innerHTML = '<option value="Todos">Todos</option>';
             
+            const userInfo = recuperarInformacoesUsuario();
+
             if (rede === "Todos") {
                 supervisorSelect.value = "Todos";
                 supervisorSelect.disabled = true;
             } else {
-                supervisorSelect.disabled = false;
+                if (userInfo.funcao === 'SUPERVISOR') {
+                    supervisorSelect.disabled = true;
+                } else {
+                    supervisorSelect.disabled = false;
+                }
             
                 if (rede) {
                     db.collection("estruturacelula")
@@ -260,6 +297,10 @@
                                 option.textContent = supervisor;
                                 supervisorSelect.appendChild(option);
                             });
+
+                            if (userInfo.supervisor) {
+                                supervisorSelect.value = userInfo.supervisor;
+                            }
                         })
                         .catch((error) => {
                             console.log("Erro ao carregar supervisores:", error);
@@ -285,7 +326,6 @@
             selectRede.style.backgroundColor = cor;
             selectRede.style.color = '#FFFFFF';
         }
-
         
         function compararLinhas(a, b) {
             if (a.rede < b.rede) return -1;
@@ -299,23 +339,14 @@
 
         // Função principal para gerar a tabela de resumo
         async function gerarTabela() {
-            console.log("Função gerarTabela() chamada");
-
             const rede = document.getElementById('rede').value;
             const supervisor = document.getElementById('supervisor').value;
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
 
-            console.log("Filtros selecionados:");
-            console.log("Rede:", rede);
-            console.log("Supervisor:", supervisor);
-            console.log("Mês:", mes);
-            console.log("Ano:", ano);
-
             if (!rede || !mes || !ano) {
                 document.getElementById('resumoTableContainer').style.display = 'none';
                 document.getElementById('loadingSpinner').style.display = 'none';
-                console.log("Filtros incompletos. Tabela não gerada.");
                 return;
             }
 
@@ -323,8 +354,6 @@
             document.getElementById('resumoTableContainer').style.display = 'none';
 
             const mesAno = `${mes}/${ano}`;
-            console.log("mesAno consultado:", mesAno);
-
             const tableBody = document.querySelector('#resumoTable tbody');
             tableBody.innerHTML = '';
 
@@ -351,21 +380,15 @@
                 }
 
                 const celulasSnapshot = await query.get();
-                console.log("Número de células encontradas:", celulasSnapshot.size);
-
                 for (const celulaDoc of celulasSnapshot.docs) {
                     const celulaData = celulaDoc.data();
                     const nomecelula = celulaData.nomecelula;
                     const supervisorCelula = celulaData.supervisor;
                     const liderCelula = celulaData.conclider;
-
-                    console.log("Consultando reuniões para célula:", nomecelula);
                     const reuniaoSnapshot = await db.collection("reuniao")
                         .where("celula", "==", nomecelula)
                         .where("mesAno", "==", mesAno)
                         .get();
-
-                    console.log("Número de reuniões encontradas:", reuniaoSnapshot.size);
 
                     let somaMembroPresentes = 0;
                     let somaQtdMembros = 0;
@@ -382,9 +405,6 @@
                         somaQtdVisitantes += Number(data.qtdVisitantes || 0);
                         somaOferta += Number(data.oferta || 0);
                         somaKgAlimento += Number(data.kgAlimento || 0);
-
-                        console.log("Valor de reuniaoRealizada:", data.reuniaoRealizada);
-                        console.log("Tipo de reuniaoRealizada:", typeof data.reuniaoRealizada);
 
                         if (data.reuniaoRealizada !== false) {
                             reunioesRealizadas++;
@@ -555,6 +575,28 @@
             XLSX.writeFile(wb, "resumo_do_mes.xlsx");
         }
 
+        // Função para preencher as opções de mês
+        function preencherMeses() {
+            const mesAtual = new Date().getMonth() + 1;
+            const mesSelect = document.getElementById('mes');
+            for (let i = 1; i <= 12; i++) {
+                let option = document.createElement('option');
+                option.value = i.toString().padStart(2, '0');
+                option.textContent = obterNomeMes(i);
+                mesSelect.appendChild(option);
+            }
+            mesSelect.value = mesAtual.toString().padStart(2, '0');
+        }
+
+        // Função auxiliar para obter o nome do mês a partir do número
+        function obterNomeMes(mes) {
+            const nomesMeses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            return nomesMeses[mes - 1];
+        }
+
         // Função para preencher as opções de ano
         function preencherAnos() {
             const anoAtual = new Date().getFullYear();
@@ -565,12 +607,17 @@
                 option.textContent = i;
                 anoSelect.appendChild(option);
             }
+            anoSelect.value = anoAtual;
         }
 
         // Inicialização da página
         window.onload = function() {
             preencherRedes();
+            preencherMeses();
             preencherAnos();
+            setTimeout(function() {
+                gerarTabela();
+            }, 500);
         };
 
         // Adicionar event listeners para os elementos de formulário

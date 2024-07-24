@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo de Reunião - Igreja Evangélica Batista Intermares</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            font-size: 12px;
+        }
+        .header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px 10px 0 0;
+        }
+        .header img {
+            max-width: 200px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 20px auto;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .form-row label {
+            width: 100px;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .form-row select {
+            flex: 1;
+            font-size: 12px;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #3498db;;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .back-button:hover {
+            background-color: #9b59b6;;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .table th:not(:first-child),
+        .table td:not(:first-child) {
+            text-align: center;
+        }
+        .header-cell {
+            font-weight: bold !important;
+            background-color: brown !important;
+            color: white !important;
+            vertical-align: middle !important;
+            text-align: center !important;
+        }
+
+        .table-cell {
+            vertical-align: middle !important;
+            text-align: center !important;
+        }
+        #reunioesTable {
+            font-size: 12px; 
+        }
+    </style>
+</head>
+<body>
+    <a href="frmRelatorios.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4">RESUMO DE REUNIÃO</h2>
+        <div class="divider"></div>
+        <form>
+            <div class="form-row">
+                <label>Rede:</label>
+                <select class="form-control" id="rede">
+                    <option value="">Selecione uma rede</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Supervisor:</label>
+                <select class="form-control" id="supervisor">
+                    <option value="">Selecione um supervisor</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Líder:</label>
+                <select class="form-control" id="lider">
+                    <option value="">Selecione um líder</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Mês/Ano:</label>
+                <div class="d-flex">
+                    <select class="form-control mr-2" id="mes">
+                        <option value="">Mês</option>
+                        <option value="01">Janeiro</option>
+                        <option value="02">Fevereiro</option>
+                        <option value="03">Março</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Maio</option>
+                        <option value="06">Junho</option>
+                        <option value="07">Julho</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                    <select class="form-control" id="ano">
+                        <option value="">Ano</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+        <table class="table table-bordered" id="reunioesTable">
+            <thead>
+                <tr>
+                    <th>Rede</th>
+                    <th>Supervisor</th>
+                    <th>Líderes</th>
+                    <th>Nome da Célula</th>
+                    <th>Data da Reunião</th>
+                    <th>Qtd de Membros</th>
+                    <th>Membros Presentes</th>
+                    <th>Visitantes</th>
+                    <th>Oferta</th>
+                    <th>Colheita do Amor</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+
+        // Inicializar o Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Obter uma referência para o Firestore
+        const db = firebase.firestore();
+
+        // Função para configurar os dropdowns baseado na função do usuário
+        function configurarDropdowns() {
+            const funcao = localStorage.getItem('funcaoUsuario');
+            const redeDropdown = document.getElementById('rede');
+            const supervisorDropdown = document.getElementById('supervisor');
+            const liderDropdown = document.getElementById('lider');
+
+            if (funcao === 'SUPERVISOR') {
+                redeDropdown.disabled = true;
+                supervisorDropdown.disabled = true;
+                liderDropdown.disabled = false;
+            } else if (funcao === 'COORDENADOR') {
+                redeDropdown.disabled = true;
+                supervisorDropdown.disabled = false;
+                liderDropdown.disabled = false;
+            } else if (funcao === 'PASTOR' || funcao === 'ADMIN') {
+                redeDropdown.disabled = false;
+                supervisorDropdown.disabled = false;
+                liderDropdown.disabled = false;
+            } else {
+                redeDropdown.disabled = true;
+                supervisorDropdown.disabled = true;
+                liderDropdown.disabled = true;
+            }
+        }
+
+        // Função para carregar opções de um select baseado em uma consulta ao Firestore
+        async function carregarOpcoes(selectId, collection, field, whereClause = null, selectedValue = null) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = `<option value="">Selecione uma opção</option>`;
+            
+            let query = db.collection(collection);
+            if (whereClause) {
+                query = query.where(whereClause.field, whereClause.operator, whereClause.value);
+            }
+            
+            const snapshot = await query.get();
+            const options = new Set();
+            
+            snapshot.forEach(doc => options.add(doc.data()[field]));
+            
+            options.forEach(option => {
+                const optionElement = createElement('option', { value: option }, option);
+                if (selectedValue && option === selectedValue) {
+                    optionElement.selected = true;
+                }
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Função utilitária para criar elementos HTML
+        function createElement(tag, attributes = {}, textContent = '') {
+            const element = document.createElement(tag);
+            Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+            if (textContent) element.textContent = textContent;
+            return element;
+        }
+
+        // Função para alterar a cor do dropdown "rede"
+        function alterarCorRede(rede) {
+            const redeSelect = document.getElementById('rede');
+            const cores = {
+                'AMARELA': '#FFD700',
+                'AZUL': '#000080',
+                'ROXA': '#4B0082',
+                'LARANJA': '#FF8C00',
+                'VERMELHA': '#8B0000',
+                'BLACK': '#000000',
+                'VERDE': '#006400'
+            };
+
+            const cor = cores[rede] || '#000000';
+            redeSelect.style.backgroundColor = cor;
+            redeSelect.style.color = '#FFFFFF';
+        }
+
+        // Função para recuperar informações do usuário
+        function recuperarInformacoesUsuario() {
+            const rede = localStorage.getItem('redeUsuario');
+            const supervisor = localStorage.getItem('supervisorUsuario');
+            const lider = localStorage.getItem('liderUsuario');
+            const celula = localStorage.getItem('celulaUsuario');
+            const funcao = localStorage.getItem('funcaoUsuario');
+
+            return { rede, supervisor, lider, celula, funcao };
+        }
+
+        // Carregar as redes ao iniciar a página
+        window.onload = function() {
+            const userInfo = recuperarInformacoesUsuario();
+            configurarDropdowns();
+            carregarOpcoes('rede', 'estruturacelula', 'rede').then(() => {
+                if (userInfo.rede) {
+                    document.getElementById('rede').value = userInfo.rede;
+                    alterarCorRede(userInfo.rede);
+                    carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: userInfo.rede }, userInfo.supervisor).then(() => {
+                        if (userInfo.supervisor) {
+                            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: userInfo.supervisor }, userInfo.lider);
+                        }
+                    });
+                }
+            });
+            preencherAnos();
+        };
+
+        function preencherAnos() {
+            const anoAtual = new Date().getFullYear();
+            const anoSelect = document.getElementById('ano');
+            for (let i = anoAtual; i >= 2024; i--) {
+                let option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                anoSelect.appendChild(option);
+            }
+            anoSelect.value = anoAtual;
+        }
+
+        // Função para carregar as reuniões na tabela
+        async function carregarReunioes() {
+            const rede = document.getElementById('rede').value;
+            const supervisor = document.getElementById('supervisor').value;
+            const lider = document.getElementById('lider').value;
+            const mes = document.getElementById('mes').value;
+            const ano = document.getElementById('ano').value;
+
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+
+            let query = db.collection('reuniao');
+
+            if (rede) {
+                query = query.where('rede', '==', rede);
+            }
+
+            if (supervisor) {
+                query = query.where('supervisor', '==', supervisor);
+            }
+
+            if (lider) {
+                query = query.where('lider', '==', lider);
+            }
+
+            if (mes && ano) {
+                const mesAno = `${mes}/${ano}`;
+                query = query.where('mesAno', '==', mesAno);
+            }
+
+            query = query.orderBy('rede').orderBy('supervisor').orderBy('lider').orderBy('data');
+
+            try {
+                const snapshot = await query.get();
+
+                snapshot.forEach(doc => {
+                    const reuniao = doc.data();
+                    const row = tableBody.insertRow();
+
+                    row.insertCell().textContent = reuniao.rede;
+                    row.insertCell().textContent = reuniao.supervisor;
+                    row.insertCell().textContent = reuniao.lider;
+                    row.insertCell().textContent = reuniao.celula;
+                    row.insertCell().textContent = reuniao.data.toDate().toLocaleDateString('pt-BR');
+                    row.insertCell().textContent = reuniao.qtdMembros;
+                    row.insertCell().textContent = reuniao.membroPresentes;
+                    row.insertCell().textContent = reuniao.qtdVisitantes;
+                    row.insertCell().textContent = reuniao.oferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    row.insertCell().textContent = reuniao.kgAlimento.toLocaleString('pt-BR') + ' kg';
+
+                    // Adiciona as classes CSS às células da tabela
+                    row.querySelectorAll('td').forEach(cell => cell.classList.add('table-cell'));
+                });
+
+                // Adiciona as classes CSS ao cabeçalho da tabela
+                const headerRow = document.querySelector('#reunioesTable thead tr');
+                headerRow.querySelectorAll('th').forEach(header => header.classList.add('header-cell'));
+            } catch (error) {
+                console.error('Erro ao carregar as reuniões:', error);
+            }
+        }
+
+        
+        // Adicionar event listeners para os selects
+        document.getElementById('rede').addEventListener('change', function() {
+            const rede = this.value;
+            alterarCorRede(rede);
+            const userInfo = recuperarInformacoesUsuario();
+            carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: rede }, userInfo.supervisor).then(() => {
+                if (userInfo.supervisor) {
+                    carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: userInfo.supervisor });
+                }
+            });
+            document.getElementById('lider').innerHTML = '<option value="">Selecione um líder</option>';
+        });
+
+        document.getElementById('supervisor').addEventListener('change', function() {
+            const rede = document.getElementById('rede').value;
+            const supervisor = this.value;
+            const userInfo = recuperarInformacoesUsuario();
+            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: supervisor }, userInfo.lider);
+        });
+        document.getElementById('rede').addEventListener('change', carregarReunioes);
+        document.getElementById('supervisor').addEventListener('change', carregarReunioes);
+        document.getElementById('lider').addEventListener('change', carregarReunioes);
+        document.getElementById('mes').addEventListener('change', carregarReunioes);
+        document.getElementById('ano').addEventListener('change', carregarReunioes);
+
+    </script>
+</body>
+</html>

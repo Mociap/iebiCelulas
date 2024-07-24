@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro para o Louvor</title>
+    <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            background-color: #2c2c2c;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+            z-index: 1000;
+        }
+        .header img {
+            max-width: 180px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #3498db;
+            margin: 30px auto;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        .form-control {
+            background-color: #3c3c3c;
+            border: none;
+            color: #ffffff;
+        }
+        .form-control:focus {
+            background-color: #4c4c4c;
+            color: #ffffff;
+            box-shadow: none;
+        }
+        label {
+            color: #cfcccc;
+            font-weight: bold;
+        }
+        .choice-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 16px;
+            background-color: #3c3c3c;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .choice-chip.selected {
+            background-color: #3498db;
+            color: #fff;
+        }
+        .choice-chip i {
+            margin-right: 8px;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .back-button i {
+            margin-right: 0px;
+        }
+        .suggestion-list {
+            position: absolute;
+            background-color: #3c3c3c;
+            border: 1px solid #4c4c4c;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .suggestion-list div {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .suggestion-list div:hover {
+            background-color: #4c4c4c;
+        }
+
+    </style>
+    
+</head>
+<body>
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="header">
+        <img src="../assets/LogoBranco.png" alt="Logo da Igreja">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4 font-weight-bold">Cadastro de Participantes do Louvor</h2>
+        <div class="divider"></div>
+        <form id="participanteForm">
+            <div class="form-group">
+                <label for="participante">Nome do Participante</label>
+                <div style="position: relative;">
+                    <input type="text" class="form-control" id="participante" required onkeyup="this.value = this.value.toUpperCase();">
+                    <div id="participantesList" class="suggestion-list"></div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Instrumentos</label>
+                <div class="choice-chips">
+                    <div class="choice-chip" data-value="Bateria">
+                        <i class="fas fa-drum"></i>
+                        Bateria
+                    </div>
+                    <div class="choice-chip" data-value="Baixo">
+                        <i class="fas fa-guitar"></i>
+                        Baixo
+                    </div>
+                    <div class="choice-chip" data-value="Guitarra">
+                        <i class="fas fa-guitar"></i>
+                        Guitarra
+                    </div>
+                    <div class="choice-chip" data-value="Violão">
+                        <i class="fas fa-guitar"></i>
+                        Violão
+                    </div>
+                    <div class="choice-chip" data-value="Teclado">
+                        <i class="fas fa-keyboard"></i>
+                        Teclado
+                    </div>
+                    <div class="choice-chip" data-value="Sopro">
+                        <i class="fas fa-wind"></i>
+                        Sopro
+                    </div>
+                    <div class="choice-chip" data-value="Vocal">
+                        <i class="fas fa-microphone"></i>
+                        Vocal
+                    </div>
+                </div>
+                <input type="hidden" id="instrumentos" name="instrumentos" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="cadastrarBtn">Cadastrar</button>
+        </form>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+    // Configuração do Firebase
+    var configuracaoFirebase = {
+        apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+        authDomain: "dbiebi.firebaseapp.com",
+        databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+        projectId: "dbiebi",
+        storageBucket: "dbiebi.appspot.com",
+        messagingSenderId: "1068164821081",
+        appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+    };
+    firebase.initializeApp(configuracaoFirebase);
+    var bancoDeDados = firebase.firestore();
+
+    // Referência ao formulário
+    var formulario = document.getElementById('participanteForm');
+
+    // Função para verificar se o nome do participante já existe na coleção "louvor"
+    function verificarParticipanteExistente(nome) {
+        return bancoDeDados.collection('louvor')
+            .where('participante', '==', nome)
+            .get()
+            .then(function(querySnapshot) {
+                return !querySnapshot.empty;
+            })
+            .catch(function(error) {
+                console.error('Erro ao verificar participante existente:', error);
+                return false;
+            });
+    }
+
+    // Adicionar evento de envio do formulário
+    formulario.addEventListener('submit', function(e) {
+        e.preventDefault(); // Previne o envio padrão do formulário
+
+        var participante = document.getElementById('participante').value.trim().toUpperCase();
+        var instrumentos = Array.from(document.querySelectorAll('.choice-chip.selected')).map(chip => chip.dataset.value);
+
+            // Validação para verificar se pelo menos um instrumento foi selecionado
+        if (instrumentos.length === 0) {
+            alert('Por favor, selecione pelo menos um instrumento.');
+            return;
+        }
+        // Verificar se o participante já existe na coleção "louvor"
+        verificarParticipanteExistente(participante)
+            .then(function(participanteExistente) {
+                if (participanteExistente) {
+                    // Participante já existe, exibir mensagem de erro
+                    alert('O participante "' + participante + '" já está cadastrado.');
+
+                    // Limpar o formulário
+                    formulario.reset();
+
+                    // Limpar a lista de sugestões
+                    participantesList.innerHTML = '';
+
+                    // Remover a seleção dos instrumentos
+                    var selectedChips = document.querySelectorAll('.choice-chip.selected');
+                    selectedChips.forEach(function(chip) {
+                        chip.classList.remove('selected');
+                    });
+                } else {
+                    // Participante não existe, adicionar dados ao Firestore
+                    bancoDeDados.collection('louvor').add({
+                        participante: participante,
+                        instrumentos: instrumentos
+                    })
+                    .then(function() {
+                        // Exibir mensagem de sucesso
+                        alert('Participante cadastrado com sucesso!');
+
+                        // Limpar o formulário
+                        formulario.reset();
+
+                        // Limpar a lista de sugestões
+                        participantesList.innerHTML = '';
+
+                        // Remover a seleção dos instrumentos
+                        var selectedChips = document.querySelectorAll('.choice-chip.selected');
+                        selectedChips.forEach(function(chip) {
+                            chip.classList.remove('selected');
+                        });
+                    })
+                    .catch(function(error) {
+                        alert('Erro ao cadastrar participante: ' + error.message);
+                    });
+                }
+            });
+    });
+
+    // Função para alternar a seleção dos ChoiceChips
+    function toggleChoiceChip(chip) {
+        chip.classList.toggle('selected');
+        var instrumentos = Array.from(document.querySelectorAll('.choice-chip.selected')).map(chip => chip.dataset.value);
+        document.getElementById('instrumentos').value = instrumentos.join(',');
+    }
+
+    // Adicionar evento de clique aos ChoiceChips
+    var choiceChips = document.getElementsByClassName('choice-chip');
+    for (var i = 0; i < choiceChips.length; i++) {
+        choiceChips[i].addEventListener('click', function() {
+            toggleChoiceChip(this);
+        });
+    }
+
+    function carregarNomesMembros(searchTerm) {
+        var participanteInput = document.getElementById('participante');
+        var participantesList = document.getElementById('participantesList');
+
+        bancoDeDados.collection('membros')
+            .orderBy('nome')
+            .startAt(searchTerm)
+            .endAt(searchTerm + '\uf8ff')
+            .get()
+            .then(function(querySnapshot) {
+                participantesList.innerHTML = '';
+                querySnapshot.forEach(function(doc) {
+                    var nome = doc.data().nome;
+                    var div = document.createElement('div');
+                    div.textContent = nome;
+                    div.addEventListener('click', function() {
+                        participanteInput.value = nome;
+                        participantesList.innerHTML = '';
+                    });
+                    participantesList.appendChild(div);
+                });
+            })
+            .catch(function(error) {
+                console.error('Erro ao carregar nomes dos membros:', error);
+            });
+    }
+
+    // Adicionar o evento 'input' ao campo de entrada "participante"
+    var participante = document.getElementById('participante');
+    var participantesList = document.getElementById('participantesList');
+
+    participante.addEventListener('input', function() {
+        var searchTerm = this.value.toUpperCase();
+
+        if (searchTerm.length > 0) {
+            carregarNomesMembros(searchTerm);
+            participantesList.style.display = 'block';
+        } else {
+            participantesList.innerHTML = '';
+            participantesList.style.display = 'none';
+        }
+    });
+</script>
+
+    
+</body>
+</html>

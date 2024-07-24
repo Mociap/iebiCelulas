@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indisponibilidade para Escala</title>
+    <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            background-color: #2c2c2c;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+            z-index: 1000;
+        }
+        .header img {
+            max-width: 180px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #3498db;
+            margin: 30px auto;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        .form-control {
+            background-color: #3c3c3c !important;
+            border: none !important;
+            color: #ffffff !important;
+        }
+        .form-control:focus {
+            background-color: #4c4c4c;
+            color: #ffffff;
+            box-shadow: none;
+        }
+        label {
+            color: #cfcccc;
+            font-weight: bold;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .back-button i {
+            margin-right: 0px;
+        }
+        .suggestion-list {
+            position: absolute;
+            background-color: #3c3c3c;
+            border: 1px solid #4c4c4c;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1;
+        }
+        .suggestion-list div {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .suggestion-list div:hover {
+            background-color: #4c4c4c;
+        }
+        .selected-dates {
+            margin-top: 10px;
+        }
+        .selected-dates span {
+            display: inline-block;
+            background-color: #3498db;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .remove-date {
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="header">
+        <img src="../assets/LogoBranco.png" alt="Logo da Igreja">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4 font-weight-bold">Indisponibilidade para Escala</h2>
+        <div class="divider"></div>
+        <form id="indisponibilidadeForm">
+            <div class="form-group">
+                <label for="participante">Nome do Participante</label>
+                <div style="position: relative;">
+                    <input type="text" class="form-control" id="participante" required onkeyup="this.value = this.value.toUpperCase();">
+                    <div id="participantesList" class="suggestion-list"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="indisponibilidade">Datas de Indisponibilidade</label>
+                <input type="text" class="form-control" id="indisponibilidade" placeholder="Selecione as datas">
+                <div class="selected-dates"></div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-5" id="cadastrarBtn">Cadastrar</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/l10n/pt.js"></script>
+
+<script>
+    // Configuração do Firebase
+    var configuracaoFirebase = {
+        apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+        authDomain: "dbiebi.firebaseapp.com",
+        databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+        projectId: "dbiebi",
+        storageBucket: "dbiebi.appspot.com",
+        messagingSenderId: "1068164821081",
+        appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+    };
+    firebase.initializeApp(configuracaoFirebase);
+    var bancoDeDados = firebase.firestore();
+
+    // Referência ao formulário
+    var indisponibilidadeForm = document.getElementById('indisponibilidadeForm');
+
+    // Configuração do Flatpickr
+    var indisponibilidadeInput = document.getElementById('indisponibilidade');
+    var selectedDates = [];
+    var flatpickrOptions = {
+        mode: 'multiple',
+        dateFormat: 'd/m/Y',
+        locale: 'pt',
+        theme: 'dark',
+        onChange: function(selectedDates, dateStr, instance) {
+            updateSelectedDates();
+        }
+    };
+    flatpickr(indisponibilidadeInput, flatpickrOptions);
+
+    // Função para atualizar as datas selecionadas
+    function updateSelectedDates() {
+        var selectedDatesContainer = document.querySelector('.selected-dates');
+        selectedDatesContainer.innerHTML = '';
+        selectedDates = indisponibilidadeInput.value.split(', ');
+        selectedDates.forEach(function(date) {
+            var span = document.createElement('span');
+            span.textContent = date;
+
+            var removeButton = document.createElement('button');
+            removeButton.innerHTML = '&times;';
+            removeButton.classList.add('remove-date');
+            removeButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                removeSelectedDate(date);
+            });
+
+            span.appendChild(removeButton);
+            selectedDatesContainer.appendChild(span);
+        });
+    }
+
+    // Função para remover uma data selecionada
+    function removeSelectedDate(date) {
+        var index = selectedDates.indexOf(date);
+        if (index > -1) {
+            selectedDates.splice(index, 1);
+            indisponibilidadeInput.value = selectedDates.join(', ');
+            updateSelectedDates();
+        }
+    }
+
+    // Adicionar evento de envio do formulário
+    indisponibilidadeForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        var participante = document.getElementById('participante').value.trim().toUpperCase();
+        var indisponibilidade = selectedDates;
+
+        // Verificar se pelo menos uma data foi selecionada
+        if (indisponibilidade.length === 0) {
+            // Exibir mensagem de erro ou tomar outra ação apropriada
+            alert('Por favor, selecione pelo menos uma data de indisponibilidade.');
+            return;
+        }
+
+        // Exibir mensagem de confirmação com as datas selecionadas
+        var confirmMessage = "As datas em que você NÃO estará disponível são:\n\n" + indisponibilidade.join("\n") + "\n\nDeseja confirmar?";
+        var confirmResult = confirm(confirmMessage);
+
+        if (confirmResult) {
+            // Adicionar dados ao Firestore
+            bancoDeDados.collection('louvor_indisp').add({
+                participante: participante,
+                indisponibilidade: indisponibilidade
+            })
+            .then(function() {
+                alert('Indisponibilidade cadastrada com sucesso!');
+                indisponibilidadeForm.reset();
+                selectedDates = [];
+                updateSelectedDates();
+                participantesList.innerHTML = '';
+            })
+            .catch(function(error) {
+                alert('Erro ao cadastrar indisponibilidade: ' + error.message);
+            });
+        }
+    });
+
+    // Função para carregar os nomes dos membros
+    function carregarNomesMembros(searchTerm) {
+        var participanteInput = document.getElementById('participante');
+        var participantesList = document.getElementById('participantesList');
+
+        bancoDeDados.collection('membros')
+            .orderBy('nome')
+            .startAt(searchTerm)
+            .endAt(searchTerm + '\uf8ff')
+            .get()
+            .then(function(querySnapshot) {
+                participantesList.innerHTML = '';
+                querySnapshot.forEach(function(doc) {
+                    var nome = doc.data().nome;
+                    var div = document.createElement('div');
+                    div.textContent = nome;
+                    div.addEventListener('click', function() {
+                        participanteInput.value = nome;
+                        participantesList.innerHTML = '';
+                    });
+                    participantesList.appendChild(div);
+                });
+            })
+            .catch(function(error) {
+                console.error('Erro ao carregar nomes dos membros:', error);
+            });
+    }
+
+    // Adicionar o evento 'input' ao campo de entrada "participante"
+    var participante = document.getElementById('participante');
+    var participantesList = document.getElementById('participantesList');
+
+    participante.addEventListener('input', function() {
+        var searchTerm = this.value.toUpperCase();
+
+        if (searchTerm.length > 0) {
+            carregarNomesMembros(searchTerm);
+            participantesList.style.display = 'block';
+        } else {
+            participantesList.innerHTML = '';
+            participantesList.style.display = 'none';
+        }
+    });
+</script>
+
+
+</body>
+</html>
+

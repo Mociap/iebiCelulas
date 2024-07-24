@@ -36,7 +36,7 @@
                 <p>Visualize os principais indicadores das células.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
-            <a href="relResumoMesCelula.html" class="card">
+            <a href="relResumoMesCelula.html" class="card" >
                 <i class="fas fa-chart-bar card-icon"></i>
                 <h2>Resumo Mensal</h2>
                 <p>Visualize um resumo das atividades e dados do mês.</p>
@@ -48,7 +48,7 @@
                 <p>Acesse informações detalhadas sobre os membros da igreja.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
-            <a href="CardsReunioes.html" class="card">
+            <a href="resumoreuniao.html" class="card">
                 <i class="fas fa-calendar-alt card-icon"></i>
                 <h2>Dados das Reuniões</h2>
                 <p>Acesse os dados registrados das reuniões semanais.</p>
@@ -97,13 +97,24 @@
 
         async function carregarDadosAdicionais() {
             const nomeUsuario = localStorage.getItem('nomeUsuario');
+            console.log("Nome do usuário:", nomeUsuario);
             if (nomeUsuario) {
                 try {
+                    const queryUsuario = await bancoDeDados.collection("usuarios").where("nome", "==", nomeUsuario).get();
+                    console.log("Resultado da consulta de usuário:", queryUsuario);
+                    if (!queryUsuario.empty) {
+                        const dadosUsuario = queryUsuario.docs[0].data();
+                        console.log("Dados do usuário:", dadosUsuario);
+                        const funcaoUsuario = dadosUsuario.funcao || '';
+                        console.log("Função do usuário:", funcaoUsuario);
+                        localStorage.setItem('funcaoUsuario', funcaoUsuario);
+                    }
+
                     const queryMembro = await bancoDeDados.collection("membros").where("nome", "==", nomeUsuario).get();
+                    console.log("Resultado da consulta de membro:", queryMembro);
                     if (!queryMembro.empty) {
                         const dadosMembro = queryMembro.docs[0].data();
-                        const funcaoMembro = dadosMembro.funcao || '';
-                        localStorage.setItem('funcaoUsuario', funcaoMembro);
+                        console.log("Dados do membro:", dadosMembro);
                         localStorage.setItem('celulaUsuario', dadosMembro.nomedacelula || '');
 
                         const queryEstrutura = await bancoDeDados.collection("estruturacelula").where("nomecelula", "==", dadosMembro.nomedacelula).get();
