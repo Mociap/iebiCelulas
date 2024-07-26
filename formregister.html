@@ -144,65 +144,82 @@
         firebase.initializeApp(configuracaoFirebase);
         var bancoDeDados = firebase.firestore();
         var auth = firebase.auth();
-
+    
         // Referência ao formulário
         var formulario = document.getElementById('registerForm');
-
+    
+        function checkNameExists(name) {
+            return bancoDeDados.collection('membros')
+                .where('nome', '==', name)
+                .get()
+                .then(snapshot => !snapshot.empty);
+        }
+    
         formulario.addEventListener('submit', function(e) {
             e.preventDefault();
-
+    
             var nome = document.getElementById('name').value.trim().toUpperCase();
             var email = document.getElementById('email').value;
             var senha = document.getElementById('password').value;
             var confirmarSenha = document.getElementById('confirmPassword').value;
-
+    
             if (senha !== confirmarSenha) {
                 alert('As senhas não coincidem.');
                 return;
             }
-
-            // Criar usuário no Firebase Authentication
-            auth.createUserWithEmailAndPassword(email, senha)
-                .then(function(userCredential) {
-                    // Usuário criado com sucesso
-                    var user = userCredential.user;
-
-                    // Adicionar informações adicionais ao Firestore
-                    return bancoDeDados.collection('usuarios').doc(user.uid).set({
-                        nome: nome,
-                        email: email,
-                        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                })
-                .then(function() {
-                    alert('Registro realizado com sucesso!');
-                    window.location.href = 'formlogin.html'; // Redirecionar para a página de login
-                })
-                .catch(function(error) {
-                    console.error('Erro no registro:', error);
-                    let mensagemErro = 'Erro no registro: ';
-                    
-                    switch(error.code) {
-                        case 'auth/email-already-in-use':
-                            mensagemErro += 'Este e-mail já está registrado em nossa comunidade. Por favor, use outro e-mail ou entre em contato com a secretaria da igreja se precisar de ajuda.';
-                            break;
-                        case 'auth/invalid-email':
-                            mensagemErro += 'O endereço de e-mail é inválido.';
-                            break;
-                        case 'auth/weak-password':
-                            mensagemErro += 'A senha é muito fraca. Use uma senha mais forte.';
-                            break;
-                        default:
-                            mensagemErro += error.message;
-                    }
-                    
-                    alert(mensagemErro);
-                });
+    
+            checkNameExists(nome).then(exists => {
+                if (exists) {
+                    // Criar usuário no Firebase Authentication
+                    auth.createUserWithEmailAndPassword(email, senha)
+                        .then(function(userCredential) {
+                            // Usuário criado com sucesso
+                            var user = userCredential.user;
+    
+                            // Adicionar informações adicionais ao Firestore
+                            return bancoDeDados.collection('usuarios').doc(user.uid).set({
+                                nome: nome,
+                                email: email,
+                                dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        })
+                        .then(function() {
+                            alert('Registro realizado com sucesso!');
+                            window.location.href = 'formlogin.html'; // Redirecionar para a página de login
+                        })
+                        .catch(function(error) {
+                            console.error('Erro no registro:', error);
+                            let mensagemErro = 'Erro no registro: ';
+                            
+                            switch(error.code) {
+                                case 'auth/email-already-in-use':
+                                    mensagemErro += 'Este e-mail já está registrado em nossa comunidade. Por favor, use outro e-mail ou entre em contato com a secretaria da igreja se precisar de ajuda.';
+                                    break;
+                                case 'auth/invalid-email':
+                                    mensagemErro += 'O endereço de e-mail é inválido.';
+                                    break;
+                                case 'auth/weak-password':
+                                    mensagemErro += 'A senha é muito fraca. Use uma senha mais forte.';
+                                    break;
+                                default:
+                                    mensagemErro += error.message;
+                            }
+                            
+                            alert(mensagemErro);
+                        });
+                } else {
+                    alert('Usuário não encontrado. Por favor, cadastre-se primeiro em uma célula antes de criar uma conta.');
+                }
+            }).catch(error => {
+                console.error('Erro ao verificar o nome:', error);
+                alert('Ocorreu um erro ao verificar seu nome. Por favor, tente novamente mais tarde.');
+            });
         });
-
+    
         document.getElementById('name').addEventListener('input', function(e) {
             this.value = this.value.toUpperCase();
         });
     </script>
+    
 </body>
 </html>
