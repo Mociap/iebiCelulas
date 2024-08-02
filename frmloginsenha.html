@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recuperação de Senha - Igreja Evangélica Batista</title>
+    <title>Login - Senha - Igreja Evangélica Batista</title>
     <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
@@ -19,7 +19,7 @@
             justify-content: center;
             align-items: center;
         }
-        .forgot-password-container {
+        .login-container {
             background-color: #2c2c2c;
             border-radius: 15px;
             padding: 30px;
@@ -56,7 +56,7 @@
         .input-wrapper {
             position: relative;
         }
-        .btn-reset {
+        .btn-login {
             background-color: #2196F3;
             border: none;
             color: #ffffff;
@@ -65,11 +65,26 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        .btn-reset:hover {
+        .btn-login:hover {
             background-color: #1976D2;
         }
-        .login-link {
-            margin-top: 20px;
+        .spacer {
+            height: 20px;
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 24px;
+            transition: color 0.3s;
+        }
+        .back-button:hover {
+            color: #2196F3;
+        }
+        .forgot-password, .register-link {
+            margin-top: 35px;
         }
         a {
             color: #2196F3;
@@ -84,34 +99,36 @@
     </style>
 </head>
 <body>
-    <div class="forgot-password-container">
-        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares" class="logo-title">
-        <h2>Recuperação de Senha</h2>
-        <p>Digite seu e-mail para receber as instruções de recuperação de senha.</p>
-        <form id="forgotPasswordForm">
+    <a href="frmloginemail.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="login-container">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista" class="logo-title">
+        <p id="saudacao"></p>
+        <form id="loginForm">
             <div class="form-group">
-                <label for="email">E-mail</label>
+                <label for="password">Senha</label>
                 <div class="input-wrapper">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" required>
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" required>
                 </div>
             </div>
             <div class="spacer"></div>
-            <button type="submit" class="btn-reset">
-                <i class="fas fa-paper-plane"></i> Enviar Instruções
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Entrar
             </button>
+            <div class="forgot-password">
+                <a href="formEsqueceuSenha.html"><i class="fas fa-question-circle"></i> Esqueceu a senha?</a>
+            </div>
+
         </form>
-        <div class="login-link">
-            Lembrou sua senha? <a href="frmloginemail.html"><i class="fas fa-sign-in-alt"></i> Voltar para o login</a>
-        </div>
     </div>
 
-    <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
 
     <script>
-        // Configuração do Firebase
         var configuracaoFirebase = {
             apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
             authDomain: "dbiebi.firebaseapp.com",
@@ -121,21 +138,44 @@
             messagingSenderId: "1068164821081",
             appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
         };
-        firebase.initializeApp(configuracaoFirebase);
 
-        document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        // Obter o apelido do usuário do localStorage
+        var apelidoUsuario = localStorage.getItem('apelidoUsuario');
+
+        // Exibir a mensagem de saudação com o apelido
+        var saudacao = document.getElementById('saudacao');
+        saudacao.textContent = 'Olá, ' + apelidoUsuario + '. Seja Bem-Vindo';
+
+        var formulario = document.getElementById('loginForm');
+
+        formulario.addEventListener('submit', async function(e) {
             e.preventDefault();
-            var email = document.getElementById('email').value;
-            
-            firebase.auth().sendPasswordResetEmail(email)
-                .then(function() {
-                    alert('E-mail de recuperação de senha enviado. Por favor, verifique sua caixa de entrada.');
-                    window.location.href = 'frmloginemail.html';
-                })
-                .catch(function(error) {
-                    console.error('Erro ao enviar e-mail de recuperação:', error);
-                    alert('Ocorreu um erro. Por favor, tente novamente.');
-                });
+            console.log("Iniciando processo de autenticação da senha");
+
+            var senha = document.getElementById('password').value;
+            var email = localStorage.getItem('emailUsuario');
+
+            try {
+                console.log("Tentando autenticar usuário");
+                const credencialUsuario = await firebase.auth().signInWithEmailAndPassword(email, senha);
+                console.log("Usuário autenticado com sucesso");
+
+                localStorage.setItem('apelidoUsuario', apelidoUsuario);
+                document.querySelector('.forgot-password').style.display = 'block';
+
+                 // Armazenar o tempo de login no localStorage
+                localStorage.setItem('tempoLogin', new Date().getTime());
+
+                // Redirecionar para a página desejada
+                window.location.href = 'frmRelatorios.html';
+            } catch (erro) {
+                console.error("Erro ao autenticar usuário:", erro);
+                alert("Senha incorreta. Por favor, verifique e tente novamente.");
+                document.querySelector('.forgot-password').style.display = 'block';
+            }
         });
     </script>
 </body>

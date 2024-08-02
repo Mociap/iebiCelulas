@@ -209,6 +209,7 @@
                         });
                 } else {
                     alert('Usuário não encontrado. Por favor, cadastre-se primeiro em uma célula antes de criar uma conta.');
+                    window.location.href = 'formCadMembros.html';
                 }
             }).catch(error => {
                 console.error('Erro ao verificar o nome:', error);

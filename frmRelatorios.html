@@ -86,7 +86,7 @@
         function realizarLogout() {
             firebase.auth().signOut().then(() => {
                 localStorage.clear();
-                window.location.href = 'formlogin.html';
+                window.location.href = 'frmloginemail.html';
             }).catch((erro) => {
                 console.error('Erro ao fazer logout:', erro);
             });
@@ -108,6 +108,7 @@
                         const funcaoUsuario = dadosUsuario.funcao || '';
                         console.log("Função do usuário:", funcaoUsuario);
                         localStorage.setItem('funcaoUsuario', funcaoUsuario);
+                        
                     }
 
                     const queryMembro = await bancoDeDados.collection("membros").where("nome", "==", nomeUsuario).get();
@@ -137,7 +138,7 @@
             const userName = localStorage.getItem('nomeUsuario');
             const userEmail = localStorage.getItem('emailUsuario');
             const userFuncao = localStorage.getItem('funcaoUsuario');
-    
+            
             document.getElementById('userName').textContent = userName || 'Não disponível';
             document.getElementById('userEmail').textContent = userEmail || 'Não disponível';
             document.getElementById('userFuncao').textContent = userFuncao || 'Não disponível';
