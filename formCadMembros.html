@@ -130,21 +130,21 @@
             <div class="form-group">
                 <label for="nome">Nome Conforme RG</label>
                 <input type="text" class="form-control" id="nome" required onkeyup="this.value = this.value.toUpperCase();">
-                <small id="nomeError" style="color: red; display: none;">Nome já cadastrado</small>
+                <small id="nomeError" style="color: rgb(255, 159, 159); display: none;">Nome já cadastrado</small>
             </div>
             <div class="form-group">
                 <label for="dtnasc">Data de Nascimento</label>
-                <input type="date" class="form-control" id="dtnasc" required>
+                <input type="date" class="form-control" id="dtnasc" required onchange="verificarDataNascimento()">
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" class="form-control" id="email" required>
-                <small id="emailError" style="color: red; display: none;">Email já cadastrado</small>
+                <small id="emailError" style="color: rgb(255, 159, 159); display: none;">Email já cadastrado</small>
             </div>            
             <div class="form-group">
                 <label for="cep">CEP</label>
-                <input type="text" class="form-control" id="cep" required maxlength="9" placeholder="99999-999" onkeyup="this.value = this.value.toUpperCase();">
-                <small id="cepError" style="color: red; display: none;">CEP inválido</small>
+                <input type="text" class="form-control" id="cep" maxlength="9" placeholder="99999-999" onkeyup="this.value = this.value.toUpperCase();">
+                <small id="cepError" style="color: rgb(255, 159, 159); display: none;">CEP inválido</small>
             </div>
             <div class="form-group">
                 <label for="bairro">Bairro</label>
@@ -260,12 +260,33 @@
         var inputCidade = document.getElementById('cidade');
         var inputUf = document.getElementById('uf');
         var cepError = document.getElementById('cepError');
-
+       
         // Máscara para o campo "Número do Celular"
         VMasker(inputCelular).maskPattern("(99) 99999-9999");
 
         // Máscara para o campo CEP
         VMasker(inputCep).maskPattern("99999-999");
+
+        // Função para requerer CEP pelo Nascimento
+        function verificarDataNascimento() {
+            var dataNascimento = new Date(document.getElementById('dtnasc').value);
+            var dataLimite = new Date();
+            dataLimite.setFullYear(dataLimite.getFullYear() - 12);
+
+            var cepInput = document.getElementById('cep');
+            var emailInput = document.getElementById('email')
+            var celularInput = document.getElementById('celular');
+
+            if (dataNascimento <= dataLimite) {
+                cepInput.setAttribute('required', 'required');
+                emailInput.setAttribute('required', 'required');
+                celularInput.setAttribute('required', 'required');
+            } else {
+                cepInput.removeAttribute('required');
+                emailInput.removeAttribute('required');
+                celularInput.removeAttribute('required');
+            }
+        }
 
         // Função para buscar endereço pelo CEP
         function buscarEnderecoPorCep(cep) {
@@ -427,7 +448,6 @@
                     return false;
                 });
         }
-
 
         // Adicionar evento de blur (sair do campo) no campo "Nome"
         inputNome.addEventListener('blur', function() {
