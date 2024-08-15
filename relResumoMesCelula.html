@@ -137,7 +137,6 @@
             <div class="form-group">
                 <label for="rede">Rede:</label>
                 <select class="form-control" id="rede" onchange="alterarCorRede(this.value); carregarSupervisores(this.value)">
-                    <option value="">Selecione uma rede</option>
                     <option value="Todos">Todos</option>
                 </select>
             </div>
@@ -224,34 +223,27 @@
             const supervisor = localStorage.getItem('supervisorUsuario');
             const funcao = localStorage.getItem('funcaoUsuario');
             return { rede, supervisor, funcao };
+            console.log("Função do Usuário:", funcao);
+            
         }
 
         // Função para preencher as opções de rede
         function preencherRedes() {
             const redeSelect = document.getElementById('rede');
             const supervisorSelect = document.getElementById('supervisor');
+            const liderSelect = document.getElementById('lider');
             const userInfo = recuperarInformacoesUsuario();
+            console.log("Função do Usuário:", userInfo.funcao);
 
-            if (userInfo.funcao === 'SUPERVISOR') {
-                redeSelect.disabled = true;
-                supervisorSelect.disabled = true;
-            } else if (userInfo.funcao === 'COORDENADOR') {
-                redeSelect.disabled = true;
-                supervisorSelect.disabled = false;
-            } else if (userInfo.funcao === 'PASTOR' || userInfo.funcao === 'ADMIN') {
-                redeSelect.disabled = false;
-                supervisorSelect.disabled = false;
-            } else {
-                redeSelect.disabled = true;
-                supervisorSelect.disabled = true;
-            }
+            // Recuperar as redes e supervisores do localStorage
+            const redesSupervisores = JSON.parse(localStorage.getItem('redesSupervisores'));
 
-            db.collection("rede").orderBy("nomerede").get().then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    let rede = doc.data();
+            // Verificar se existem redes armazenadas no localStorage
+            if (redesSupervisores && Object.keys(redesSupervisores).length > 0) {
+                Object.keys(redesSupervisores).forEach((rede) => {
                     let option = document.createElement('option');
-                    option.value = rede.nomerede;
-                    option.textContent = rede.nomerede;
+                    option.value = rede;
+                    option.textContent = rede;
                     redeSelect.appendChild(option);
                 });
 
@@ -259,56 +251,55 @@
                     redeSelect.value = userInfo.rede;
                     alterarCorRede(userInfo.rede);
                     carregarSupervisores(userInfo.rede);
+                } else {
+                    // Carregar supervisores e líderes da primeira rede encontrada
+                    const primeiraRede = Object.keys(redesSupervisores)[0];
+                    carregarSupervisores(primeiraRede);
                 }
-            }).catch((error) => {
-                console.log("Erro ao buscar redes:", error);
-            });
+            } else {
+                console.log("Nenhuma rede encontrada no localStorage.");
+            }
         }
 
+
         // Função para carregar supervisores
-        function carregarSupervisores(rede) {
-            const supervisorSelect = document.getElementById('supervisor');
-            supervisorSelect.innerHTML = '<option value="Todos">Todos</option>';
-            
-            const userInfo = recuperarInformacoesUsuario();
+function carregarSupervisores(rede) {
+    const supervisorSelect = document.getElementById('supervisor');
+    supervisorSelect.innerHTML = '<option value="Todos">Todos</option>'; // Limpa as opções anteriores e adiciona a opção "Todos"
 
-            if (rede === "Todos") {
-                supervisorSelect.value = "Todos";
-                supervisorSelect.disabled = true;
-            } else {
-                if (userInfo.funcao === 'SUPERVISOR') {
-                    supervisorSelect.disabled = true;
-                } else {
-                    supervisorSelect.disabled = false;
-                }
-            
-                if (rede) {
-                    db.collection("estruturacelula")
-                        .where("rede", "==", rede)
-                        .get()
-                        .then((querySnapshot) => {
-                            const supervisores = new Set();
-                            querySnapshot.forEach((doc) => {
-                                supervisores.add(doc.data().supervisor);
-                            });
+    // Recuperar os dados do usuário do localStorage
+    const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario'));
 
-                            supervisores.forEach((supervisor) => {
-                                let option = document.createElement('option');
-                                option.value = supervisor;
-                                option.textContent = supervisor;
-                                supervisorSelect.appendChild(option);
-                            });
+    console.log('Rede selecionada:', rede);
+    console.log('dadosUsuario:', dadosUsuario);
 
-                            if (userInfo.supervisor) {
-                                supervisorSelect.value = userInfo.supervisor;
-                            }
-                        })
-                        .catch((error) => {
-                            console.log("Erro ao carregar supervisores:", error);
-                        });
+    if (dadosUsuario) {
+        const supervisores = new Set(); // Conjunto para armazenar os supervisores únicos
+
+        // Iterar sobre os dados do usuário
+        for (const dados of Object.values(dadosUsuario)) {
+            for (const { rede: redeAtual, supervisor } of dados) {
+                if (rede === 'Todos' || rede === redeAtual) {
+                    // Se a rede selecionada for "Todos" ou a rede atual, adicionar o supervisor ao conjunto
+                    supervisores.add(supervisor);
                 }
             }
         }
+
+        console.log('Supervisores encontrados para a rede', rede, ':', supervisores);
+
+        // Adicionar as opções de supervisores ao select
+        for (const supervisor of supervisores) {
+            const option = document.createElement('option');
+            option.value = supervisor;
+            option.textContent = supervisor;
+            supervisorSelect.appendChild(option);
+        }
+    } else {
+        console.log('Nenhum dado de usuário encontrado no localStorage');
+    }
+}
+
 
         // Função para alterar a cor da rede selecionada
         function alterarCorRede(rede) {
@@ -619,6 +610,22 @@
             setTimeout(function() {
                 gerarTabela();
             }, 500);
+                    // Obtém todas as chaves do localStorage
+                    const chaves = Object.keys(localStorage);
+
+                    // Verifica se há chaves no localStorage
+                    if (chaves.length > 0) {
+                        console.log("Dados armazenados no localStorage:");
+
+                        // Percorre as chaves e exibe os valores correspondentes
+                        chaves.forEach(function(chave) {
+                            const valor = localStorage.getItem(chave);
+                            console.log(`${chave}: ${valor}`);
+                        });
+                    } else {
+                        console.log("Não há dados armazenados no localStorage.");
+                    }
+            
         };
 
         // Adicionar event listeners para os elementos de formulário
