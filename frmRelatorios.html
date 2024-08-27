@@ -57,287 +57,76 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
-    <script>
-        var configuracaoFirebase = {
-            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
-            authDomain: "dbiebi.firebaseapp.com",
-            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
-            projectId: "dbiebi",
-            storageBucket: "dbiebi.appspot.com",
-            messagingSenderId: "1068164821081",
-            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
-        };
-        firebase.initializeApp(configuracaoFirebase);
-        var bancoDeDados = firebase.firestore();
+<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
+<script>
+    var configuracaoFirebase = {
+        apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+        authDomain: "dbiebi.firebaseapp.com",
+        databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+        projectId: "dbiebi",
+        storageBucket: "dbiebi.appspot.com",
+        messagingSenderId: "1068164821081",
+        appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+    };
+    firebase.initializeApp(configuracaoFirebase);
+    var bancoDeDados = firebase.firestore();
 
-        function verificarTempoSessao() {
-            const tempoLogin = localStorage.getItem('tempoLogin');
-            const tempoAtual = new Date().getTime();
-            const tempoLimite = 30 * 60 * 1000; // 30 minutos
+    function verificarTempoSessao() {
+        const tempoLogin = localStorage.getItem('tempoLogin');
+        const tempoAtual = new Date().getTime();
+        const tempoLimite = 30 * 60 * 1000; // 30 minutos
 
-            if (tempoAtual - tempoLogin > tempoLimite) {
-                realizarLogout();
-            }
+        if (tempoAtual - tempoLogin > tempoLimite) {
+            realizarLogout();
         }
+    }
 
-        function realizarLogout() {
-            firebase.auth().signOut().then(() => {
-                localStorage.clear();
-                window.location.href = 'formlogin.html';
-            }).catch((erro) => {
-                console.error('Erro ao fazer logout:', erro);
+    function realizarLogout() {
+        firebase.auth().signOut().then(() => {
+            localStorage.clear();
+            window.location.href = 'formlogin.html';
+        }).catch((erro) => {
+            console.error('Erro ao fazer logout:', erro);
+        });
+    }
+
+    setInterval(verificarTempoSessao, 60000); // Verifica a cada minuto
+    verificarTempoSessao(); // Verifica imediatamente ao carregar a página
+
+    window.onload = function() {
+        const userName = localStorage.getItem('nomeUsuario');
+        const userEmail = localStorage.getItem('emailUsuario');
+        const userFuncao = localStorage.getItem('funcaoUsuario');
+                            
+        document.getElementById('userName').textContent = userName || 'Não disponível';
+        document.getElementById('userEmail').textContent = userEmail || 'Não disponível';
+        document.getElementById('userFuncao').textContent = userFuncao || 'Não disponível';
+        
+        // Obtém todas as chaves do localStorage
+        const chaves = Object.keys(localStorage);
+
+        // Verifica se há chaves no localStorage
+        if (chaves.length > 0) {
+            console.log("Dados armazenados no localStorage:");
+
+            // Percorre as chaves e exibe os valores correspondentes
+            chaves.forEach(function(chave) {
+                const valor = localStorage.getItem(chave);
+                console.log(`${chave}: ${valor}`);
             });
+        } else {
+            console.log("Não há dados armazenados no localStorage.");
         }
 
-        setInterval(verificarTempoSessao, 60000); // Verifica a cada minuto
-        verificarTempoSessao(); // Verifica imediatamente ao carregar a página
-     
-        async function carregarDadosAdicionais() {
-            const nomeUsuario = localStorage.getItem('nomeUsuario');
-            console.log("Nome do usuário:", nomeUsuario);
-            if (nomeUsuario) {
-                try {
-                    const queryUsuario = await bancoDeDados.collection("usuarios").where("nome", "==", nomeUsuario).get();
-                    if (!queryUsuario.empty) {
-                        const dadosUsuario = queryUsuario.docs[0].data();
-                        const funcaoUsuario = dadosUsuario.funcao || '';
-                        localStorage.setItem('funcaoUsuario', funcaoUsuario);
-                    }
+        document.getElementById('logoutLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            realizarLogout();
+        });
+    };
+</script>
 
-                    const queryMembro = await bancoDeDados.collection("membros").where("nome", "==", nomeUsuario).get();
-                    if (!queryMembro.empty) {
-                        const dadosMembro = queryMembro.docs[0].data();
-                        localStorage.setItem('celulaUsuario', dadosMembro.nomedacelula || '');
 
-                        const queryEstrutura = await bancoDeDados.collection("estruturacelula").where("nomecelula", "==", dadosMembro.nomedacelula).get();
-                        if (!queryEstrutura.empty) {
-                            const dadosEstrutura = queryEstrutura.docs[0].data();
-                            localStorage.setItem('liderUsuario', dadosEstrutura.conclider || '');
-                            localStorage.setItem('supervisorUsuario', dadosEstrutura.supervisor || '');
-                            localStorage.setItem('redeUsuario', dadosEstrutura.rede || '');
-                        }
-                    }
-                } catch (erro) {
-                    console.error("Erro ao carregar dados adicionais:", erro);
-                }
-            }
-        }
-
-        // Função para associar, rede, supervisor e lider do usuário
-        async function encontrarRedesDoUsuario() {
-            try {
-                const nomeUsuario = localStorage.getItem('nomeUsuario');
-                console.log(`Iniciando a busca pelas redes, supervisores e líderes do usuário: ${nomeUsuario}`);
-                console.log("Nome do usuário:", nomeUsuario);
-
-                const dadosUsuario = {};
-
-                const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                    .where('coordenador', '==', nomeUsuario)
-                    .get();
-
-                querySnapshot.forEach((doc) => {
-                    const dados = doc.data();
-                    const rede = dados.rede;
-                    const supervisor = dados.supervisor;
-                    const lider = dados.conclider;
-
-                    if (!dadosUsuario[nomeUsuario]) {
-                        dadosUsuario[nomeUsuario] = [];
-                    }
-
-                    dadosUsuario[nomeUsuario].push({ rede, supervisor, lider });
-
-                    console.log(`Dados encontrados para o coordenador ${nomeUsuario}:`, { rede, supervisor, lider });
-                });
-
-                const camposLider = ['supervisor1', 'supervisor2', 'nomelider1', 'nomelider2', 'nomelider3'];
-
-                for (const campo of camposLider) {
-                    console.log(`Buscando redes, supervisores e líderes para o campo ${campo}`);
-
-                    const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                        .where(campo, '==', nomeUsuario)
-                        .get();
-
-                    querySnapshot.forEach((doc) => {
-                        const dados = doc.data();
-                        const rede = dados.rede;
-                        const supervisor = dados.supervisor;
-                        const lider = dados.conclider;
-
-                        if (!dadosUsuario[nomeUsuario]) {
-                            dadosUsuario[nomeUsuario] = [];
-                        }
-
-                        dadosUsuario[nomeUsuario].push({ rede, supervisor, lider });
-
-                        console.log(`Dados encontrados para o campo ${campo} e usuário ${nomeUsuario}:`, { rede, supervisor, lider });
-                    });
-                }
-
-                console.log(`Dados encontrados para o usuário ${nomeUsuario}:`, dadosUsuario);
-
-                // Armazenar os dados no localStorage
-                localStorage.setItem('dadosUsuario', JSON.stringify(dadosUsuario));
-
-                return dadosUsuario;
-            } catch (error) {
-                console.error('Erro ao encontrar as redes, supervisores e líderes do usuário:', error);
-                return {};
-            }
-        }
-
-        async function ajustafuncaoUsuario() {
-            try {
-                const nomeUsuario = localStorage.getItem('nomeUsuario');
-                const funcao = localStorage.getItem('funcaoUsuario');
-
-                let funcaoUsuario = 'Membro';
-
-                if (funcao === 'ADMIN') {
-                    funcaoUsuario = 'ADMIN';
-                } else {
-                    const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                        .where('pastor1', '==', nomeUsuario)
-                        .get();
-
-                    if (!querySnapshot.empty) {
-                        funcaoUsuario = 'Pastor';
-                    } else {
-                        const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                            .where('pastor2', '==', nomeUsuario)
-                            .get();
-
-                        if (!querySnapshot.empty) {
-                            funcaoUsuario = 'Pastor';
-                        } else {
-                            const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                                .where('coordenador1', '==', nomeUsuario)
-                                .get();
-
-                            if (!querySnapshot.empty) {
-                                funcaoUsuario = 'Coordenador';
-                            } else {
-                                const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                                    .where('coordenador2', '==', nomeUsuario)
-                                    .get();
-
-                                if (!querySnapshot.empty) {
-                                    funcaoUsuario = 'Coordenador';
-                                } else {
-                                    const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                                        .where('supervisor1', '==', nomeUsuario)
-                                        .get();
-
-                                    if (!querySnapshot.empty) {
-                                        funcaoUsuario = 'Supervisor';
-                                    } else {
-                                        const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                                            .where('supervisor2', '==', nomeUsuario)
-                                            .get();
-
-                                        if (!querySnapshot.empty) {
-                                            funcaoUsuario = 'Supervisor';
-                                        } else {
-                                            const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                                                .where('nomelider1', '==', nomeUsuario)
-                                                .get();
-
-                                            if (!querySnapshot.empty) {
-                                                funcaoUsuario = 'Líder';
-                                            } else {
-                                                const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                                                    .where('nomelider2', '==', nomeUsuario)
-                                                    .get();
-
-                                                if (!querySnapshot.empty) {
-                                                    funcaoUsuario = 'Líder';
-                                                } else {
-                                                    const querySnapshot = await bancoDeDados.collection('estruturacelula')
-                                                        .where('nomelider3', '==', nomeUsuario)
-                                                        .get();
-
-                                                    if (!querySnapshot.empty) {
-                                                        funcaoUsuario = 'Líder';
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                console.log(`Função do usuário ${nomeUsuario}:`, funcaoUsuario);
-                return { funcao: funcaoUsuario };                
-            } catch (error) {
-                console.error('Erro ao encontrar a função do usuário:', error);
-                return { funcao: 'Membro' };
-            }
-        }
-
-        // Exemplo de uso
-        const nomeUsuario = 'Nome do Usuário';
-        encontrarRedesDoUsuario(nomeUsuario)
-            .then((redes) => {
-                console.log(`Redes do usuário ${nomeUsuario}:`, redes);
-                // Faça algo com as redes encontradas, como exibi-las na página
-            })
-            .catch((error) => {
-                console.error('Erro ao encontrar as redes do usuário:', error);
-            });
-
-            // Exemplo de uso
-            ajustafuncaoUsuario()
-                .then((resultado) => {
-                    const funcaoUsuario = resultado.funcao;
-                    localStorage.setItem('funcaoUsuario', funcaoUsuario);
-                    console.log("Função do usuário:", funcaoUsuario);
-                    // Faça algo com a função do usuário, como exibi-la na página
-                })
-                .catch((error) => {
-                    console.error('Erro ao encontrar a função do usuário:', error);
-                })
-                
-        window.onload = async function() {
-            await carregarDadosAdicionais();
-            await ajustafuncaoUsuario();
-
-            const userName = localStorage.getItem('nomeUsuario');
-            const userEmail = localStorage.getItem('emailUsuario');
-            const userFuncao = localStorage.getItem('funcaoUsuario');
-                                
-            document.getElementById('userName').textContent = userName || 'Não disponível';
-            document.getElementById('userEmail').textContent = userEmail || 'Não disponível';
-            document.getElementById('userFuncao').textContent = userFuncao || 'Não disponível';
-             
-            // Obtém todas as chaves do localStorage
-            const chaves = Object.keys(localStorage);
-
-// Verifica se há chaves no localStorage
-if (chaves.length > 0) {
-    console.log("Dados armazenados no localStorage:");
-
-    // Percorre as chaves e exibe os valores correspondentes
-    chaves.forEach(function(chave) {
-        const valor = localStorage.getItem(chave);
-        console.log(`${chave}: ${valor}`);
-    });
-} else {
-    console.log("Não há dados armazenados no localStorage.");
-}
-
-            document.getElementById('logoutLink').addEventListener('click', function(e) {
-                e.preventDefault();
-                realizarLogout();
-            });
-        };
-    </script>
 </body>
 </html>

@@ -114,12 +114,12 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+        import { getFirestore, collection, doc, getDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-    <script>
-        var configuracaoFirebase = {
+        const configuracaoFirebase = {
             apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
             authDomain: "dbiebi.firebaseapp.com",
             databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
@@ -128,9 +128,10 @@
             messagingSenderId: "1068164821081",
             appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
         };
-        firebase.initializeApp(configuracaoFirebase);
-        var bancoDeDados = firebase.firestore();
-        var auth = firebase.auth();
+
+        const app = initializeApp(configuracaoFirebase);
+        const bancoDeDados = getFirestore(app);
+        const autenticacao = getAuth(app);
 
         if (typeof(Storage) !== "undefined") {
             console.log("localStorage está disponível");
@@ -138,45 +139,88 @@
             console.log("localStorage não está disponível");
         }
 
-        async function armazenarDadosUsuario(idUsuario) {
+        async function determinarFuncaoUsuario(nomeUsuario) {
             try {
-                const docUsuario = await bancoDeDados.collection("usuarios").doc(idUsuario).get();
-                if (docUsuario.exists) {
-                    const dadosUsuario = docUsuario.data();
-                    localStorage.setItem('nomeUsuario', dadosUsuario.nome);
-                    localStorage.setItem('emailUsuario', dadosUsuario.email);
-                    console.log("Dados do usuário armazenados:", dadosUsuario);
-                } else {
-                    console.log("Documento do usuário não encontrado");
+                const queryUsuario = await getDocs(query(collection(bancoDeDados, "usuarios"), where("nome", "==", nomeUsuario)));
+                if (!queryUsuario.empty && queryUsuario.docs[0].data().funcao === "ADMIN") {
+                    return "ADMIN";
                 }
+
+                const queryEstrutura = await getDocs(collection(bancoDeDados, "estruturacelula"));
+                for (const documento of queryEstrutura.docs) {
+                    const dados = documento.data();
+                    if (dados.pastor1 === nomeUsuario || dados.pastor2 === nomeUsuario) {
+                        return "Pastor";
+                    }
+                    if (dados.coordenador1 === nomeUsuario || dados.coordenador2 === nomeUsuario) {
+                        return "Coordenador";
+                    }
+                    if (dados.supervisor1 === nomeUsuario || dados.supervisor2 === nomeUsuario) {
+                        return "Supervisor";
+                    }
+                    if (dados.nomelider1 === nomeUsuario || dados.nomelider2 === nomeUsuario) {
+                        return "Lider";
+                    }
+                }
+                return "Membro";
             } catch (erro) {
-                console.error("Erro ao armazenar dados do usuário:", erro);
+                console.error("Erro ao determinar função do usuário:", erro);
+                return "Membro";
             }
         }
 
-        var formulario = document.getElementById('loginForm');
+        async function armazenarDadosUsuario(email) {
+            try {
+                const membrosRef = collection(bancoDeDados, "membros");
+                const q = query(membrosRef, where("email", "==", email));
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    const documentoMembro = querySnapshot.docs[0];
+                    const dadosMembro = documentoMembro.data();
+                    
+                    localStorage.setItem('nomeUsuario', dadosMembro.nome);
+                    localStorage.setItem('nomedacelula', dadosMembro.nomedacelula);
+                    localStorage.setItem('lidercelula', dadosMembro.lidercelula);
+                    localStorage.setItem('igreja', dadosMembro.igreja);
+                    localStorage.setItem('rede', dadosMembro.rede);
 
-        formulario.addEventListener('submit', async function(e) {
-            e.preventDefault();
+                    const funcaoUsuario = await determinarFuncaoUsuario(dadosMembro.nome);
+                    localStorage.setItem('funcaoUsuario', funcaoUsuario);
+
+                    console.log("Dados do membro armazenados:", dadosMembro);
+                    console.log("Função do usuário:", funcaoUsuario);
+                } else {
+                    console.log("Documento do membro não encontrado");
+                }
+            } catch (erro) {
+                console.error("Erro ao armazenar dados do membro:", erro);
+            }
+        }
+
+        const formulario = document.getElementById('loginForm');
+
+        formulario.addEventListener('submit', async function(evento) {
+            evento.preventDefault();
             console.log("Iniciando processo de login");
 
-            var email = document.getElementById('email').value;
-            var senha = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('password').value;
 
             try {
                 console.log("Tentando autenticar usuário");
-                const credencialUsuario = await auth.signInWithEmailAndPassword(email, senha);
+                const credencialUsuario = await signInWithEmailAndPassword(autenticacao, email, senha);
                 console.log("Usuário autenticado com sucesso");
 
-                var usuario = credencialUsuario.user;
+                const usuario = credencialUsuario.user;
                 localStorage.setItem('tempoLogin', new Date().getTime());
                 localStorage.setItem('emailUsuario', email);
                 console.log("Tempo de login e email armazenados");
 
-                await armazenarDadosUsuario(usuario.uid);
+                await armazenarDadosUsuario(email);
                 console.log("Dados do usuário armazenados");
 
-                window.location.href = 'frmRelatorios.html';
+                // window.location.href = 'frmRelatorios.html';
             } catch (erro) {
                 console.error("Erro completo:", erro);
                 console.log("Código de erro:", erro.code);
@@ -209,4 +253,6 @@
         });
     </script>
 </body>
+
+
 </html>
