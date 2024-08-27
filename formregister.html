@@ -98,21 +98,21 @@
                 <label for="email">E-mail</label>
                 <div class="input-wrapper">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" required>
+                    <input type="email" id="email" autocomplete="username" required>
                 </div>
             </div>
             <div class="form-group">
                 <label for="password">Senha</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" required>
+                    <input type="password" id="password" autocomplete="new-password" required>
                 </div>
             </div>
             <div class="form-group">
                 <label for="confirmPassword">Confirmar Senha</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="confirmPassword" required>
+                    <input type="password" id="confirmPassword" autocomplete="new-password" required>
                 </div>
             </div>
             <div class="spacer"></div>
@@ -125,13 +125,11 @@
         </div>
     </div>
 
-    <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
 
     <script>
-        // Configuração do Firebase
         var configuracaoFirebase = {
             apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
             authDomain: "dbiebi.firebaseapp.com",
@@ -143,20 +141,19 @@
         };
         firebase.initializeApp(configuracaoFirebase);
         var bancoDeDados = firebase.firestore();
-        var auth = firebase.auth();
+        var autenticacao = firebase.auth();
     
-        // Referência ao formulário
         var formulario = document.getElementById('registerForm');
     
-        function checkNameExists(name) {
+        function verificarNomeExistente(nome) {
             return bancoDeDados.collection('membros')
-                .where('nome', '==', name)
+                .where('nome', '==', nome)
                 .get()
                 .then(snapshot => !snapshot.empty);
         }
     
-        formulario.addEventListener('submit', function(e) {
-            e.preventDefault();
+        formulario.addEventListener('submit', function(evento) {
+            evento.preventDefault();
     
             var nome = document.getElementById('name').value.trim().toUpperCase();
             var email = document.getElementById('email').value;
@@ -168,59 +165,64 @@
                 return;
             }
     
-            checkNameExists(nome).then(exists => {
-                if (exists) {
-                    // Criar usuário no Firebase Authentication
-                    auth.createUserWithEmailAndPassword(email, senha)
-                        .then(function(userCredential) {
-                            // Usuário criado com sucesso
-                            var user = userCredential.user;
-    
-                            // Adicionar informações adicionais ao Firestore
-                            return bancoDeDados.collection('usuarios').doc(user.uid).set({
-                                nome: nome,
-                                email: email,
-                                dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-                            });
+            console.log('Verificando nome:', nome);
+            verificarNomeExistente(nome).then(existe => {
+                if (existe) {
+                    console.log('Nome encontrado na coleção "membros". Prosseguindo com o registro.');
+                    
+                    autenticacao.createUserWithEmailAndPassword(email, senha)
+                        .then(function(credencialUsuario) {
+                            var usuario = credencialUsuario.user;
+                            console.log('Usuário criado com sucesso na Autenticação:', usuario.uid);
                         })
-                        .then(function() {
-                            alert('Registro realizado com sucesso!');
-                            window.location.href = 'formlogin.html'; // Redirecionar para a página de login
-                        })
-                        .catch(function(error) {
-                            console.error('Erro no registro:', error);
-                            let mensagemErro = 'Erro no registro: ';
-                            
-                            switch(error.code) {
-                                case 'auth/email-already-in-use':
-                                    mensagemErro += 'Este e-mail já está registrado em nossa comunidade. Por favor, use outro e-mail ou entre em contato com a secretaria da igreja se precisar de ajuda.';
-                                    break;
-                                case 'auth/invalid-email':
-                                    mensagemErro += 'O endereço de e-mail é inválido.';
-                                    break;
-                                case 'auth/weak-password':
-                                    mensagemErro += 'A senha é muito fraca. Use uma senha mais forte.';
-                                    break;
-                                default:
-                                    mensagemErro += error.message;
-                            }
-                            
-                            alert(mensagemErro);
+                        .catch(function(erro) {
+                            console.error('Erro ao criar usuário na Autenticação:', erro);
+                            throw erro;
                         });
+
+                        bancoDeDados.collection('usuarios').where('email', '==', email).get()
+                            .then(function(querySnapshot) {
+                                if (querySnapshot.empty) {
+                                    return bancoDeDados.collection('usuarios').add({
+                                        nome: nome,
+                                        email: email,
+                                        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+                                } else {
+                                    console.log('Usuário já existe na coleção "usuarios"');
+                                    return Promise.resolve();
+                                }
+                            })
+                            .then(function(docRef) {
+                                if (docRef) {
+                                    console.log('Documento adicionado com ID: ', docRef.id);
+                                }
+                                alert('Registro realizado com sucesso!');
+                                setTimeout(function() {
+                                    window.location.href = 'formlogin.html';
+                                }, 1000);
+                            })
+                            .catch(function(erro) {
+                                console.error('Erro ao adicionar documento:', erro);
+                                alert('Ocorreu um erro ao salvar os dados: ' + erro.message);
+                            });
+
                 } else {
+                    console.log('Usuário não encontrado na coleção "membros"');
                     alert('Usuário não encontrado. Por favor, cadastre-se primeiro em uma célula antes de criar uma conta.');
                     window.location.href = 'formCadMembros.html';
                 }
-            }).catch(error => {
-                console.error('Erro ao verificar o nome:', error);
+            }).catch(erro => {
+                console.error('Erro ao verificar o nome:', erro);
                 alert('Ocorreu um erro ao verificar seu nome. Por favor, tente novamente mais tarde.');
             });
         });
     
-        document.getElementById('name').addEventListener('input', function(e) {
+        document.getElementById('name').addEventListener('input', function(evento) {
             this.value = this.value.toUpperCase();
         });
     </script>
-    
 </body>
+
+
 </html>
