@@ -198,6 +198,54 @@
             }
         }
 
+        async function armazenarEstruturaCelula() {
+            const nomeUsuario = localStorage.getItem('nomeUsuario');
+            const funcaoUsuario = localStorage.getItem('funcaoUsuario');
+            const estrutura = {
+                pastores: {},
+                coordenadores: {},
+                supervisores: {},
+                lideres: {}
+            };
+
+            const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
+            const querySnapshot = await getDocs(estruturaCelulaRef);
+
+            querySnapshot.forEach((doc) => {
+                const dados = doc.data();
+                const { rede, Pastor, coordenador, supervisor, conclider } = dados;
+
+                if (funcaoUsuario === 'ADMIN') {
+                    estrutura.pastores[rede] = Pastor;
+                    estrutura.coordenadores[rede] = coordenador;
+                    estrutura.supervisores[rede] = supervisor;
+                    estrutura.lideres[rede] = conclider;
+                } else {
+                    if (dados.pastor1 === nomeUsuario || dados.pastor2 === nomeUsuario) {
+                        estrutura.pastores[rede] = Pastor;
+                        estrutura.coordenadores[rede] = coordenador;
+                        estrutura.supervisores[rede] = supervisor;
+                        estrutura.lideres[rede] = conclider;
+                    } else if (dados.coordenador1 === nomeUsuario || dados.coordenador2 === nomeUsuario) {
+                        estrutura.coordenadores[rede] = coordenador;
+                        estrutura.supervisores[rede] = supervisor;
+                        estrutura.lideres[rede] = conclider;
+                    } else if (dados.supervisor1 === nomeUsuario || dados.supervisor2 === nomeUsuario) {
+                        estrutura.supervisores[rede] = supervisor;
+                        estrutura.lideres[rede] = conclider;
+                    } else if (dados.nomelider1 === nomeUsuario || dados.nomelider2 === nomeUsuario || dados.nomelider3 === nomeUsuario) {
+                        estrutura.lideres[rede] = conclider;
+                    }
+                }
+            });
+
+            for (const key in estrutura) {
+                localStorage.setItem(key, JSON.stringify(estrutura[key]));
+            }
+
+            console.log("Estrutura de célula armazenada com sucesso");
+        }
+
         const formulario = document.getElementById('loginForm');
 
         formulario.addEventListener('submit', async function(evento) {
@@ -218,7 +266,9 @@
                 console.log("Tempo de login e email armazenados");
 
                 await armazenarDadosUsuario(email);
+                await armazenarEstruturaCelula();
                 console.log("Dados do usuário armazenados");
+                window.location.href = 'frmRelatorios.html';
 
                 // window.location.href = 'frmRelatorios.html';
             } catch (erro) {
