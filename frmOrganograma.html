@@ -112,6 +112,11 @@
             margin: 0 15px;
             font-size: 12px;
         }
+        .supervisor-info {
+            font-size: 0.8em;
+            margin-top: 5px;
+            color: rgba(255,255,255,0.8);
+        }
         .connector-vertical {
             width: 2px;
             background-color: #bdc3c7;
@@ -308,6 +313,10 @@
             }
         }
 
+        function contarCelulasPorSupervisor(lideres) {
+            return lideres.length;
+        }
+
         // Carregar líderes e exibir organograma
         function carregarLideres() {
             const redeEscolhida = selectRedes.value;
@@ -361,6 +370,9 @@
                                 <div class="supervisor-group">
                                     <div class="node supervisor" style="background-color: ${corBase};">
                                         <strong>${supervisor}</strong>
+                                        <div class="supervisor-info">
+                                            Células: ${contarCelulasPorSupervisor(lideres)}
+                                        </div>
                                     </div>
                                     <div class="connector-vertical"></div>
                                     <div class="lider-container">
