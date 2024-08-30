@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -21,6 +20,7 @@
         }
         .container {
             max-width: 1200px;
+            width: 100%;
             margin-top: 20px;
             background-color: #fff;
             padding: 30px;
@@ -56,7 +56,8 @@
             border-color: #333;
         }
         #resumoTable {
-            margin-top: 20px;
+            width: 100%;
+            margin-bottom: 20px;
         }
         #resumoTable th {
             background-color: #f8f9fa;
@@ -64,6 +65,7 @@
         }
         #exportButton {
             margin-top: 20px;
+            margin-bottom: 10px;
         }
         #loadingSpinner {
             position: fixed;
@@ -120,7 +122,17 @@
             vertical-align: middle !important;
             text-align: center !important;
         }
-
+        .table-responsive {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
     </style>
 </head>
 <body>
@@ -130,7 +142,7 @@
     <div class="header">
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
     </div>
-    <div class="container">
+    <div class="container container-fluid">
         <h2 class="text-center mb-4 font-weight-bold">Resumo do Mês por Célula</h2>
         <div class="divider"></div>
         <form id="relatorioForm">
@@ -177,27 +189,29 @@
                 </div>
             </div>
         </div>
-        <div id="resumoTableContainer" style="display: none;">
-            <table id="resumoTable" class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th class="header-cell">Rede</th>
-                        <th class="header-cell">Supervisor</th>
-                        <th class="header-cell">Líderes</th>
-                        <th class="header-cell">Nome da Célula</th>
-                        <th class="header-cell">Qtd de Membros</th>
-                        <th class="header-cell">Reuniões no Mês</th>
-                        <th class="header-cell">Frequência Mês</th>
-                        <th class="header-cell">Quantidade de Visitações Mês</th>
-                        <th class="header-cell">Valor das Ofertas Mês</th>
-                        <th class="header-cell">Colheita do Amor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-            <button id="exportButton" class="btn btn-primary btn-block" onclick="imprimirTabela()">Imprimir Relatório</button>
-        </div>
+        <div class="table-responsive mt-4"></div>
+            <div id="resumoTableContainer" class="table-container" style="display: none;">
+                <table id="resumoTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="header-cell">Rede</th>
+                            <th class="header-cell">Supervisor</th>
+                            <th class="header-cell">Líderes</th>
+                            <th class="header-cell">Nome da Célula</th>
+                            <th class="header-cell">Qtd de Membros</th>
+                            <th class="header-cell">Reuniões no Mês</th>
+                            <th class="header-cell">Frequência Mês</th>
+                            <th class="header-cell">Qde Visitações no Mês</th>
+                            <th class="header-cell">Valor das Ofertas Mês</th>
+                            <th class="header-cell">Colheita do Amor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <button id="exportButton" class="btn btn-primary btn-block" onclick="imprimirTabela()">Imprimir Relatório</button>
+            </div>
+        </div>    
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
