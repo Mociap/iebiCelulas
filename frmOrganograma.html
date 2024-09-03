@@ -179,6 +179,11 @@
         .form-control {
             font-size: 12px;
         }
+        .rede-info {
+            font-size: 0.8em;
+            margin-top: 5px;
+            color: rgba(255,255,255,0.8);
+        }
     </style>
 </head>
 <body>
@@ -258,6 +263,11 @@
             };
 
             return cores[rede] || '#E0E0E0';
+        }
+
+        // Função para contar células rede
+        function contarCelulasPorRede(supervisores) {
+            return Object.values(supervisores).reduce((total, lideres) => total + lideres.length, 0);
         }
 
         // Carregar redes
@@ -359,6 +369,9 @@
                             <div class="rede-group">
                                 <div class="node rede" style="background-color: ${corBase};">
                                     ${rede}
+                                    <div class="rede-info">
+                                        Células: ${contarCelulasPorRede(supervisores)}
+                                    </div>
                                 </div>
                                 <div class="content-wrapper">
                                     <div class="connector-vertical"></div>

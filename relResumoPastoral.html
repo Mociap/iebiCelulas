@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo Pastoral</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            padding-top: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px 10px 0 0;
+        }
+        .header img {
+            max-width: 200px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 30px auto;
+        }
+        #relatorioContainer {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #db7734;
+            color: #fff;
+            padding: 10px;
+            border-radius: 50%;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-button:hover {
+            background-color: #db7734;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .back-button i {
+            margin-right: 0;
+        }
+        .card-body .table {
+            font-size: 0.85rem;
+        }
+        .card-body h4 {
+            font-size: 1.1rem;
+        }
+        .table-title {
+            font-size: 16;
+            font-weight: bold;
+        }
+        .table td, .table th {
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <a href="frmRelatorios.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+    </div>
+    
+    <div class="container container-fluid">
+        <h2 class="text-center mb-4 font-weight-bold">Resumo Pastoral</h2>
+        <div class="divider"></div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <ul class="nav nav-pills nav-fill mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">
+                            <i class="fas fa-chart-pie mr-2"></i>Resumo Geral
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">
+                            <i class="fas fa-network-wired mr-2"></i>Detalhes por Rede
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">
+                            <i class="fas fa-chart-bar mr-2"></i>Gráficos
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <canvas id="graficoSupervisores"></canvas>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <canvas id="graficoCelulas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="mb-3 table-title text-center">Nº de CÉLULAS por Setor</h4>
+                                        <table class="table table-striped table-bordered table-sm">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th class="text-center align-middle">Rede</th>
+                                                    <th class="text-center align-middle">Supervisor</th>
+                                                    <th class="text-center align-middle">Qtd Células</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tabelaCelulas">
+                                                <!-- Os dados serão inseridos aqui via JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h4 class="mb-3 table-title text-center">Segunda Tabela</h4>
+                                        <table class="table table-striped table-bordered table-sm">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th class="text-center align-middle">Coluna 1</th>
+                                                    <th class="text-center align-middle">Coluna 2</th>
+                                                    <th class="text-center align-middle">Coluna 3</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dados da segunda tabela serão inseridos aqui -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">Detalhes por Rede</h3>
+                                <!-- Conteúdo dos Detalhes por Rede aqui -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">Gráficos</h3>
+                                <!-- Conteúdo dos Gráficos aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <script src="auth-check.js"></script>
+
+    <!-- Bootstrap JS e dependências -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Obtém todas as chaves do localStorage
+        const chaves = Object.keys(localStorage);
+
+        // Verifica se há chaves no localStorage
+        if (chaves.length > 0) {
+            console.log("Dados armazenados no localStorage:");
+            chaves.forEach(function(chave) {
+                const valor = localStorage.getItem(chave);
+                console.log(`${chave}: ${valor}`);
+            });
+        } else {
+            console.log("Não há dados armazenados no localStorage.");
+        }
+
+        // Função para contar supervisores por rede
+        function contarSupervisoresPorRede() {
+            const supervisores = JSON.parse(localStorage.getItem('supervisores'));
+            const contagem = {};
+            for (const rede in supervisores) {
+                contagem[rede] = supervisores[rede].length;
+            }
+            return contagem;
+        }
+
+        // Função para contar células por rede
+        function contarCelulasPorRede() {
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+            const contagem = {};
+            for (const rede in lideres) {
+                contagem[rede] = lideres[rede].length;
+            }
+            return contagem;
+        }
+
+        function getCorRede(rede) {
+            const cores = {
+                'AMARELA': '#FFD700',
+                'AZUL': '#000080',
+                'TEEN': '#4B0082',
+                'LARANJA': '#FF8C00',
+                'VERMELHA': '#8B0000',
+                'BLACK': '#000000',
+                'VERDE': '#006400'
+            };
+            return cores[rede.toUpperCase()] || '#000000';
+        }
+
+        function calcularTotal(dados) {
+            return Object.values(dados).reduce((a, b) => a + b, 0);
+        }
+
+        const opcoesGrafico = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            elements: {
+                arc: {
+                    borderWidth: 0
+                }
+            },
+            layout: {
+                padding: 20
+            },
+            cutout: '50%'
+        };
+
+        // Para o gráfico de supervisores
+        const opcoesSupervisores = {
+            ...opcoesGrafico,
+            plugins: {
+                ...opcoesGrafico.plugins,
+                title: {
+                    display: true,
+                    text: 'Supervisores por Rede',
+                    font: {
+                        size: 18
+                    }
+                }
+            }
+        };
+
+        // Para o gráfico de células
+        const opcoesCelulas = {
+            ...opcoesGrafico,
+            plugins: {
+                ...opcoesGrafico.plugins,
+                title: {
+                    display: true,
+                    text: 'Células por Rede',
+                    font: {
+                        size: 18
+                    }
+                }
+            }
+        };
+
+        const pluginTextoCentral = {
+            id: 'textoCentral',
+            afterDraw: function(grafico) {
+                var ctx = grafico.ctx;
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                grafico.data.datasets.forEach(function(dataset, indiceDataset) {
+                    var meta = grafico.getDatasetMeta(indiceDataset);
+                    meta.data.forEach(function(elemento, indice) {
+                        var textoValor = dataset.data[indice].toString();
+                        var tamanhoFonte = 16;
+                        ctx.font = `bold ${tamanhoFonte}px Arial`;
+                        ctx.fillStyle = 'white';
+
+                        var angulo = (elemento.startAngle + elemento.endAngle) / 2;
+                        var raio = (elemento.outerRadius + elemento.innerRadius) / 2;
+                        
+                        var x = elemento.x + Math.cos(angulo) * raio;
+                        var y = elemento.y + Math.sin(angulo) * raio;
+
+                        ctx.fillText(textoValor, x, y);
+                    });
+                });
+                ctx.restore();
+            }
+        };
+
+        const pluginCentroTotal = {
+            id: 'centroTotal',
+            afterDraw: function(chart) {
+                const ctx = chart.ctx;
+                const chartArea = chart.chartArea;
+                
+                const centerX = (chartArea.left + chartArea.right) / 2;
+                const centerY = (chartArea.top + chartArea.bottom) / 2;
+                
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                const fontSize = ((chartArea.bottom - chartArea.top) / 15)*1.5;
+                ctx.font = fontSize + "px sans-serif";
+                
+                const text = "Total: ";
+                const total = calcularTotal(chart.data.datasets[0].data);
+                const fullText = text + total;
+
+                ctx.fillStyle = "#000000";
+                ctx.fillText(fullText, centerX, centerY);
+                
+                ctx.restore();
+            }
+        };
+
+        // Criar gráfico de supervisores
+        const ctxSupervisores = document.getElementById('graficoSupervisores').getContext('2d');
+        const dadosSupervisores = contarSupervisoresPorRede();
+        new Chart(ctxSupervisores, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(dadosSupervisores),
+                datasets: [{
+                    data: Object.values(dadosSupervisores),
+                    backgroundColor: Object.keys(dadosSupervisores).map(getCorRede)
+                }]
+            },
+            options: opcoesSupervisores,
+            plugins: [pluginTextoCentral, pluginCentroTotal]
+        });
+
+        // Criar gráfico de células
+        const ctxCelulas = document.getElementById('graficoCelulas').getContext('2d');
+        const dadosCelulas = contarCelulasPorRede();
+        new Chart(ctxCelulas, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(dadosCelulas),
+                datasets: [{
+                    data: Object.values(dadosCelulas),
+                    backgroundColor: Object.keys(dadosCelulas).map(getCorRede)
+                }]
+            },
+            options: opcoesCelulas,
+            plugins: [pluginTextoCentral, pluginCentroTotal]
+        });
+
+        function preencherTabelaCelulas() {
+            console.log('Iniciando preenchimento da tabela de células');
+
+            const supervisores = JSON.parse(localStorage.getItem('supervisores'));
+            console.log('Supervisores carregados:', supervisores);
+
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+            console.log('Líderes carregados:', lideres);
+
+            const tabelaBody = document.getElementById('tabelaCelulas');
+
+            let dadosTabela = [];
+            for (const rede in supervisores) {
+                console.log(`Processando rede: ${rede}`);
+                supervisores[rede].forEach(supervisor => {
+                    console.log(`Processando supervisor: ${supervisor}`);
+                    const qtdCelulas = lideres[rede].filter(lider => lider.supervisor === supervisor).length;
+                    console.log(`Quantidade de células para ${supervisor}: ${qtdCelulas}`);
+                    dadosTabela.push({ rede, supervisor, qtdCelulas });
+                });
+            }
+
+            console.log('Dados da tabela antes da ordenação:', dadosTabela);
+
+            dadosTabela.sort((a, b) => {
+                if (a.rede !== b.rede) {
+                    return a.rede.localeCompare(b.rede);
+                }
+                return a.supervisor.localeCompare(b.supervisor);
+            });
+
+            console.log('Dados da tabela após ordenação:', dadosTabela);
+
+            tabelaBody.innerHTML = '';
+
+            dadosTabela.forEach(({ rede, supervisor, qtdCelulas }) => {
+                const row = `
+                    <tr>
+                        <td class="text-center align-middle">${rede}</td>
+                        <td class="text-center align-middle">${supervisor}</td>
+                        <td class="text-center align-middle">${qtdCelulas}</td>
+                    </tr>
+                `;
+                tabelaBody.innerHTML += row;
+            });
+
+            console.log('Preenchimento da tabela concluído');
+        }
+
+
+
+        // Chame esta função após o carregamento da página
+        document.addEventListener('DOMContentLoaded', function() {
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+            const contagem = {};
+
+            for (const rede in lideres) {
+                lideres[rede].forEach(lider => {
+                    const chave = `${rede} - ${lider.supervisor}`;
+                    contagem[chave] = (contagem[chave] || 0) + 1;
+                });
+            }
+
+            const dadosOrdenados = Object.entries(contagem)
+                .map(([chave, valor]) => {
+                    const [rede, supervisor] = chave.split(' - ');
+                    return { rede, supervisor, qtdCelulas: valor };
+                })
+                .sort((a, b) => {
+                    if (a.rede !== b.rede) {
+                        return a.rede.localeCompare(b.rede);
+                    }
+                    return a.supervisor.localeCompare(b.supervisor);
+                });
+
+            preencherTabelaComContagem(dadosOrdenados);
+        });
+
+        function preencherTabelaComContagem(dadosOrdenados) {
+            const tabelaBody = document.getElementById('tabelaCelulas');
+            if (!tabelaBody) {
+                console.error('Elemento tabelaCelulas não encontrado');
+                return;
+            }
+
+            const coresRedes = {
+                'VERMELHA': '#FF0000',
+                'VERDE': '#008000',
+                'AZUL': '#0000FF',
+                'AMARELA': '#FFFF00',
+                'LARANJA': '#FFA500',
+                'BLACK': '#000000',
+                'TEEN': '#800080'
+            };
+
+            tabelaBody.innerHTML = '';
+
+            let totalGeral = 0;
+
+            dadosOrdenados.forEach(({ rede, supervisor, qtdCelulas }) => {
+                const row = tabelaBody.insertRow();
+                const cor = coresRedes[rede] || '#000000';
+                row.innerHTML = `
+                    <td class="align-middle">
+                        <i class="fas fa-circle" style="color: ${cor};"></i>
+                        ${rede}
+                    </td>
+                    <td class="text-center align-middle">${supervisor}</td>
+                    <td class="text-center align-middle">${qtdCelulas}</td>
+                `;
+                totalGeral += qtdCelulas;
+            });
+
+            // Adiciona linha de total
+            const linhaTotalGeral = tabelaBody.insertRow();
+            linhaTotalGeral.className = 'thead-dark text-white bg-dark';
+            linhaTotalGeral.innerHTML = `
+                <td colspan="2" class="text-center align-middle font-weight-bold">Total Geral:</td>
+                <td class="text-center align-middle font-weight-bold">${totalGeral}</td>
+            `;
+        }
+
+    </script>
+
+</body>
+</html>
+

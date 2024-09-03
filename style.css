@@ -61,6 +61,7 @@ h1 {
 .card:nth-child(3)::before { background-color: #e74c3c; }
 .card:nth-child(4)::before { background-color: #f1c40f; }
 .card:nth-child(5)::before { background-color: #3498db; }
+.card:nth-child(6)::before { background-color: #db7734; }
 .card:hover::before {
     height: 100%;
     opacity: 0.1;
@@ -140,3 +141,5 @@ a {
     margin: 5px 0;
     font-size: 0.9em;
 }
+
+

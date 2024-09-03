@@ -198,6 +198,7 @@
             }
         }
 
+        // Em contrução
         async function armazenarEstruturaCelula() {
             const nomeUsuario = localStorage.getItem('nomeUsuario');
             const funcaoUsuario = localStorage.getItem('funcaoUsuario');
@@ -215,26 +216,30 @@
                 const dados = doc.data();
                 const { rede, Pastor, coordenador, supervisor, conclider } = dados;
 
-                const roles = ['pastores', 'coordenadores', 'supervisores', 'lideres'];
-                const values = [Pastor, coordenador, supervisor, conclider];
-
                 if (funcaoUsuario === 'ADMIN' ||
                     dados.pastor1 === nomeUsuario || dados.pastor2 === nomeUsuario ||
                     dados.coordenador1 === nomeUsuario || dados.coordenador2 === nomeUsuario ||
                     dados.supervisor1 === nomeUsuario || dados.supervisor2 === nomeUsuario ||
                     dados.nomelider1 === nomeUsuario || dados.nomelider2 === nomeUsuario || dados.nomelider3 === nomeUsuario) {
-                        roles.forEach((role, index) => {
-                            if (!estrutura[role][rede]) estrutura[role][rede] = new Set();
-                            estrutura[role][rede].add(values[index]);
-                        });
+                    
+                    if (!estrutura.pastores[rede]) estrutura.pastores[rede] = new Set();
+                    if (!estrutura.coordenadores[rede]) estrutura.coordenadores[rede] = new Set();
+                    if (!estrutura.supervisores[rede]) estrutura.supervisores[rede] = new Set();
+                    if (!estrutura.lideres[rede]) estrutura.lideres[rede] = [];
+
+                    estrutura.pastores[rede].add(Pastor);
+                    estrutura.coordenadores[rede].add(coordenador);
+                    estrutura.supervisores[rede].add(supervisor);
+                    estrutura.lideres[rede].push({rede, supervisor, conclider});
                 }
-                
             });
 
-            // Convert Sets to Arrays and store in localStorage
+            // Converter Sets para Arrays e armazenar no localStorage
             for (const role in estrutura) {
-                for (const rede in estrutura[role]) {
-                    estrutura[role][rede] = Array.from(estrutura[role][rede]);
+                if (role !== 'lideres') {
+                    for (const rede in estrutura[role]) {
+                        estrutura[role][rede] = Array.from(estrutura[role][rede]);
+                    }
                 }
                 localStorage.setItem(role, JSON.stringify(estrutura[role]));
             }
