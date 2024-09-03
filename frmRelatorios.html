@@ -135,8 +135,18 @@
             realizarLogout();
         });
     };
+
+        // Adicione este código no final da função window.onload ou em um script separado
+        const chaves = Object.keys(localStorage);
+        chaves.forEach(function(chave) {
+            try {
+                const valor = JSON.parse(localStorage.getItem(chave));
+                console.log(`${chave}:`, valor);
+            } catch (e) {
+                console.log(`${chave}: ${localStorage.getItem(chave)} (Não é um JSON válido)`);
+            }
+        });
+
 </script>
-
-
 </body>
 </html>

@@ -215,34 +215,29 @@
                 const dados = doc.data();
                 const { rede, Pastor, coordenador, supervisor, conclider } = dados;
 
-                if (funcaoUsuario === 'ADMIN') {
-                    estrutura.pastores[rede] = Pastor;
-                    estrutura.coordenadores[rede] = coordenador;
-                    estrutura.supervisores[rede] = supervisor;
-                    estrutura.lideres[rede] = conclider;
-                } else {
-                    if (dados.pastor1 === nomeUsuario || dados.pastor2 === nomeUsuario) {
-                        estrutura.pastores[rede] = Pastor;
-                        estrutura.coordenadores[rede] = coordenador;
-                        estrutura.supervisores[rede] = supervisor;
-                        estrutura.lideres[rede] = conclider;
-                    } else if (dados.coordenador1 === nomeUsuario || dados.coordenador2 === nomeUsuario) {
-                        estrutura.coordenadores[rede] = coordenador;
-                        estrutura.supervisores[rede] = supervisor;
-                        estrutura.lideres[rede] = conclider;
-                    } else if (dados.supervisor1 === nomeUsuario || dados.supervisor2 === nomeUsuario) {
-                        estrutura.supervisores[rede] = supervisor;
-                        estrutura.lideres[rede] = conclider;
-                    } else if (dados.nomelider1 === nomeUsuario || dados.nomelider2 === nomeUsuario || dados.nomelider3 === nomeUsuario) {
-                        estrutura.lideres[rede] = conclider;
-                    }
+                const roles = ['pastores', 'coordenadores', 'supervisores', 'lideres'];
+                const values = [Pastor, coordenador, supervisor, conclider];
+
+                if (funcaoUsuario === 'ADMIN' ||
+                    dados.pastor1 === nomeUsuario || dados.pastor2 === nomeUsuario ||
+                    dados.coordenador1 === nomeUsuario || dados.coordenador2 === nomeUsuario ||
+                    dados.supervisor1 === nomeUsuario || dados.supervisor2 === nomeUsuario ||
+                    dados.nomelider1 === nomeUsuario || dados.nomelider2 === nomeUsuario || dados.nomelider3 === nomeUsuario) {
+                        roles.forEach((role, index) => {
+                            if (!estrutura[role][rede]) estrutura[role][rede] = new Set();
+                            estrutura[role][rede].add(values[index]);
+                        });
                 }
+                
             });
 
-            for (const key in estrutura) {
-                localStorage.setItem(key, JSON.stringify(estrutura[key]));
+            // Convert Sets to Arrays and store in localStorage
+            for (const role in estrutura) {
+                for (const rede in estrutura[role]) {
+                    estrutura[role][rede] = Array.from(estrutura[role][rede]);
+                }
+                localStorage.setItem(role, JSON.stringify(estrutura[role]));
             }
-
             console.log("Estrutura de célula armazenada com sucesso");
         }
 

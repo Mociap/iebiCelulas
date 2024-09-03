@@ -237,8 +237,6 @@
             const supervisor = localStorage.getItem('supervisorUsuario');
             const funcao = localStorage.getItem('funcaoUsuario');
             return { rede, supervisor, funcao };
-            console.log("Função do Usuário:", funcao);
-            
         }
 
         // Função para preencher as opções de rede
@@ -250,19 +248,22 @@
             console.log("Dados de supervisores:", supervisores);
 
             if (supervisores && Object.keys(supervisores).length > 0) {
-                const redes = Object.keys(supervisores);
-                console.log("Redes encontradas:", redes);
+                let redes = Object.keys(supervisores);
+                redes.sort(); // Ordena as redes alfabeticamente
+                console.log("Redes encontradas e ordenadas:", redes);
 
                 redeSelect.innerHTML = ''; // Limpa as opções existentes
 
                 if (redes.length > 1) {
+                    // Adiciona "Todos" como primeira opção se houver mais de uma rede
                     let optionTodos = document.createElement('option');
                     optionTodos.value = "Todos";
                     optionTodos.textContent = "Todos";
                     redeSelect.appendChild(optionTodos);
-                    console.log("Opção 'Todos' adicionada");
+                    console.log("Opção 'Todos' adicionada como primeira opção");
                 }
 
+                // Adiciona as redes ordenadas
                 redes.forEach((rede) => {
                     let option = document.createElement('option');
                     option.value = rede;
@@ -271,15 +272,13 @@
                     console.log("Opção de rede adicionada:", rede);
                 });
 
-                const funcaoUsuario = localStorage.getItem('funcaoUsuario');
-                const redeUsuario = localStorage.getItem('rede');
-
-                if (redeUsuario && redes.includes(redeUsuario)) {
-                    redeSelect.value = redeUsuario;
-                    console.log("Rede do usuário selecionada:", redeUsuario);
-                } else if (funcaoUsuario !== 'ADMIN') {
+                // Seleciona a opção apropriada
+                if (redes.length > 1) {
+                    redeSelect.value = "Todos";
+                    console.log("'Todos' selecionado para múltiplas redes");
+                } else {
                     redeSelect.value = redes[0];
-                    console.log("Primeira rede selecionada:", redes[0]);
+                    console.log("Única rede selecionada:", redes[0]);
                 }
 
                 alterarCorRede(redeSelect.value);
@@ -293,8 +292,6 @@
 
         // Função para carregar supervisores
         function carregarSupervisores(rede) {
-            console.log("Carregando supervisores para a rede:", rede);
-
             const supervisorSelect = document.getElementById('supervisor');
             supervisorSelect.innerHTML = '';
             
@@ -305,9 +302,11 @@
                 let supervisoresUnicos = new Set();
 
                 if (rede === 'Todos') {
-                    Object.values(supervisores).forEach(supervisor => supervisoresUnicos.add(supervisor));
+                    Object.values(supervisores).forEach(supervisorArray => {
+                        supervisorArray.forEach(supervisor => supervisoresUnicos.add(supervisor));
+                    });
                 } else if (supervisores[rede]) {
-                    supervisoresUnicos.add(supervisores[rede]);
+                    supervisores[rede].forEach(supervisor => supervisoresUnicos.add(supervisor));
                 }
 
                 if (supervisoresUnicos.size > 1) {
@@ -315,7 +314,6 @@
                     optionTodos.value = "Todos";
                     optionTodos.textContent = "Todos";
                     supervisorSelect.appendChild(optionTodos);
-                    console.log("Opção 'Todos' adicionada para supervisores");
                 }
 
                 supervisoresUnicos.forEach(supervisor => {
@@ -323,12 +321,15 @@
                     option.value = supervisor;
                     option.textContent = supervisor;
                     supervisorSelect.appendChild(option);
-                    console.log("Opção de supervisor adicionada:", supervisor);
                 });
 
                 if (supervisoresUnicos.size > 0) {
-                    supervisorSelect.value = Array.from(supervisoresUnicos)[0];
-                    console.log("Primeiro supervisor selecionado:", supervisorSelect.value);
+                    if (supervisoresUnicos.size > 1) {
+                        supervisorSelect.value = "Todos";
+                    } else {
+                        supervisorSelect.value = Array.from(supervisoresUnicos)[0];
+                    }
+                    console.log("Supervisor selecionado:", supervisorSelect.value);
                 }
             } else {
                 console.log("Nenhum supervisor encontrado no localStorage.");
@@ -336,7 +337,7 @@
 
             console.log("Carregamento de supervisores concluído");
         }
-
+        
         // Função para alterar a cor da rede selecionada
         function alterarCorRede(rede) {
             var selectRede = document.getElementById('rede');
@@ -355,6 +356,7 @@
             selectRede.style.color = '#FFFFFF';
         }
         
+        // Comparar para Ordenar
         function compararLinhas(a, b) {
             if (a.rede < b.rede) return -1;
             if (a.rede > b.rede) return 1;
@@ -435,7 +437,6 @@
 
                     reuniaoSnapshot.forEach((doc) => {
                         const data = doc.data();
-                        console.log("Dados da reunião:", data);
                         somaMembroPresentes += Number(data.membroPresentes || 0);
                         somaQtdMembros += Number(data.qtdMembros || 0);
                         somaQtdVisitantes += Number(data.qtdVisitantes || 0);
@@ -478,12 +479,8 @@
                     });
                 }
 
-                console.log("Dados antes da ordenação:", dados);
-
                 // Ordenar os dados por Rede, Supervisor e Líderes
                 dados.sort(compararLinhas);
-
-                console.log("Dados após a ordenação:", dados);
 
                 let supervisorAtual = null;
                 let subtotais = {
@@ -497,8 +494,7 @@
 
                 // Preencher a tabela com os dados ordenados
                 for (const linha of dados) {
-                    console.log("Linha sendo inserida na tabela:", linha);
-
+                    
                     if (supervisorAtual !== linha.supervisor) {
                         if (supervisorAtual !== null) {
                             adicionarLinhaSubtotais(tableBody, subtotais, supervisorAtual);
@@ -547,8 +543,7 @@
                     adicionarLinhaSubtotais(tableBody, subtotais, supervisorAtual);
                 }
 
-                console.log("Totais calculados:", totais);
-
+                
                 totais.frequencia = totais.qtdMembros > 0
                     ? ((totais.membroPresentes / totais.qtdMembros) * 100).toFixed(2)
                     : 0;
@@ -611,12 +606,20 @@
         function preencherMeses() {
             const mesAtual = new Date().getMonth() + 1;
             const mesSelect = document.getElementById('mes');
+            mesSelect.innerHTML = ''; // Limpa as opções existentes
+
+            const nomesMeses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+
             for (let i = 1; i <= 12; i++) {
                 let option = document.createElement('option');
                 option.value = i.toString().padStart(2, '0');
-                option.textContent = obterNomeMes(i);
+                option.textContent = nomesMeses[i - 1];
                 mesSelect.appendChild(option);
             }
+            
             mesSelect.value = mesAtual.toString().padStart(2, '0');
         }
 
