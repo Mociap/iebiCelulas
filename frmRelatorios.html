@@ -62,14 +62,22 @@
             </a>
         </div>
     </div>
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="spinner"></div>
+            <p>Aguarde, carregando...</p>
+        </div>
+    </div>
 
-<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
 <script src="hierarquias.js"></script>
 
-<script>
-    var configuracaoFirebase = {
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+
+    const configuracaoFirebase = {
         apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
         authDomain: "dbiebi.firebaseapp.com",
         databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
@@ -78,8 +86,10 @@
         messagingSenderId: "1068164821081",
         appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
     };
-    firebase.initializeApp(configuracaoFirebase);
-    var bancoDeDados = firebase.firestore();
+
+    const app = initializeApp(configuracaoFirebase);
+    const bancoDeDados = getFirestore(app);
+    const auth = getAuth(app);
 
     function verificarTempoSessao() {
         const tempoLogin = localStorage.getItem('tempoLogin');
@@ -92,13 +102,14 @@
     }
 
     function realizarLogout() {
-        firebase.auth().signOut().then(() => {
+        signOut(auth).then(() => {
             localStorage.clear();
             window.location.href = 'formlogin.html';
         }).catch((erro) => {
             console.error('Erro ao fazer logout:', erro);
         });
     }
+
 
     setInterval(verificarTempoSessao, 60000); // Verifica a cada minuto
     verificarTempoSessao(); // Verifica imediatamente ao carregar a página
@@ -138,20 +149,76 @@
 
         document.getElementById('logoutLink').addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('Botão de logout clicado');
             realizarLogout();
         });
     };
 
-        // Adicione este código no final da função window.onload ou em um script separado
-        const chaves = Object.keys(localStorage);
-        chaves.forEach(function(chave) {
-            try {
-                const valor = JSON.parse(localStorage.getItem(chave));
-                console.log(`${chave}:`, valor);
-            } catch (e) {
-                console.log(`${chave}: ${localStorage.getItem(chave)} (Não é um JSON válido)`);
-            }
+    function mostrarTelaSplash() {
+        document.getElementById('splash-screen').classList.add('show');
+    }
+
+    function esconderTelaSplash() {
+        document.getElementById('splash-screen').classList.remove('show');
+    }
+
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            e.preventDefault();
+            mostrarTelaSplash();
+            
+            // Simula o carregamento ou processamento de dados
+            setTimeout(() => {
+                esconderTelaSplash();
+                window.location.href = this.getAttribute('href');
+            }, 2000); // Ajuste este tempo conforme necessário
         });
+    });
+
+    async function atualizarDadosLideres(lideres) {
+        for (const rede in lideres) {
+            lideres[rede] = await Promise.all(lideres[rede].map(async (lider) => {
+                const nomecelulas = await obterNomeCelulas(lider.conclider);
+                const membrosCount = await contarMembros(nomecelulas);
+                return {...lider, nomecelulas, membrosCount};
+            }));
+        }
+        return lideres;
+    }
+
+    async function obterNomeCelulas(conclider) {
+        const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
+        const q = query(estruturaCelulaRef, where("conclider", "==", conclider));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => doc.data().nomecelula);
+    }
+
+    async function contarMembros(nomecelulas) {
+        if (!nomecelulas.length) return 0;
+        const membrosRef = collection(bancoDeDados, "membros");
+        const q = query(membrosRef, where("nomedacelula", "in", nomecelulas));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.size;
+    }
+
+    document.querySelector('a[href="relResumoPastoral.html"]').addEventListener('click', async function(e) {
+        e.preventDefault();
+        const lideres = JSON.parse(localStorage.getItem('lideres'));
+        const lideresAtualizados = await atualizarDadosLideres(lideres);
+        localStorage.setItem('lideres', JSON.stringify(lideresAtualizados));
+        window.location.href = 'relResumoPastoral.html';
+    });
+
+    // Adicione este código no final da função window.onload ou em um script separado
+    const chaves = Object.keys(localStorage);
+    chaves.forEach(function(chave) {
+        try {
+            const valor = JSON.parse(localStorage.getItem(chave));
+            console.log(`${chave}:`, valor);
+        } catch (e) {
+            console.log(`${chave}: ${localStorage.getItem(chave)} (Não é um JSON válido)`);
+        }
+    });
 
 </script>
 </body>

@@ -81,6 +81,47 @@
         .spacer {
             height: 20px;
         }
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .splash-screen.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .splash-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #fff;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
     </style>
 </head>
 <body>
@@ -98,7 +139,7 @@
                 <label for="password">Senha</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" required>
+                    <input type="password" id="password" required autocomplete="current-password">
                 </div>
             </div>
             <div class="spacer"></div>
@@ -111,6 +152,12 @@
         </div>
         <div class="register-link">
             Não tem uma Senha? <a href="formregister.html"><i class="fas fa-user-plus"></i> Registre-se</a>
+        </div>
+    </div>
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="spinner"></div>
+            <p>Aguarde, carregando...</p>
         </div>
     </div>
 
@@ -212,9 +259,9 @@
             const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
             const querySnapshot = await getDocs(estruturaCelulaRef);
 
-            querySnapshot.forEach((doc) => {
+            for (const doc of querySnapshot.docs) {
                 const dados = doc.data();
-                const { rede, Pastor, coordenador, supervisor, conclider } = dados;
+                const { rede, Pastor, coordenador, supervisor, conclider, nomecelula } = dados;
 
                 if (funcaoUsuario === 'ADMIN' ||
                     dados.pastor1 === nomeUsuario || dados.pastor2 === nomeUsuario ||
@@ -230,9 +277,14 @@
                     estrutura.pastores[rede].add(Pastor);
                     estrutura.coordenadores[rede].add(coordenador);
                     estrutura.supervisores[rede].add(supervisor);
-                    estrutura.lideres[rede].push({rede, supervisor, conclider});
+
+                    estrutura.lideres[rede].push({
+                        rede, 
+                        supervisor, 
+                        conclider,
+                    });
                 }
-            });
+            }
 
             // Converter Sets para Arrays e armazenar no localStorage
             for (const role in estrutura) {
@@ -252,6 +304,8 @@
             evento.preventDefault();
             console.log("Iniciando processo de login");
 
+            document.getElementById('splash-screen').classList.add('show');
+
             const email = document.getElementById('email').value;
             const senha = document.getElementById('password').value;
 
@@ -268,10 +322,14 @@
                 await armazenarDadosUsuario(email);
                 await armazenarEstruturaCelula();
                 console.log("Dados do usuário armazenados");
-                window.location.href = 'frmRelatorios.html';
 
-                // window.location.href = 'frmRelatorios.html';
+                setTimeout(() => {
+                    document.getElementById('splash-screen').classList.remove('show');
+                    window.location.href = 'frmRelatorios.html';
+                }, 2000);
+
             } catch (erro) {
+                document.getElementById('splash-screen').classList.remove('show');
                 console.error("Erro completo:", erro);
                 console.log("Código de erro:", erro.code);
                 console.log("Mensagem de erro:", erro.message);
@@ -301,6 +359,8 @@
                 alert(mensagem);
             }
         });
+
+        
     </script>
 </body>
 
