@@ -281,12 +281,18 @@
             disableMobile: "true",
             placeholder: "Selecione a data...",
             allowInput: false,
+            maxDate: "today",
             onChange: function(selectedDates, dateStr, instance) {
                 var dataEscolhida = selectedDates[0];
+                if (dataEscolhida > new Date()) {
+                    alert("Data inválida. Por favor, selecione uma data até o dia atual.");
+                    instance.clear();
+                } else {
                 inputAno.value = dataEscolhida.getFullYear();
                 var mes = String(dataEscolhida.getMonth() + 1).padStart(2, '0');
                 var ano = dataEscolhida.getFullYear();
                 inputMesAno.value = mes + '/' + ano;
+                }
             }
         });
 
