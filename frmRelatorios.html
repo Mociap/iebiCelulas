@@ -175,42 +175,8 @@
         });
     });
 
-    async function atualizarDadosLideres(lideres) {
-        for (const rede in lideres) {
-            lideres[rede] = await Promise.all(lideres[rede].map(async (lider) => {
-                const nomecelulas = await obterNomeCelulas(lider.conclider);
-                const membrosCount = await contarMembros(nomecelulas);
-                return {...lider, nomecelulas, membrosCount};
-            }));
-        }
-        return lideres;
-    }
-
-    async function obterNomeCelulas(conclider) {
-        const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
-        const q = query(estruturaCelulaRef, where("conclider", "==", conclider));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => doc.data().nomecelula);
-    }
-
-    async function contarMembros(nomecelulas) {
-        if (!nomecelulas.length) return 0;
-        const membrosRef = collection(bancoDeDados, "membros");
-        const q = query(membrosRef, where("nomedacelula", "in", nomecelulas));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.size;
-    }
-
-    document.querySelector('a[href="relResumoPastoral.html"]').addEventListener('click', async function(e) {
-        e.preventDefault();
-        const lideres = JSON.parse(localStorage.getItem('lideres'));
-        const lideresAtualizados = await atualizarDadosLideres(lideres);
-        localStorage.setItem('lideres', JSON.stringify(lideresAtualizados));
-        window.location.href = 'relResumoPastoral.html';
-    });
-
     // Adicione este código no final da função window.onload ou em um script separado
-    const chaves = Object.keys(localStorage);
+    /*const chaves = Object.keys(localStorage);
     chaves.forEach(function(chave) {
         try {
             const valor = JSON.parse(localStorage.getItem(chave));
@@ -218,7 +184,7 @@
         } catch (e) {
             console.log(`${chave}: ${localStorage.getItem(chave)} (Não é um JSON válido)`);
         }
-    });
+    });*/
 
 </script>
 </body>
