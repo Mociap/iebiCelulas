@@ -184,6 +184,19 @@
             margin-top: 5px;
             color: rgba(255,255,255,0.8);
         }
+        .supervisor-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 5px;
+        }
+
+        .node.supervisor {
+            height: auto;
+            padding: 15px;
+        }
+        
     </style>
 </head>
 <body>
@@ -265,6 +278,27 @@
             return cores[rede] || '#E0E0E0';
         }
 
+        function getImagePath(supervisor) {
+            const basePath = `./assets/2-Supervisores/${supervisor.replace('/', '-')}`;
+            const pngPath = `${basePath}.png`;
+            const jpegPath = `${basePath}.jpeg`;
+
+            if (fileExists(pngPath)) {
+                return pngPath;
+            } else if (fileExists(jpegPath)) {
+                return jpegPath;
+            } else {
+                return './assets/2-Supervisores/default.png'; // Imagem padrão caso nenhuma seja encontrada
+            }
+        }
+
+        function fileExists(url) {
+            var http = new XMLHttpRequest();
+            http.open('HEAD', url, false);
+            http.send();
+            return http.status != 404;
+        }
+        
         // Função para contar células rede
         function contarCelulasPorRede(supervisores) {
             return Object.values(supervisores).reduce((total, lideres) => total + lideres.length, 0);
@@ -382,15 +416,15 @@
                             html += `
                                 <div class="supervisor-group">
                                     <div class="node supervisor" style="background-color: ${corBase};">
+                                        <img src="${getImagePath(supervisor)}" alt="${supervisor}" class="supervisor-image">
                                         <strong>${supervisor}</strong>
                                         <div class="supervisor-info">
-                                            Células: ${contarCelulasPorSupervisor(lideres)}
+                                            Células: ${lideres.length}
                                         </div>
                                     </div>
                                     <div class="connector-vertical"></div>
                                     <div class="lider-container">
                             `;
-
                             lideres.forEach((lider) => {
                                 html += `
                                     <div class="node lider" style="background-color: ${corClara};">
@@ -412,9 +446,23 @@
                     const corBase = alterarCorRede(redeEscolhida);
                     const corClara = gerarCorClara(redeEscolhida);
                     
+                    const supervisores = {};
+                    let totalCelulas = 0;
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        if (!supervisores[data.supervisor]) {
+                            supervisores[data.supervisor] = [];
+                        }
+                        supervisores[data.supervisor].push(data);
+                        totalCelulas++;
+                    });
+
                     html += `
                         <div class="node rede" style="background-color: ${corBase};">
                             ${redeEscolhida}
+                            <div class="rede-info">
+                                Células: ${totalCelulas}
+                            </div>
                         </div>
                         <div class="content-wrapper">
                             <div class="connector-vertical"></div>
@@ -422,21 +470,15 @@
                     `;
 
                     if (supervisorEscolhido === 'TODOS') {
-                        // Agrupar por supervisor
-                        const supervisores = {};
-                        querySnapshot.forEach((doc) => {
-                            const data = doc.data();
-                            if (!supervisores[data.supervisor]) {
-                                supervisores[data.supervisor] = [];
-                            }
-                            supervisores[data.supervisor].push(data);
-                        });
-
                         for (const [supervisor, lideres] of Object.entries(supervisores)) {
                             html += `
                                 <div class="supervisor-group">
                                     <div class="node supervisor" style="background-color: ${corBase};">
+                                        <img src="${getImagePath(supervisor)}" alt="${supervisor}" class="supervisor-image">
                                         <strong>${supervisor}</strong>
+                                        <div class="supervisor-info">
+                                            Células: ${lideres.length}
+                                        </div>
                                     </div>
                                     <div class="connector-vertical"></div>
                                     <div class="lider-container">
@@ -457,22 +499,25 @@
                         }
                     } else {
                         // Apenas um supervisor
+                        const lideres = supervisores[supervisorEscolhido] || [];
                         html += `
                             <div class="supervisor-group">
                                 <div class="node supervisor" style="background-color: ${corBase};">
                                     <strong>${supervisorEscolhido}</strong>
+                                    <div class="supervisor-info">
+                                        Células: ${lideres.length}
+                                    </div>
                                 </div>
                                 <div class="connector-vertical"></div>
                                 <div class="lider-container">
                         `;
 
-                        querySnapshot.forEach((doc) => {
-                            const data = doc.data();
+                        lideres.forEach((lider) => {
                             html += `
                                 <div class="node lider" style="background-color: ${corClara};">
-                                    <div>${data.conclider || 'Líder não especificado'}</div>
+                                    <div>${lider.conclider || 'Líder não especificado'}</div>
                                     <div class="lider-info">
-                                        ${data.nomecelula || 'Nome da célula não especificado'}
+                                        ${lider.nomecelula || 'Nome da célula não especificado'}
                                     </div>
                                 </div>
                             `;
