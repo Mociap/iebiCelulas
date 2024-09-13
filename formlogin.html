@@ -216,6 +216,20 @@
             }
         }
 
+        //função para encontrar o supervisor
+        async function encontrarSupervisor(nomedacelula) {
+            const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
+            const q = query(estruturaCelulaRef, where("nomecelula", "==", nomedacelula));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const documento = querySnapshot.docs[0];
+                const dados = documento.data();
+                return dados.supervisor;
+            }
+            return null;
+        }
+
         async function armazenarDadosUsuario(email) {
             try {
                 const membrosRef = collection(bancoDeDados, "membros");
@@ -235,8 +249,14 @@
                     const funcaoUsuario = await determinarFuncaoUsuario(dadosMembro.nome);
                     localStorage.setItem('funcaoUsuario', funcaoUsuario);
 
+                    const supervisor = await encontrarSupervisor(dadosMembro.nomedacelula);
+                    if (supervisor) {
+                        localStorage.setItem('supervisor', supervisor);
+                    }
+
                     console.log("Dados do membro armazenados:", dadosMembro);
                     console.log("Função do usuário:", funcaoUsuario);
+                    console.log("Supervisor:", supervisor);
                 } else {
                     console.log("Documento do membro não encontrado");
                 }

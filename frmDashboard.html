@@ -89,12 +89,58 @@
             transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .splash-screen.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .splash-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #fff;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <a href="frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="spinner"></div>
+            <p>Aguarde, carregando...</p>
+        </div>
+    </div>
     <div class="header">
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
@@ -148,6 +194,7 @@
             </div>
         </div>
     </div>
+
     <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -173,6 +220,14 @@
         // Variáveis para armazenar as instâncias dos gráficos
         let charts = {};
 
+        function mostrarSplashScreen() {
+            document.getElementById('splash-screen').classList.add('show');
+        }
+
+        function esconderSplashScreen() {
+            document.getElementById('splash-screen').classList.remove('show');
+        }
+
         // Função utilitária para formatar números
         function formatNumber(value, decimals = 2, prefix = '') {
             return prefix + value.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -192,48 +247,6 @@
             const redeDropdown = document.getElementById('rede');
             const supervisorDropdown = document.getElementById('supervisor');
             const liderDropdown = document.getElementById('lider');
-
-            if (funcao === 'SUPERVISOR') {
-                redeDropdown.disabled = true;
-                supervisorDropdown.disabled = true;
-                liderDropdown.disabled = false;
-            } else if (funcao === 'COORDENADOR') {
-                redeDropdown.disabled = true;
-                supervisorDropdown.disabled = false;
-                liderDropdown.disabled = false;
-            } else if (funcao === 'PASTOR' || funcao === 'ADMIN') {
-                redeDropdown.disabled = false;
-                supervisorDropdown.disabled = false;
-                liderDropdown.disabled = false;
-            } else {
-                redeDropdown.disabled = true;
-                supervisorDropdown.disabled = true;
-                liderDropdown.disabled = true;
-            }
-        }
-
-        // Função para carregar opções de um select baseado em uma consulta ao Firestore
-        async function carregarOpcoes(selectId, collection, field, whereClause = null, selectedValue = null) {
-            const select = document.getElementById(selectId);
-            select.innerHTML = `<option value="">Selecione uma opção</option>`;
-            
-            let query = db.collection(collection);
-            if (whereClause) {
-                query = query.where(whereClause.field, whereClause.operator, whereClause.value);
-            }
-            
-            const snapshot = await query.get();
-            const options = new Set();
-            
-            snapshot.forEach(doc => options.add(doc.data()[field]));
-            
-            options.forEach(option => {
-                const optionElement = createElement('option', { value: option }, option);
-                if (selectedValue && option === selectedValue) {
-                    optionElement.selected = true;
-                }
-                select.appendChild(optionElement);
-            });
         }
 
         // Função para obter dados mensais
@@ -266,6 +279,15 @@
             const mediaMembrosPresentes = quantidadeReunioes > 0 ? totalMembrosPresentes / quantidadeReunioes : 0;
             const frequencia = mediaMembros > 0 ? (mediaMembrosPresentes / mediaMembros) * 100 : 0;
 
+            console.log("Dados mensais obtidos:", {
+                mediaMembros,
+                mediaVisitantes,
+                mediaMembrosPresentes,
+                frequencia,
+                totalOfertaMes,
+                totalColheitaAmor
+            });
+            
             return {
                 mediaMembros,
                 mediaVisitantes,
@@ -278,7 +300,10 @@
 
         // Função para gerar a tabela de resumo
         async function gerarTabelaResumo() {
+            console.log("Iniciando geração da tabela de resumo");
             const lider = document.getElementById('lider').value;
+            console.log("Líder selecionado para gerar tabela:", lider);
+
             if (!lider) return;
 
             const tabelaResumo = document.getElementById('tabelaResumo');
@@ -289,6 +314,8 @@
             const meses = [];
             const dadosMensais = [];
 
+            console.log("Preparando cabeçalho");
+    
             // Preparar cabeçalho
             let headerHTML = '<tr><th></th>';
             for (let i = 0; i < 9; i++) {
@@ -299,7 +326,12 @@
             }
             headerHTML += '</tr>';
             thead.innerHTML = headerHTML;
+            console.log("Cabeçalho após inserção:", thead.innerHTML);
 
+            console.log("Cabeçalho preparado:", headerHTML);
+
+            console.log("Obtendo dados mensais");
+            
             // Obter todos os dados mensais de uma vez
             for (const mes of meses) {
                 const [mesNumero, ano] = mes.split('/');
@@ -308,6 +340,8 @@
                 const dados = await obterDadosMensais(lider, mesInicio, mesFim);
                 dadosMensais.push(dados);
             }
+
+            console.log("Dados mensais para preenchimento da tabela:", dadosMensais);
 
             const rows = [
                 { label: 'Média de Membros', key: 'mediaMembros', format: (v) => formatNumber(v, 1) },
@@ -319,6 +353,7 @@
             ];
 
             // Construir o corpo da tabela
+            console.log("Construindo corpo da tabela");
             let tbodyHTML = '';
             for (const row of rows) {
                 tbodyHTML += `<tr><th>${row.label}</th>`;
@@ -328,6 +363,19 @@
                 tbodyHTML += '</tr>';
             }
             tbody.innerHTML = tbodyHTML;
+            
+            console.log("Corpo da tabela construído:", tbodyHTML);
+
+            console.log("Tabela de resumo gerada com sucesso");
+            console.log("Conteúdo final da tabela:", tabelaResumo.innerHTML);
+        
+            console.log("Visibilidade da tabela:", tabelaResumo.style.display);
+            console.log("Dimensões da tabela:", tabelaResumo.offsetWidth, "x", tabelaResumo.offsetHeight);
+            
+            setTimeout(() => {
+                console.log("Conteúdo da tabela após 1 segundo:", tabelaResumo.innerHTML);
+            }, 1000);
+
         }
 
         // Função para criar/atualizar gráficos
@@ -455,64 +503,212 @@
             return { rede, supervisor, lider, celula, funcao };
         }
 
-        // Carregar as redes ao iniciar a página
-        window.onload = function() {
-            const userInfo = recuperarInformacoesUsuario();
-            configurarDropdowns();
-            carregarOpcoes('rede', 'estruturacelula', 'rede').then(() => {
-                if (userInfo.rede) {
-                    document.getElementById('rede').value = userInfo.rede;
-                    alterarCorRede(userInfo.rede);
-                    carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: userInfo.rede }, userInfo.supervisor).then(() => {
-                        if (userInfo.supervisor) {
-                            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: userInfo.supervisor }, userInfo.lider).then(() => {
-                                if (userInfo.lider) {
-                                    gerarTabelaResumo();
-                                    gerarGraficos();
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-            limparTabelaEGraficos();
-        };
+         // Função para logar o conteúdo do localStorage
+        function logLocalStorageContent() {
+            console.log("Conteúdo do localStorage:");
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                console.log(`${key}: ${value}`);
+            }
+        }
 
-        // Adicionar event listeners para os selects
-        document.getElementById('rede').addEventListener('change', function() {
-            const rede = this.value;
-            alterarCorRede(rede);
-            const userInfo = recuperarInformacoesUsuario();
-            carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: rede }, userInfo.supervisor).then(() => {
-                if (userInfo.supervisor) {
-                    carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: userInfo.supervisor });
-                }
-            });
-            document.getElementById('lider').innerHTML = '<option value="">Selecione um líder</option>';
-            limparTabelaEGraficos();
-        });
+//aqui está ok
+// versão 3
 
-        document.getElementById('supervisor').addEventListener('change', function() {
-            const rede = document.getElementById('rede').value;
-            const supervisor = this.value;
-            const userInfo = recuperarInformacoesUsuario();
-            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: supervisor }, userInfo.lider).then(() => {
-                if (userInfo.lider) {
-                    gerarTabelaResumo();
-                    gerarGraficos();
-                }
-            });
-            limparTabelaEGraficos();
-        });
+        // Função para preencher as opções de rede
+        function preencherRedes() {
+            const redeSelect = document.getElementById('rede');
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
 
-        document.getElementById('lider').addEventListener('change', function() {
-            if (this.value) {
+            if (!lideres || Object.keys(lideres).length === 0) {
+                const rede = localStorage.getItem('rede');
+                redeSelect.innerHTML = '';
+                if (rede) {
+                    let option = document.createElement('option');
+                    option.value = rede;
+                    option.textContent = rede;
+                    redeSelect.appendChild(option);
+                }
+            } else {
+                redeSelect.innerHTML = '';
+                let redes = Object.keys(lideres);
+                redes.sort();
+                redes.forEach((rede) => {
+                    let option = document.createElement('option');
+                    option.value = rede;
+                    option.textContent = rede;
+                    redeSelect.appendChild(option);
+                });
+            }
+
+            if (redeSelect.options.length > 0) {
+                redeSelect.value = redeSelect.options[0].value;
+                alterarCorRede(redeSelect.value);
+                carregarSupervisores(redeSelect.value);
+            }
+        }
+
+        function carregarSupervisores(rede) {
+            const supervisorSelect = document.getElementById('supervisor');
+            supervisorSelect.innerHTML = '';
+            
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+
+            if (!lideres || !lideres[rede]) {
+                const supervisor = localStorage.getItem('supervisor');
+                if (supervisor) {
+                    let option = document.createElement('option');
+                    option.value = supervisor;
+                    option.textContent = supervisor;
+                    supervisorSelect.appendChild(option);
+                }
+            } else {
+                let supervisoresUnicos = new Set();
+                lideres[rede].forEach(lider => supervisoresUnicos.add(lider.supervisor));
+                supervisoresUnicos.forEach(supervisor => {
+                    let option = document.createElement('option');
+                    option.value = supervisor;
+                    option.textContent = supervisor;
+                    supervisorSelect.appendChild(option);
+                });
+            }
+
+            if (supervisorSelect.options.length > 0) {
+                supervisorSelect.value = supervisorSelect.options[0].value;
+                carregarLideres(rede, supervisorSelect.value);
+            }
+        }
+
+        function carregarLideres(rede, supervisor) {
+            const liderSelect = document.getElementById('lider');
+            liderSelect.innerHTML = '';
+
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+
+            if (!lideres || !lideres[rede]) {
+                const lidercelula = localStorage.getItem('lidercelula');
+                if (lidercelula) {
+                    let option = document.createElement('option');
+                    option.value = lidercelula;
+                    option.textContent = lidercelula;
+                    liderSelect.appendChild(option);
+                }
+            } else {
+                let lideresUnicos = new Set();
+                lideres[rede].forEach(lider => {
+                    if (lider.supervisor === supervisor) {
+                        lideresUnicos.add(lider.conclider);
+                    }
+                });
+                lideresUnicos.forEach((lider) => {
+                    let option = document.createElement('option');
+                    option.value = lider;
+                    option.textContent = lider;
+                    liderSelect.appendChild(option);
+                });
+            }
+
+            if (liderSelect.options.length > 0) {
+                liderSelect.value = liderSelect.options[0].value;
                 gerarTabelaResumo();
                 gerarGraficos();
+            }
+        }
+
+
+        // Event listeners para os selects
+        document.getElementById('rede').addEventListener('change', async function() {
+            mostrarSplashScreen();
+            const rede = this.value;
+            alterarCorRede(rede);
+            carregarSupervisores(rede);
+            
+            // Seleciona o primeiro supervisor
+            const supervisorSelect = document.getElementById('supervisor');
+            if (supervisorSelect.options.length > 0) {
+                supervisorSelect.selectedIndex = 0;
+                const supervisor = supervisorSelect.value;
+                
+                // Carrega líderes para a rede e supervisor selecionados
+                carregarLideres(rede, supervisor);
+                
+                // Seleciona o primeiro líder
+                const liderSelect = document.getElementById('lider');
+                if (liderSelect.options.length > 0) {
+                    liderSelect.selectedIndex = 0;
+                    
+                    // Gera tabela e gráficos
+                    await gerarTabelaResumo();
+                    await gerarGraficos();
+                    esconderSplashScreen();
+                } else {
+                    limparTabelaEGraficos();
+                }
             } else {
                 limparTabelaEGraficos();
             }
         });
+
+
+        document.getElementById('supervisor').addEventListener('change', async function() {
+            mostrarSplashScreen();
+            const rede = document.getElementById('rede').value;
+            const supervisor = this.value;
+            
+            carregarLideres(rede, supervisor);
+            
+            // Seleciona o primeiro líder
+            const liderSelect = document.getElementById('lider');
+            if (liderSelect.options.length > 0) {
+                liderSelect.selectedIndex = 0;
+                
+                // Gera tabela e gráficos
+                await gerarTabelaResumo();
+                await gerarGraficos();
+                esconderSplashScreen();
+            } else {
+                limparTabelaEGraficos();
+            }
+        });
+
+
+        document.getElementById('lider').addEventListener('change', async function() {
+            if (this.value) {
+                mostrarSplashScreen();
+                await gerarTabelaResumo();
+                await gerarGraficos();
+                esconderSplashScreen();
+            } else {
+                limparTabelaEGraficos();
+            }
+        });
+
+        // Inicialização da página
+        window.onload = async function() {
+            mostrarSplashScreen();
+            console.log("Página carregada");
+            logLocalStorageContent();
+            await preencherRedes();
+            console.log("Redes preenchidas");
+
+            // Select the first leader by default
+            const liderSelect = document.getElementById('lider');
+            if (liderSelect.options.length > 0) {
+                liderSelect.selectedIndex = 0;
+            }
+
+            // Generate table and graphs
+            await gerarTabelaResumo();
+            await gerarGraficos();
+
+            console.log("Tabela e gráficos gerados");
+            esconderSplashScreen();
+        };
+
+
+
+
     </script>
 </body>
 </html>

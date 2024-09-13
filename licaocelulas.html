@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lição de Células</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            background-color: #2c2c2c;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+            z-index: 1000;
+        }
+        .header img {
+            max-width: 180px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #9919cc;
+            margin: 30px auto;
+        }
+        .btn-primary {
+            background-color: #9919cc;
+            border-color: #9919cc;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #9919cc;
+            border-color: #9919cc;
+        }
+        .form-control {
+            background-color: #3c3c3c;
+            border: none;
+            color: #ffffff;
+        }
+        .form-control:focus {
+            background-color: #4c4c4c;
+            color: #ffffff;
+            box-shadow: none;
+        }
+        label {
+            color: #cfcccc;
+            font-weight: bold;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #9919cc;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 50%;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        .back-button:hover {
+            background-color: #9919cc;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .form-control[readonly] {
+            background-color: #3c3c3c;
+            opacity: 0.7;
+            /*cursor: not-allowed;*/
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4">Lição de Células</h2>
+        <div class="divider"></div>
+        <form id="licaoForm">
+            <div class="form-group">
+                <label for="data">Data da Lição</label>
+                <input type="text" class="form-control" id="data" placeholder="Selecione a data..." required readonly>
+            </div>
+            <div class="form-group">
+                <label for="titulo">Título da Lição</label>
+                <input type="text" class="form-control" id="titulo" required>
+            </div>
+            <div class="form-group">
+                <label for="conteudo">Conteúdo da Lição</label>
+                <textarea class="form-control" id="conteudo" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">Enviar</button>
+        </form>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        // Inicializar o Flatpickr no campo de data
+        flatpickr("#data", {
+            dateFormat: "d/m/Y",
+            locale: "pt",
+            disableMobile: "true",
+            placeholder: "Selecione a data...",
+            allowInput: false,
+            maxDate: "today",
+            onChange: function(selectedDates, dateStr, instance) {
+                var dataEscolhida = selectedDates[0];
+                if (dataEscolhida > new Date()) {
+                    alert("Data inválida. Por favor, selecione uma data até o dia atual.");
+                    instance.clear();
+                }
+            }
+        });
+
+        // Adicionar evento de envio do formulário
+        document.getElementById('licaoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var data = document.getElementById('data').value;
+            var titulo = document.getElementById('titulo').value;
+            var conteudo = document.getElementById('conteudo').value;
+
+            // Converter a data do formato dd/mm/yyyy para yyyy-mm-dd
+            var [dia, mes, ano] = data.split('/');
+            var dataFormatada = `${ano}-${mes}-${dia}`;
+
+            var dadosLicao = {
+                data: firebase.firestore.Timestamp.fromDate(new Date(dataFormatada)),
+                titulo: titulo,
+                conteudo: conteudo
+            };
+
+            bancoDeDados.collection('licoes').add(dadosLicao)
+            .then(function() {
+                alert('Lição de célula enviada com sucesso!');
+                document.getElementById('licaoForm').reset();
+            })
+            .catch(function(error) {
+                alert('Erro ao enviar lição: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>

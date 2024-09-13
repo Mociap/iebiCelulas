@@ -99,6 +99,10 @@
         #reunioesTable {
             font-size: 12px; 
         }
+        #mes {
+            width: 1300% !important;
+        }
+
     </style>
 </head>
 <body>
@@ -115,25 +119,22 @@
             <div class="form-row">
                 <label>Rede:</label>
                 <select class="form-control" id="rede">
-                    <option value="">Selecione uma rede</option>
                 </select>
             </div>
             <div class="form-row">
                 <label>Supervisor:</label>
                 <select class="form-control" id="supervisor">
-                    <option value="">Selecione um supervisor</option>
                 </select>
             </div>
             <div class="form-row">
                 <label>Líder:</label>
                 <select class="form-control" id="lider">
-                    <option value="">Selecione um líder</option>
                 </select>
             </div>
             <div class="form-row">
                 <label>Mês/Ano:</label>
                 <div class="d-flex">
-                    <select class="form-control mr-2" id="mes">
+                    <select class="form-control mr-2" id="mes" style="width: 150px !important; display: inline-block;">
                         <option value="">Mês</option>
                         <option value="01">Janeiro</option>
                         <option value="02">Fevereiro</option>
@@ -197,30 +198,16 @@
         const db = firebase.firestore();
 
         // Função para configurar os dropdowns baseado na função do usuário
-        function configurarDropdowns() {
-            const funcao = localStorage.getItem('funcaoUsuario');
+        /*function configurarDropdowns() {
             const redeDropdown = document.getElementById('rede');
             const supervisorDropdown = document.getElementById('supervisor');
             const liderDropdown = document.getElementById('lider');
 
-            if (funcao === 'SUPERVISOR') {
-                redeDropdown.disabled = true;
-                supervisorDropdown.disabled = true;
-                liderDropdown.disabled = false;
-            } else if (funcao === 'COORDENADOR') {
-                redeDropdown.disabled = true;
-                supervisorDropdown.disabled = false;
-                liderDropdown.disabled = false;
-            } else if (funcao === 'PASTOR' || funcao === 'ADMIN') {
-                redeDropdown.disabled = false;
-                supervisorDropdown.disabled = false;
-                liderDropdown.disabled = false;
-            } else {
-                redeDropdown.disabled = true;
-                supervisorDropdown.disabled = true;
-                liderDropdown.disabled = true;
-            }
-        }
+            redeDropdown.disabled = false;
+            supervisorDropdown.disabled = false;
+            liderDropdown.disabled = false;
+        }*/
+
 
         // Função para carregar opções de um select baseado em uma consulta ao Firestore
         async function carregarOpcoes(selectId, collection, field, whereClause = null, selectedValue = null) {
@@ -283,23 +270,114 @@
             return { rede, supervisor, lider, celula, funcao };
         }
 
+        function preencherRedes() {
+            const redeSelect = document.getElementById('rede');
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+
+            redeSelect.innerHTML = '';
+            if (lideres && Object.keys(lideres).length > 0) {
+                let redes = Object.keys(lideres);
+                redes.sort();
+                redes.forEach((rede) => {
+                    let option = document.createElement('option');
+                    option.value = rede;
+                    option.textContent = rede;
+                    redeSelect.appendChild(option);
+                });
+            } else {
+                const rede = localStorage.getItem('rede');
+                if (rede) {
+                    let option = document.createElement('option');
+                    option.value = rede;
+                    option.textContent = rede;
+                    redeSelect.appendChild(option);
+                }
+            }
+
+            if (redeSelect.options.length > 0) {
+                redeSelect.selectedIndex = 0;
+                alterarCorRede(redeSelect.value);
+                carregarSupervisores(redeSelect.value);
+            }
+        }
+
+        function carregarSupervisores(rede) {
+            const supervisorSelect = document.getElementById('supervisor');
+            supervisorSelect.innerHTML = '';
+            
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+
+            if (lideres && lideres[rede]) {
+                let supervisoresUnicos = new Set();
+                lideres[rede].forEach(lider => supervisoresUnicos.add(lider.supervisor));
+                supervisoresUnicos.forEach(supervisor => {
+                    let option = document.createElement('option');
+                    option.value = supervisor;
+                    option.textContent = supervisor;
+                    supervisorSelect.appendChild(option);
+                });
+            } else {
+                const supervisor = localStorage.getItem('supervisor');
+                if (supervisor) {
+                    let option = document.createElement('option');
+                    option.value = supervisor;
+                    option.textContent = supervisor;
+                    supervisorSelect.appendChild(option);
+                }
+            }
+
+            if (supervisorSelect.options.length > 0) {
+                supervisorSelect.selectedIndex = 0;
+                carregarLideres(rede, supervisorSelect.value);
+            }
+        }
+
+        function carregarLideres(rede, supervisor) {
+            const liderSelect = document.getElementById('lider');
+            liderSelect.innerHTML = '';
+
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+
+            if (lideres && lideres[rede]) {
+                lideres[rede].forEach(lider => {
+                    if (lider.supervisor === supervisor) {
+                        let option = document.createElement('option');
+                        option.value = lider.conclider;
+                        option.textContent = lider.conclider;
+                        liderSelect.appendChild(option);
+                    }
+                });
+            } else {
+                const lidercelula = localStorage.getItem('lidercelula');
+                if (lidercelula) {
+                    let option = document.createElement('option');
+                    option.value = lidercelula;
+                    option.textContent = lidercelula;
+                    liderSelect.appendChild(option);
+                }
+            }
+
+            if (liderSelect.options.length > 0) {
+                liderSelect.selectedIndex = 0;
+                carregarReunioes();
+            }
+        }
+
         // Carregar as redes ao iniciar a página
         window.onload = function() {
             const userInfo = recuperarInformacoesUsuario();
-            configurarDropdowns();
-            carregarOpcoes('rede', 'estruturacelula', 'rede').then(() => {
-                if (userInfo.rede) {
-                    document.getElementById('rede').value = userInfo.rede;
-                    alterarCorRede(userInfo.rede);
-                    carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: userInfo.rede }, userInfo.supervisor).then(() => {
-                        if (userInfo.supervisor) {
-                            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: userInfo.supervisor }, userInfo.lider);
-                        }
-                    });
-                }
-            });
+            /*configurarDropdowns();*/
+            preencherRedes();
             preencherAnos();
+
+            // Definir o mês atual
+            const mesAtual = (new Date().getMonth() + 1).toString().padStart(2, '0');
+            document.getElementById('mes').value = mesAtual;
+
+            // Carregar as reuniões iniciais
+            carregarReunioes();
         };
+
 
         function preencherAnos() {
             const anoAtual = new Date().getFullYear();

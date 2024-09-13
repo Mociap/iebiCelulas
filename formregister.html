@@ -81,6 +81,47 @@
         .spacer {
             height: 20px;
         }
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .splash-screen.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .splash-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #fff;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
     </style>
 </head>
 <body>
@@ -124,6 +165,12 @@
             Já tem uma conta? <a href="formlogin.html"><i class="fas fa-sign-in-alt"></i> Faça login</a>
         </div>
     </div>
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="spinner"></div>
+            <p>Aguarde, carregando...</p>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
@@ -145,6 +192,16 @@
     
         var formulario = document.getElementById('registerForm');
     
+
+        function mostrarSplashScreen() {
+            document.getElementById('splash-screen').classList.add('show');
+        }
+
+        function esconderSplashScreen() {
+            document.getElementById('splash-screen').classList.remove('show');
+        }
+
+
         function verificarNomeExistente(nome) {
             return bancoDeDados.collection('membros')
                 .where('nome', '==', nome)
@@ -154,6 +211,7 @@
     
         formulario.addEventListener('submit', function(evento) {
             evento.preventDefault();
+            mostrarSplashScreen();
     
             var nome = document.getElementById('name').value.trim().toUpperCase();
             var email = document.getElementById('email').value;
@@ -216,6 +274,7 @@
                 console.error('Erro ao verificar o nome:', erro);
                 alert('Ocorreu um erro ao verificar seu nome. Por favor, tente novamente mais tarde.');
             });
+            esconderSplashScreen();
         });
     
         document.getElementById('name').addEventListener('input', function(evento) {
