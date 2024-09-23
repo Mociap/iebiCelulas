@@ -1,0 +1,159 @@
+  <!DOCTYPE html>
+  <html lang="pt-br">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Mapa de Evangelismo - Igreja Evangélica Batista Itapevi</title>
+      <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+      <style>
+          body {
+              background-color: #f8f9fa;
+              font-family: 'Montserrat', sans-serif;
+              color: #333;
+              padding-top: 100px;
+          }
+          .container {
+              max-width: 1200px;
+              width: 100%;
+              margin-top: 20px;
+              background-color: #fff;
+              padding: 30px;
+              border-radius: 10px;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          }
+          .header {
+              background-color: #000;
+              padding: 10px;
+              text-align: center;
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              z-index: 1000;
+              box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          }
+          .header img {
+              max-width: 150px;
+          }
+          .divider {
+              width: 75%;
+              height: 2px;
+              background-color: #000;
+              margin: 30px auto;
+          }
+          .btn-primary {
+              background-color: #000;
+              border-color: #000;
+          }
+          .btn-primary:hover {
+              background-color: #333;
+              border-color: #333;
+          }
+          #map { 
+              height: 400px; 
+              margin-bottom: 20px;
+          }
+          .form-group {
+              margin-bottom: 20px;
+          }
+          .back-button {
+              position: fixed;
+              top: 20px;
+              left: 20px;
+              background-color: #e74c3c;
+              color: #ffffff;
+              padding: 10px;
+              border-radius: 30px;
+              text-decoration: none;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 40px;
+              height: 40px;
+              transition: all 0.3s ease;
+              z-index: 1001;
+          }
+          .back-button:hover {
+              background-color: #c0392b;
+              transform: translateY(-3px);
+              box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+          }
+      </style>
+  </head>
+  <body>
+      <a href="frmRelatorios.html" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+      </a>
+      <div class="header">
+          <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+      </div>
+      <div class="container">
+          <h2 class="text-center mb-4 font-weight-bold">Mapa de Evangelismo</h2>
+          <div class="divider"></div>
+          <div class="form-group">
+              <input type="text" id="endereco" class="form-control" placeholder="Digite o endereço ou CEP">
+              <div id="sugestoes" class="list-group"></div>
+          </div>
+          <div id="map"></div>
+          <p class="text-center mt-2">Clique no mapa para selecionar o local do evangelismo</p>
+          <form id="evangelismoForm">
+              <div class="form-group">
+                  <label for="rede">Rede:</label>
+                  <select class="form-control" id="rede" required></select>
+              </div>
+              <div class="form-group">
+                  <label for="coordenador">Coordenador:</label>
+                  <select class="form-control" id="coordenador" required></select>
+              </div>
+              <div class="form-group">
+                  <label for="supervisor">Supervisor:</label>
+                  <select class="form-control" id="supervisor" required></select>
+              </div>
+              <div class="form-group">
+                  <label for="lider">Líder:</label>
+                  <select class="form-control" id="lider" required></select>
+              </div>
+              <div class="form-group">
+                  <label for="celula">Célula:</label>
+                  <input type="text" class="form-control" id="celula" readonly>
+              </div>
+              <div class="form-group">
+                  <label for="data">Data:</label>
+                  <input type="datetime-local" class="form-control" id="data" required>
+              </div>
+              <div class="form-group">
+                  <label for="descricao">Descrição:</label>
+                  <input type="text" class="form-control" id="descricao" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Registrar Local</button>
+          </form>
+      </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log("Iniciando script do mapa");
+
+                // Inicializar mapa
+                console.log("Tentando inicializar o mapa");
+                const map = L.map('map').setView([-6.9847, -34.8339], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                console.log("Mapa inicializado");
+            });
+        </script>
+    </body>
+  </html>
+
+const map = L.map('map').setView([-6.9847, -34.8339], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+const map = L.map('map').setView([-6.9847, -34.8339], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+<div id="map"></div>
