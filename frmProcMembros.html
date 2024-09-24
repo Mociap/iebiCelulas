@@ -83,6 +83,24 @@
             font-weight: bold;
         }
 
+        .form-inline {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group {
+            width: 100%;
+        }
+
+        #pesquisaNome {
+            border-right: none;
+        }
+
+        #btnPesquisar {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
         .back-button {
             position: fixed;
             top: 20px;
@@ -183,25 +201,24 @@
             background-color: #2c2c2c;
             z-index: 1;
         }
-        
-.table-container::-webkit-scrollbar {
-    width: 12px;
-}
 
-.table-container::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
+        .table-container::-webkit-scrollbar {
+            width: 12px;
+        }
 
-.table-container::-webkit-scrollbar-thumb {
-    background-color: #3498db;
-    border-radius: 6px;
-    border: 3px solid #1a1a1a;
-}
+        .table-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
 
-.table-container::-webkit-scrollbar-thumb:hover {
-    background-color: #2980b9;
-}
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #3498db;
+            border-radius: 6px;
+            border: 3px solid #1a1a1a;
+        }
 
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 
@@ -215,10 +232,14 @@
     <div class="container">
         <h2 class="text-center mb-4 font-weight-bold">Procurar Membros</h2>
         <div class="divider"></div>
-        <form id="formularioPesquisa">
-            <div class="form-group">
-                <label for="pesquisaNome">Nome do Membro</label>
+        <form id="formularioPesquisa" class="form-inline">
+            <div class="input-group">
                 <input type="text" class="form-control" id="pesquisaNome" placeholder="Digite o nome do membro">
+                <div class="input-group-append">
+                    <button type="button" id="btnPesquisar" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </div>
         </form>
         <div class="table-responsive mt-4">
@@ -248,42 +269,42 @@
     </div>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
-      <script>
-          // Configuração do Firebase
-          const firebaseConfig = {
-              apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
-              authDomain: "dbiebi.firebaseapp.com",
-              databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
-              projectId: "dbiebi",
-              storageBucket: "dbiebi.appspot.com",
-              messagingSenderId: "1068164821081",
-              appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
-          };
-          firebase.initializeApp(firebaseConfig);
-          var bancoDeDados = firebase.firestore();
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var bancoDeDados = firebase.firestore();
 
-          function mostrarSplashScreen() {
-              document.getElementById('splash-screen').classList.add('show');
-          }
+        function mostrarSplashScreen() {
+            document.getElementById('splash-screen').classList.add('show');
+        }
 
-          function ocultarSplashScreen() {
-              document.getElementById('splash-screen').classList.remove('show');
-          }
+        function ocultarSplashScreen() {
+            document.getElementById('splash-screen').classList.remove('show');
+        }
 
-          function preencherTabelaMembros(filtro = '') {
-              mostrarSplashScreen();
-              const corpoTabela = document.getElementById('corpoTabelaMembros');
-              const filtroLowerCase = filtro.toLowerCase();
+        function preencherTabelaMembros(filtro = '') {
+            mostrarSplashScreen();
+            const corpoTabela = document.getElementById('corpoTabelaMembros');
+            const filtroLowerCase = filtro.toLowerCase();
 
-              bancoDeDados.collection('membros')
-                  .orderBy('nome')
-                  .get()
-                  .then((querySnapshot) => {
-                      corpoTabela.innerHTML = '';
-                      querySnapshot.forEach((doc) => {
-                          const dados = doc.data();
-                          if (dados.nome.toLowerCase().includes(filtroLowerCase)) {
-                              const linha = `
+            bancoDeDados.collection('membros')
+                .orderBy('nome')
+                .get()
+                .then((querySnapshot) => {
+                    corpoTabela.innerHTML = '';
+                    querySnapshot.forEach((doc) => {
+                        const dados = doc.data();
+                        if (dados.nome.toLowerCase().includes(filtroLowerCase)) {
+                            const linha = `
                               <tr data-id="${doc.id}">
                                   <td>${dados.nome}</td>
                                   <td>${dados.dtnasc}</td>
@@ -292,90 +313,91 @@
                                   <td>${dados.nomedacelula}</td>
                               </tr>
                           `;
-                              corpoTabela.innerHTML += linha;
-                          }
-                      });
-                    
-                      // Adicionar ouvintes de evento de clique às linhas
-                      const linhas = corpoTabela.getElementsByTagName('tr');
-                      for (let linha of linhas) {
-                          linha.addEventListener('click', function() {
-                              const membroId = this.getAttribute('data-id');
-                              window.location.href = `formprofile.html?id=${membroId}`;
-                          });
-                      }
-                      ocultarSplashScreen();
-                  })
-                  .catch((erro) => {
-                      console.error("Erro ao obter documentos: ", erro);
-                      ocultarSplashScreen();
-                  });
-          }
+                            corpoTabela.innerHTML += linha;
+                        }
+                    });
 
-          document.addEventListener('DOMContentLoaded', function() {
-              const urlParams = new URLSearchParams(window.location.search);
-              const membroId = urlParams.get('id');
+                    // Adicionar ouvintes de evento de clique às linhas
+                    const linhas = corpoTabela.getElementsByTagName('tr');
+                    for (let linha of linhas) {
+                        linha.addEventListener('click', function () {
+                            const membroId = this.getAttribute('data-id');
+                            window.location.href = `formprofile.html?id=${membroId}`;
+                        });
+                    }
+                    ocultarSplashScreen();
+                })
+                .catch((erro) => {
+                    console.error("Erro ao obter documentos: ", erro);
+                    ocultarSplashScreen();
+                });
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const membroId = urlParams.get('id');
 
-              if (membroId) {
-                  bancoDeDados.collection('membros').doc(membroId).get()
-                      .then((doc) => {
-                          if (doc.exists) {
-                              const dados = doc.data();
-                              // Preencher campos do formulário com os dados
-                              document.getElementById('nome').value = dados.nome;
-                              document.getElementById('dtnasc').value = formatarDataParaInput(dados.dtnasc);
-                              document.getElementById('email').value = dados.email;
-                              document.getElementById('cep').value = dados.cep;
-                              document.getElementById('bairro').value = dados.bairro;
-                              document.getElementById('cidade').value = dados.cidade;
-                              document.getElementById('uf').value = dados.uf;
-                              document.getElementById('sexo').value = dados.sexo;
-                              document.getElementById('estadoCivil').value = dados.estadoCivil;
-                              document.getElementById('celular').value = dados.celular;
-                              document.getElementById('igreja').value = dados.igreja;
-                              document.getElementById('nomedacelula').value = dados.nomedacelula;
-                              document.getElementById('lidercelula').value = dados.lidercelula;
-                              document.getElementById('rede').value = dados.rede;
-                              document.getElementById('arrolamento').value = dados.arrolamento;
+            if (membroId) {
+                bancoDeDados.collection('membros').doc(membroId).get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            const dados = doc.data();
+                            document.getElementById('nome').value = dados.nome || '';
+                            document.getElementById('dtnasc').value = formatarDataParaInput(dados.dtnasc);
+                            document.getElementById('email').value = dados.email || '';
+                            document.getElementById('cep').value = dados.cep || '';
+                            document.getElementById('bairro').value = dados.bairro || '';
+                            document.getElementById('cidade').value = dados.cidade || '';
+                            document.getElementById('uf').value = dados.uf || '';
+                            document.getElementById('sexo').value = dados.sexo || '';
+                            document.getElementById('estadoCivil').value = dados.estadoCivil || '';
+                            document.getElementById('celular').value = dados.celular || '';
+                            document.getElementById('igreja').value = dados.igreja || '';
+                            document.getElementById('nomedacelula').value = dados.nomedacelula || '';
+                            document.getElementById('lidercelula').value = dados.lidercelula || '';
+                            document.getElementById('rede').value = dados.rede || '';
+                            document.getElementById('arrolamento').value = dados.arrolamento || '';
 
-                              // Atualizar choice chips
-                              atualizarChoiceChip('sexo', dados.sexo);
-                              atualizarChoiceChip('estadoCivil', dados.estadoCivil);
-                              atualizarChoiceChip('arrolamento', dados.arrolamento);
+                            // Atualizar choice chips
+                            atualizarChoiceChip('sexo', dados.sexo);
+                            atualizarChoiceChip('estadoCivil', dados.estadoCivil);
+                            atualizarChoiceChip('arrolamento', dados.arrolamento);
 
-                              // Mudar o texto do botão para "Atualizar"
-                              document.getElementById('cadastrarBtn').textContent = 'Atualizar';
-                          }
-                      })
-                      .catch((erro) => {
-                          console.error("Erro ao obter documento:", erro);
-                      });
-              }
-
-              preencherTabelaMembros();
-
-              const campoPesquisa = document.getElementById('pesquisaNome');
-              campoPesquisa.addEventListener('input', (e) => {
-                  preencherTabelaMembros(e.target.value);
-              });
-          });
-
-          function formatarDataParaInput(dataString) {
-              const [dia, mes, ano] = dataString.split('/');
-              return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-          }
-
-          function atualizarChoiceChip(nomeCampo, valor) {
-              const chips = document.querySelectorAll(`[name="${nomeCampo}"] .choice-chip`);
-              chips.forEach(chip => {
-                  if (chip.dataset.value === valor) {
-                      chip.classList.add('selected');
-                  } else {
-                      chip.classList.remove('selected');
-                  }
-              });
-          }
-      </script>
+                            // Mudar o texto do botão para "Atualizar"
+                            document.getElementById('cadastrarBtn').textContent = 'Atualizar';
+                        }
+                    })
+                    .catch((erro) => {
+                        console.error("Erro ao obter documento:", erro);
+                    });
+            }
+            const btnPesquisar = document.getElementById('btnPesquisar');
+            btnPesquisar.addEventListener('click', function () {
+                const filtro = document.getElementById('pesquisaNome').value;
+                preencherTabelaMembros(filtro);
+            });
+        });
+        function formatarDataParaInput(dataString) {
+            if (!dataString || dataString === "0" || typeof dataString !== 'string') {
+                return "";
+            }
+            const partes = dataString.split('/');
+            if (partes.length !== 3) {
+                return "";
+            }
+            const [dia, mes, ano] = partes;
+            return `${ano.padStart(4, '0')}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+        }
+        function atualizarChoiceChip(nomeCampo, valor) {
+            const chips = document.querySelectorAll(`[name="${nomeCampo}"] .choice-chip`);
+            chips.forEach(chip => {
+                if (chip.dataset.value === valor) {
+                    chip.classList.add('selected');
+                } else {
+                    chip.classList.remove('selected');
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
