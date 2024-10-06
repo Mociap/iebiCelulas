@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Inscrição Escola Ministerial</title>
+    <link rel="shortcut icon" href="../3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .chat-container {
+            max-width: 500px;
+            margin: 20px auto;
+            background-color: #2c2c2c;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-header {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            max-width: 70%;
+        }
+
+        .user-message {
+            margin-left: auto;
+            background-color: #3498db;
+        }
+
+        .bot-message {
+            background-color: #2c2c2c;
+        }
+
+        .user-input {
+            display: flex;
+            padding: 10px;
+        }
+
+        .user-input input {
+            flex-grow: 1;
+            border: none;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .user-input button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-left: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .typing-indicator {
+            padding: 5px;
+            color: #888;
+            font-style: italic;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .quick-reply {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>Chatbot Inscrição Escola Ministerial</h3>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="user-input">
+            <input type="text" id="userInput" placeholder="Digite sua mensagem...">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        var configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        var bancoDeDados = firebase.firestore();
+
+        let conversationState = 'inicio';
+        let userData = {};
+
+        function typeMessage(element, message, callback, index = 0) {
+            if (index < message.length) {
+                element.textContent += message[index];
+                setTimeout(() => typeMessage(element, message, callback, index + 1), 10 + Math.random() * 20);
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        function carregarCelulas() {
+            return bancoDeDados.collection('estruturacelula')
+                .orderBy('nomecelula')
+                .get()
+                .then((querySnapshot) => {
+                    const celulas = [];
+                    querySnapshot.forEach((doc) => {
+                        celulas.push(doc.data().nomecelula);
+                    });
+                    return celulas;
+                });
+        }
+
+        function carregarMembrosCelula(celulaId) {
+            return bancoDeDados.collection('membros')
+                .where('nomedacelula', '==', celulaId)
+                .orderBy('nome')
+                .get()
+                .then((querySnapshot) => {
+                    const membros = [];
+                    querySnapshot.forEach((doc) => {
+                        membros.push(doc.data().nome);
+                    });
+                    return membros;
+                });
+        }
+
+        const botResponses = {
+            inicio: [
+                "Olá! 👋 Bem-vindo à inscrição da Escola Ministerial. Estou aqui para ajudar você nesse processo emocionante! Para começar, qual é o nome da sua célula?",
+                "Oi! Que bom ter você aqui! 😊 Vamos começar sua inscrição na Escola Ministerial. Primeiro, me conte: qual é o nome da sua célula?",
+                "Seja bem-vindo(a)! 🌟 Estou animado para ajudar na sua inscrição para a Escola Ministerial. Vamos lá: qual é o nome da sua célula?"
+            ],
+            celula: [
+                "Ótimo! 👍 Agora, qual é o seu nome completo?",
+                "Perfeito! 😃 E qual é o seu nome completo?",
+                "Excelente! 🎉 Agora, por favor, me diga seu nome completo."
+            ],
+            nome: [
+                "Prazer em conhecê-lo, {nome}! 😊 Qual curso você gostaria de se inscrever?",
+                "Que nome bonito, {nome}! 🌟 Agora me conte, qual curso te interessa?",
+                "Ótimo, {nome}! 👏 Qual curso da Escola Ministerial você quer fazer?"
+            ],
+            curso: [
+                "Excelente escolha, {nome}! 🎓 Agora, qual disciplina você gostaria de cursar em {curso}?",
+                "Boa decisão! 👌 E qual disciplina de {curso} mais te interessa?",
+                "{curso} é fascinante! 🤩 Qual disciplina desse curso você quer estudar?"
+            ],
+            disciplina: [
+                "Perfeito! 👍 Por último, qual turma você prefere para {disciplina}?",
+                "Ótima escolha de disciplina! 📚 Agora, em qual turma você gostaria de se matricular?",
+                "Excelente! 🌟 Para finalizar, qual turma você escolhe para {disciplina}?"
+            ],
+            confirmacao: [
+                "Tudo certo! Vou resumir suas informações:\n\nCélula: {celula}\nNome: {nome}\nCurso: {curso}\nDisciplina: {disciplina}\nTurma: {turma}\n\nEstá tudo correto? 🤔",
+                "Ótimo! Aqui está o resumo da sua inscrição:\n\nCélula: {celula}\nNome: {nome}\nCurso: {curso}\nDisciplina: {disciplina}\nTurma: {turma}\n\nPodemos confirmar? 😊",
+                "Perfeito! Confira se está tudo certo:\n\nCélula: {celula}\nNome: {nome}\nCurso: {curso}\nDisciplina: {disciplina}\nTurma: {turma}\n\nEstá tudo ok? 👀"
+            ]
+        };
+
+        function getRandomResponse(state) {
+            const responses = botResponses[state];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function addMessage(message, isUser = false, callback = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            chatMessages.appendChild(messageElement);
+
+            if (isUser) {
+                messageElement.textContent = message;
+                if (callback) callback();
+            } else {
+                typeMessage(messageElement, message, callback);
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addQuickReplies(replies, isDropdown = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            if (isDropdown) {
+                const select = document.createElement('select');
+                select.classList.add('form-control', 'mt-2');
+                replies.forEach(reply => {
+                    const option = document.createElement('option');
+                    option.value = reply;
+                    option.textContent = reply;
+                    select.appendChild(option);
+                });
+                select.onchange = () => {
+                    addMessage(select.value, true);
+                    processarEntradaUsuario(select.value);
+                    select.remove();
+                };
+                chatMessages.appendChild(select);
+            } else {
+                const quickRepliesContainer = document.createElement('div');
+                quickRepliesContainer.classList.add('quick-replies');
+                replies.forEach(reply => {
+                    const button = document.createElement('button');
+                    button.textContent = reply;
+                    button.classList.add('quick-reply');
+                    button.onclick = () => {
+                        addMessage(reply, true);
+                        processarEntradaUsuario(reply);
+                        quickRepliesContainer.remove();
+                    };
+                    quickRepliesContainer.appendChild(button);
+                });
+                chatMessages.appendChild(quickRepliesContainer);
+            }
+        }
+
+        function processarEntradaUsuario(entrada) {
+            setTimeout(() => {
+                switch (conversationState) {
+                    case 'celula':
+                        userData.celula = entrada;
+                        addMessage(getRandomResponse('celula'), false, () => {
+                            carregarMembrosCelula(entrada).then(membros => {
+                                console.log('Membros carregados:', membros);
+                                addQuickReplies(membros, true);
+                            });
+                        });
+                        conversationState = 'nome';
+                        break;
+                    case 'nome':
+                        userData.nome = entrada;
+                        addMessage(getRandomResponse('nome').replace('{nome}', userData.nome));
+                        conversationState = 'curso';
+                        addQuickReplies(['Teologia Básica', 'Liderança Cristã', 'Estudos Bíblicos Avançados']);
+                        break;
+                    case 'curso':
+                        userData.curso = entrada;
+                        addMessage(getRandomResponse('curso').replace('{nome}', userData.nome).replace('{curso}', userData.curso));
+                        conversationState = 'disciplina';
+                        addQuickReplies(['Introdução à Teologia', 'História da Igreja', 'Hermenêutica']);
+                        break;
+                    case 'disciplina':
+                        userData.disciplina = entrada;
+                        addMessage(getRandomResponse('disciplina').replace('{disciplina}', userData.disciplina));
+                        conversationState = 'turma';
+                        addQuickReplies(['Manhã', 'Tarde', 'Noite']);
+                        break;
+                    case 'turma':
+                        userData.turma = entrada;
+                        addMessage(getRandomResponse('confirmacao')
+                            .replace('{celula}', userData.celula)
+                            .replace('{nome}', userData.nome)
+                            .replace('{curso}', userData.curso)
+                            .replace('{disciplina}', userData.disciplina)
+                            .replace('{turma}', userData.turma));
+                        conversationState = 'confirmacao';
+                        addQuickReplies(['Sim', 'Não']);
+                        break;
+                    case 'confirmacao':
+                        if (entrada.toLowerCase() === 'sim') {
+                            realizarInscricao();
+                        } else {
+                            addMessage("Tudo bem, vamos recomeçar. Qual é o nome da sua célula?");
+                            conversationState = 'inicio';
+                            userData = {};
+                        }
+                        break;
+                }
+            }, 500 + Math.random() * 500);
+        }
+
+        function realizarInscricao() {
+            bancoDeDados.collection('cursosInscricoes').add({
+                nome: userData.nome,
+                celula: userData.celula,
+                cursoNome: userData.curso,
+                disciplina: userData.disciplina,
+                turma: userData.turma,
+                dataInscricao: new Date()
+            })
+                .then(function () {
+                    addMessage("Sua inscrição foi realizada com sucesso! 🎉 Obrigado por se inscrever na Escola Ministerial. Estamos ansiosos para te ver nas aulas! 📚🙏");
+                    conversationState = 'inicio';
+                    userData = {};
+                    addMessage(getRandomResponse('inicio'));
+                    carregarCelulas().then(celulas => {
+                        addQuickReplies(celulas, true);
+                    });
+                })
+                .catch(function (error) {
+                    console.error("Erro ao realizar inscrição:", error);
+                    addMessage("Ops! 😅 Parece que tivemos um pequeno contratempo ao finalizar sua inscrição. Que tal tentarmos novamente? Se o problema persistir, por favor, entre em contato com nossa equipe de suporte.");
+                });
+        }
+
+        // Iniciar a conversa
+        addMessage(getRandomResponse('inicio'), false, () => {
+            carregarCelulas().then(celulas => {
+                addQuickReplies(celulas, true);
+            });
+        });
+    </script>
+</body>
+
+</html>

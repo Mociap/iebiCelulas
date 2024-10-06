@@ -93,6 +93,34 @@
             opacity: 0.7;
             /*cursor: not-allowed;*/
         }
+        .custom-file-label::after {
+            content: "Procurar";
+        }
+        input[type="file"] {
+            background-color: #3c3c3c;
+            border: none;
+            color: #ffffff;
+            padding: 0;
+            border-radius: 0.25rem;
+            width: 100%;
+            height: 38px;
+            line-height: 38px;
+        }
+
+        input[type="file"]::-webkit-file-upload-button {
+            background-color: #9919cc;
+            border: none;
+            color: #ffffff;
+            padding: 0 0.75rem;
+            height: 38px;
+            border-radius: 0.25rem 0 0 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="file"]::-webkit-file-upload-button:hover {
+            background-color: #8014a8;
+        }
     </style>
 </head>
 <body>
@@ -118,6 +146,12 @@
                 <label for="conteudo">Conteúdo da Lição</label>
                 <textarea class="form-control" id="conteudo" rows="5" required></textarea>
             </div>
+            <div class="form-group">
+                <label for="pdfFile">Arquivo PDF (opcional)</label>
+                <div class="custom-file">
+                    <input type="file" class="form-control" id="pdfFile" accept=".pdf">
+                </div>
+            </div>
             <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">Enviar</button>
         </form>
     </div>
@@ -125,6 +159,7 @@
     <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-storage.js"></script>
 
     <script>
         // Configuração do Firebase
@@ -164,6 +199,7 @@
             var data = document.getElementById('data').value;
             var titulo = document.getElementById('titulo').value;
             var conteudo = document.getElementById('conteudo').value;
+            var pdfFile = document.getElementById('pdfFile').files[0];
 
             // Converter a data do formato dd/mm/yyyy para yyyy-mm-dd
             var [dia, mes, ano] = data.split('/');
@@ -175,14 +211,36 @@
                 conteudo: conteudo
             };
 
-            bancoDeDados.collection('licoes').add(dadosLicao)
-            .then(function() {
-                alert('Lição de célula enviada com sucesso!');
-                document.getElementById('licaoForm').reset();
-            })
-            .catch(function(error) {
-                alert('Erro ao enviar lição: ' + error.message);
-            });
+            if (pdfFile) {
+                var storageRef = firebase.storage().ref('pdfs/' + pdfFile.name);
+                storageRef.put(pdfFile).then(function(snapshot) {
+                    return snapshot.ref.getDownloadURL();
+                }).then(function(downloadURL) {
+                    dadosLicao.pdfUrl = downloadURL;
+                    return bancoDeDados.collection('licoes').add(dadosLicao);
+                }).then(function() {
+                    alert('Lição de célula e PDF enviados com sucesso!');
+                    document.getElementById('licaoForm').reset();
+                }).catch(function(error) {
+                    alert('Erro ao enviar lição: ' + error.message);
+                });
+            } else {
+                bancoDeDados.collection('licoes').add(dadosLicao)
+                .then(function() {
+                    alert('Lição de célula enviada com sucesso!');
+                    document.getElementById('licaoForm').reset();
+                })
+                .catch(function(error) {
+                    alert('Erro ao enviar lição: ' + error.message);
+                });
+            }
+        });
+
+        // Atualizar o nome do arquivo selecionado
+        document.getElementById('pdfFile').addEventListener('change', function(e) {
+            var fileName = e.target.files[0].name;
+            var nextSibling = e.target.nextElementSibling;
+            nextSibling.innerText = fileName;
         });
     </script>
 </body>
