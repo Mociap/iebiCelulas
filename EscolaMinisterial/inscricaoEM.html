@@ -440,41 +440,41 @@
         document.getElementById('turma').addEventListener('change', function() {
             carregarDisciplinas(this.value);
         });
+          function carregarDisciplinas(turmaSelecionada) {
+              console.log('Carregando disciplinas para a turma:', turmaSelecionada);
+              const selectDisciplina = document.getElementById('disciplina');
+              selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina</option>';
 
-        function carregarDisciplinas(turmaSelecionada) {
-            console.log('Carregando disciplinas para a turma:', turmaSelecionada);
-            const selectDisciplina = document.getElementById('disciplina');
-            selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina</option>';
+              document.getElementById('splash-screen').classList.add('show');
 
-            document.getElementById('splash-screen').classList.add('show');
+              bancoDeDados.collection('cursosTurmas')
+                  .where('nomeTurma', '==', turmaSelecionada)
+                  .get()
+                  .then((querySnapshot) => {
+                      const disciplinasUnicas = new Set();
+                      querySnapshot.forEach((doc) => {
+                          disciplinasUnicas.add(doc.data().disciplinas);
+                      });
 
-            bancoDeDados.collection('cursosTurmas')
-                .where('nomeTurma', '==', turmaSelecionada)
-                .get()
-                .then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        const doc = querySnapshot.docs[0];
-                        const disciplinas = doc.data().disciplinas;
-                        if (Array.isArray(disciplinas)) {
-                            disciplinas.forEach((disciplina) => {
-                                console.log('Adicionando disciplina:', disciplina);
-                                const option = document.createElement('option');
-                                option.value = disciplina;
-                                option.text = disciplina;
-                                selectDisciplina.add(option);
-                            });
-                        }
-                    } else {
-                        console.log('Nenhuma turma encontrada com o nome:', turmaSelecionada);
-                    }
-                })
-                .catch((error) => {
-                    console.error('Erro ao carregar disciplinas:', error);
-                })
-                .finally(() => {
-                    document.getElementById('splash-screen').classList.remove('show');
-                });
-        }
+                      disciplinasUnicas.forEach((disciplina) => {
+                          console.log('Adicionando disciplina:', disciplina);
+                          const option = document.createElement('option');
+                          option.value = disciplina;
+                          option.text = disciplina;
+                          selectDisciplina.add(option);
+                      });
+
+                      if (disciplinasUnicas.size === 0) {
+                          console.log('Nenhuma disciplina encontrada para a turma:', turmaSelecionada);
+                      }
+                  })
+                  .catch((error) => {
+                      console.error('Erro ao carregar disciplinas:', error);
+                  })
+                  .finally(() => {
+                      document.getElementById('splash-screen').classList.remove('show');
+                  });
+          }        
         // Remova este trecho
         function carregarCursos() {
             return new Promise((resolve, reject) => {
@@ -511,43 +511,47 @@
                       console.error("Erro ao carregar células:", error);
                   });
           }
-        
-          function carregarTurmas() {
-              return new Promise((resolve, reject) => {
-                  const selectTurma = document.getElementById('turma');
-                  selectTurma.innerHTML = '';
+                    function carregarTurmas() {
+                        return new Promise((resolve, reject) => {
+                            const selectTurma = document.getElementById('turma');
+                            selectTurma.innerHTML = '';
 
-                  bancoDeDados.collection('cursosTurmas')
-                      .orderBy('nomeTurma')
-                      .get()
-                      .then((querySnapshot) => {
-                          const turmas = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            bancoDeDados.collection('cursosTurmas')
+                                .orderBy('nomeTurma')
+                                .get()
+                                .then((querySnapshot) => {
+                                    const turmasUnicas = new Set();
+                                    querySnapshot.forEach((doc) => {
+                                        turmasUnicas.add(doc.data().nomeTurma);
+                                    });
 
-                          if (turmas.length === 1) {
-                              const option = document.createElement('option');
-                              option.value = turmas[0].nomeTurma;
-                              option.text = turmas[0].nomeTurma;
-                              selectTurma.add(option);
-                              selectTurma.value = turmas[0].nomeTurma;
-                              carregarDisciplinas(turmas[0].nomeTurma);
-                          } else {
-                              const defaultOption = document.createElement('option');
-                              defaultOption.value = "";
-                              defaultOption.text = "Selecione a Turma...";
-                              selectTurma.add(defaultOption);
+                                    const turmasArray = Array.from(turmasUnicas);
 
-                              turmas.forEach((turma) => {
-                                  const option = document.createElement('option');
-                                  option.value = turma.nomeTurma;
-                                  option.text = turma.nomeTurma;
-                                  selectTurma.add(option);
-                              });
-                          }
-                          resolve();
-                      })
-                      .catch(reject);
-              });
-        }                            
+                                    if (turmasArray.length === 1) {
+                                        const option = document.createElement('option');
+                                        option.value = turmasArray[0];
+                                        option.text = turmasArray[0];
+                                        selectTurma.add(option);
+                                        selectTurma.value = turmasArray[0];
+                                        carregarDisciplinas(turmasArray[0]);
+                                    } else {
+                                        const defaultOption = document.createElement('option');
+                                        defaultOption.value = "";
+                                        defaultOption.text = "Selecione a Turma...";
+                                        selectTurma.add(defaultOption);
+
+                                        turmasArray.forEach((turma) => {
+                                            const option = document.createElement('option');
+                                            option.value = turma;
+                                            option.text = turma;
+                                            selectTurma.add(option);
+                                        });
+                                    }
+                                    resolve();
+                                })
+                                .catch(reject);
+                        });
+                    }                           
     </script>
 </body>
 
