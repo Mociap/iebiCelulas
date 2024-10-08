@@ -230,7 +230,7 @@
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
     <h1 id="welcome-title" class="welcome-title">Bem-vindo ao Sistema Células IEBI</h1>
-    
+
     <div class="container">
         <div class="banner-container">
             <a href="EscolaMinisterial/inscricaoEM.html">
@@ -258,55 +258,53 @@
                 <div class="btn-primary">Acessar</div>
             </div>
         </div>
-        <div class="card em-card" onclick="logEMClick()">
+        <a href="EscolaMinisterial/frmEM.html" class="card em-card" onclick="logEMClick(event)">
             <i class="fas fa-graduation-cap card-icon"></i>
             <h2>Escola Ministerial</h2>
             <p>Acesse a área da Escola Ministerial.</p>
-            <a href="EscolaMinisterial/frmEM.html" class="btn-primary">Acessar</a>
-        </div>
-    </div>
+            <div class="btn-primary">Acessar</div>
+        </a>
+        <script>
+            function verificarStatusLogin() {
+                const tempoLogin = localStorage.getItem('tempoLogin');
+                const tempoAtual = new Date().getTime();
 
-    <script>
-        function verificarStatusLogin() {
-            const tempoLogin = localStorage.getItem('tempoLogin');
-            const tempoAtual = new Date().getTime();
-
-            if (tempoLogin && (tempoAtual - tempoLogin < 5 * 60 * 1000)) {
-                window.location.href = 'frmRelatorios.html';
-            } else {
-                window.location.href = 'formlogin.html';
+                if (tempoLogin && (tempoAtual - tempoLogin < 5 * 60 * 1000)) {
+                    window.location.href = 'frmRelatorios.html';
+                } else {
+                    window.location.href = 'formlogin.html';
+                }
             }
-        }
 
-        function verificarPosicaoTitulo() {
-            const logo = document.querySelector('.header img');
-            const titulo = document.getElementById('welcome-title');
-            const retanguloLogo = logo.getBoundingClientRect();
-            const retanguloTitulo = titulo.getBoundingClientRect();
-            const margemTolerancia = 10; // pixels
+            function verificarPosicaoTitulo() {
+                const logo = document.querySelector('.header img');
+                const titulo = document.getElementById('welcome-title');
+                const retanguloLogo = logo.getBoundingClientRect();
+                const retanguloTitulo = titulo.getBoundingClientRect();
+                const margemTolerancia = 10; // pixels
 
-            if (retanguloTitulo.left <= retanguloLogo.right + margemTolerancia) {
-                titulo.style.opacity = '0';
-                titulo.style.pointerEvents = 'none';
-            } else {
-                titulo.style.opacity = '1';
-                titulo.style.pointerEvents = 'auto';
+                if (retanguloTitulo.left <= retanguloLogo.right + margemTolerancia) {
+                    titulo.style.opacity = '0';
+                    titulo.style.pointerEvents = 'none';
+                } else {
+                    titulo.style.opacity = '1';
+                    titulo.style.pointerEvents = 'auto';
+                }
             }
-        }
 
-        function logEMClick() {
-            console.log("Clique no card da Escola Ministerial detectado");
-            console.log("Tentando acessar: EscolaMinisterial/frmEM.html");
-        }
+            function logEMClick(event) {
+                console.log("Clique no card da Escola Ministerial detectado");
+                console.log("Tentando acessar: EscolaMinisterial/frmEM.html");
+            }
 
-        function checkTitlePosition() {
-            verificarPosicaoTitulo();
-        }
-        
-        window.addEventListener('load', checkTitlePosition);
-        window.addEventListener('resize', checkTitlePosition);
+            function checkTitlePosition() {
+                verificarPosicaoTitulo();
+            }
 
-    </script>
+            window.addEventListener('load', checkTitlePosition);
+            window.addEventListener('resize', checkTitlePosition);
+
+        </script>
 </body>
 
 </html>

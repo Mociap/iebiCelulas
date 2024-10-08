@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membros por Célula - Igreja Evangélica Batista Itapevi</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            padding-top: 100px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #000;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header img {
+            max-width: 150px;
+        }
+
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 30px auto;
+        }
+
+        .btn-primary {
+            background-color: #000;
+            border-color: #000;
+        }
+
+        .btn-primary:hover {
+            background-color: #333;
+            border-color: #333;
+        }
+
+        #membrosTable {
+            margin-top: 20px;
+        }
+
+        #membrosTable th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .membros-lista {
+            white-space: pre-line;
+        }
+
+        #exportButton {
+            margin-top: 20px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #f1c40f;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .back-button:hover {
+            background-color: #f1c40f;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button i {
+            margin-right: 0px;
+        }
+
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs .nav-link {
+            color: #333;
+        }
+
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+        }
+
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .splash-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #fff;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="spinner"></div>
+            <p>Aguarde, carregando...</p>
+        </div>
+    </div>
+    <a href="frmEM.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="header">
+        <img src="../LogoBranco.png" alt="Logo da Igreja Evangélica Batista">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4 font-weight-bold">Inscrições EM por Célula</h2>
+        <div class="divider"></div>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="total-geral-tab" data-toggle="tab" href="#total-geral" role="tab"
+                    aria-controls="total-geral" aria-selected="true">Total Geral</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="supervisores-tab" data-toggle="tab" href="#supervisores" role="tab"
+                    aria-controls="supervisores" aria-selected="false">Supervisores</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="total-geral" role="tabpanel" aria-labelledby="total-geral-tab">
+                <!-- Conteúdo da primeira aba (tabela existente) -->
+                <div id="membrosTableContainer">
+                    <table id="membrosTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Turma</th>
+                                <th>Disciplina</th>
+                                <th>Total de Inscritos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                    <button id="exportButton" class="btn btn-primary btn-block" onclick="exportToExcel()">Exportar para
+                        Excel</button>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="supervisores" role="tabpanel" aria-labelledby="supervisores-tab">
+                <div id="supervisoresTableContainer">
+                    <table id="supervisoresTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Supervisor</th>
+                                <th>Total de Inscritos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firestore
+        var db = firebase.firestore();
+
+        // Função para gerar a tabela de membros
+        async function gerarTabela() {
+            const tableBody = document.querySelector('#membrosTable tbody');
+            tableBody.innerHTML = '';
+
+            try {
+                const inscricoesSnapshot = await db.collection("cursosInscricoes").get();
+
+                let resumo = {};
+
+                inscricoesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const key = `${data.turma}-${data.disciplina}`;
+
+                    if (!resumo[key]) {
+                        resumo[key] = {
+                            turma: data.turma,
+                            disciplina: data.disciplina,
+                            totalInscritos: 0
+                        };
+                    }
+                    resumo[key].totalInscritos++;
+                });
+
+                let totalGeral = 0;
+                Object.values(resumo).forEach(item => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = item.turma;
+                    row.insertCell(1).textContent = item.disciplina;
+                    row.insertCell(2).textContent = item.totalInscritos;
+                    totalGeral += item.totalInscritos;
+                });
+
+                // Adicionar linha de total geral
+                const totalRow = tableBody.insertRow();
+                totalRow.insertCell(0).textContent = 'Total Geral';
+                totalRow.insertCell(1).textContent = '';
+                totalRow.insertCell(2).textContent = totalGeral;
+                totalRow.classList.add('font-weight-bold');
+
+                document.getElementById('membrosTableContainer').style.display = 'block';
+
+            } catch (error) {
+                console.error("Erro ao gerar tabela:", error);
+            }
+        }
+
+        async function gerarTabelaSupervisores() {
+            const tableBody = document.querySelector('#supervisoresTable tbody');
+            tableBody.innerHTML = '';
+
+            try {
+                const inscricoesSnapshot = await db.collection("cursosInscricoes").get();
+                const estruturaCelulaSnapshot = await db.collection("estruturacelula").get();
+
+                let resumoSupervisores = {};
+                let disciplinas = new Set();
+
+                // Criar mapeamento de célula para supervisor
+                const celulaSupervisorMap = {};
+                estruturaCelulaSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    celulaSupervisorMap[data.nomecelula] = data.supervisor;
+                });
+
+                // Processar inscrições
+                inscricoesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const celula = data.celula;
+                    const disciplina = data.disciplina;
+                    const supervisor = celulaSupervisorMap[celula] || 'Não especificado';
+
+                    disciplinas.add(disciplina);
+
+                    if (!resumoSupervisores[supervisor]) {
+                        resumoSupervisores[supervisor] = {};
+                    }
+                    if (!resumoSupervisores[supervisor][disciplina]) {
+                        resumoSupervisores[supervisor][disciplina] = 0;
+                    }
+                    resumoSupervisores[supervisor][disciplina]++;
+                });
+
+                // Criar cabeçalho da tabela
+                const headerRow = tableBody.insertRow();
+                headerRow.insertCell(0).textContent = 'Supervisor';
+                Array.from(disciplinas).sort().forEach(disciplina => {
+                    headerRow.insertCell().textContent = disciplina;
+                });
+                headerRow.insertCell().textContent = 'Total';
+
+                let totaisDisciplinas = Array(disciplinas.size + 1).fill(0);
+
+                Object.entries(resumoSupervisores).forEach(([supervisor, disciplinasCount]) => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = supervisor;
+
+                    let totalSupervisor = 0;
+                    Array.from(disciplinas).sort().forEach((disciplina, index) => {
+                        const count = disciplinasCount[disciplina] || 0;
+                        row.insertCell().textContent = count;
+                        totalSupervisor += count;
+                        totaisDisciplinas[index] += count;
+                    });
+                    row.insertCell().textContent = totalSupervisor;
+                    totaisDisciplinas[totaisDisciplinas.length - 1] += totalSupervisor;
+                });
+
+                // Adicionar linha de total geral
+                const totalRow = tableBody.insertRow();
+                totalRow.insertCell(0).textContent = 'Total Geral';
+                totaisDisciplinas.forEach(total => {
+                    totalRow.insertCell().textContent = total;
+                });
+                totalRow.classList.add('font-weight-bold');
+
+            } catch (error) {
+                console.error("Erro ao gerar tabela de supervisores:", error);
+            }
+        }
+
+        function exportToExcel() {
+            const table = document.getElementById('membrosTable');
+            const rows = Array.from(table.rows);
+
+            let data = [];
+
+            // Cabeçalho
+            data.push(['Turma', 'Disciplina', 'Total de Inscritos']);
+
+            // Processar cada linha da tabela
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].cells;
+                data.push([
+                    cells[0].textContent,
+                    cells[1].textContent,
+                    cells[2].textContent
+                ]);
+            }
+
+            // Criar planilha
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inscrições Realizadas");
+
+            // Gerar arquivo Excel
+            XLSX.writeFile(wb, "inscricoes_realizadas.xlsx");
+        }
+
+        // Preencher as redes quando a página carregar
+        window.onload = async function () {
+            document.getElementById('splash-screen').style.display = 'flex';
+            await gerarTabela();
+            await gerarTabelaSupervisores();
+            document.getElementById('splash-screen').style.display = 'none';
+        };
+    </script>
+</body>
+
+</html>
