@@ -229,7 +229,9 @@
     <div class="header">
         <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
+    <!-- 
     <h1 id="welcome-title" class="welcome-title">Bem-vindo ao Sistema Células IEBI</h1>
+    -->
 
     <div class="container">
         <div class="banner-container">
@@ -251,29 +253,36 @@
                 <p>Registre os dados da reunião semanal.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
-            <div class="card" onclick="verificarStatusLogin()">
+            <div class="card" onclick="verificarStatusLogin('frmRelatorios.html')">
                 <i class="fas fa-chart-bar card-icon"></i>
                 <h2>Relatórios</h2>
                 <p>Visualize os relatórios das reuniões.</p>
                 <div class="btn-primary">Acessar</div>
             </div>
+            <div class="card" onclick="verificarStatusLogin('EscolaMinisterial/frmEM.html')">
+                <i class="fas fa-graduation-cap card-icon"></i>
+                <h2>Escola Ministerial</h2>
+                <p>Acesse a área da Escola Ministerial.</p>
+                <div class="btn-primary">Acessar</div>
+            </div>
         </div>
-        <a href="EscolaMinisterial/frmEM.html" class="card em-card" onclick="logEMClick(event)">
-            <i class="fas fa-graduation-cap card-icon"></i>
-            <h2>Escola Ministerial</h2>
-            <p>Acesse a área da Escola Ministerial.</p>
-            <div class="btn-primary">Acessar</div>
-        </a>
+
         <script>
-            function verificarStatusLogin() {
+
+            function verificarStatusLogin(destino) {
                 const tempoLogin = localStorage.getItem('tempoLogin');
                 const tempoAtual = new Date().getTime();
 
                 if (tempoLogin && (tempoAtual - tempoLogin < 5 * 60 * 1000)) {
-                    window.location.href = 'frmRelatorios.html';
+                    window.location.href = destino;
                 } else {
+                    localStorage.setItem('paginaDestino', destino);
                     window.location.href = 'formlogin.html';
                 }
+            }
+
+            function verificarStatusLoginEM() {
+                verificarStatusLogin('EscolaMinisterial/frmEM.html');
             }
 
             function verificarPosicaoTitulo() {
