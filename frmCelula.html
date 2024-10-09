@@ -117,7 +117,7 @@
 </head>
 
 <body>
-    <a href="index.html" class="back-button">
+    <a href="frmEstruturaCelula.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
@@ -221,7 +221,11 @@
                 <input type="text" class="form-control" id="nomecelula" required
                     onkeyup="this.value = this.value.toUpperCase();">
             </div>
-            <button type="submit" class="btn btn-primary btn-block" id="cadastrarBtn">Cadastrar</button>
+            <div class="btn-group btn-block" role="group">
+                <button type="submit" class="btn btn-primary" id="cadastrarBtn">Cadastrar</button>
+                <button type="button" class="btn btn-warning" id="editarBtn">Editar</button>
+                <button type="button" class="btn btn-danger" id="excluirBtn">Excluir</button>
+            </div>
         </form>
     </div>
 
@@ -244,6 +248,57 @@
 
         // Referência ao formulário
         var formulario = document.getElementById('cellForm');
+
+        function obterParametroURL(nome) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(nome);
+        }
+
+        function preencherFormulario(data) {
+            document.getElementById('nomeigreja').value = data.nomeigreja;
+            document.getElementById('rede').value = data.rede;
+            document.getElementById('Pastor').value = data.Pastor;
+            document.getElementById('pastor1').value = data.pastor1;
+            document.getElementById('pastor2').value = data.pastor2;
+            document.getElementById('coordenador').value = data.coordenador;
+            document.getElementById('coordenador1').value = data.coordenador1;
+            document.getElementById('coordenador2').value = data.coordenador2;
+            document.getElementById('supervisor').value = data.supervisor;
+            document.getElementById('supervisor1').value = data.supervisor1;
+            document.getElementById('supervisor2').value = data.supervisor2;
+            document.getElementById('conclider').value = data.conclider;
+            document.getElementById('nomelider1').value = data.nomelider1;
+            document.getElementById('nomelider2').value = data.nomelider2;
+            document.getElementById('nomelider3').value = data.nomelider3;
+            document.getElementById('nomecelula').value = data.nomecelula;
+
+            alterarCorRede(data.rede);
+        }
+
+        function carregarDadosCelula() {
+            const lider = obterParametroURL('lider');
+            const nomecelula = obterParametroURL('nomecelula');
+
+            if (lider && nomecelula) {
+                bancoDeDados.collection('estruturacelula')
+                    .where('conclider', '==', lider)
+                    .where('nomecelula', '==', nomecelula)
+                    .limit(1)
+                    .get()
+                    .then((querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            const doc = querySnapshot.docs[0];
+                            const data = doc.data();
+                            preencherFormulario(data);
+                        } else {
+                            console.log('Nenhum documento encontrado');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar dados:', error);
+                    });
+            }
+        }
 
         // Preencher o dropdown de igrejas
         bancoDeDados.collection('igreja').get().then((querySnapshot) => {
@@ -437,6 +492,7 @@
                 campoCoordenador.value = '';
             }
         }
+
         function atualizarCampoSupervisor() {
             var supervisor1 = document.getElementById('supervisor1').value.trim();
             var supervisor2 = document.getElementById('supervisor2').value.trim();
@@ -455,6 +511,7 @@
                 campoSupervisor.value = '';
             }
         }
+
         function atualizarCampoLider() {
             var lider1 = document.getElementById('nomelider1').value.trim();
             var lider2 = document.getElementById('nomelider2').value.trim();
@@ -474,7 +531,6 @@
             }
         }
 
-
         // Adicione estes event listeners
         document.getElementById('pastor1').addEventListener('input', atualizarCampos);
         document.getElementById('pastor2').addEventListener('input', atualizarCampos);
@@ -485,6 +541,92 @@
         document.getElementById('nomelider1').addEventListener('input', atualizarCampos);
         document.getElementById('nomelider2').addEventListener('input', atualizarCampos);
         document.getElementById('nomelider3').addEventListener('input', atualizarCampos);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            carregarDadosCelula();
+            const editarBtn = document.getElementById('editarBtn');
+const excluirBtn = document.getElementById('excluirBtn');
+
+editarBtn.addEventListener('click', function() {
+    const lider = obterParametroURL('lider');
+    const nomecelula = obterParametroURL('nomecelula');
+
+    if (lider && nomecelula) {
+        bancoDeDados.collection('estruturacelula')
+            .where('conclider', '==', lider)
+            .where('nomecelula', '==', nomecelula)
+            .limit(1)
+            .get()
+            .then((querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    const doc = querySnapshot.docs[0];
+                    const data = obterDadosFormulario();
+                    doc.ref.update(data)
+                        .then(() => {
+                            alert('Documento atualizado com sucesso!');
+                            window.location.href = 'frmEstruturaCelula.html';
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao atualizar documento:', error);
+                            alert('Erro ao atualizar documento: ' + error.message);
+                        });
+                }
+            });
+    }
+});
+
+excluirBtn.addEventListener('click', function() {
+    if (confirm('Tem certeza que deseja excluir esta célula?')) {
+        const lider = obterParametroURL('lider');
+        const nomecelula = obterParametroURL('nomecelula');
+
+        if (lider && nomecelula) {
+            bancoDeDados.collection('estruturacelula')
+                .where('conclider', '==', lider)
+                .where('nomecelula', '==', nomecelula)
+                .limit(1)
+                .get()
+                .then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        const doc = querySnapshot.docs[0];
+                        doc.ref.delete()
+                            .then(() => {
+                                alert('Documento excluído com sucesso!');
+                                window.location.href = 'frmEstruturaCelula.html';
+                            })
+                            .catch((error) => {
+                                console.error('Erro ao excluir documento:', error);
+                                alert('Erro ao excluir documento: ' + error.message);
+                            });
+                    }
+                });
+        }
+    }
+});
+
+function obterDadosFormulario() {
+    return {
+        nomeigreja: document.getElementById('nomeigreja').value.trim().toUpperCase(),
+        rede: document.getElementById('rede').value.trim().toUpperCase(),
+        Pastor: document.getElementById('Pastor').value.trim().toUpperCase(),
+        pastor1: document.getElementById('pastor1').value.trim().toUpperCase(),
+        pastor2: document.getElementById('pastor2').value.trim().toUpperCase(),
+        coordenador: document.getElementById('coordenador').value.trim().toUpperCase(),
+        coordenador1: document.getElementById('coordenador1').value.trim().toUpperCase(),
+        coordenador2: document.getElementById('coordenador2').value.trim().toUpperCase(),
+        supervisor: document.getElementById('supervisor').value.trim().toUpperCase(),
+        supervisor1: document.getElementById('supervisor1').value.trim().toUpperCase(),
+        supervisor2: document.getElementById('supervisor2').value.trim().toUpperCase(),
+        conclider: document.getElementById('conclider').value.trim().toUpperCase(),
+        nomelider1: document.getElementById('nomelider1').value.trim().toUpperCase(),
+        nomelider2: document.getElementById('nomelider2').value.trim().toUpperCase(),
+        nomelider3: document.getElementById('nomelider3').value.trim().toUpperCase(),
+        nomecelula: document.getElementById('nomecelula').value.trim().toUpperCase()
+    };
+}
+
+        });
+
     </script>
 </body>
 

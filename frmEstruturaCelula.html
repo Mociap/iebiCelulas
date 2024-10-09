@@ -127,16 +127,56 @@
         .sub-card {
             margin-left: 20px;
         }
-        
-  .collapse {
-      transition: max-height 0.3s ease-out;
-      max-height: 0;
-      overflow: hidden;
-  }
 
-  .collapse.show {
-      max-height: 1000px; /* Ajuste este valor conforme necessário */
-  }
+        .collapse {
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .collapse.show {
+            max-height: 2000px;
+            /* Ajuste este valor conforme necessário */
+        }
+
+        .card-body {
+            display: block !important;
+        }
+
+        .leader-card {
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            transform: translateX(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .leader-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .leader-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .leader-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+
+        .leader-card .card-body {
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 
@@ -152,6 +192,7 @@
         <div class="divider"></div>
         <div id="estruturaCelula"></div>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -172,45 +213,48 @@
         firebase.initializeApp(firebaseConfig);
         var bancoDeDados = firebase.firestore();
 
+        function abrirEdicao(lider, nomecelula) {
+            window.location.href = `frmCelula.html?lider=${encodeURIComponent(lider)}&nomecelula=${encodeURIComponent(nomecelula)}`;
+        }
+
         // Adicione este código após a inicialização do Firebase
-        
         function criarCard(titulo, nome, key) {
-    console.log(`Criando card para ${titulo}: ${nome}`);
-    const card = document.createElement('div');
-    card.className = 'card mb-3';
-    card.innerHTML = `
-        <div class="card-header" id="header${key}">
-            <h5 class="mb-0">
-                <span class="text-white" style="cursor: pointer;">
-                    ${titulo}: ${nome}
-                </span>
-            </h5>
-        </div>
-        <div id="collapse${key}" class="collapse">
-            <div class="card-body"></div>
-        </div>
-    `;
+            console.log(`Criando card para ${titulo}: ${nome}`);
+            const card = document.createElement('div');
+            card.className = 'card mb-3';
+            card.innerHTML = `
+                            <div class="card-header" id="header${key}">
+                                <h5 class="mb-0">
+                                    <span class="text-white" style="cursor: pointer;">
+                                        ${titulo}: ${nome}
+                                    </span>
+                                </h5>
+                            </div>
+                            <div id="collapse${key}" class="collapse">
+                                <div class="card-body"></div>
+                            </div>
+                        `;
 
             const header = card.querySelector('.card-header');
             const collapse = card.querySelector('.collapse');
-
-            header.addEventListener('click', () => {
+            header.addEventListener('click', (event) => {
+                event.stopPropagation();
                 console.log(`Clicado em ${titulo}: ${nome}`);
                 console.log('Estado do collapse antes:', collapse.classList.contains('show'));
                 collapse.classList.toggle('show');
-                console.log('Estado do collapse depois:', collapse.classList.contains('show'));
+                console.log('Estado do collapse após toggle:', collapse.classList.contains('show'));
+                console.log('Altura do conteúdo:', collapse.scrollHeight + 'px');
             });
 
             return card;
         }
-
         document.addEventListener('DOMContentLoaded', function () {
             console.log('DOM carregado, iniciando busca de dados');
             const estruturaCelulaDiv = document.getElementById('estruturaCelula');
 
             bancoDeDados.collection('estruturacelula').get().then((querySnapshot) => {
                 console.log(`Dados obtidos: ${querySnapshot.size} documentos`);
-        const estrutura = {};
+                const estrutura = {};
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
@@ -233,17 +277,23 @@
                     });
                 });
 
-                for (const [pastorKey, pastor] of Object.entries(estrutura)) {
+                const pastoresOrdenados = Object.entries(estrutura).sort((a, b) => a[1].nome.localeCompare(b[1].nome));
+
+                for (const [pastorKey, pastor] of pastoresOrdenados) {
+                    console.log(`Processando pastor: ${pastor.nome}`);
                     const cardPastor = criarCard('Pastor', pastor.nome, pastorKey);
                     estruturaCelulaDiv.appendChild(cardPastor);
 
                     const pastorBody = cardPastor.querySelector('.card-body');
-                    for (const [coordenadorKey, coordenador] of Object.entries(pastor.coordenadores)) {
+                    const coordenadoresOrdenados = Object.entries(pastor.coordenadores).sort((a, b) => a[1].nome.localeCompare(b[1].nome));
+                    for (const [coordenadorKey, coordenador] of coordenadoresOrdenados) {
+                        console.log(`Processando coordenador: ${coordenador.nome}`);
                         const cardCoordenador = criarCard('Coordenador', coordenador.nome, coordenadorKey);
                         pastorBody.appendChild(cardCoordenador);
 
                         const coordenadorBody = cardCoordenador.querySelector('.card-body');
-                        coordenadorBody.innerHTML += `<p>Rede: ${coordenador.rede}</p>`;
+                        //coordenadorBody.innerHTML += `<p>Rede: ${coordenador.rede}</p>`;
+                        const supervisoresOrdenados = Object.entries(coordenador.supervisores).sort((a, b) => a[1].nome.localeCompare(b[1].nome));
 
                         for (const [supervisorKey, supervisor] of Object.entries(coordenador.supervisores)) {
                             const cardSupervisor = criarCard('Supervisor', supervisor.nome, supervisorKey);
@@ -251,18 +301,26 @@
 
                             const supervisorBody = cardSupervisor.querySelector('.card-body');
                             supervisor.celulas.forEach(celula => {
-                                supervisorBody.innerHTML += `
-                                      <div class="card mb-2">
-                                          <div class="card-body">
-                                              <h6>Célula: ${celula.nome}</h6>
-                                              <p>Líder: ${celula.lider}</p>
-                                          </div>
-                                      </div>
-                                  `;
+                                const cardElement = document.createElement('div');
+                                cardElement.className = 'card mb-2 leader-card';
+                                cardElement.innerHTML = `
+        <div class="card-body">
+            <h6>Célula: ${celula.nome}</h6>
+            <p>Líder: ${celula.lider}</p>
+        </div>
+    `;
+                                cardElement.addEventListener('click', () => abrirEdicao(celula.lider, celula.nome));
+                                supervisorBody.appendChild(cardElement);
                             });
+
                         }
                     }
                 }
+
+
+                console.log('Estrutura completa criada');
+                console.log('Número total de cards:', document.querySelectorAll('.card').length);
+
             }).catch((error) => {
                 console.error("Erro ao buscar dados: ", error);
             });
@@ -273,4 +331,3 @@
 </body>
 
 </html>
-
