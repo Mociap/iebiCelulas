@@ -160,7 +160,7 @@
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" class="form-control" id="email" required>
+                <input type="email" class="form-control" id="email">
                 <small id="emailError" style="color: rgb(255, 159, 159); display: none;">Email já cadastrado</small>
             </div>
             <div class="form-group">
@@ -304,16 +304,16 @@
             dataLimite.setFullYear(dataLimite.getFullYear() - 12);
 
             var cepInput = document.getElementById('cep');
-            var emailInput = document.getElementById('email')
+            //var emailInput = document.getElementById('email')
             var celularInput = document.getElementById('celular');
 
             if (dataNascimento <= dataLimite) {
                 cepInput.setAttribute('required', 'required');
-                emailInput.setAttribute('required', 'required');
+                //emailInput.setAttribute('required', 'required');
                 celularInput.setAttribute('required', 'required');
             } else {
                 cepInput.removeAttribute('required');
-                emailInput.removeAttribute('required');
+                //emailInput.removeAttribute('required');
                 celularInput.removeAttribute('required');
             }
         }
@@ -498,22 +498,24 @@
                     }
                 });
         });
-
         document.getElementById('email').addEventListener('blur', function () {
             var email = this.value.trim();
 
-            verificarEmailExistente(email)
-                .then(function (emailExistente) {
-                    if (emailExistente) {
-                        // Email já cadastrado
-                        document.getElementById('emailError').style.display = 'block';
-                        cadastrarBtn.disabled = true;
-                    } else {
-                        // Email não cadastrado
-                        document.getElementById('emailError').style.display = 'none';
-                        cadastrarBtn.disabled = false;
-                    }
-                });
+            if (email) { // Only validate if email is not empty
+                verificarEmailExistente(email)
+                    .then(function (emailExistente) {
+                        if (emailExistente) {
+                            document.getElementById('emailError').style.display = 'block';
+                            cadastrarBtn.disabled = true;
+                        } else {
+                            document.getElementById('emailError').style.display = 'none';
+                            cadastrarBtn.disabled = false;
+                        }
+                    });
+            } else {
+                document.getElementById('emailError').style.display = 'none';
+                cadastrarBtn.disabled = false;
+            }
         });
 
         // Adicionar evento de envio do formulário
@@ -522,21 +524,14 @@
             console.log("Formulário submetido");
 
             var nome = document.getElementById('nome').value.trim().toUpperCase();
-            var email = document.getElementById('email').value.trim();
-            console.log("Nome:", nome, "Email:", email);
+            //var email = document.getElementById('email').value.trim();
+            //console.log("Nome:", nome, "Email:", email);
 
-            Promise.all([verificarNomeExistente(nome), verificarEmailExistente(email)])
-                .then(function (results) {
-                    var nomeExistente = results[0];
-                    var emailExistente = results[1];
-                    console.log("Nome existente:", nomeExistente, "Email existente:", emailExistente);
-
+            verificarNomeExistente(nome)
+                .then(function (nomeExistente) {
                     if (nomeExistente) {
                         console.log("Nome já cadastrado");
                         alert('Este nome já está cadastrado. Por favor, use um nome diferente.');
-                    } else if (emailExistente) {
-                        console.log("Email já cadastrado");
-                        alert('Este email já está cadastrado. Por favor, use um email diferente.');
                     } else {
                         console.log("Iniciando cadastro de novo membro");
                         // Obter valores dos campos
@@ -561,40 +556,40 @@
                         var ano = dataNascimentoFormatada.getFullYear();
                         var dataNascFormatada = `${dia}/${mes}/${ano}`;
 
-                            const timelineInicial = [{
-                                data: new Date().toISOString(),
-                                acao: 'Criação do perfil',
-                                alteracoes: 'Perfil criado'
-                            }];
+                        const timelineInicial = [{
+                            data: new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }),
+                            acao: 'Criação do perfil',
+                            alteracoes: 'Perfil criado'
+                        }];
 
-                            // Adicionar dados ao Firestore
-                            bancoDeDados.collection('membros').add({
-                                nome: nome,
-                                email: email,
-                                dtnasc: dataNascFormatada,
-                                cep: cep,
-                                bairro: bairro,
-                                cidade: cidade,
-                                uf: uf,
-                                sexo: sexo,
-                                estadoCivil: estadoCivil,
-                                celular: celular,
-                                igreja: igreja,
-                                nomedacelula: nomedacelula,
-                                lidercelula: lidercelula,
-                                rede: rede,
-                                arrolamento: arrolamento,
-                                timeline: timelineInicial
+                        // Adicionar dados ao Firestore
+                        bancoDeDados.collection('membros').add({
+                            nome: nome,
+                            email: email,
+                            dtnasc: dataNascFormatada,
+                            cep: cep,
+                            bairro: bairro,
+                            cidade: cidade,
+                            uf: uf,
+                            sexo: sexo,
+                            estadoCivil: estadoCivil,
+                            celular: celular,
+                            igreja: igreja,
+                            nomedacelula: nomedacelula,
+                            lidercelula: lidercelula,
+                            rede: rede,
+                            arrolamento: arrolamento,
+                            timeline: timelineInicial
+                        })
+                            .then(function () {
+                                console.log("Membro cadastrado com sucesso");
+                                window.location.href = 'agradecimento.html';
                             })
-                                .then(function () {
-                                    console.log("Membro cadastrado com sucesso");
-                                    window.location.href = 'agradecimento.html';
-                                })
-                                .catch(function (error) {
-                                    console.error("Erro ao cadastrar membro:", error);
-                                    alert('Erro ao cadastrar membro: ' + error.message);
-                                });
-                        }
+                            .catch(function (error) {
+                                console.error("Erro ao cadastrar membro:", error);
+                                alert('Erro ao cadastrar membro: ' + error.message);
+                            });
+                    }
                 })
                 .catch(function (error) {
                     console.error("Erro ao verificar nome ou email existente:", error);

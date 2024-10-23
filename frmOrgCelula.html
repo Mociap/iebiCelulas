@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estrutura da Célula</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0px;
+        }
+
+        .container {
+            max-width: 90%;
+            margin: 20px auto;
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            background-color: #2c2c2c;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .header img {
+            max-width: 180px;
+        }
+
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #3498db;
+            margin: 30px auto;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .form-control {
+            background-color: #3c3c3c;
+            border: none;
+            color: #ffffff;
+        }
+
+        .form-control:focus {
+            background-color: #4c4c4c;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        label {
+            color: #cfcccc;
+            font-weight: bold;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button i {
+            margin-right: 0px;
+        }
+          .card {
+              background-color: #3c3c3c;
+              border: none;
+              margin-bottom: 15px;
+              transition: all 0.3s ease;
+          }
+
+          .card:hover {
+              transform: translateY(-5px);
+              box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+          }
+
+          .card .card {
+              margin-left: 20px;
+          }
+
+          .card-header {
+              background-color: #3498db;
+              color: white;
+              cursor: pointer;
+              position: relative;
+          }
+
+          .card-header::before {
+        content: '▶';
+        position: absolute;
+        left: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: transform 0.3s ease;
+    }
+
+    .card-header.active::before {
+        transform: translateY(-50%) rotate(90deg);
+    }
+
+    .leader-card {
+        margin-left: 40px;
+    }
+    
+        .card-body {
+            display: none;
+        }
+
+        .sub-card {
+            margin-left: 20px;
+        }
+
+        .collapse {
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .collapse.show {
+            max-height: 2000px;
+            /* Ajuste este valor conforme necessário */
+        }
+
+        .card-body {
+            display: block !important;
+        }
+
+        .leader-card {
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            transform: translateX(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .leader-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .leader-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .leader-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+
+        .leader-card .card-body {
+            position: relative;
+            z-index: 1;
+        }
+
+        .org-chart {
+            display: flex;
+            justify-content: center;
+        }
+
+        .org-chart ul {
+            padding: 0;
+            margin: 0;
+            list-style-type: none;
+        }
+
+        .org-chart li {
+            float: left;
+            text-align: center;
+            list-style-type: none;
+            padding: 20px 5px 0 5px;
+            position: relative;
+        }
+
+        .org-chart li::before,
+        .org-chart li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 50%;
+            border-top: 1px solid #3498db;
+            width: 50%;
+            height: 20px;
+        }
+
+        .org-chart li::after {
+            right: auto;
+            left: 50%;
+            border-left: 1px solid #3498db;
+        }
+
+        .org-chart li:only-child::before,
+        .org-chart li:only-child::after {
+            display: none;
+        }
+
+        .org-chart li:first-child::before,
+        .org-chart li:last-child::after {
+            border: 0 none;
+        }
+
+        .org-chart li:last-child::before {
+            border-right: 1px solid #3498db;
+            border-radius: 0 5px 0 0;
+        }
+
+        .org-chart li:first-child::after {
+            border-radius: 5px 0 0 0;
+        }
+
+        .org-chart .org-box {
+            border: 1px solid #3498db;
+            padding: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 14px;
+            display: inline-block;
+            min-width: 150px;
+            min-height: 60px;
+            background-color: #2c2c2c;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .org-chart .org-box:hover {
+            background-color: #3498db;
+            color: #ffffff;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4 font-weight-bold">Estrutura da Célula</h2>
+        <div class="divider"></div>
+        <div id="organograma" class="org-chart"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var bancoDeDados = firebase.firestore();
+
+        function abrirEdicao(lider, nomecelula) {
+            window.location.href = `frmCelula.html?lider=${encodeURIComponent(lider)}&nomecelula=${encodeURIComponent(nomecelula)}`;
+        }
+
+        // Adicione este código após a inicialização do Firebase
+        function criarCard(titulo, nome, key, parent) {
+            console.log(`Criando card para ${titulo}: ${nome}`);
+            const card = document.createElement('div');
+            card.className = 'card mb-3';
+            card.innerHTML = `
+                <div class="card-header" id="header${key}">
+                    <h5 class="mb-0">
+                        <span class="text-white" style="cursor: pointer;">
+                            ${titulo}: ${nome}
+                        </span>
+                    </h5>
+                </div>
+                <div id="collapse${key}" class="collapse">
+                    <div class="card-body"></div>
+                </div>
+            `;
+
+            const header = card.querySelector('.card-header');
+            const collapse = card.querySelector('.collapse');
+            header.addEventListener('click', (event) => {
+                event.stopPropagation();
+                collapse.classList.toggle('show');
+                header.classList.toggle('active');
+            });
+
+            if (parent) {
+                parent.querySelector('.card-body').appendChild(card);
+            } else {
+                estruturaCelulaDiv.appendChild(card);
+            }
+
+            return card;
+        }        let estruturaCelulaDiv;
+          function criarOrganograma(estrutura) {
+              const organograma = document.getElementById('organograma');
+              organograma.innerHTML = '';
+
+              function criarNivel(dados, elemento) {
+                  const ul = document.createElement('ul');
+                  elemento.appendChild(ul);
+
+                  Object.entries(dados).forEach(([key, value]) => {
+                      const li = document.createElement('li');
+                      const div = document.createElement('div');
+                      div.className = 'org-box';
+                      div.textContent = `${value.titulo}: ${value.nome}`;
+                      li.appendChild(div);
+                      ul.appendChild(li);
+
+                      if (value.filhos) {
+                          criarNivel(value.filhos, li);
+                      }
+                  });
+              }
+
+              criarNivel(estrutura, organograma);
+          }
+
+          document.addEventListener('DOMContentLoaded', function () {
+              console.log('DOM carregado, iniciando busca de dados');
+
+              bancoDeDados.collection('estruturacelula').get().then((querySnapshot) => {
+                  console.log(`Dados obtidos: ${querySnapshot.size} documentos`);
+                  const estrutura = {};
+
+                  querySnapshot.forEach((doc) => {
+                      const data = doc.data();
+                      const pastorKey = data.Pastor.replace(/[^a-zA-Z0-9]/g, '');
+                      const coordenadorKey = data.coordenador.replace(/[^a-zA-Z0-9]/g, '');
+                      const supervisorKey = data.supervisor.replace(/[^a-zA-Z0-9]/g, '');
+
+                      if (!estrutura[pastorKey]) {
+                          estrutura[pastorKey] = { titulo: 'Pastor', nome: data.Pastor, filhos: {} };
+                      }
+                      if (!estrutura[pastorKey].filhos[coordenadorKey]) {
+                          estrutura[pastorKey].filhos[coordenadorKey] = { titulo: 'Coordenador', nome: data.coordenador, filhos: {} };
+                      }
+                      if (!estrutura[pastorKey].filhos[coordenadorKey].filhos[supervisorKey]) {
+                          estrutura[pastorKey].filhos[coordenadorKey].filhos[supervisorKey] = { titulo: 'Supervisor', nome: data.supervisor, filhos: {} };
+                      }
+            
+                      const celulaKey = `${data.conclider}-${data.nomecelula}`.replace(/[^a-zA-Z0-9]/g, '');
+                      estrutura[pastorKey].filhos[coordenadorKey].filhos[supervisorKey].filhos[celulaKey] = {
+                          titulo: 'Célula',
+                          nome: `${data.nomecelula} (${data.conclider})`
+                      };
+                  });
+
+                  criarOrganograma(estrutura);
+                  console.log('Organograma hierárquico criado');
+              }).catch((error) => {
+                  console.error("Erro ao buscar dados: ", error);
+              });
+          });
+    </script>
+
+</body>
+
+</html>
