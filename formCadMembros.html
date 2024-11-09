@@ -221,13 +221,13 @@
                 <select class="form-control" id="igreja" required></select>
             </div>
             <div class="form-group">
-                <label for="nomedacelula">Nome da Célula</label>
-                <select class="form-control" id="nomedacelula"
+                <label for="lidercelula">Nome do Líder</label>
+                <select class="form-control" id="lidercelula"
                     onchange="this.value = this.value.toUpperCase();"></select>
             </div>
             <div class="form-group">
-                <label for="lidercelula">Nome do Líder</label>
-                <input type="text" class="form-control" id="lidercelula" readonly
+                <label for="nomedacelula">Nome da Célula</label>
+                <input type="text" class="form-control" id="nomedacelula" readonly
                     onkeyup="this.value = this.value.toUpperCase();">
             </div>
             <div class="form-group">
@@ -385,72 +385,70 @@
             selectRede.style.backgroundColor = cor;
             selectRede.style.color = (cor === '#000000' || cor === '#800080' || cor === '#0000FF') ? '#FFFFFF' : '#000000';
         }
+          // Carregar lista de líderes
+          bancoDeDados.collection('estruturacelula')
+              .orderBy('conclider')
+              .get()
+              .then((querySnapshot) => {
+                  const selectLider = document.getElementById('lidercelula');
 
-        // Preencher o dropdown de células e atualizar campos relacionados
-        inputNomedaCelula.addEventListener('change', function () {
-            const nomedacelula = inputNomedaCelula.value.toUpperCase();
+                  // Opção padrão
+                  const optionPadrao = document.createElement('option');
+                  optionPadrao.value = '';
+                  optionPadrao.text = 'Selecione um líder';
+                  optionPadrao.disabled = true;
+                  optionPadrao.selected = true;
+                  selectLider.add(optionPadrao);
 
-            if (nomedacelula) {
-                bancoDeDados.collection('estruturacelula')
-                    .where('nomecelula', '==', nomedacelula)
-                    .get()
-                    .then((querySnapshot) => {
-                        querySnapshot.forEach((doc) => {
-                            const dados = doc.data();
-                            inputLiderCelula.value = dados.conclider.toUpperCase();
-                            inputRede.value = dados.rede.toUpperCase();
-                            alterarCorRede(dados.rede); // Chama a função para alterar a cor do campo rede
-                        });
-                    })
-                    .catch((error) => {
-                        console.error('Erro ao consultar a coleção "estruturacelula":', error);
-                    });
-            } else {
-                inputLiderCelula.value = '';
-                inputRede.value = '';
-                alterarCorRede(''); // Reseta a cor do campo rede
-            }
-        });
+                  // Opções especiais
+                  const optionCoordenador = document.createElement('option');
+                  optionCoordenador.value = 'SOU COORDENADOR DE REDE';
+                  optionCoordenador.text = 'SOU COORDENADOR DE REDE';
+                  selectLider.add(optionCoordenador);
 
-        bancoDeDados.collection('estruturacelula')
-            .orderBy('nomecelula')
-            .get()
-            .then((querySnapshot) => {
-                const selectNomedaCelula = document.getElementById('nomedacelula');
+                  const optionSupervisor = document.createElement('option');
+                  optionSupervisor.value = 'SOU SUPERVISOR DE REDE';
+                  optionSupervisor.text = 'SOU SUPERVISOR DE REDE';
+                  selectLider.add(optionSupervisor);
 
-                // Adicionar opção padrão
-                const optionPadrao = document.createElement('option');
-                optionPadrao.value = '';
-                optionPadrao.text = 'Selecione uma célula';
-                optionPadrao.disabled = true;
-                optionPadrao.selected = true;
-                selectNomedaCelula.add(optionPadrao);
+                  // Array para armazenar líderes únicos
+                  const lideresUnicos = new Set();
 
-                // Adicionar novas opções no início da lista
-                const optionCoordenador = document.createElement('option');
-                optionCoordenador.value = 'SOU COORDENADOR DE REDE';
-                optionCoordenador.text = 'SOU COORDENADOR DE REDE';
-                selectNomedaCelula.add(optionCoordenador);
+                  querySnapshot.forEach((doc) => {
+                      const lider = doc.data().conclider;
+                      if (lider !== '0' && !lideresUnicos.has(lider)) {
+                          lideresUnicos.add(lider);
+                          const option = document.createElement('option');
+                          option.value = lider;
+                          option.text = lider;
+                          selectLider.add(option);
+                      }
+                  });
+              });
 
-                const optionSupervisor = document.createElement('option');
-                optionSupervisor.value = 'SOU SUPERVISOR DE REDE';
-                optionSupervisor.text = 'SOU SUPERVISOR DE REDE';
-                selectNomedaCelula.add(optionSupervisor);
+          // Evento de mudança do líder
+          document.getElementById('lidercelula').addEventListener('change', function() {
+              const liderSelecionado = this.value.toUpperCase();
+              const inputNomedaCelula = document.getElementById('nomedacelula');
+              const inputRede = document.getElementById('rede');
 
-                querySnapshot.forEach((doc) => {
-                    const nomecelula = doc.data().nomecelula;
-                    if (nomecelula !== '0') {
-                        const option = document.createElement('option');
-                        option.value = nomecelula;
-                        option.text = nomecelula;
-                        selectNomedaCelula.add(option);
-                    }
-                });
-            })
-            .catch((error) => {
-                console.error('Erro ao consultar a coleção "estruturacelula":', error);
-            });
-
+              if (liderSelecionado) {
+                  bancoDeDados.collection('estruturacelula')
+                      .where('conclider', '==', liderSelecionado)
+                      .get()
+                      .then((querySnapshot) => {
+                          querySnapshot.forEach((doc) => {
+                              const dados = doc.data();
+                              inputNomedaCelula.value = dados.nomecelula.toUpperCase();
+                              inputRede.value = dados.rede.toUpperCase();
+                              alterarCorRede(dados.rede);
+                          });
+                      });
+              } else {
+                  inputNomedaCelula.value = '';
+                  inputRede.value = '';
+              }
+          });
         // Função para verificar se o nome já está cadastrado
         function verificarNomeExistente(nome) {
             return bancoDeDados.collection('membros')
