@@ -213,6 +213,23 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
+        .mobile-video {
+    display: none;
+}
+
+.desktop-video {
+    display: block;
+}
+
+@media screen and (max-width: 840px) {
+    .mobile-video {
+        display: block;
+    }
+    .desktop-video {
+        display: none;
+    }
+}
+
 
         @media screen and (max-width: 768px) {
             .welcome-title {
@@ -246,8 +263,11 @@
                 <img src="./assets/Banner_Index.png" alt="Banner IEBI" class="banner-image">
             </a>-->
             <a href="https://mociap.github.io/Acamp360/" target="_blank">
-                <video autoplay muted loop class="banner-video">
+                <video autoplay muted loop class="banner-video desktop-video">
                     <source src="./assets/Banner_Video.mp4" type="video/mp4">
+                </video>
+                <video autoplay muted loop class="banner-video mobile-video">
+                    <source src="./assets/movel_Banner_Video.mp4" type="video/mp4">
                 </video>
             </a>
         </div>
