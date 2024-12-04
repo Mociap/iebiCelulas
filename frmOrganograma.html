@@ -279,7 +279,7 @@
         }
 
         function getImagePath(supervisor) {
-            const basePath = `./assets/2-Supervisores/${supervisor.replace('/', '-')}`;
+            const basePath = `./assets/Supervisores/${supervisor.replace('/', '-')}`;
             const pngPath = `${basePath}.png`;
             const jpegPath = `${basePath}.jpeg`;
 
@@ -288,7 +288,7 @@
             } else if (fileExists(jpegPath)) {
                 return jpegPath;
             } else {
-                return './assets/2-Supervisores/default.png'; // Imagem padrão caso nenhuma seja encontrada
+                return './assets/Supervisores/default.png'; // Imagem padrão caso nenhuma seja encontrada
             }
         }
 
