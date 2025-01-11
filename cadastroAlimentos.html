@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Alimentos</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+        background-color: #1a1a1a;
+        color: #ffffff;
+      }
+      .container {
+        max-width: 500px;
+        margin: 20px auto;
+        background-color: #2c2c2c;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      }
+      .btn-primary {
+        background-color: #3498db;
+        border-color: #3498db;
+      }
+      .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+      }
+      .form-control {
+        background-color: #3c3c3c;
+        border: none;
+        color: #ffffff;
+      }
+      .list-group-item {
+        background-color: #3c3c3c;
+        color: #ffffff;
+        border: 1px solid #4c4c4c;
+      }
+      .form-control:focus {
+        background-color: #3c3c3c;
+        color: #ffffff;
+        box-shadow: none;
+        border-color: #3498db;
+      }
+
+      .form-control::placeholder {
+        color: #999;
+      }
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="text-center mb-4">Cadastro de Alimentos</h2>
+      <form id="alimentoForm">
+        <div class="form-group">
+          <label for="nomeAlimento">Nome do Alimento</label>
+          <input
+            type="text"
+            class="form-control"
+            id="nomeAlimento"
+            placeholder="Digite o nome do alimento"
+            onkeyup="this.value = this.value.toUpperCase();"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="gramaturaKg">Gramatura (Kg)</label>
+          <input
+            type="number"
+            class="form-control"
+            id="gramaturaKg"
+            placeholder="Digite a gramatura da embalagem em KG"
+            step="0.001"
+            onkeyup="this.value = this.value.toUpperCase();"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          Cadastrar
+        </button>
+      </form>
+
+      <h4 class="mt-4">Lista de Alimentos</h4>
+      <ul id="listaAlimentos" class="list-group mt-3"></ul>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+        authDomain: "dbiebi.firebaseapp.com",
+        databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+        projectId: "dbiebi",
+        storageBucket: "dbiebi.appspot.com",
+        messagingSenderId: "1068164821081",
+        appId: "1:1068164821081:web:2d3e0030d5311d94f30148",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const form = document.getElementById("alimentoForm");
+      const lista = document.getElementById("listaAlimentos");
+      const inputGramatura = document.getElementById("gramaturaKg");
+
+      // Formatação da gramatura
+      inputGramatura.addEventListener("input", function (e) {
+        var value = e.target.value.replace(/\D/g, "");
+        value = (value / 1000).toFixed(3) + "";
+        e.target.value = value;
+      });
+
+      // Cadastrar alimento
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const nomeAlimento = document
+          .getElementById("nomeAlimento")
+          .value.toUpperCase();
+        const gramaturaKg = parseFloat(
+          document.getElementById("gramaturaKg").value
+        );
+
+        db.collection("listaAlimentos")
+          .add({
+            nomeAlimento: nomeAlimento,
+            gramaturaKg: gramaturaKg,
+            dataCadastro: new Date(),
+          })
+          .then(() => {
+            form.reset();
+            carregarAlimentos();
+          });
+      });
+
+      // Carregar lista de alimentos
+      function carregarAlimentos() {
+        lista.innerHTML = "";
+        db.collection("listaAlimentos")
+          .orderBy("nomeAlimento")
+          .get()
+          .then((snapshot) => {
+            snapshot.forEach((doc) => {
+              const li = document.createElement("li");
+              li.className =
+                "list-group-item d-flex justify-content-between align-items-center";
+              li.innerHTML = `
+                            ${doc.data().nomeAlimento} - ${
+                doc.data().gramaturaKg
+              } Kg
+                            <button class="btn btn-danger btn-sm" onclick="excluirAlimento('${
+                              doc.id
+                            }')">
+                                Excluir
+                            </button>
+                        `;
+              lista.appendChild(li);
+            });
+          });
+      }
+
+      // Excluir alimento
+      function excluirAlimento(id) {
+        if (confirm("Deseja realmente excluir este alimento?")) {
+          db.collection("listaAlimentos")
+            .doc(id)
+            .delete()
+            .then(() => carregarAlimentos());
+        }
+      }
+
+      // Carregar lista inicial
+      carregarAlimentos();
+    </script>
+  </body>
+</html>
