@@ -47,7 +47,7 @@
         <!-- Parte 3: Download em CSV -->
         <div id="downloadParte" class="mt-4">
             <h3>Download em CSV</h3>
-            <button id="downloadBtn" class="btn btn-success btn-block">Baixar CSV</button>
+            <button id="downloadBtn" class="btn btn-success btn-block">Baixar XLS</button>
             <div id="downloadResultado" class="mt-4"></div>
         </div>
     </div>
@@ -55,6 +55,7 @@
     <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
 
     <script>
         // Configuração do Firebase
@@ -170,38 +171,41 @@
             });
         });
 
-        // Parte 3: Download em CSV
+        // Parte 3: Download em XLS
         downloadBtn.addEventListener('click', function() {
             bancoDeDados.collection(colecao).get()
             .then(function(querySnapshot) {
-                var csvData = '\uFEFF'; // Adicionar marca de ordem de byte (BOM) para UTF-8
-                var campos = [];
+                const dados = [];
+                let campos = [];
 
+                // Obtém cabeçalhos e dados
                 querySnapshot.forEach(function(doc) {
-                    var dados = doc.data();
+                    const documento = doc.data();
                     if (campos.length === 0) {
-                        campos = Object.keys(dados);
-                        csvData += campos.join(';') + '\n';
+                        campos = Object.keys(documento);
+                        dados.push(campos); // Adiciona cabeçalhos como primeira linha
                     }
-                    var valores = campos.map(function(campo) {
-                        var valor = dados[campo] || '';
-                        return '"' + valor.replace(/"/g, '""') + '"'; // Escapar aspas duplas
+                    const valores = campos.map(campo => {
+                        const valor = documento[campo];
+                        // Verifica se o campo é um array (membros)
+                        if (Array.isArray(valor)) {
+                            return valor.join(', '); // Converte array em string separada por vírgula
+                        }
+                        return valor || '';
                     });
-                    csvData += valores.join(';') + '\n';
+                    dados.push(valores);
                 });
 
-                var csvBlob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-                var csvUrl = URL.createObjectURL(csvBlob);
-                var link = document.createElement('a');
-                link.setAttribute('href', csvUrl);
-                link.setAttribute('download', `${colecao}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                // Cria planilha
+                const planilha = XLSX.utils.aoa_to_sheet(dados);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, planilha, "Dados");
+
+                // Gera e baixa arquivo XLS
+                XLSX.writeFile(workbook, `${colecao}.xls`);
             })
-            .catch(function(error) {
-                downloadResultado.innerHTML = `<p>Erro ao baixar CSV: ${error}</p>`;
+            .catch(function(erro) {
+                downloadResultado.innerHTML = `<p>Erro ao baixar XLS: ${erro}</p>`;
             });
         });
     </script>
