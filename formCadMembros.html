@@ -156,7 +156,6 @@
       />
     </div>
     <div class="container">
-<<<<<<< HEAD
       <h2 class="text-center mb-4 font-weight-bold">Cadastro de Membros</h2>
       <div class="divider"></div>
       <form id="memberForm">
@@ -247,16 +246,6 @@
             <div class="choice-chip" data-value="MASCULINO">
               <i class="fas fa-male"></i>
               Masculino
-=======
-        <h2 class="text-center mb-4 font-weight-bold">Cadastro de Membros</h2>
-        <div class="divider"></div>
-        <form id="memberForm">
-            <div class="form-group">
-                <label for="nome">Nome (Conforme RG)</label>
-                <input type="text" class="form-control" id="nome" required
-                    onkeyup="this.value = this.value.toUpperCase();">
-                <small id="nomeError" style="color: rgb(255, 159, 159); display: none;">Nome já cadastrado</small>
->>>>>>> 34d12d7b939ce408bceced18993858ce4f0c4215
             </div>
             <div class="choice-chip" data-value="FEMININO">
               <i class="fas fa-female"></i>
@@ -322,7 +311,6 @@
               <i class="fas fa-times-circle"></i>
               Não Sou Membro
             </div>
-<<<<<<< HEAD
           </div>
           <input type="hidden" id="arrolamento" name="arrolamento" required />
         </div>
@@ -334,80 +322,6 @@
           Cadastrar
         </button>
       </form>
-=======
-            <div class="form-group">
-                <label for="uf">UF</label>
-                <input type="text" class="form-control" id="uf" required maxlength="2" readonly
-                    onkeyup="this.value = this.value.toUpperCase();">
-            </div>
-            <div class="form-group">
-                <label>Sexo</label>
-                <div class="choice-chips">
-                    <div class="choice-chip" data-value="MASCULINO">
-                        <i class="fas fa-male"></i>
-                        Masculino
-                    </div>
-                    <div class="choice-chip" data-value="FEMININO">
-                        <i class="fas fa-female"></i>
-                        Feminino
-                    </div>
-                </div>
-                <input type="hidden" id="sexo" name="sexo" required>
-            </div>
-            <div class="form-group">
-                <label>Estado Civil</label>
-                <div class="choice-chips">
-                    <div class="choice-chip" data-value="SOLTEIRO">
-                        <i class="fas fa-user"></i>
-                        Solteiro
-                    </div>
-                    <div class="choice-chip" data-value="CASADO">
-                        <i class="fas fa-heart"></i>
-                        Casado
-                    </div>
-                </div>
-                <input type="hidden" id="estadoCivil" name="estadoCivil" required>
-            </div>
-            <div class="form-group">
-                <label for="celular">Número do Celular</label>
-                <input type="text" class="form-control" id="celular" required>
-            </div>
-            <div class="form-group">
-                <label for="igreja">Igreja em que Congrega</label>
-                <select class="form-control" id="igreja" required></select>
-            </div>
-            <div class="form-group">
-                <label for="lidercelula">Nome do Líder</label>
-                <select class="form-control" id="lidercelula"
-                    onchange="this.value = this.value.toUpperCase();"></select>
-            </div>
-            <div class="form-group">
-                <label for="nomedacelula">Nome da Célula</label>
-                <input type="text" class="form-control" id="nomedacelula" readonly
-                    onkeyup="this.value = this.value.toUpperCase();">
-            </div>
-            <div class="form-group">
-                <label for="rede">Rede</label>
-                <input type="text" class="form-control" id="rede" readonly
-                    onkeyup="this.value = this.value.toUpperCase();">
-            </div>
-            <div class="form-group">
-                <label>Arrolamento na Igreja</label>
-                <div class="choice-chips">
-                    <div class="choice-chip" data-value="SOU MEMBRO">
-                        <i class="fas fa-check-circle"></i>
-                        Sou Membro
-                    </div>
-                    <div class="choice-chip" data-value="NÃO SOU MEMBRO">
-                        <i class="fas fa-times-circle"></i>
-                        Não Sou Membro
-                    </div>
-                </div>
-                <input type="hidden" id="arrolamento" name="arrolamento" required>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block" id="cadastrarBtn">Cadastrar</button>
-        </form>
->>>>>>> 34d12d7b939ce408bceced18993858ce4f0c4215
     </div>
 
     <!-- Importar Firebase -->
@@ -543,7 +457,6 @@
           BLACK: "#000000",
           VERDE: "#008000",
         };
-<<<<<<< HEAD
 
         var cor = cores[rede] || "#000000";
         selectRede.style.backgroundColor = cor;
@@ -586,7 +499,21 @@
         document.getElementById("lidercelula").addEventListener("change", function() {
             const liderSelecionado = this.value;
             const inputCelula = document.getElementById("nomedacelula");
-          
+            const inputRede = document.getElementById("rede");
+    
+    const specialRoles = [
+        "SOU PASTOR DE REDE",
+        "SOU COORDENADOR DE REDE", 
+        "SOU SUPERVISOR DE REDE"
+    ];
+
+    if (specialRoles.includes(liderSelecionado)) {
+        inputCelula.value = "";
+        inputRede.value = "";
+        alterarCorRede("");
+        return;
+    }
+
             if (liderSelecionado) {
                 bancoDeDados.collection("estruturacelula")
                     .where("conclider", "==", liderSelecionado)
@@ -646,232 +573,6 @@
             'Erro ao consultar a coleção "estruturacelula":',
             error
           );
-=======
-        firebase.initializeApp(configuracaoFirebase);
-        var bancoDeDados = firebase.firestore();
-
-        // Referência ao formulário
-        var formulario = document.getElementById('memberForm');
-        var inputNomedaCelula = document.getElementById('nomedacelula');
-        var inputLiderCelula = document.getElementById('lidercelula');
-        var inputRede = document.getElementById('rede');
-        var inputCelular = document.getElementById('celular');
-        var selectIgrejas = document.getElementById('igreja');
-        var inputNome = document.getElementById('nome');
-        var email = document.getElementById('email').value;
-        var nomeError = document.getElementById('nomeError');
-        var cadastrarBtn = document.getElementById('cadastrarBtn');
-        var inputCep = document.getElementById('cep');
-        var inputBairro = document.getElementById('bairro');
-        var inputCidade = document.getElementById('cidade');
-        var inputUf = document.getElementById('uf');
-        var cepError = document.getElementById('cepError');
-
-        // Máscara para o campo "Número do Celular"
-        VMasker(inputCelular).maskPattern("(99) 99999-9999");
-
-        // Máscara para o campo CEP
-        VMasker(inputCep).maskPattern("99999-999");
-
-        // Função para requerer CEP pelo Nascimento
-        function verificarDataNascimento() {
-            var dataNascimento = new Date(document.getElementById('dtnasc').value);
-            var dataLimite = new Date();
-            dataLimite.setFullYear(dataLimite.getFullYear() - 12);
-
-            var cepInput = document.getElementById('cep');
-            //var emailInput = document.getElementById('email')
-            var celularInput = document.getElementById('celular');
-
-            if (dataNascimento <= dataLimite) {
-                cepInput.setAttribute('required', 'required');
-                //emailInput.setAttribute('required', 'required');
-                celularInput.setAttribute('required', 'required');
-            } else {
-                cepInput.removeAttribute('required');
-                //emailInput.removeAttribute('required');
-                celularInput.removeAttribute('required');
-            }
-        }
-
-        // Função para buscar endereço pelo CEP
-        function buscarEnderecoPorCep(cep) {
-            var url = `https://viacep.com.br/ws/${cep}/json/`;
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.erro) {
-                        // CEP não encontrado
-                        inputBairro.value = '';
-                        inputCidade.value = '';
-                        inputUf.value = '';
-                        cepError.style.display = 'block'; // Exibir mensagem de erro
-                    } else {
-                        // Preencher os campos com os dados retornados
-                        inputBairro.value = data.bairro.toUpperCase();
-                        inputCidade.value = data.localidade.toUpperCase();
-                        inputUf.value = data.uf.toUpperCase();
-                        cepError.style.display = 'none'; // Ocultar mensagem de erro
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao buscar endereço:', error);
-                    cepError.style.display = 'block'; // Exibir mensagem de erro
-                });
-        }
-
-        // Adicionar evento de blur (sair do campo) no campo CEP
-        inputCep.addEventListener('blur', function () {
-            var cep = inputCep.value.replace(/\D/g, ''); // Remover caracteres não numéricos
-            if (cep.length === 8) {
-                buscarEnderecoPorCep(cep);
-            } else {
-                cepError.style.display = 'block'; // Exibir mensagem de erro
-                inputBairro.value = '';
-                inputCidade.value = '';
-                inputUf.value = '';
-            }
-        });
-
-        // Preencher o dropdown de igrejas
-        bancoDeDados.collection('igreja').get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const option = document.createElement('option');
-                option.value = doc.data().nomeigreja;
-                option.text = doc.data().nomeigreja;
-                selectIgrejas.add(option);
-            });
-        });
-
-        // Função para alterar a cor da caixa de acordo com a rede escolhida
-        function alterarCorRede(rede) {
-            var selectRede = document.getElementById('rede');
-            var cores = {
-                'AMARELA': '#FFFF00',
-                'AZUL': '#0000FF',
-                'TEEN': '#800080',
-                'LARANJA': '#FFA500',
-                'VERMELHA': '#FF0000',
-                'BLACK': '#000000',
-                'VERDE': '#008000'
-            };
-
-            var cor = cores[rede] || '#000000';
-            selectRede.style.backgroundColor = cor;
-            selectRede.style.color = (cor === '#000000' || cor === '#800080' || cor === '#0000FF') ? '#FFFFFF' : '#000000';
-        }
-          // Carregar lista de líderes
-          bancoDeDados.collection('estruturacelula')
-              .orderBy('conclider')
-              .get()
-              .then((querySnapshot) => {
-                  const selectLider = document.getElementById('lidercelula');
-
-                  // Opção padrão
-                  const optionPadrao = document.createElement('option');
-                  optionPadrao.value = '';
-                  optionPadrao.text = 'Selecione um líder';
-                  optionPadrao.disabled = true;
-                  optionPadrao.selected = true;
-                  selectLider.add(optionPadrao);
-
-                  // Opções especiais
-                  const optionCoordenador = document.createElement('option');
-                  optionCoordenador.value = 'SOU COORDENADOR DE REDE';
-                  optionCoordenador.text = 'SOU COORDENADOR DE REDE';
-                  selectLider.add(optionCoordenador);
-
-                  const optionSupervisor = document.createElement('option');
-                  optionSupervisor.value = 'SOU SUPERVISOR DE REDE';
-                  optionSupervisor.text = 'SOU SUPERVISOR DE REDE';
-                  selectLider.add(optionSupervisor);
-
-                  // Array para armazenar líderes únicos
-                  const lideresUnicos = new Set();
-
-                  querySnapshot.forEach((doc) => {
-                      const lider = doc.data().conclider;
-                      if (lider !== '0' && !lideresUnicos.has(lider)) {
-                          lideresUnicos.add(lider);
-                          const option = document.createElement('option');
-                          option.value = lider;
-                          option.text = lider;
-                          selectLider.add(option);
-                      }
-                  });
-              });
-
-          // Evento de mudança do líder
-          document.getElementById('lidercelula').addEventListener('change', function() {
-              const liderSelecionado = this.value.toUpperCase();
-              const inputNomedaCelula = document.getElementById('nomedacelula');
-              const inputRede = document.getElementById('rede');
-
-              if (liderSelecionado) {
-                  bancoDeDados.collection('estruturacelula')
-                      .where('conclider', '==', liderSelecionado)
-                      .get()
-                      .then((querySnapshot) => {
-                          querySnapshot.forEach((doc) => {
-                              const dados = doc.data();
-                              inputNomedaCelula.value = dados.nomecelula.toUpperCase();
-                              inputRede.value = dados.rede.toUpperCase();
-                              alterarCorRede(dados.rede);
-                          });
-                      });
-              } else {
-                  inputNomedaCelula.value = '';
-                  inputRede.value = '';
-              }
-          });
-        // Função para verificar se o nome já está cadastrado
-        function verificarNomeExistente(nome) {
-            return bancoDeDados.collection('membros')
-                .where('nome', '==', nome)
-                .get()
-                .then(function (querySnapshot) {
-                    return !querySnapshot.empty;
-                })
-                .catch(function (error) {
-                    console.error('Erro ao verificar nome existente:', error);
-                    return false;
-                });
-        }
-
-        // Função para verificar se o email já está cadastrado
-        function verificarEmailExistente(email) {
-            return bancoDeDados.collection('membros')
-                .where('email', '==', email)
-                .get()
-                .then(function (querySnapshot) {
-                    return !querySnapshot.empty;
-                })
-                .catch(function (error) {
-                    console.error('Erro ao verificar email existente:', error);
-                    return false;
-                });
-        }
-
-        // Adicionar evento de blur (sair do campo) no campo "Nome"
-        inputNome.addEventListener('blur', function () {
-            var nome = inputNome.value.toUpperCase();
-            this.value = this.value.trim();
-            var nome = this.value.toUpperCase();
-
-            verificarNomeExistente(nome)
-                .then(function (nomeExistente) {
-                    if (nomeExistente) {
-                        // Nome já cadastrado
-                        nomeError.style.display = 'block';
-                        cadastrarBtn.disabled = true;
-                    } else {
-                        // Nome não cadastrado
-                        nomeError.style.display = 'none';
-                        cadastrarBtn.disabled = false;
-                    }
-                });
->>>>>>> 34d12d7b939ce408bceced18993858ce4f0c4215
         });
 
       // Preencher o dropdown de líderes
