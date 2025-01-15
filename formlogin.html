@@ -302,7 +302,7 @@
 
             for (const doc of querySnapshot.docs) {
                 const dados = doc.data();
-                const { rede, Pastor, coordenador, supervisor, conclider, nomecelula } = dados;
+                const {Pastor, coordenador, rede, supervisor, conclider, nomecelula } = dados;
 
                 if (funcaoUsuario === 'ADMIN' ||
                     dados.pastor1 === nomeUsuario || dados.pastor2 === nomeUsuario ||
@@ -310,16 +310,18 @@
                     dados.supervisor1 === nomeUsuario || dados.supervisor2 === nomeUsuario ||
                     dados.nomelider1 === nomeUsuario || dados.nomelider2 === nomeUsuario || dados.nomelider3 === nomeUsuario) {
 
-                    if (!estrutura.pastores[rede]) estrutura.pastores[rede] = new Set();
-                    if (!estrutura.coordenadores[rede]) estrutura.coordenadores[rede] = new Set();
-                    if (!estrutura.supervisores[rede]) estrutura.supervisores[rede] = new Set();
-                    if (!estrutura.lideres[rede]) estrutura.lideres[rede] = [];
+                    //if (!estrutura.pastores[rede]) estrutura.pastores[rede] = new Set();
+                    if (!estrutura.coordenadores[Pastor]) estrutura.coordenadores[Pastor] = new Set();
+                    if (!estrutura.supervisores[Pastor]) estrutura.supervisores[Pastor] = new Set();
+                    if (!estrutura.lideres[Pastor]) estrutura.lideres[Pastor] = [];
 
-                    estrutura.pastores[rede].add(Pastor);
-                    estrutura.coordenadores[rede].add(coordenador);
-                    estrutura.supervisores[rede].add(supervisor);
+                    //estrutura.pastores[rede].add(Pastor);
+                    estrutura.coordenadores[Pastor].add(coordenador);
+                    estrutura.supervisores[Pastor].add(supervisor);
 
-                    estrutura.lideres[rede].push({
+                    estrutura.lideres[Pastor].push({
+                        //pastor: Pastor,
+                        coordenador: coordenador,
                         rede,
                         supervisor,
                         conclider,
@@ -330,14 +332,20 @@
             // Converter Sets para Arrays e armazenar no localStorage
             for (const role in estrutura) {
                 if (role !== 'lideres') {
-                    for (const rede in estrutura[role]) {
-                        estrutura[role][rede] = Array.from(estrutura[role][rede]);
+                    for (const Pastor in estrutura[role]) {
+                        estrutura[role][Pastor] = Array.from(estrutura[role][Pastor]);
                     }
                 }
                 localStorage.setItem(role, JSON.stringify(estrutura[role]));
             }
             console.log("Estrutura de célula armazenada com sucesso");
         }
+
+
+
+
+//----------------------------
+
 
         const formulario = document.getElementById('loginForm');
 

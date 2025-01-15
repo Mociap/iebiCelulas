@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resumo Pastoral</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        font-family: "Montserrat", sans-serif;
+        color: #333;
+        padding-top: 0;
+      }
+      .container {
+        max-width: 950px;
+        margin-top: 20px;
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #000;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        border-radius: 10px 10px 0 0;
+      }
+      .header img {
+        max-width: 200px;
+      }
+      .divider {
+        width: 90%;
+        height: 2px;
+        background-color: #000;
+        margin: 30px auto;
+      }
+      #relatorioContainer {
+        margin-top: 40px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        overflow-x: auto;
+      }
+      .back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background-color: #db7734;
+        color: #fff;
+        padding: 10px;
+        border-radius: 50%;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        transition: all 0.3s ease;
+        z-index: 1001;
+      }
+      .back-button:hover {
+        background-color: #db7734;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .back-button i {
+        margin-right: 0;
+      }
+      .card-body .table {
+        font-size: 0.85rem;
+      }
+      .card-body h4 {
+        font-size: 1.1rem;
+      }
+      .table-title {
+        font-size: 16;
+        font-weight: bold;
+      }
+      .table td,
+      .table th {
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="../frmRelatorios.html" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+
+    <div class="header">
+      <img
+        src="../assets/LogoBranco.png"
+        alt="Logo da Igreja Evangélica Batista em Intermares"
+      />
+    </div>
+
+    <div class="container container-fluid">
+      <h2 class="text-center mb-4 font-weight-bold" style="margin-top: 20px">
+        Resumo Pastoral
+      </h2>
+      <div class="divider"></div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-10">
+          <ul class="nav nav-pills nav-fill mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a
+                class="nav-link active"
+                id="home-tab"
+                data-toggle="tab"
+                href="#home"
+                role="tab"
+                aria-controls="home"
+                aria-selected="true"
+              >
+                <i class="fas fa-chart-pie mr-2"></i>Resumo Geral
+              </a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a
+                class="nav-link"
+                id="profile-tab"
+                data-toggle="tab"
+                href="#profile"
+                role="tab"
+                aria-controls="profile"
+                aria-selected="false"
+              >
+                <i class="fas fa-network-wired mr-2"></i>Detalhes por Rede
+              </a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a
+                class="nav-link"
+                id="contact-tab"
+                data-toggle="tab"
+                href="#contact"
+                role="tab"
+                aria-controls="contact"
+                aria-selected="false"
+              >
+                <i class="fas fa-chart-bar mr-2"></i>Gráficos
+              </a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div
+              class="tab-pane fade show active"
+              id="home"
+              role="tabpanel"
+              aria-labelledby="home-tab"
+            >
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <canvas id="graficoCoordenadores"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                      <canvas id="graficoSupervisores"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                      <canvas id="graficoCelulas"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card mt-4">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <h4 class="mb-3 table-title text-center">
+                        Resumo por Setor
+                      </h4>
+                      <table
+                        class="table table-striped table-bordered table-sm"
+                      >
+                        <thead class="thead-dark">
+                          <tr>
+                            <th class="text-center align-middle">
+                              Coordenador
+                            </th>
+                            <th class="text-center align-middle">Rede</th>
+                            <th class="text-center align-middle">Supervisor</th>
+                            <th class="text-center align-middle">
+                              Qtd Células
+                            </th>
+                            <th class="text-center align-middle">
+                              Qtd Líderes
+                            </th>
+                            <th class="text-center align-middle">
+                              Qtd Membros
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody id="tabelaResumo">
+                          <!-- Os dados serão inseridos aqui via JavaScript -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="tab-pane fade"
+              id="profile"
+              role="tabpanel"
+              aria-labelledby="profile-tab"
+            >
+              <div class="card">
+                <div class="card-body">
+                  <h3 class="card-title">Detalhes por Rede</h3>
+                  <!-- Conteúdo dos Detalhes por Rede aqui -->
+                </div>
+              </div>
+            </div>
+            <div
+              class="tab-pane fade"
+              id="contact"
+              role="tabpanel"
+              aria-labelledby="contact-tab"
+            >
+              <div class="card">
+                <div class="card-body">
+                  <h3 class="card-title">Gráficos</h3>
+                  <!-- Conteúdo dos Gráficos aqui -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS e dependências -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        query,
+        where,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import {
+        getAuth,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+      const configuracaoFirebase = {
+        apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+        authDomain: "dbiebi.firebaseapp.com",
+        databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+        projectId: "dbiebi",
+        storageBucket: "dbiebi.appspot.com",
+        messagingSenderId: "1068164821081",
+        appId: "1:1068164821081:web:2d3e0030d5311d94f30148",
+      };
+
+      const app = initializeApp(configuracaoFirebase);
+      const bancoDeDados = getFirestore(app);
+      const auth = getAuth(app);
+
+      // Obtém todas as chaves do localStorage
+      const chaves = Object.keys(localStorage);
+
+      // Verifica se há chaves no localStorage
+      if (chaves.length > 0) {
+        console.log("Dados armazenados no localStorage:");
+        chaves.forEach(function (chave) {
+          const valor = localStorage.getItem(chave);
+          console.log(`${chave}: ${valor}`);
+        });
+      } else {
+        console.log("Não há dados armazenados no localStorage.");
+      }
+
+      //Função para contar os coordenadores
+            function contarCoordenadoresUnicos() {
+    const coordenadores = JSON.parse(localStorage.getItem('coordenadores'));
+    const coordenadoresUnicos = new Set();
+    
+    // Coleta todos os coordenadores únicos
+    Object.values(coordenadores).forEach(coords => {
+        coords.forEach(coord => coordenadoresUnicos.add(coord));
+    });
+    
+    // Cria objeto com contagem por coordenador
+    const contagem = {};
+    coordenadoresUnicos.forEach(coord => {
+        contagem[coord] = Object.values(coordenadores).filter(
+            coords => coords.includes(coord)
+        ).length;
+    });
+    
+    return contagem;
+}
+
+
+      // Função para contar supervisores por rede
+      function contarSupervisoresPorRede() {
+        const supervisores = JSON.parse(localStorage.getItem("supervisores"));
+        const contagem = {};
+        for (const rede in supervisores) {
+          contagem[rede] = supervisores[rede].length;
+        }
+        return contagem;
+      }
+
+      // Função para contar células por rede
+      function contarCelulasPorRede() {
+        const lideres = JSON.parse(localStorage.getItem("lideres"));
+        const contagem = {};
+        for (const rede in lideres) {
+          contagem[rede] = lideres[rede].length;
+        }
+        return contagem;
+      }
+
+      function getCorRede(rede) {
+        const cores = {
+          AMARELA: "#FFD700",
+          AZUL: "#000080",
+          TEEN: "#4B0082",
+          LARANJA: "#FF8C00",
+          VERMELHA: "#8B0000",
+          BLACK: "#000000",
+          VERDE: "#006400",
+        };
+        return cores[rede.toUpperCase()] || "#000000";
+      }
+
+      function calcularTotal(dados) {
+        return Object.values(dados).reduce((a, b) => a + b, 0);
+      }
+
+      const opcoesGrafico = {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return `${context.label}: ${context.raw}`;
+              },
+            },
+          },
+        },
+        elements: {
+          arc: {
+            borderWidth: 0,
+          },
+        },
+        layout: {
+          padding: 20,
+        },
+        cutout: "50%",
+      };
+
+      // para o grafico de Coordenador
+      const opcoesCoordenadores = {
+        ...opcoesGrafico,
+        plugins: {
+          ...opcoesGrafico.plugins,
+          title: {
+            display: true,
+            text: "Coordenadores por Rede",
+            font: {
+              size: 18,
+            },
+          },
+        },
+      };
+
+      // Para o gráfico de supervisores
+      const opcoesSupervisores = {
+        ...opcoesGrafico,
+        plugins: {
+          ...opcoesGrafico.plugins,
+          title: {
+            display: true,
+            text: "Supervisores por Rede",
+            font: {
+              size: 18,
+            },
+          },
+        },
+      };
+
+      // Para o gráfico de células
+      const opcoesCelulas = {
+        ...opcoesGrafico,
+        plugins: {
+          ...opcoesGrafico.plugins,
+          title: {
+            display: true,
+            text: "Células por Rede",
+            font: {
+              size: 18,
+            },
+          },
+        },
+      };
+
+      const pluginTextoCentral = {
+        id: "textoCentral",
+        afterDraw: function (grafico) {
+          var ctx = grafico.ctx;
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          grafico.data.datasets.forEach(function (dataset, indiceDataset) {
+            var meta = grafico.getDatasetMeta(indiceDataset);
+            meta.data.forEach(function (elemento, indice) {
+              var textoValor = dataset.data[indice].toString();
+              var tamanhoFonte = 16;
+              ctx.font = `bold ${tamanhoFonte}px Arial`;
+              ctx.fillStyle = "white";
+
+              var angulo = (elemento.startAngle + elemento.endAngle) / 2;
+              var raio = (elemento.outerRadius + elemento.innerRadius) / 2;
+
+              var x = elemento.x + Math.cos(angulo) * raio;
+              var y = elemento.y + Math.sin(angulo) * raio;
+
+              ctx.fillText(textoValor, x, y);
+            });
+          });
+          ctx.restore();
+        },
+      };
+
+      const pluginCentroTotal = {
+        id: "centroTotal",
+        afterDraw: function (chart) {
+          const ctx = chart.ctx;
+          const chartArea = chart.chartArea;
+
+          const centerX = (chartArea.left + chartArea.right) / 2;
+          const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          const fontSize = ((chartArea.bottom - chartArea.top) / 15) * 1.5;
+          ctx.font = fontSize + "px sans-serif";
+
+          const text = "Total: ";
+          const total = calcularTotal(chart.data.datasets[0].data);
+          const fullText = text + total;
+
+          ctx.fillStyle = "#000000";
+          ctx.fillText(fullText, centerX, centerY);
+
+          ctx.restore();
+        },
+      };
+
+      // Criar gráfico de supervisores
+      const ctxCoordenadores = document
+        .getElementById("graficoCoordenadores")
+        .getContext("2d");
+      const dadosCoordenadores = contarCoordenadoresUnicos();
+      new Chart(ctxCoordenadores, {
+        type: "pie",
+        data: {
+          labels: Object.keys(dadosCoordenadores),
+          datasets: [
+            {
+              data: Object.values(dadosCoordenadores),
+              backgroundColor: Object.keys(dadosCoordenadores).map(getCorRede),
+            },
+          ],
+        },
+        options: opcoesCoordenadores,
+        plugins: [pluginTextoCentral, pluginCentroTotal],
+      });
+
+      // Criar gráfico de supervisores
+      const ctxSupervisores = document
+        .getElementById("graficoSupervisores")
+        .getContext("2d");
+      const dadosSupervisores = contarSupervisoresPorRede();
+      new Chart(ctxSupervisores, {
+        type: "pie",
+        data: {
+          labels: Object.keys(dadosSupervisores),
+          datasets: [
+            {
+              data: Object.values(dadosSupervisores),
+              backgroundColor: Object.keys(dadosSupervisores).map(getCorRede),
+            },
+          ],
+        },
+        options: opcoesSupervisores,
+        plugins: [pluginTextoCentral, pluginCentroTotal],
+      });
+
+      // Criar gráfico de células
+      const ctxCelulas = document
+        .getElementById("graficoCelulas")
+        .getContext("2d");
+      const dadosCelulas = contarCelulasPorRede();
+      new Chart(ctxCelulas, {
+        type: "pie",
+        data: {
+          labels: Object.keys(dadosCelulas),
+          datasets: [
+            {
+              data: Object.values(dadosCelulas),
+              backgroundColor: Object.keys(dadosCelulas).map(getCorRede),
+            },
+          ],
+        },
+        options: opcoesCelulas,
+        plugins: [pluginTextoCentral, pluginCentroTotal],
+      });
+      async function atualizarDadosLideres(lideres) {
+        console.log("Iniciando atualização dos dados dos líderes");
+        for (const rede in lideres) {
+          lideres[rede] = await Promise.all(
+            lideres[rede].map(async (lider) => {
+              try {
+                const nomecelulas = await obterNomeCelulas(lider.conclider);
+                const membrosCount = await contarMembros(nomecelulas);
+                const coordenador = await obterCoordenador(lider.conclider);
+                return { ...lider, nomecelulas, membrosCount, coordenador };
+              } catch (erro) {
+                console.error(
+                  `Erro ao processar líder ${lider.conclider}:`,
+                  erro
+                );
+                return lider;
+              }
+            })
+          );
+        }
+        console.log("Dados dos líderes atualizados:", lideres);
+        return lideres;
+      }
+
+      async function obterCoordenador(conclider) {
+        const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
+        const q = query(
+          estruturaCelulaRef,
+          where("conclider", "==", conclider)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          return querySnapshot.docs[0].data().coordenador;
+        }
+        return "";
+      }
+
+      async function obterNomeCelulas(conclider) {
+        const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
+        const q = query(
+          estruturaCelulaRef,
+          where("conclider", "==", conclider)
+        );
+        const querySnapshot = await getDocs(q);
+        const nomecelulas = querySnapshot.docs.map(
+          (doc) => doc.data().nomecelula
+        );
+        return nomecelulas.join(" / "); // Junta os nomes das células com ' / '
+      }
+
+      async function contarMembros(nomecelulas) {
+        if (!nomecelulas) return 0;
+        const celulas = nomecelulas.split(" / ");
+        const membrosRef = collection(bancoDeDados, "membros");
+        const q = query(membrosRef, where("nomedacelula", "in", celulas));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.size;
+      }
+
+      // Chame esta função após o carregamento da página
+      document.addEventListener("DOMContentLoaded", async function () {
+        //Atualizar Localstorage
+        const lideres = JSON.parse(localStorage.getItem("lideres"));
+        const lideresAtualizados = await atualizarDadosLideres(lideres);
+        localStorage.setItem("lideres", JSON.stringify(lideresAtualizados));
+
+        // Contagem e Ordenação
+        const contagem = {};
+
+        for (const rede in lideres) {
+          lideres[rede].forEach((lider) => {
+            const chave = `${rede} - ${lider.supervisor}`;
+            contagem[chave] = (contagem[chave] || 0) + 1;
+          });
+        }
+
+        const dadosOrdenados = Object.entries(contagem)
+          .map(([chave, valor]) => {
+            const [rede, supervisor] = chave.split(" - ");
+            return { rede, supervisor, qtdCelulas: valor };
+          })
+          .sort((a, b) => {
+            if (a.rede !== b.rede) {
+              return a.rede.localeCompare(b.rede);
+            }
+            return a.supervisor.localeCompare(b.supervisor);
+          });
+
+        console.log("DOM carregado, iniciando preenchimento das tabelas");
+        preencherTabelaResumo();
+        console.log("Preenchimento das tabelas concluído");
+      });
+      function preencherTabelaResumo() {
+        const supervisores = JSON.parse(localStorage.getItem("supervisores"));
+        const lideres = JSON.parse(localStorage.getItem("lideres"));
+        const tabelaBody = document.getElementById("tabelaResumo");
+
+        let dadosTabela = [];
+        let totalCelulas = 0;
+        let totalLideres = 0;
+        let totalMembros = 0;
+
+        for (const rede in supervisores) {
+          supervisores[rede].forEach((supervisor) => {
+            const celulasSupervisor = lideres[rede].filter(
+              (lider) => lider.supervisor === supervisor
+            );
+            const qtdCelulas = celulasSupervisor.length;
+            const qtdLideres = celulasSupervisor.reduce(
+              (total, lider) => total + lider.conclider.split("/").length,
+              0
+            );
+            const qtdMembros = celulasSupervisor.reduce(
+              (total, lider) => total + (lider.membrosCount || 0),
+              0
+            );
+            const coordenador = celulasSupervisor[0]?.coordenador || "";
+
+            dadosTabela.push({
+              coordenador,
+              rede,
+              supervisor,
+              qtdCelulas,
+              qtdLideres,
+              qtdMembros,
+            });
+            totalCelulas += qtdCelulas;
+            totalLideres += qtdLideres;
+            totalMembros += qtdMembros;
+          });
+        }
+
+        dadosTabela.sort((a, b) => {
+          if (a.coordenador !== b.coordenador) {
+            return a.coordenador.localeCompare(b.coordenador);
+          }
+          if (a.rede !== b.rede) {
+            return a.rede.localeCompare(b.rede);
+          }
+          if (a.supervisor !== b.supervisor) {
+            return a.supervisor.localeCompare(b.supervisor);
+          }
+          return a.rede.localeCompare(b.rede);
+        });
+
+        tabelaBody.innerHTML = "";
+
+        dadosTabela.forEach(
+          ({
+            coordenador,
+            rede,
+            supervisor,
+            qtdCelulas,
+            qtdLideres,
+            qtdMembros,
+          }) => {
+            const row = `
+                      <tr>
+                          <td class="align-middle">${coordenador}</td>
+                          <td class="align-middle">
+                              <i class="fas fa-circle" style="color: ${getCorRede(
+                                rede
+                              )};"></i>
+                              ${rede}
+                          </td>
+                          <td class="text-center align-middle">${supervisor}</td>
+                          <td class="text-center align-middle">${qtdCelulas}</td>
+                          <td class="text-center align-middle">${qtdLideres}</td>
+                          <td class="text-center align-middle">${qtdMembros}</td>
+                      </tr>
+                  `;
+            tabelaBody.innerHTML += row;
+          }
+        );
+
+        // Adiciona linha de total
+        const linhaTotalGeral = tabelaBody.insertRow();
+        linhaTotalGeral.className = "thead-dark text-white bg-dark";
+        linhaTotalGeral.innerHTML = `
+                  <td colspan="3" class="text-center align-middle font-weight-bold">Total Geral:</td>
+                  <td class="text-center align-middle font-weight-bold">${totalCelulas}</td>
+                  <td class="text-center align-middle font-weight-bold">${totalLideres}</td>
+                  <td class="text-center align-middle font-weight-bold">${totalMembros}</td>
+              `;
+      }
+      const coresRedes = {
+        VERMELHA: "#FF0101",
+        VERDE: "#008000",
+        AZUL: "#0000FF",
+        AMARELA: "#FFFF00",
+        LARANJA: "#FFA500",
+        BLACK: "#000000",
+        TEEN: "#800080",
+      };
+    </script>
+  </body>
+</html>
