@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Igreja Evangélica Batista Intermares</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            font-size: 12px;
+        }
+        .header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px 10px 0 0;
+        }
+        .header img {
+            max-width: 200px;
+        }
+        .divider {
+            width: 75%;
+            height: 2px;
+            background-color: #000;
+            margin: 20px auto;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .form-row label {
+            width: 100px;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .form-row select {
+            flex: 1;
+            font-size: 12px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .table th:not(:first-child),
+        .table td:not(:first-child) {
+            text-align: center;
+        }
+        .chart-container {
+            margin-top: 30px;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #9b59b6;;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .back-button:hover {
+            background-color: #9b59b6;;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .splash-screen.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .splash-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #fff;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <a href="frmRelatorios.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="spinner"></div>
+            <p>Aguarde, carregando...</p>
+        </div>
+    </div>
+    <div class="header">
+        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
+    </div>
+    <div class="container">
+        <h2 class="text-center mb-4">DASHBOARD</h2>
+        <div class="divider"></div>
+        <form>
+            <div class="form-row">
+                <label>Rede:</label>
+                <select class="form-control" id="rede">
+                    <option value="">Selecione uma rede</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Supervisor:</label>
+                <select class="form-control" id="supervisor">
+                    <option value="">Selecione um supervisor</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Líder:</label>
+                <select class="form-control" id="lider">
+                    <option value="">Selecione um líder</option>
+                </select>
+            </div>
+        </form>
+        <table class="table table-bordered" id="tabelaResumo">
+            <thead>
+                <tr><th></th></tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <div class="divider"></div>
+        <h3 class="text-center mb-4">INDICADORES</h3>
+        <div class="divider"></div>
+        <div class="row chart-container">
+            <div class="col-md-6">
+                <canvas id="frequenciaChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="visitacoesChart"></canvas>
+            </div>
+        </div>
+        <div class="row chart-container">
+            <div class="col-md-6">
+                <canvas id="ofertaChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="colheitaChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+
+        // Inicializar o Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Obter uma referência para o Firestore
+        const db = firebase.firestore();
+
+        // Variáveis para armazenar as instâncias dos gráficos
+        let charts = {};
+
+        function mostrarSplashScreen() {
+            document.getElementById('splash-screen').classList.add('show');
+        }
+
+        function esconderSplashScreen() {
+            document.getElementById('splash-screen').classList.remove('show');
+        }
+
+        // Função utilitária para formatar números
+        function formatNumber(value, decimals = 2, prefix = '') {
+            return prefix + value.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        // Função utilitária para criar elementos HTML
+        function createElement(tag, attributes = {}, textContent = '') {
+            const element = document.createElement(tag);
+            Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+            if (textContent) element.textContent = textContent;
+            return element;
+        }
+
+        // Função para configurar os dropdowns baseado na função do usuário
+        function configurarDropdowns() {
+            const funcao = localStorage.getItem('funcaoUsuario');
+            const redeDropdown = document.getElementById('rede');
+            const supervisorDropdown = document.getElementById('supervisor');
+            const liderDropdown = document.getElementById('lider');
+        }
+
+        // Função para obter dados mensais
+        async function obterDadosMensais(lider, mesInicio, mesFim) {
+            const snapshot = await db.collection('reuniao')
+                .where('lider', '==', lider)
+                .where('data', '>=', mesInicio)
+                .where('data', '<=', mesFim)
+                .get();
+
+            let totalMembros = 0;
+            let totalVisitantes = 0;
+            let totalMembrosPresentes = 0;
+            let totalOfertaMes = 0;
+            let totalColheitaAmor = 0;
+            let quantidadeReunioes = 0;
+
+            snapshot.forEach(doc => {
+                const dados = doc.data();
+                totalMembros += Number(dados.qtdMembros) || 0;
+                totalVisitantes += Number(dados.qtdVisitantes) || 0;
+                totalMembrosPresentes += Number(dados.membroPresentes) || 0;
+                totalOfertaMes += Number(dados.oferta) || 0;
+                totalColheitaAmor += Number(dados.kgAlimento) || 0;
+                quantidadeReunioes++;
+            });
+
+            const mediaMembros = quantidadeReunioes > 0 ? totalMembros / quantidadeReunioes : 0;
+            const mediaVisitantes = quantidadeReunioes > 0 ? totalVisitantes / quantidadeReunioes : 0;
+            const mediaMembrosPresentes = quantidadeReunioes > 0 ? totalMembrosPresentes / quantidadeReunioes : 0;
+            const frequencia = mediaMembros > 0 ? (mediaMembrosPresentes / mediaMembros) * 100 : 0;
+
+            console.log("Dados mensais obtidos:", {
+                mediaMembros,
+                mediaVisitantes,
+                mediaMembrosPresentes,
+                frequencia,
+                totalOfertaMes,
+                totalColheitaAmor
+            });
+            
+            return {
+                mediaMembros,
+                mediaVisitantes,
+                mediaMembrosPresentes,
+                frequencia,
+                totalOfertaMes,
+                totalColheitaAmor
+            };
+        }
+
+        // Função para gerar a tabela de resumo
+        async function gerarTabelaResumo() {
+            console.log("Iniciando geração da tabela de resumo");
+            const lider = document.getElementById('lider').value;
+            console.log("Líder selecionado para gerar tabela:", lider);
+
+            if (!lider) return;
+
+            const tabelaResumo = document.getElementById('tabelaResumo');
+            const thead = tabelaResumo.getElementsByTagName('thead')[0];
+            const tbody = tabelaResumo.getElementsByTagName('tbody')[0];
+
+            const dataAtual = new Date();
+            const meses = [];
+            const dadosMensais = [];
+
+            console.log("Preparando cabeçalho");
+    
+            // Preparar cabeçalho
+            let headerHTML = '<tr><th></th>';
+            for (let i = 0; i < 9; i++) {
+                const mes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
+                const mesFormatado = `${mes.getMonth() + 1}/${mes.getFullYear()}`;
+                meses.push(mesFormatado);
+                headerHTML += `<th>${mesFormatado}</th>`;
+            }
+            headerHTML += '</tr>';
+            thead.innerHTML = headerHTML;
+            console.log("Cabeçalho após inserção:", thead.innerHTML);
+
+            console.log("Cabeçalho preparado:", headerHTML);
+
+            console.log("Obtendo dados mensais");
+            
+            // Obter todos os dados mensais de uma vez
+            for (const mes of meses) {
+                const [mesNumero, ano] = mes.split('/');
+                const mesInicio = new Date(ano, mesNumero - 1, 1);
+                const mesFim = new Date(ano, mesNumero, 0);
+                const dados = await obterDadosMensais(lider, mesInicio, mesFim);
+                dadosMensais.push(dados);
+            }
+
+            console.log("Dados mensais para preenchimento da tabela:", dadosMensais);
+
+            const rows = [
+                { label: 'Média de Membros', key: 'mediaMembros', format: (v) => formatNumber(v, 1) },
+                { label: 'Média de Visitações', key: 'mediaVisitantes', format: (v) => formatNumber(v, 1) },
+                { label: 'Média de Membros Presentes', key: 'mediaMembrosPresentes', format: (v) => formatNumber(v, 1) },
+                { label: '% Frequência', key: 'frequencia', format: (v) => formatNumber(v, 1, '') + '%' },
+                { label: 'Oferta Mês (R$)', key: 'totalOfertaMes', format: (v) => formatNumber(v, 2) },
+                { label: 'Colheita do Amor (Kg)', key: 'totalColheitaAmor', format: (v) => formatNumber(v, 0) }
+            ];
+
+            // Construir o corpo da tabela
+            console.log("Construindo corpo da tabela");
+            let tbodyHTML = '';
+            for (const row of rows) {
+                tbodyHTML += `<tr><th>${row.label}</th>`;
+                for (const dados of dadosMensais) {
+                    tbodyHTML += `<td>${row.format(dados[row.key])}</td>`;
+                }
+                tbodyHTML += '</tr>';
+            }
+            tbody.innerHTML = tbodyHTML;
+            
+            console.log("Corpo da tabela construído:", tbodyHTML);
+
+            console.log("Tabela de resumo gerada com sucesso");
+            console.log("Conteúdo final da tabela:", tabelaResumo.innerHTML);
+        
+            console.log("Visibilidade da tabela:", tabelaResumo.style.display);
+            console.log("Dimensões da tabela:", tabelaResumo.offsetWidth, "x", tabelaResumo.offsetHeight);
+            
+            setTimeout(() => {
+                console.log("Conteúdo da tabela após 1 segundo:", tabelaResumo.innerHTML);
+            }, 1000);
+
+        }
+
+        // Função para criar/atualizar gráficos
+        function criarOuAtualizarGrafico(chartId, type, labels, data, label, backgroundColor, borderColor) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            
+            if (charts[chartId]) {
+                charts[chartId].destroy();
+            }
+
+            charts[chartId] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: label
+                            }
+                        }
+                    },
+                    plugins: {
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => formatNumber(value, 1),
+                            font: {
+                                weight: 'bold'
+                            },
+                            color: borderColor
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        // Função para gerar os gráficos
+        async function gerarGraficos() {
+            const lider = document.getElementById('lider').value;
+            if (!lider) return;
+
+            const dataAtual = new Date();
+            const meses = [];
+            const dadosMensais = [];
+
+            for (let i = 0; i < 9; i++) {
+                const mes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
+                const mesFormatado = `${mes.getMonth() + 1}/${mes.getFullYear()}`;
+                meses.push(mesFormatado);
+
+                const [mesNumero, ano] = mesFormatado.split('/');
+                const mesInicio = new Date(ano, mesNumero - 1, 1);
+                const mesFim = new Date(ano, mesNumero, 0);
+
+                const dados = await obterDadosMensais(lider, mesInicio, mesFim);
+                dadosMensais.push(dados);
+            }
+
+            criarOuAtualizarGrafico('frequenciaChart', 'bar', meses, dadosMensais.map(d => d.frequencia), '% Frequência', 'rgba(54, 162, 235, 0.5)', 'rgba(54, 162, 235, 1)');
+            criarOuAtualizarGrafico('visitacoesChart', 'bar', meses, dadosMensais.map(d => d.mediaVisitantes), 'Média de Visitações', 'rgba(255, 206, 86, 0.5)', 'rgba(255, 206, 86, 1)');
+            criarOuAtualizarGrafico('ofertaChart', 'bar', meses, dadosMensais.map(d => d.totalOfertaMes), 'Oferta Mês (R$)', 'rgba(75, 192, 192, 0.5)', 'rgba(75, 192, 192, 1)');
+            criarOuAtualizarGrafico('colheitaChart', 'bar', meses, dadosMensais.map(d => d.totalColheitaAmor), 'Colheita do Amor (Kg)', 'rgba(153, 102, 255, 0.5)', 'rgba(153, 102, 255, 1)');
+        }
+
+        // Função para alterar a cor do dropdown "rede"
+        function alterarCorRede(rede) {
+            const redeSelect = document.getElementById('rede');
+            const cores = {
+                'AMARELA': '#FFD700',
+                'AZUL': '#000080',
+                'TEEN': '#4B0082',
+                'LARANJA': '#FF8C00',
+                'VERMELHA': '#8B0000',
+                'BLACK': '#000000',
+                'VERDE': '#006400'
+            };
+
+            const cor = cores[rede] || '#000000';
+            redeSelect.style.backgroundColor = cor;
+            redeSelect.style.color = '#FFFFFF';
+        }
+
+        // Função para limpar a tabela e os gráficos
+        function limparTabelaEGraficos() {
+            const tabelaResumo = document.getElementById('tabelaResumo');
+            tabelaResumo.innerHTML = `
+                <thead>
+                    <tr><th></th></tr>
+                </thead>
+                <tbody></tbody>
+            `;
+
+            // Limpar gráficos
+            ['frequenciaChart', 'visitacoesChart', 'ofertaChart', 'colheitaChart'].forEach(chartId => {
+                if (charts[chartId]) {
+                    charts[chartId].destroy();
+                    charts[chartId] = null;
+                }
+                const canvas = document.getElementById(chartId);
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+        }
+
+        // Função para recuperar informações do usuário
+        function recuperarInformacoesUsuario() {
+            const rede = localStorage.getItem('redeUsuario');
+            const supervisor = localStorage.getItem('supervisorUsuario');
+            const lider = localStorage.getItem('liderUsuario');
+            const celula = localStorage.getItem('celulaUsuario');
+            const funcao = localStorage.getItem('funcaoUsuario');
+
+            return { rede, supervisor, lider, celula, funcao };
+        }
+
+         // Função para logar o conteúdo do localStorage
+        function logLocalStorageContent() {
+            console.log("Conteúdo do localStorage:");
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                console.log(`${key}: ${value}`);
+            }
+        }
+
+//aqui está ok
+// versão 3
+
+        // Função para preencher as opções de rede
+        function preencherRedes() {
+            const redeSelect = document.getElementById('rede');
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+
+            if (!lideres || Object.keys(lideres).length === 0) {
+                const rede = localStorage.getItem('rede');
+                redeSelect.innerHTML = '';
+                if (rede) {
+                    let option = document.createElement('option');
+                    option.value = rede;
+                    option.textContent = rede;
+                    redeSelect.appendChild(option);
+                }
+            } else {
+                redeSelect.innerHTML = '';
+                let redes = Object.keys(lideres);
+                redes.sort();
+                redes.forEach((rede) => {
+                    let option = document.createElement('option');
+                    option.value = rede;
+                    option.textContent = rede;
+                    redeSelect.appendChild(option);
+                });
+            }
+
+            if (redeSelect.options.length > 0) {
+                redeSelect.value = redeSelect.options[0].value;
+                alterarCorRede(redeSelect.value);
+                carregarSupervisores(redeSelect.value);
+            }
+        }
+
+        function carregarSupervisores(rede) {
+            const supervisorSelect = document.getElementById('supervisor');
+            supervisorSelect.innerHTML = '';
+            
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+
+            if (!lideres || !lideres[rede]) {
+                const supervisor = localStorage.getItem('supervisor');
+                if (supervisor) {
+                    let option = document.createElement('option');
+                    option.value = supervisor;
+                    option.textContent = supervisor;
+                    supervisorSelect.appendChild(option);
+                }
+            } else {
+                let supervisoresUnicos = new Set();
+                lideres[rede].forEach(lider => supervisoresUnicos.add(lider.supervisor));
+                supervisoresUnicos.forEach(supervisor => {
+                    let option = document.createElement('option');
+                    option.value = supervisor;
+                    option.textContent = supervisor;
+                    supervisorSelect.appendChild(option);
+                });
+            }
+
+            if (supervisorSelect.options.length > 0) {
+                supervisorSelect.value = supervisorSelect.options[0].value;
+                carregarLideres(rede, supervisorSelect.value);
+            }
+        }
+
+        function carregarLideres(rede, supervisor) {
+            const liderSelect = document.getElementById('lider');
+            liderSelect.innerHTML = '';
+
+            const lideres = JSON.parse(localStorage.getItem('lideres'));
+
+            if (!lideres || !lideres[rede]) {
+                const lidercelula = localStorage.getItem('lidercelula');
+                if (lidercelula) {
+                    let option = document.createElement('option');
+                    option.value = lidercelula;
+                    option.textContent = lidercelula;
+                    liderSelect.appendChild(option);
+                }
+            } else {
+                let lideresUnicos = new Set();
+                lideres[rede].forEach(lider => {
+                    if (lider.supervisor === supervisor) {
+                        lideresUnicos.add(lider.conclider);
+                    }
+                });
+                lideresUnicos.forEach((lider) => {
+                    let option = document.createElement('option');
+                    option.value = lider;
+                    option.textContent = lider;
+                    liderSelect.appendChild(option);
+                });
+            }
+
+            if (liderSelect.options.length > 0) {
+                liderSelect.value = liderSelect.options[0].value;
+                gerarTabelaResumo();
+                gerarGraficos();
+            }
+        }
+
+
+        // Event listeners para os selects
+        document.getElementById('rede').addEventListener('change', async function() {
+            mostrarSplashScreen();
+            const rede = this.value;
+            alterarCorRede(rede);
+            carregarSupervisores(rede);
+            
+            // Seleciona o primeiro supervisor
+            const supervisorSelect = document.getElementById('supervisor');
+            if (supervisorSelect.options.length > 0) {
+                supervisorSelect.selectedIndex = 0;
+                const supervisor = supervisorSelect.value;
+                
+                // Carrega líderes para a rede e supervisor selecionados
+                carregarLideres(rede, supervisor);
+                
+                // Seleciona o primeiro líder
+                const liderSelect = document.getElementById('lider');
+                if (liderSelect.options.length > 0) {
+                    liderSelect.selectedIndex = 0;
+                    
+                    // Gera tabela e gráficos
+                    await gerarTabelaResumo();
+                    await gerarGraficos();
+                    esconderSplashScreen();
+                } else {
+                    limparTabelaEGraficos();
+                }
+            } else {
+                limparTabelaEGraficos();
+            }
+        });
+
+
+        document.getElementById('supervisor').addEventListener('change', async function() {
+            mostrarSplashScreen();
+            const rede = document.getElementById('rede').value;
+            const supervisor = this.value;
+            
+            carregarLideres(rede, supervisor);
+            
+            // Seleciona o primeiro líder
+            const liderSelect = document.getElementById('lider');
+            if (liderSelect.options.length > 0) {
+                liderSelect.selectedIndex = 0;
+                
+                // Gera tabela e gráficos
+                await gerarTabelaResumo();
+                await gerarGraficos();
+                esconderSplashScreen();
+            } else {
+                limparTabelaEGraficos();
+            }
+        });
+
+
+        document.getElementById('lider').addEventListener('change', async function() {
+            if (this.value) {
+                mostrarSplashScreen();
+                await gerarTabelaResumo();
+                await gerarGraficos();
+                esconderSplashScreen();
+            } else {
+                limparTabelaEGraficos();
+            }
+        });
+
+        // Inicialização da página
+        window.onload = async function() {
+            mostrarSplashScreen();
+            console.log("Página carregada");
+            logLocalStorageContent();
+            await preencherRedes();
+            console.log("Redes preenchidas");
+
+            // Select the first leader by default
+            const liderSelect = document.getElementById('lider');
+            if (liderSelect.options.length > 0) {
+                liderSelect.selectedIndex = 0;
+            }
+
+            // Generate table and graphs
+            await gerarTabelaResumo();
+            await gerarGraficos();
+
+            console.log("Tabela e gráficos gerados");
+            esconderSplashScreen();
+        };
+
+
+
+
+    </script>
+</body>
+</html>

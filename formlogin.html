@@ -147,7 +147,7 @@
 
 <body>
     <div class="login-container">
-        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares" class="logo-title">
+        <img src="./assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista em Intermares" class="logo-title">
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">E-mail</label>
@@ -312,12 +312,12 @@
 
                     //if (!estrutura.pastores[rede]) estrutura.pastores[rede] = new Set();
                     if (!estrutura.coordenadores[Pastor]) estrutura.coordenadores[Pastor] = new Set();
-                    if (!estrutura.supervisores[Pastor]) estrutura.supervisores[Pastor] = new Set();
+                    if (!estrutura.supervisores[coordenador]) estrutura.supervisores[coordenador] = new Set();
                     if (!estrutura.lideres[Pastor]) estrutura.lideres[Pastor] = [];
 
                     //estrutura.pastores[rede].add(Pastor);
                     estrutura.coordenadores[Pastor].add(coordenador);
-                    estrutura.supervisores[Pastor].add(supervisor);
+                    estrutura.supervisores[coordenador].add(supervisor);
 
                     estrutura.lideres[Pastor].push({
                         //pastor: Pastor,
@@ -338,7 +338,7 @@
                 }
                 localStorage.setItem(role, JSON.stringify(estrutura[role]));
             }
-            console.log("Estrutura de célula armazenada com sucesso");
+            console.log("Estrutura de célula armazenada com sucesso", estrutura);
         }
 
 

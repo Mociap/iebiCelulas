@@ -17,6 +17,8 @@
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
+
+    
     <style>
       body {
         font-family: "Nunito", sans-serif;
@@ -131,18 +133,35 @@
       .back-button i {
         margin-right: 0px;
       }
+        .form-control:disabled {
+          background-color: #3c3c3c;
+          color: #ffffff;
+          border: none;
+          cursor: not-allowed;
+        }
+      .form-control:disabled::placeholder {
+        color: #666666;
+      }
+
+      .form-control:enabled {
+        background-color: #3c3c3c;
+        color: #ffffff;
+        border: none;
+      }
 
       .form-control[readonly] {
-        background-color: #3c3c3c;
-        opacity: 0.7;
         cursor: not-allowed;
-      }
-
-      .form-control {
+        background-color: #3c3c3c;
         color: #ffffff;
-        /* Mantém o texto dentro das caixas branco */
+      }
+      .form-control:enabled:focus {
+        background-color: #4c4c4c;
+        color: #ffffff;
+        box-shadow: none;
       }
     </style>
+    
+    
   </head>
 
   <body>
@@ -152,7 +171,7 @@
     <div class="header">
       <img
         src="./LogoBranco.png"
-        alt="Logo da Igreja Evangélica Batista Itapevi"
+        alt="Logo da Igreja Evangélica Batista Intermares"
       />
     </div>
     <div class="container">
@@ -290,17 +309,6 @@
             <input type="text" class="form-control" id="nomedacelula" required readonly onkeyup="this.value = this.value.toUpperCase();" />
         </div>        
         <div class="form-group">
-          <label for="rede">Rede</label>
-          <input
-            type="text"
-            class="form-control"
-            id="rede"
-            required
-            readonly
-            onkeyup="this.value = this.value.toUpperCase();"
-          />
-        </div>
-        <div class="form-group">
           <label>Arrolamento na Igreja</label>
           <div class="choice-chips">
             <div class="choice-chip" data-value="SOU MEMBRO">
@@ -344,196 +352,141 @@
       };
       firebase.initializeApp(configuracaoFirebase);
       var bancoDeDados = firebase.firestore();
+        // Referência ao formulário
+        var formulario = document.getElementById("memberForm");
+        var inputNomedaCelula = document.getElementById("nomedacelula");
+        var inputLiderCelula = document.getElementById("lidercelula");
+        var inputCelular = document.getElementById("celular");
+        var selectIgrejas = document.getElementById("igreja");
+        var inputNome = document.getElementById("nome");
+        var email = document.getElementById("email").value;
+        var nomeError = document.getElementById("nomeError");
+        var cadastrarBtn = document.getElementById("cadastrarBtn");
+        var inputCep = document.getElementById("cep");
+        var inputBairro = document.getElementById("bairro");
+        var inputCidade = document.getElementById("cidade");
+        var inputUf = document.getElementById("uf");
+        var cepError = document.getElementById("cepError");
 
-      // Referência ao formulário
-      var formulario = document.getElementById("memberForm");
-      var inputNomedaCelula = document.getElementById("nomedacelula");
-      var inputLiderCelula = document.getElementById("lidercelula");
-      var inputRede = document.getElementById("rede");
-      var inputCelular = document.getElementById("celular");
-      var selectIgrejas = document.getElementById("igreja");
-      var inputNome = document.getElementById("nome");
-      var email = document.getElementById("email").value;
-      var nomeError = document.getElementById("nomeError");
-      var cadastrarBtn = document.getElementById("cadastrarBtn");
-      var inputCep = document.getElementById("cep");
-      var inputBairro = document.getElementById("bairro");
-      var inputCidade = document.getElementById("cidade");
-      var inputUf = document.getElementById("uf");
-      var cepError = document.getElementById("cepError");
+        // Máscara para o campo "Número do Celular"
+        VMasker(inputCelular).maskPattern("(99) 99999-9999");
 
-      // Máscara para o campo "Número do Celular"
-      VMasker(inputCelular).maskPattern("(99) 99999-9999");
+        // Máscara para o campo CEP
+        VMasker(inputCep).maskPattern("99999-999");
 
-      // Máscara para o campo CEP
-      VMasker(inputCep).maskPattern("99999-999");
+        // Add this after the existing VMasker declarations
+        VMasker(document.getElementById("dtnasc")).maskPattern("99/99/9999");
 
-      // Add this after the existing VMasker declarations
-      VMasker(document.getElementById("dtnasc")).maskPattern("99/99/9999");
+        // Função para requerer CEP pelo Nascimento
+        function verificarDataNascimento() {
+          var dataNascimento = new Date(document.getElementById("dtnasc").value);
+          var dataLimite = new Date();
+          dataLimite.setFullYear(dataLimite.getFullYear() - 12);
 
-      // Função para requerer CEP pelo Nascimento
-      function verificarDataNascimento() {
-        var dataNascimento = new Date(document.getElementById("dtnasc").value);
-        var dataLimite = new Date();
-        dataLimite.setFullYear(dataLimite.getFullYear() - 12);
+          var cepInput = document.getElementById("cep");
+          var celularInput = document.getElementById("celular");
 
-        var cepInput = document.getElementById("cep");
-        //var emailInput = document.getElementById('email')
-        var celularInput = document.getElementById("celular");
-
-        if (dataNascimento <= dataLimite) {
-          cepInput.setAttribute("required", "required");
-          //emailInput.setAttribute('required', 'required');
-          celularInput.setAttribute("required", "required");
-        } else {
-          cepInput.removeAttribute("required");
-          //emailInput.removeAttribute('required');
-          celularInput.removeAttribute("required");
+          if (dataNascimento <= dataLimite) {
+            cepInput.setAttribute("required", "required");
+            celularInput.setAttribute("required", "required");
+          } else {
+            cepInput.removeAttribute("required");
+            celularInput.removeAttribute("required");
+          }
         }
-      }
 
-      // Função para buscar endereço pelo CEP
-      function buscarEnderecoPorCep(cep) {
-        var url = `https://viacep.com.br/ws/${cep}/json/`;
+        // Função para buscar endereço pelo CEP
+        function buscarEnderecoPorCep(cep) {
+          var url = `https://viacep.com.br/ws/${cep}/json/`;
 
-        fetch(url)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.erro) {
-              // CEP não encontrado
-              inputBairro.value = "";
-              inputCidade.value = "";
-              inputUf.value = "";
+          fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.erro) {
+                // CEP não encontrado
+                inputBairro.value = "";
+                inputCidade.value = "";
+                inputUf.value = "";
+                cepError.style.display = "block"; // Exibir mensagem de erro
+              } else {
+                // Preencher os campos com os dados retornados
+                inputBairro.value = data.bairro.toUpperCase();
+                inputCidade.value = data.localidade.toUpperCase();
+                inputUf.value = data.uf.toUpperCase();
+                cepError.style.display = "none"; // Ocultar mensagem de erro
+              }
+            })
+            .catch((error) => {
+              console.error("Erro ao buscar endereço:", error);
               cepError.style.display = "block"; // Exibir mensagem de erro
-            } else {
-              // Preencher os campos com os dados retornados
-              inputBairro.value = data.bairro.toUpperCase();
-              inputCidade.value = data.localidade.toUpperCase();
-              inputUf.value = data.uf.toUpperCase();
-              cepError.style.display = "none"; // Ocultar mensagem de erro
-            }
-          })
-          .catch((error) => {
-            console.error("Erro ao buscar endereço:", error);
-            cepError.style.display = "block"; // Exibir mensagem de erro
-          });
-      }
-
-      // Adicionar evento de blur (sair do campo) no campo CEP
-      inputCep.addEventListener("blur", function () {
-        var cep = inputCep.value.replace(/\D/g, ""); // Remover caracteres não numéricos
-        if (cep.length === 8) {
-          buscarEnderecoPorCep(cep);
-        } else {
-          cepError.style.display = "block"; // Exibir mensagem de erro
-          inputBairro.value = "";
-          inputCidade.value = "";
-          inputUf.value = "";
+            });
         }
-      });
 
-      // Preencher o dropdown de igrejas
-      bancoDeDados
-        .collection("igreja")
-        .get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            const option = document.createElement("option");
+        // Adicionar evento de blur (sair do campo) no campo CEP
+        inputCep.addEventListener("blur", function () {
+          var cep = inputCep.value.replace(/\D/g, ""); // Remover caracteres não numéricos
+          if (cep.length === 8) {
+            buscarEnderecoPorCep(cep);
+          } else {
+            cepError.style.display = "block"; // Exibir mensagem de erro
+            inputBairro.value = "";
+            inputCidade.value = "";
+            inputUf.value = "";
+          }
+        });
+
+        // Preencher o dropdown de igrejas
+        bancoDeDados
+          .collection("igreja")
+          .get()
+          .then((querySnapshot) => {
+            // Adicionar opção default
+            const optionPadrao = document.createElement("option");
+            optionPadrao.value = "";
+            optionPadrao.text = "Selecione uma igreja";
+            optionPadrao.disabled = true;
+            optionPadrao.selected = true;
+            selectIgrejas.add(optionPadrao);
+
+            // Continua com o código existente
+            querySnapshot.forEach((doc) => {
+              const option = document.createElement("option");
             option.value = doc.data().nomeigreja;
             option.text = doc.data().nomeigreja;
             selectIgrejas.add(option);
           });
         });
 
-      // Função para alterar a cor da caixa de acordo com a rede escolhida
-      function alterarCorRede(rede) {
-        var selectRede = document.getElementById("rede");
-        var cores = {
-          AMARELA: "#FFFF00",
-          AZUL: "#0000FF",
-          TEEN: "#800080",
-          LARANJA: "#FFA500",
-          VERMELHA: "#FF0000",
-          BLACK: "#000000",
-          VERDE: "#008000",
-        };
+      // Atualizar o evento de change do líder
+      document.getElementById("lidercelula").addEventListener("change", function() {
+          const liderSelecionado = this.value;
+          const inputCelula = document.getElementById("nomedacelula");
 
-        var cor = cores[rede] || "#000000";
-        selectRede.style.backgroundColor = cor;
-        selectRede.style.color =
-          cor === "#000000" || cor === "#800080" || cor === "#0000FF"
-            ? "#FFFFFF"
-            : "#000000";
-      }
-        // Preencher o dropdown de células e atualizar campos relacionados
-        inputNomedaCelula.addEventListener("change", function () {
-          const nomedacelula = inputNomedaCelula.value.toUpperCase();
+          const opcoesEspeciais = [
+              "SOU PASTOR DE REDE",
+              "SOU COORDENADOR DE REDE",
+              "SOU SUPERVISOR DE REDE"
+          ];
 
-          if (nomedacelula) {
-            bancoDeDados
-              .collection("estruturacelula")
-              .where("nomecelula", "==", nomedacelula)
-              .get()
-              .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                  const dados = doc.data();
-                  inputLiderCelula.value = dados.conclider.toUpperCase();
-                  inputRede.value = dados.rede.toUpperCase();
-                  alterarCorRede(dados.rede); // Chama a função para alterar a cor do campo rede
-                });
-              })
-              .catch((error) => {
-                console.error(
-                  'Erro ao consultar a coleção "estruturacelula":',
-                  error
-                );
-              });
-          } else {
-            inputLiderCelula.value = "";
-            inputRede.value = "";
-            alterarCorRede(""); // Reseta a cor do campo rede
+          if (opcoesEspeciais.includes(liderSelecionado)) {
+              inputCelula.value = "";
+              return;
           }
-        });
 
-        // Adicionar evento de mudança no select de líderes
-        document.getElementById("lidercelula").addEventListener("change", function() {
-            const liderSelecionado = this.value;
-            const inputCelula = document.getElementById("nomedacelula");
-            const inputRede = document.getElementById("rede");
-    
-    const specialRoles = [
-        "SOU PASTOR DE REDE",
-        "SOU COORDENADOR DE REDE", 
-        "SOU SUPERVISOR DE REDE"
-    ];
-
-    if (specialRoles.includes(liderSelecionado)) {
-        inputCelula.value = "";
-        inputRede.value = "";
-        alterarCorRede("");
-        return;
-    }
-
-            if (liderSelecionado) {
-                bancoDeDados.collection("estruturacelula")
-                    .where("conclider", "==", liderSelecionado)
-                    .get()
-                    .then((querySnapshot) => {
-                        querySnapshot.forEach((doc) => {
-                            const dados = doc.data();
-                            inputCelula.value = dados.nomecelula.toUpperCase();
-                            inputRede.value = dados.rede.toUpperCase();
-                            alterarCorRede(dados.rede);
-                        });
-                    });
-            } else {
-                inputCelula.value = "";
-                inputRede.value = "";
-                alterarCorRede("");
-            }
-        });
-      bancoDeDados
-        .collection("estruturacelula")
+          if (liderSelecionado) {
+              bancoDeDados.collection("estruturacelula")
+                  .where("conclider", "==", liderSelecionado)
+                  .get()
+                  .then((querySnapshot) => {
+                      querySnapshot.forEach((doc) => {
+                          inputCelula.value = doc.data().nomecelula.toUpperCase();
+                      });
+                  });
+          } else {
+              inputCelula.value = "";
+          }
+      });
+      bancoDeDados        .collection("estruturacelula")
         .orderBy("nomecelula")
         .get()
         .then((querySnapshot) => {
@@ -574,54 +527,74 @@
             error
           );
         });
-
-      // Preencher o dropdown de líderes
+      // Primeiro, vamos obter a referência do select de líderes
       const selectLider = document.getElementById("lidercelula");
+        // Primeiro, vamos desabilitar o campo líder inicialmente
+        document.getElementById("lidercelula").disabled = true;
 
-      // Adicionar opção padrão
-      const optionPadraoLider = document.createElement("option");
-      optionPadraoLider.value = "";
-      optionPadraoLider.text = "Selecione um líder";
-      optionPadraoLider.disabled = true;
-      optionPadraoLider.selected = true;
-      selectLider.add(optionPadraoLider);
+        // Atualizar a função de carregar líderes
+        function carregarLideres(igrejaSelecionada) {
+            const selectLider = document.getElementById("lidercelula");
+    
+            if (igrejaSelecionada) {
+                // Habilita o campo quando uma igreja for selecionada
+                selectLider.disabled = false;
+                // Limpa as opções existentes
+                selectLider.innerHTML = '';
 
-      // Adicionar opções especiais
-      const opcoesEspeciais = [
-        "SOU PASTOR DE REDE",
-        "SOU COORDENADOR DE REDE",
-        "SOU SUPERVISOR DE REDE",
-      ];
+                // Adiciona mensagem de instrução
+                const optionPadraoLider = document.createElement("option");
+                optionPadraoLider.value = "";
+                optionPadraoLider.text = "Selecione seu Líder";
+                optionPadraoLider.disabled = true;
+                optionPadraoLider.selected = true;
+                selectLider.add(optionPadraoLider);
 
-      opcoesEspeciais.forEach((opcao) => {
-        const option = document.createElement("option");
-        option.value = opcao;
-        option.text = opcao;
-        selectLider.add(option);
-      });
+                // Adicionar opções especiais
+                const opcoesEspeciais = [
+                    "SOU PASTOR DE REDE",
+                    "SOU COORDENADOR DE REDE",
+                    "SOU SUPERVISOR DE REDE"
+                ];
 
-      // Carregar líderes do Firestore
-      bancoDeDados
-        .collection("estruturacelula")
-        .orderBy("conclider")
-        .get()
-        .then((querySnapshot) => {
-          const lideres = new Set();
-          querySnapshot.forEach((doc) => {
-            const lider = doc.data().conclider.toUpperCase();
-            if (lider && !opcoesEspeciais.includes(lider)) {
-              lideres.add(lider);
+                opcoesEspeciais.forEach(opcao => {
+                    const option = document.createElement("option");
+                    option.value = opcao;
+                    option.text = opcao;
+                    selectLider.add(option);
+                });
+
+                // Carregar líderes do Firestore filtrados por igreja
+                bancoDeDados.collection("estruturacelula")
+                    .where("nomeigreja", "==", igrejaSelecionada)
+                    .orderBy("conclider")
+                    .get()
+                    .then((querySnapshot) => {
+                        const lideres = new Set();
+                        querySnapshot.forEach((doc) => {
+                            const lider = doc.data().conclider.toUpperCase();
+                            if (lider && !opcoesEspeciais.includes(lider)) {
+                                lideres.add(lider);
+                            }
+                        });
+
+                        lideres.forEach((lider) => {
+                            const option = document.createElement("option");
+                            option.value = lider;
+                            option.text = lider;
+                            selectLider.add(option);
+                        });
+                    });
+            } else {
+                // Mantém o campo bloqueado se nenhuma igreja estiver selecionada
+                selectLider.disabled = true;
             }
-          });
-
-          lideres.forEach((lider) => {
-            const option = document.createElement("option");
-            option.value = lider;
-            option.text = lider;
-            selectLider.add(option);
-          });
-        });
-
+        }
+      // Adicionar evento de mudança no select de igrejas
+      document.getElementById("igreja").addEventListener("change", function() {
+          const igrejaSelecionada = this.value;
+          carregarLideres(igrejaSelecionada);
+      });
       // Função para verificar se o nome já está cadastrado
       function verificarNomeExistente(nome) {
         return bancoDeDados
@@ -670,6 +643,7 @@
           }
         });
       });
+      
       document.getElementById("email").addEventListener("blur", function () {
         var email = this.value.trim();
 
@@ -791,6 +765,8 @@
             );
           });
       });
+
+
       // Função para alternar a seleção dos ChoiceChips
       function toggleChoiceChip(chip) {
         var chips = chip.parentNode.getElementsByClassName("choice-chip");
