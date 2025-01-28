@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
   <style>
     body {
       font-family: "Nunito", sans-serif;
@@ -78,15 +79,38 @@
     }
 
     .form-control {
-      background-color: #3c3c3c;
+      background-color: #3c3c3c !important;
       border: none;
-      color: #ffffff;
+      color: #ffffff !important;
     }
 
     .form-control:focus {
+      background-color: #4c4c4c !important;
+      color: #ffffff !important;
+      box-shadow: none;
+    }
+
+    .form-control:disabled {
+      background-color: #3c3c3c !important;
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    select.form-control option {
+      background-color: #2c2c2c;
+      color: #ffffff;
+    }
+
+    select.form-control:focus option:hover,
+    select.form-control option:hover,
+    select.form-control option:checked {
       background-color: #4c4c4c;
       color: #ffffff;
-      box-shadow: none;
+    }
+
+    select.form-control optgroup {
+      background-color: #2c2c2c;
+      color: #ffffff;
     }
 
     label {
@@ -196,6 +220,7 @@
       cursor: not-allowed;
     }
   </style>
+
 </head>
 
 <body>
@@ -209,87 +234,98 @@
   <div class="container">
     <h2 class="text-center mb-4">Dados da Reunião</h2>
     <div class="divider"></div>
-    <form id="reuniaoForm">
-      <div class="form-group-switch reuniao-realizada-switch">
-        <label class="switch-label" for="reuniaoRealizada">Reunião Realizada</label>
-        <label class="switch">
-          <input type="checkbox" id="reuniaoRealizada" checked />
-          <span class="slider round"></span>
-        </label>
-      </div>
-      <div id="camposReuniao">
-        <div class="form-group">
-          <label for="data">Data da Reunião</label>
-          <input type="text" class="form-control" id="data" placeholder="Selecione a data..." required readonly />
+      <form id="reuniaoForm">
+        <div class="form-group-switch reuniao-realizada-switch">
+          <label class="switch-label" for="reuniaoRealizada">Reunião Realizada</label>
+          <label class="switch">
+            <input type="checkbox" id="reuniaoRealizada" checked />
+            <span class="slider round"></span>
+          </label>
         </div>
-        <div class="form-group" style="display: none">
-          <label for="ano">Ano</label>
-          <input type="number" class="form-control" id="ano" readonly />
-        </div>
-        <div class="form-group" style="display: none">
-          <label for="mesAno">Mês/Ano</label>
-          <input type="text" class="form-control" id="mesAno" readonly />
-        </div>
-        <div class="form-group">
-          <label for="rede">Rede</label>
-          <select class="form-control" id="rede" required
-            onchange="alterarCorRede(this.value); carregarSupervisores(this.value)"></select>
-        </div>
-        <div class="form-group">
-          <label for="supervisor">Supervisor</label>
-          <select class="form-control" id="supervisor" required onchange="carregarLideres(this.value)"></select>
-        </div>
-        <div class="form-group">
-          <label for="lider">Líder</label>
-          <select class="form-control" id="lider" required onchange="carregarCelula(this.value)"></select>
-        </div>
-        <div class="form-group">
-          <label for="celula">Célula</label>
-          <input type="text" class="form-control" id="celula" readonly />
-        </div>
-        <div class="form-group campo-reuniao">
-          <label>Presença</label>
-          <div id="presencaContainer"></div>
-        </div>
-        <div class="form-group campo-reuniao">
-          <label for="qtdVisitantes">Quantidade de Visitantes</label>
-          <input type="number" class="form-control" id="qtdVisitantes" required />
-        </div>
-        <div class="form-group campo-reuniao">
-          <label for="oferta">Oferta</label>
-          <input type="text" class="form-control" id="oferta" required />
-        </div>
-        <div class="form-group campo-reuniao">
-          <div class="row">
-            <div class="col-md-8">
-              <label>Colheita do Amor</label>
-              <select class="form-control" id="tipoAlimento" required>
-                <option value="" disabled selected>
-                  Selecione um alimento
-                </option>
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label>Quant Unidades</label>
-              <input type="number" class="form-control" id="qtdAlimento" placeholder="Quantidade" min="1" step="1"
-                onkeypress="return event.charCode >= 48 && event.charCode <= 57" required disabled />
-            </div>
+
+        <div id="camposReuniao">
+          <div class="form-group">
+            <label for="data">Data da Reunião</label>
+            <input type="text" class="form-control" id="data" placeholder="Selecione a data..." required readonly />
           </div>
+
+          <div class="form-group" style="display: none">
+            <label for="ano">Ano</label>
+            <input type="number" class="form-control" id="ano" readonly />
+          </div>
+
+          <div class="form-group" style="display: none">
+            <label for="mesAno">Mês/Ano</label>
+            <input type="text" class="form-control" id="mesAno" readonly />
+          </div>
+
+          <div class="form-group">
+            <label for="igreja">Igreja</label>
+            <select class="form-control" id="igreja" required></select>
+          </div>
+
+          <div class="form-group">
+            <label for="supervisor">Supervisor</label>
+            <select class="form-control" id="supervisor" required disabled></select>
+          </div>
+
+          <div class="form-group">
+            <label for="lider">Líder</label>
+            <select class="form-control" id="lider" required disabled onchange="carregarCelula(this.value)"></select>
+          </div>
+
+          <div class="form-group">
+            <label for="celula">Célula</label>
+            <input type="text" class="form-control" id="celula" readonly />
+          </div>
+
+          <div class="form-group campo-reuniao">
+            <label>Presença</label>
+            <div id="presencaContainer"></div>
+          </div>
+
+          <div class="form-group campo-reuniao">
+            <label for="qtdVisitantes">Quantidade de Visitantes</label>
+            <input type="number" class="form-control" id="qtdVisitantes" required />
+          </div>
+
+          <div class="form-group campo-reuniao">
+            <label for="oferta">Oferta</label>
+            <input type="text" class="form-control" id="oferta" required />
+          </div>
+
+          <div class="form-group campo-reuniao">
+            <label>Colheita do Amor</label>
+            <select class="form-control" id="tipoAlimento" required>
+              <option value="" disabled selected>
+                Selecione um alimento.
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group campo-reuniao">
+            <label>Quant Unidades</label>
+            <input type="number" class="form-control" id="qtdAlimento" placeholder="Quantidade" min="1" step="1"
+              onkeypress="return event.charCode >= 48 && event.charCode <= 57" required disabled />
+          </div>
+
         </div>
 
         <div class="form-group campo-reuniao">
           <label for="qtdMembros">Quantidade de Membros</label>
           <input type="number" class="form-control" id="qtdMembros" readonly />
         </div>
+
         <div class="form-group campo-reuniao">
           <label for="membroPresentes">Membros Presentes</label>
           <input type="number" class="form-control" id="membroPresentes" readonly />
         </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">
-        Enviar
-      </button>
-    </form>
+
+        <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">
+          Enviar
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- Importar Firebase -->
@@ -357,41 +393,44 @@
       e.target.value = "R$ " + value;
     });
 
-    // Preencher o dropdown de redes em ordem alfabética
-    bancoDeDados
-      .collection("rede")
-      .orderBy("nomerede")
-      .get()
-      .then((querySnapshot) => {
-        const option = document.createElement("option");
-        option.value = "";
-        option.text = "Selecione uma rede";
-        selectRedes.add(option);
+    // Referência ao select de igreja
+    const selectIgrejas = document.getElementById("igreja");
 
-        querySnapshot.forEach((doc) => {
-          const option = document.createElement("option");
-          option.value = doc.data().nomerede;
-          option.text = doc.data().nomerede;
-          selectRedes.add(option);
-        });
+    // Preencher o dropdown de igrejas
+    bancoDeDados.collection("igreja").get().then((querySnapshot) => {
+      // Adicionar opção default
+      const optionPadrao = document.createElement("option");
+      optionPadrao.value = "";
+      optionPadrao.text = "Selecione uma igreja";
+      optionPadrao.disabled = true;
+      optionPadrao.selected = true;
+      selectIgrejas.add(optionPadrao);
+
+      querySnapshot.forEach((doc) => {
+        const option = document.createElement("option");
+        option.value = doc.data().nomeigreja;
+        option.text = doc.data().nomeigreja;
+        selectIgrejas.add(option);
       });
+    });
 
-    // Função para carregar os supervisores com base na rede selecionada
-    function carregarSupervisores(rede) {
-      selectSupervisores.innerHTML = "";
-      selectLideres.innerHTML = "";
-      inputCelula.value = "";
-      presencaContainer.innerHTML = "";
+    // Atualizar função carregarSupervisores para filtrar por igreja
+    function carregarSupervisores(igrejaSelecionada) {
+      const selectSupervisor = document.getElementById("supervisor");
 
-      if (rede) {
-        const option = document.createElement("option");
-        option.value = "";
-        option.text = "Selecione um supervisor";
-        selectSupervisores.add(option);
+      if (igrejaSelecionada) {
+        selectSupervisor.disabled = false;
+        selectSupervisor.innerHTML = '';
 
-        bancoDeDados
-          .collection("estruturacelula")
-          .where("rede", "==", rede)
+        const optionPadrao = document.createElement("option");
+        optionPadrao.value = "";
+        optionPadrao.text = "Selecione um supervisor";
+        optionPadrao.disabled = true;
+        optionPadrao.selected = true;
+        selectSupervisor.add(optionPadrao);
+
+        bancoDeDados.collection("estruturacelula")
+          .where("nomeigreja", "==", igrejaSelecionada)
           .get()
           .then((querySnapshot) => {
             const supervisores = new Set();
@@ -399,42 +438,52 @@
               supervisores.add(doc.data().supervisor);
             });
 
-            supervisores.forEach((supervisor) => {
+            Array.from(supervisores).sort().forEach((supervisor) => {
               const option = document.createElement("option");
               option.value = supervisor;
               option.text = supervisor;
-              selectSupervisores.add(option);
+              selectSupervisor.add(option);
             });
-          })
-          .catch((error) => {
-            console.error("Erro ao carregar supervisores:", error);
           });
       } else {
-        const option = document.createElement("option");
-        option.value = "";
-        option.text = "Selecione uma rede primeiro";
-        selectSupervisores.add(option);
+        selectSupervisor.disabled = true;
+        selectSupervisor.innerHTML = '';
       }
     }
 
-    // Função para carregar os líderes com base no supervisor selecionado e na rede selecionada
+    // Adicionar evento de change no select de igreja
+    document.getElementById("igreja").addEventListener("change", function () {
+      const igrejaSelecionada = this.value;
+      carregarSupervisores(igrejaSelecionada);
+
+      // Limpar campos dependentes
+      document.getElementById("lider").innerHTML = '';
+      document.getElementById("celula").value = '';
+      document.getElementById("presencaContainer").innerHTML = '';
+    });
+    // Função para carregar os líderes com base no supervisor selecionado
     function carregarLideres(supervisor) {
+      const selectLideres = document.getElementById("lider");
+      const igrejaSelecionada = document.getElementById("igreja").value;
+
       selectLideres.innerHTML = "";
       inputCelula.value = "";
       presencaContainer.innerHTML = "";
 
-      const rede = document.getElementById("rede").value; // Obtém o valor da rede selecionada
+      if (supervisor && igrejaSelecionada) {
+        // Adiciona opção padrão
+        const optionPadrao = document.createElement("option");
+        optionPadrao.value = "";
+        optionPadrao.text = "Selecione um líder";
+        optionPadrao.disabled = true;
+        optionPadrao.selected = true;
+        selectLideres.add(optionPadrao);
 
-      if (supervisor && rede) {
-        const option = document.createElement("option");
-        option.value = "";
-        option.text = "Selecione um líder";
-        selectLideres.add(option);
-
+        // Resto do código de carregamento dos líderes...
         bancoDeDados
           .collection("estruturacelula")
           .where("supervisor", "==", supervisor)
-          .where("rede", "==", rede) // Adiciona a condição de busca pela rede
+          .where("nomeigreja", "==", igrejaSelecionada)
           .get()
           .then((querySnapshot) => {
             const lideres = new Set();
@@ -442,30 +491,28 @@
               lideres.add(doc.data().conclider);
             });
 
-            lideres.forEach((lider) => {
+            Array.from(lideres).sort().forEach((lider) => {
               const option = document.createElement("option");
               option.value = lider;
               option.text = lider;
               selectLideres.add(option);
             });
-          })
-          .catch((error) => {
-            console.error("Erro ao carregar líderes:", error);
           });
-      } else if (supervisor) {
-        const option = document.createElement("option");
-        option.value = "";
-        option.text = "Selecione uma rede primeiro";
-        selectLideres.add(option);
-      } else {
-        const option = document.createElement("option");
-        option.value = "";
-        option.text = "Selecione um supervisor primeiro";
-        selectLideres.add(option);
       }
     }
 
-    // Função para inicializar o campo "Membros Presentes"
+    document.getElementById("supervisor").addEventListener("change", function () {
+      const supervisorSelecionado = this.value;
+      const selectLider = document.getElementById("lider");
+
+      if (supervisorSelecionado) {
+        selectLider.disabled = false;
+        carregarLideres(supervisorSelecionado);
+      } else {
+        selectLider.disabled = true;
+        selectLider.innerHTML = '';
+      }
+    });    // Função para inicializar o campo "Membros Presentes"
     function inicializarMembroPresentes() {
       document.getElementById("membroPresentes").value = 0;
     }
@@ -710,10 +757,7 @@
 
       var dadosReuniao = {
         reuniaoRealizada: reuniaoRealizada,
-        data: firebase.firestore.Timestamp.fromDate(
-          new Date(ano, mes - 1, dia, 21, 0, 0)
-        ),
-        rede: document.getElementById("rede").value,
+        data: firebase.firestore.Timestamp.fromDate(new Date(ano, mes - 1, dia, 21, 0, 0)),
         supervisor: document.getElementById("supervisor").value,
         lider: document.getElementById("lider").value,
         celula: document.getElementById("celula").value,
