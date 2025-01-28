@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -214,9 +215,9 @@
         <div class="divider"></div>
         <form id="relatorioForm">
             <div class="form-group">
-                <label for="rede">Rede:</label>
-                <select class="form-control" id="rede"
-                    onchange="alterarCorRede(this.value); carregarSupervisores(this.value)">
+                <label for="coordenador">Coordenador:</label>
+                <select class="form-control" id="coordenador"
+                    onchange="alterarCorCoordenador(this.value); carregarSupervisores(this.value)">
                     <option value="Todos">Todos</option>
                 </select>
             </div>
@@ -250,6 +251,7 @@
                 </div>
             </div>
         </form>
+    </div>
         <div id="loadingSpinner" style="display: none;">
             <div class="d-flex justify-content-center">
                 <div class="spinner-border text-primary" role="status">
@@ -262,7 +264,7 @@
             <table id="resumoTable" class="table table-striped table-bordered">
                 <thead>
                     <tr>
-                        <th class="header-cell">Rede</th>
+                        <th class="header-cell">Coordenador</th>
                         <th class="header-cell">Supervisor</th>
                         <th class="header-cell">Líderes</th>
                         <th class="header-cell">Nome da Célula</th>
@@ -281,7 +283,7 @@
                 Exportar para Excel
             </button>
         </div>
-    </div>
+    
     </div>
 
     <div id="splash-screen" class="splash-screen">
@@ -290,8 +292,8 @@
             <p>Aguarde, carregando...</p>
         </div>
     </div>
-
-
+    
+ 
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
 
@@ -368,8 +370,34 @@
             console.log("Preenchimento de redes concluído");
         }
 
+        function preencherCoordenadores() {
+            const coordenadorSelect = document.getElementById('coordenador');
+            const supervisores = JSON.parse(localStorage.getItem('supervisores'));
+
+            if (supervisores && Object.keys(supervisores).length > 0) {
+                let coordenadores = Object.keys(supervisores);
+                coordenadores.sort();
+
+                coordenadorSelect.innerHTML = '';
+
+                if (coordenadores.length > 1) {
+                    let optionTodos = document.createElement('option');
+                    optionTodos.value = "Todos";
+                    optionTodos.textContent = "Todos";
+                    coordenadorSelect.appendChild(optionTodos);
+                }
+
+                coordenadores.forEach((coordenador) => {
+                    let option = document.createElement('option');
+                    option.value = coordenador;
+                    option.textContent = coordenador;
+                    coordenadorSelect.appendChild(option);
+                });
+            }
+        }
+
         // Função para carregar supervisores
-        function carregarSupervisores(rede) {
+        function carregarSupervisores(coordenador) {
             const supervisorSelect = document.getElementById('supervisor');
             supervisorSelect.innerHTML = '';
 
@@ -379,43 +407,41 @@
             if (supervisores) {
                 let supervisoresUnicos = new Set();
 
-                if (rede === 'Todos') {
+                if (coordenador === 'Todos') {
                     Object.values(supervisores).forEach(supervisorArray => {
                         supervisorArray.forEach(supervisor => supervisoresUnicos.add(supervisor));
                     });
-                } else if (supervisores[rede]) {
-                    supervisores[rede].forEach(supervisor => supervisoresUnicos.add(supervisor));
+                } else if (supervisores[coordenador]) {
+                    supervisores[coordenador].forEach(supervisor => supervisoresUnicos.add(supervisor));
                 }
 
-                if (supervisoresUnicos.size > 1) {
+                // Convertendo Set para Array e ordenando alfabeticamente
+                let supervisoresOrdenados = Array.from(supervisoresUnicos).sort();
+
+                if (supervisoresOrdenados.length > 1) {
                     let optionTodos = document.createElement('option');
                     optionTodos.value = "Todos";
                     optionTodos.textContent = "Todos";
                     supervisorSelect.appendChild(optionTodos);
                 }
 
-                supervisoresUnicos.forEach(supervisor => {
+                supervisoresOrdenados.forEach(supervisor => {
                     let option = document.createElement('option');
                     option.value = supervisor;
                     option.textContent = supervisor;
                     supervisorSelect.appendChild(option);
                 });
 
-                if (supervisoresUnicos.size > 0) {
-                    if (supervisoresUnicos.size > 1) {
+                if (supervisoresOrdenados.length > 0) {
+                    if (supervisoresOrdenados.length > 1) {
                         supervisorSelect.value = "Todos";
                     } else {
-                        supervisorSelect.value = Array.from(supervisoresUnicos)[0];
+                        supervisorSelect.value = supervisoresOrdenados[0];
                     }
                     console.log("Supervisor selecionado:", supervisorSelect.value);
                 }
-            } else {
-                console.log("Nenhum supervisor encontrado no localStorage.");
             }
-
-            console.log("Carregamento de supervisores concluído");
         }
-
         // Função para alterar a cor da rede selecionada
         function alterarCorRede(rede) {
             var selectRede = document.getElementById('rede');
@@ -434,10 +460,30 @@
             selectRede.style.color = '#FFFFFF';
         }
 
+        function alterarCorCoordenador(coordenador) {
+            var selectCoordenador = document.getElementById('coordenador');
+            var cores = {
+                'COORDENADOR 1': '#008000',  // Verde
+                'COORDENADOR 2': '#FF0000',  // Vermelho
+                'COORDENADOR 3': '#0000FF',  // Azul
+                'COORDENADOR 4': '#FFD700',  // Amarelo
+                'COORDENADOR 5': '#FFA500',  // Laranja
+                'COORDENADOR 6': '#800080',  // Roxo
+                'COORDENADOR 7': '#4B0082',  // Índigo
+                'COORDENADOR 8': '#FF1493',  // Rosa
+                'COORDENADOR 9': '#00CED1',  // Turquesa
+                'COORDENADOR 10': '#8B4513'  // Marrom
+            };
+
+            var cor = cores[coordenador] || '#000000';
+            selectCoordenador.style.backgroundColor = cor;
+            selectCoordenador.style.color = '#FFFFFF';
+        }
+
         // Comparar para Ordenar
         function compararLinhas(a, b) {
-            if (a.rede < b.rede) return -1;
-            if (a.rede > b.rede) return 1;
+            if (a.coordenador  < b.coordenador ) return -1;
+            if (a.coordenador  > b.coordenador ) return 1;
             if (a.supervisor < b.supervisor) return -1;
             if (a.supervisor > b.supervisor) return 1;
             if (a.lider < b.lider) return -1;
@@ -447,24 +493,29 @@
 
         // Função principal para gerar a tabela de resumo
         async function gerarTabela() {
-            const rede = document.getElementById('rede').value;
-            const supervisor = document.getElementById('supervisor').value;
-            const mes = document.getElementById('mes').value;
-            const ano = document.getElementById('ano').value;
+            const coordenadorSelect = document.getElementById('coordenador');
+            const supervisorSelect = document.getElementById('supervisor');
+            const mesSelect = document.getElementById('mes');
+            const anoSelect = document.getElementById('ano');
 
-            if (!rede || !mes || !ano) {
+            if (!coordenadorSelect || !supervisorSelect || !mesSelect || !anoSelect) {
+                console.log("Elementos do formulário não encontrados");
+                return;
+            }
+
+            const coordenador = coordenadorSelect.value;
+            const supervisor = supervisorSelect.value;
+            const mes = mesSelect.value;
+            const ano = anoSelect.value;
+
+            if (!coordenador || !mes || !ano) {
                 document.getElementById('resumoTableContainer').style.display = 'none';
                 return;
             }
 
-            document.getElementById('loadingSpinner').style.display = 'block';
-            document.getElementById('resumoTableContainer').style.display = 'none';
-
-
-            document.getElementById('splash-screen').classList.add('show');
-            document.getElementById('resumoTableContainer').style.display = 'none';
-
             try {
+                document.getElementById('splash-screen').classList.add('show');
+                document.getElementById('resumoTableContainer').style.display = 'none';
 
                 const mesAno = `${mes}/${ano}`;
                 const tableBody = document.querySelector('#resumoTable tbody');
@@ -484,16 +535,11 @@
                 try {
                     let query = db.collection("estruturacelula");
 
-                    if (rede === "Todos") {
-                        const redesNoLocalStorage = Object.keys(JSON.parse(localStorage.getItem('supervisores')));
-                        query = query.where("rede", "in", redesNoLocalStorage);
+                    if (coordenador === "Todos") {
+                        const coordenadoresNoLocalStorage = Object.keys(JSON.parse(localStorage.getItem('supervisores')));
+                        query = query.where("coordenador", "in", coordenadoresNoLocalStorage);
                     } else {
-                        query = query.where("rede", "==", rede);
-                    }
-
-
-                    if (rede !== "Todos") {
-                        query = query.where("rede", "==", rede);
+                        query = query.where("coordenador", "==", coordenador);
                     }
 
                     if (supervisor && supervisor !== "Todos") {
@@ -525,23 +571,13 @@
                             somaQtdVisitantes += Number(data.qtdVisitantes || 0);
                             somaOferta += Number(data.oferta || 0);
                             somaKgAlimento += Number(data.kgAlimento || 0);
-
-                            if (data.reuniaoRealizada !== false) {
-                                reunioesRealizadas++;
-                                console.log("Reunião contabilizada");
-                            } else {
-                                console.log("Reunião não contabilizada");
-                            }
                         });
-
-                        console.log(`Reuniões realizadas para ${nomecelula}:`, reunioesRealizadas);
 
                         let frequencia = somaQtdMembros > 0 ? (somaMembroPresentes / somaQtdMembros * 100).toFixed(2) + "%" : "N/A";
                         let visitacoes = somaQtdVisitantes.toLocaleString('pt-BR');
                         let ofertas = somaOferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                         let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR') + " kg";
 
-                        // Consulta adicional para obter a quantidade de membros da célula
                         const membroSnapshot = await db.collection("membros")
                             .where("nomedacelula", "==", nomecelula)
                             .get();
@@ -549,7 +585,7 @@
                         const qtdMembros = membroSnapshot.size;
 
                         dados.push({
-                            rede: celulaData.rede,
+                            coordenador: celulaData.coordenador,
                             supervisor: supervisorCelula,
                             lider: liderCelula,
                             nomecelula: nomecelula,
@@ -562,7 +598,6 @@
                         });
                     }
 
-                    // Ordenar os dados por Rede, Supervisor e Líderes
                     dados.sort(compararLinhas);
 
                     let supervisorAtual = null;
@@ -575,9 +610,7 @@
                         ofertaAmor: 0
                     };
 
-                    // Preencher a tabela com os dados ordenados
                     for (const linha of dados) {
-
                         if (supervisorAtual !== linha.supervisor) {
                             if (supervisorAtual !== null) {
                                 adicionarLinhaSubtotais(tableBody, subtotais, supervisorAtual);
@@ -594,7 +627,7 @@
                         }
 
                         const row = tableBody.insertRow();
-                        row.insertCell(0).textContent = linha.rede;
+                        row.insertCell(0).textContent = linha.coordenador;
                         row.insertCell(1).textContent = linha.supervisor;
                         row.insertCell(2).textContent = linha.lider;
                         row.insertCell(3).textContent = linha.nomecelula;
@@ -621,11 +654,9 @@
                         totais.ofertaAmor += parseFloat(linha.ofertaAmor.replace(/\./g, '').replace(' kg', ''));
                     }
 
-                    // Adicionar a última linha de subtotal
                     if (supervisorAtual !== null) {
                         adicionarLinhaSubtotais(tableBody, subtotais, supervisorAtual);
                     }
-
 
                     totais.frequencia = totais.qtdMembros > 0
                         ? ((totais.membroPresentes / totais.qtdMembros) * 100).toFixed(2)
@@ -635,16 +666,13 @@
 
                     await new Promise(resolve => setTimeout(resolve, 2000));
 
-                    document.getElementById('loadingSpinner').style.display = 'none';
+                    document.getElementById('splash-screen').classList.remove('show');
                     document.getElementById('resumoTableContainer').style.display = 'block';
 
                 } catch (error) {
                     console.error("Erro ao gerar tabela:", error);
-                    document.getElementById('loadingSpinner').style.display = 'none';
-                    alert("Ocorreu um erro ao gerar a tabela. Por favor, tente novamente.");
+                    throw error;
                 }
-                document.getElementById('splash-screen').classList.remove('show');
-                document.getElementById('resumoTableContainer').style.display = 'block';
             } catch (error) {
                 console.error("Erro ao gerar tabela:", error);
                 document.getElementById('splash-screen').classList.remove('show');
@@ -652,41 +680,40 @@
             }
         }
 
-        function adicionarLinhaSubtotais(tableBody, subtotais, supervisor) {
-            const row = tableBody.insertRow();
-            row.classList.add('subtotal-row');
-            console.log("Classe 'subtotal-row' adicionada à linha de subtotal");
+          function adicionarLinhaSubtotais(tableBody, subtotais, supervisor) {
+              const row = tableBody.insertRow();
+              row.classList.add('subtotal-row');
+              console.log("Classe 'subtotal-row' adicionada à linha de subtotal");
 
-            const cell = row.insertCell(0);
-            cell.colSpan = 4;
-            cell.textContent = 'Subtotal: ' + supervisor;
+              const cell = row.insertCell(0);
+              cell.colSpan = 4;
+              cell.textContent = 'Subtotal: ' + supervisor;
 
-            row.insertCell(1).textContent = subtotais.qtdMembros; // Adicionado subtotal de Qtd de Membros
-            row.insertCell(2).textContent = subtotais.reunioes;
-            row.insertCell(3).textContent = ((subtotais.membroPresentes / subtotais.qtdMembros) * 100).toFixed(2) + '%';
-            row.insertCell(4).textContent = subtotais.visitacoes.toLocaleString('pt-BR');
-            row.insertCell(5).textContent = subtotais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            row.insertCell(6).textContent = subtotais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
-        }
+              row.insertCell(1).textContent = subtotais.qtdMembros; // Adicionado subtotal de Qtd de Membros
+              row.insertCell(2).textContent = subtotais.reunioes;
+              row.insertCell(3).textContent = ((subtotais.membroPresentes / subtotais.qtdMembros) * 100).toFixed(2) + '%';
+              row.insertCell(4).textContent = subtotais.visitacoes.toLocaleString('pt-BR');
+              row.insertCell(5).textContent = subtotais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+              row.insertCell(6).textContent = subtotais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
+          }
 
-        // Função para adicionar linha de totais à tabela
-        function adicionarLinhaTotais(tableBody, totais) {
-            const row = tableBody.insertRow();
-            row.classList.add('total-geral-row');
-            console.log("Classe 'total-geral-row' adicionada à linha de total geral");
+          // Função para adicionar linha de totais à tabela
+          function adicionarLinhaTotais(tableBody, totais) {
+              const row = tableBody.insertRow();
+              row.classList.add('total-geral-row');
+              console.log("Classe 'total-geral-row' adicionada à linha de total geral");
 
-            const cell = row.insertCell(0);
-            cell.colSpan = 4; // Mesclando as colunas 1, 2, 3, 4
-            cell.textContent = 'Total Geral';
+              const cell = row.insertCell(0);
+              cell.colSpan = 4; // Mesclando as colunas 1, 2, 3, 4
+              cell.textContent = 'Total Geral';
 
-            row.insertCell(1).textContent = totais.qtdMembros; // Adicionado total de Qtd de Membros
-            row.insertCell(2).textContent = totais.reunioes;
-            row.insertCell(3).textContent = totais.frequencia + '%';
-            row.insertCell(4).textContent = totais.visitacoes.toLocaleString('pt-BR');
-            row.insertCell(5).textContent = totais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            row.insertCell(6).textContent = totais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
-        }
-
+              row.insertCell(1).textContent = totais.qtdMembros; // Adicionado total de Qtd de Membros
+              row.insertCell(2).textContent = totais.reunioes;
+              row.insertCell(3).textContent = totais.frequencia + '%';
+              row.insertCell(4).textContent = totais.visitacoes.toLocaleString('pt-BR');
+              row.insertCell(5).textContent = totais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+              row.insertCell(6).textContent = totais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
+          }
         // Função para imprimir a tabela
         function imprimirTabela() {
             window.print();
@@ -796,22 +823,17 @@
             }
             anoSelect.value = anoAtual;
         }
-
         // Inicialização da página
         window.onload = function () {
-            preencherRedes();
+            preencherCoordenadores();
             preencherMeses();
             preencherAnos();
             gerarTabela();
 
-            // Obtém todas as chaves do localStorage
+            // Log para debug
             const chaves = Object.keys(localStorage);
-
-            // Verifica se há chaves no localStorage
             if (chaves.length > 0) {
                 console.log("Dados armazenados no localStorage:");
-
-                // Percorre as chaves e exibe os valores correspondentes
                 chaves.forEach(function (chave) {
                     const valor = localStorage.getItem(chave);
                     console.log(`${chave}: ${valor}`);
@@ -819,14 +841,56 @@
             } else {
                 console.log("Não há dados armazenados no localStorage.");
             }
-
         };
 
-        // Adicionar event listeners para os elementos de formulário
-        document.getElementById('rede').addEventListener('change', gerarTabela);
-        document.getElementById('supervisor').addEventListener('change', gerarTabela);
-        document.getElementById('mes').addEventListener('change', gerarTabela);
-        document.getElementById('ano').addEventListener('change', gerarTabela);
+        // Nova função preencherCoordenadores com verificação do elemento
+        function preencherCoordenadores() {
+            const coordenadorSelect = document.getElementById('coordenador');
+
+            if (!coordenadorSelect) {
+                console.log("Elemento 'coordenador' não encontrado");
+                return;
+            }
+
+            const supervisores = JSON.parse(localStorage.getItem('supervisores'));
+            if (supervisores && Object.keys(supervisores).length > 0) {
+                let coordenadores = Object.keys(supervisores);
+                coordenadores.sort();
+
+                coordenadorSelect.innerHTML = '';
+
+                if (coordenadores.length > 1) {
+                    coordenadorSelect.add(new Option("Todos", "Todos"));
+                }
+
+                coordenadores.forEach((coordenador) => {
+                    coordenadorSelect.add(new Option(coordenador, coordenador));
+                });
+
+                alterarCorCoordenador(coordenadorSelect.value);
+                carregarSupervisores(coordenadorSelect.value);
+            }
+        }
+            // Inicialização dos event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                const coordenadorSelect = document.getElementById('coordenador');
+                const supervisorSelect = document.getElementById('supervisor');
+                const mesSelect = document.getElementById('mes');
+                const anoSelect = document.getElementById('ano');
+
+                if (coordenadorSelect) {
+                    coordenadorSelect.addEventListener('change', gerarTabela);
+                }
+                if (supervisorSelect) {
+                    supervisorSelect.addEventListener('change', gerarTabela);
+                }
+                if (mesSelect) {
+                    mesSelect.addEventListener('change', gerarTabela);
+                }
+                if (anoSelect) {
+                    anoSelect.addEventListener('change', gerarTabela);
+                }
+            });
     </script>
 </body>
 
