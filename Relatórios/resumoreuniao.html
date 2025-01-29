@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resumo de Reunião - Igreja Evangélica Batista Intermares</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -21,7 +21,7 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             background-color: #fff;
-            font-size: 12px;
+            font-size: 14px;
         }
         .header {
             background-color: #000;
@@ -37,23 +37,23 @@
             width: 75%;
             height: 2px;
             background-color: #000;
-            margin: 20px auto;
+            margin: 30px auto;
         }
         .form-row {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
-            font-size: 12px;
+            font-size: 14px;
         }
         .form-row label {
             width: 100px;
             margin-right: 10px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 14px;
         }
         .form-row select {
             flex: 1;
-            font-size: 12px;
+            font-size: 14px;
         }
         .back-button {
             position: fixed;
@@ -85,28 +85,48 @@
             text-align: center;
         }
         .header-cell {
-            font-weight: bold !important;
+            width: 200px;
             background-color: brown !important;
             color: white !important;
-            vertical-align: middle !important;
-            text-align: center !important;
         }
-
         .table-cell {
             vertical-align: middle !important;
             text-align: center !important;
         }
         #reunioesTable {
-            font-size: 12px; 
+            font-size: 14px;
+            display: none; /* Esconde a tabela inicialmente */
         }
         #mes {
             width: 1300% !important;
         }
-
+        .btn-loading {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        .table-info {
+            background-color: #e3f2fd !important;
+        }
+        .table-dark {
+            background-color: brown !important;
+            color: white !important;
+            border-color: brown !important;
+        }
+        .table-dark td {
+            background-color: brown !important;
+            color: white !important;
+            border-color: brown !important;
+        }
     </style>
 </head>
 <body>
-    <a href="../frmRelatorios.html" class="back-button">
+    <a href="frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
@@ -117,18 +137,21 @@
         <div class="divider"></div>
         <form>
             <div class="form-row">
-                <label>Rede:</label>
-                <select class="form-control" id="rede">
+                <label>Coordenador:</label>
+                <select class="form-control" id="coordenador" onchange="alterarCorCoordenador(this.value)">
+                    <option value="">Selecione um coordenador</option>
                 </select>
             </div>
             <div class="form-row">
                 <label>Supervisor:</label>
                 <select class="form-control" id="supervisor">
+                    <option value="">Selecione um supervisor</option>
                 </select>
             </div>
             <div class="form-row">
                 <label>Líder:</label>
                 <select class="form-control" id="lider">
+                    <option value="">Selecione um líder</option>
                 </select>
             </div>
             <div class="form-row">
@@ -149,31 +172,35 @@
                         <option value="11">Novembro</option>
                         <option value="12">Dezembro</option>
                     </select>
-                    <select class="form-control" id="ano">
+                    <select class="form-control mr-2" id="ano">
                         <option value="">Ano</option>
                     </select>
+                    <button type="button" class="btn btn-primary" id="btnPesquisar">
+                        <i class="fas fa-search"></i> Pesquisar
+                    </button>
                 </div>
             </div>
         </form>
+    </div>
+    
         <table class="table table-bordered" id="reunioesTable">
             <thead>
                 <tr>
-                    <th>Rede</th>
-                    <th>Supervisor</th>
-                    <th>Líderes</th>
-                    <th>Nome da Célula</th>
-                    <th>Data da Reunião</th>
-                    <th>Qtd de Membros</th>
-                    <th>Membros Presentes</th>
-                    <th>Visitantes</th>
-                    <th>Oferta</th>
-                    <th>Colheita do Amor</th>
+                    <th class="header-cell">Supervisor</th>
+                    <th class="header-cell">Líder</th>
+                    <th class="header-cell">Nome da Célula</th>
+                    <th class="header-cell">Data da Reunião</th>
+                    <th class="header-cell">Qtd de Membros</th>
+                    <th class="header-cell">Membros Presentes</th>
+                    <th class="header-cell">Visitantes</th>
+                    <th class="header-cell">Oferta</th>
+                    <th class="header-cell">Colheita do Amor</th>
                 </tr>
             </thead>
             <tbody>
             </tbody>
         </table>
-    </div>
+    
 
     <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -196,18 +223,6 @@
 
         // Obter uma referência para o Firestore
         const db = firebase.firestore();
-
-        // Função para configurar os dropdowns baseado na função do usuário
-        /*function configurarDropdowns() {
-            const redeDropdown = document.getElementById('rede');
-            const supervisorDropdown = document.getElementById('supervisor');
-            const liderDropdown = document.getElementById('lider');
-
-            redeDropdown.disabled = false;
-            supervisorDropdown.disabled = false;
-            liderDropdown.disabled = false;
-        }*/
-
 
         // Função para carregar opções de um select baseado em uma consulta ao Firestore
         async function carregarOpcoes(selectId, collection, field, whereClause = null, selectedValue = null) {
@@ -242,142 +257,165 @@
         }
 
         // Função para alterar a cor do dropdown "rede"
-        function alterarCorRede(rede) {
-            const redeSelect = document.getElementById('rede');
+        function alterarCorCoordenador(coordenador) {
+            const coordenadorSelect = document.getElementById('coordenador');
             const cores = {
-                'AMARELA': '#FFD700',
-                'AZUL': '#000080',
-                'TEEN': '#4B0082',
-                'LARANJA': '#FF8C00',
-                'VERMELHA': '#8B0000',
-                'BLACK': '#000000',
-                'VERDE': '#006400'
+                'COORDENADOR 1': '#008000',  // Verde
+                'COORDENADOR 2': '#FF0000',  // Vermelho
+                'COORDENADOR 3': '#0000FF',  // Azul
+                'COORDENADOR 4': '#FFD700',  // Amarelo
+                'COORDENADOR 5': '#FFA500',  // Laranja
+                'COORDENADOR 6': '#800080',  // Roxo
+                'COORDENADOR 7': '#4B0082',  // Índigo
+                'COORDENADOR 8': '#FF1493',  // Rosa
+                'COORDENADOR 9': '#00CED1',  // Turquesa
+                'COORDENADOR 10': '#8B4513'  // Marrom
             };
 
-            const cor = cores[rede] || '#000000';
-            redeSelect.style.backgroundColor = cor;
-            redeSelect.style.color = '#FFFFFF';
+            const cor = cores[coordenador] || '#000000';
+            coordenadorSelect.style.backgroundColor = cor;
+            coordenadorSelect.style.color = '#FFFFFF';
         }
 
         // Função para recuperar informações do usuário
         function recuperarInformacoesUsuario() {
-            const rede = localStorage.getItem('redeUsuario');
+            const coordenador = localStorage.getItem('coordenadorUsuario');
             const supervisor = localStorage.getItem('supervisorUsuario');
             const lider = localStorage.getItem('liderUsuario');
             const celula = localStorage.getItem('celulaUsuario');
             const funcao = localStorage.getItem('funcaoUsuario');
 
-            return { rede, supervisor, lider, celula, funcao };
+            console.log('=== Informações do Usuário ===');
+            console.log('Coordenador:', coordenador);
+            console.log('Supervisor:', supervisor);
+            console.log('Líder:', lider);
+            console.log('Célula:', celula);
+            console.log('Função:', funcao);
+            console.log('===========================');
+
+            return { coordenador, supervisor, lider, celula, funcao };
         }
 
-        function preencherRedes() {
-            const redeSelect = document.getElementById('rede');
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
+        function preencherCoordenadores() {
+            console.log('=== PREENCHENDO COORDENADORES ===');
+            const coordenadorSelect = document.getElementById('coordenador');
+            coordenadorSelect.innerHTML = '<option value="">Selecione um coordenador</option>';
 
-            redeSelect.innerHTML = '';
-            if (lideres && Object.keys(lideres).length > 0) {
-                let redes = Object.keys(lideres);
-                redes.sort();
-                redes.forEach((rede) => {
-                    let option = document.createElement('option');
-                    option.value = rede;
-                    option.textContent = rede;
-                    redeSelect.appendChild(option);
-                });
-            } else {
-                const rede = localStorage.getItem('rede');
-                if (rede) {
-                    let option = document.createElement('option');
-                    option.value = rede;
-                    option.textContent = rede;
-                    redeSelect.appendChild(option);
-                }
-            }
+            db.collection('estruturacelula')
+                .get()
+                .then(snapshot => {
+                    const coordenadores = new Set();
+                    
+                    snapshot.forEach(doc => {
+                        const coordenador = doc.data().coordenador;
+                        if (coordenador) {
+                            coordenadores.add(coordenador);
+                        }
+                    });
 
-            if (redeSelect.options.length > 0) {
-                redeSelect.selectedIndex = 0;
-                alterarCorRede(redeSelect.value);
-                carregarSupervisores(redeSelect.value);
-            }
-        }
-
-        function carregarSupervisores(rede) {
-            const supervisorSelect = document.getElementById('supervisor');
-            supervisorSelect.innerHTML = '';
-            
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
-
-            if (lideres && lideres[rede]) {
-                let supervisoresUnicos = new Set();
-                lideres[rede].forEach(lider => supervisoresUnicos.add(lider.supervisor));
-                supervisoresUnicos.forEach(supervisor => {
-                    let option = document.createElement('option');
-                    option.value = supervisor;
-                    option.textContent = supervisor;
-                    supervisorSelect.appendChild(option);
-                });
-            } else {
-                const supervisor = localStorage.getItem('supervisor');
-                if (supervisor) {
-                    let option = document.createElement('option');
-                    option.value = supervisor;
-                    option.textContent = supervisor;
-                    supervisorSelect.appendChild(option);
-                }
-            }
-
-            if (supervisorSelect.options.length > 0) {
-                supervisorSelect.selectedIndex = 0;
-                carregarLideres(rede, supervisorSelect.value);
-            }
-        }
-
-        function carregarLideres(rede, supervisor) {
-            const liderSelect = document.getElementById('lider');
-            liderSelect.innerHTML = '';
-
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
-
-            if (lideres && lideres[rede]) {
-                lideres[rede].forEach(lider => {
-                    if (lider.supervisor === supervisor) {
+                    // Ordenar coordenadores
+                    [...coordenadores].sort().forEach(coordenador => {
                         let option = document.createElement('option');
-                        option.value = lider.conclider;
-                        option.textContent = lider.conclider;
-                        liderSelect.appendChild(option);
-                    }
+                        option.value = coordenador;
+                        option.textContent = coordenador;
+                        coordenadorSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar coordenadores:", error);
                 });
-            } else {
-                const lidercelula = localStorage.getItem('lidercelula');
-                if (lidercelula) {
-                    let option = document.createElement('option');
-                    option.value = lidercelula;
-                    option.textContent = lidercelula;
-                    liderSelect.appendChild(option);
-                }
-            }
-
-            if (liderSelect.options.length > 0) {
-                liderSelect.selectedIndex = 0;
-                carregarReunioes();
-            }
         }
 
-        // Carregar as redes ao iniciar a página
+        function carregarSupervisores(coordenador) {
+            console.log('=== CARREGANDO SUPERVISORES ===');
+            console.log('Coordenador selecionado:', coordenador);
+            
+            const supervisorSelect = document.getElementById('supervisor');
+            const liderSelect = document.getElementById('lider');
+            
+            supervisorSelect.innerHTML = '<option value="">Selecione um supervisor</option>';
+            liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
+            
+            if (!coordenador) return;
+
+            db.collection('estruturacelula')
+                .where('coordenador', '==', coordenador)
+                .get()
+                .then(snapshot => {
+                    const supervisores = new Set();
+                    snapshot.forEach(doc => {
+                        const supervisor = doc.data().supervisor;
+                        if (supervisor) supervisores.add(supervisor);
+                    });
+
+                    [...supervisores].sort().forEach(supervisor => {
+                        let option = document.createElement('option');
+                        option.value = supervisor;
+                        option.textContent = supervisor;
+                        supervisorSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar supervisores:", error);
+                });
+        }
+
+        function carregarLideres(coordenador, supervisor) {
+            console.log('=== CARREGANDO LÍDERES ===');
+            console.log('Coordenador:', coordenador);
+            console.log('Supervisor:', supervisor);
+            
+            const liderSelect = document.getElementById('lider');
+            liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
+            
+            if (!supervisor) return;
+
+            db.collection('estruturacelula')
+                .where('coordenador', '==', coordenador)
+                .where('supervisor', '==', supervisor)
+                .get()
+                .then(snapshot => {
+                    const lideres = new Set();
+                    snapshot.forEach(doc => {
+                        const lider = doc.data().conclider;
+                        if (lider) lideres.add(lider);
+                    });
+
+                    [...lideres].sort().forEach(lider => {
+                        let option = document.createElement('option');
+                        option.value = lider;
+                        option.textContent = lider;
+                        liderSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar líderes:", error);
+                });
+        }
+
+        // Modificar window.onload para incluir a verificação inicial
         window.onload = function() {
+            console.log('=== INÍCIO DO CARREGAMENTO DA PÁGINA ===');
             const userInfo = recuperarInformacoesUsuario();
-            /*configurarDropdowns();*/
-            preencherRedes();
+            
+            // Verifica se o usuário está autenticado e tem função definida
+            if (!userInfo.funcao) {
+                alert('Usuário sem permissões definidas. Por favor, faça login novamente.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            preencherCoordenadores();
             preencherAnos();
 
             // Definir o mês atual
             const mesAtual = (new Date().getMonth() + 1).toString().padStart(2, '0');
             document.getElementById('mes').value = mesAtual;
 
-            // Carregar as reuniões iniciais
-            carregarReunioes();
+            // Limpar a tabela inicialmente
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         };
-
 
         function preencherAnos() {
             const anoAtual = new Date().getFullYear();
@@ -393,91 +431,157 @@
 
         // Função para carregar as reuniões na tabela
         async function carregarReunioes() {
-            const rede = document.getElementById('rede').value;
-            const supervisor = document.getElementById('supervisor').value;
-            const lider = document.getElementById('lider').value;
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
+            
+            if (!mes || !ano) {
+                alert('Por favor, selecione o mês e o ano para pesquisar.');
+                return;
+            }
+
+            document.getElementById('reunioesTable').style.display = 'table';
+            const btnPesquisar = document.getElementById('btnPesquisar');
+            const btnText = btnPesquisar.innerHTML;
+            btnPesquisar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
+            btnPesquisar.disabled = true;
+            btnPesquisar.classList.add('btn-loading');
 
             const tableBody = document.querySelector('#reunioesTable tbody');
-            tableBody.innerHTML = '';
-
-            let query = db.collection('reuniao');
-
-            if (rede) {
-                query = query.where('rede', '==', rede);
-            }
-
-            if (supervisor) {
-                query = query.where('supervisor', '==', supervisor);
-            }
-
-            if (lider) {
-                query = query.where('lider', '==', lider);
-            }
-
-            if (mes && ano) {
-                const mesAno = `${mes}/${ano}`;
-                query = query.where('mesAno', '==', mesAno);
-            }
-
-            query = query.orderBy('rede').orderBy('supervisor').orderBy('lider').orderBy('data');
+            tableBody.innerHTML = '<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>';
 
             try {
+                const supervisor = document.getElementById('supervisor').value;
+                const lider = document.getElementById('lider').value;
+                const mesAno = `${mes}/${ano}`;
+
+                let query = db.collection('reuniao')
+                    .where('mesAno', '==', mesAno)
+                    .orderBy('supervisor')
+                    .orderBy('lider')
+                    .orderBy('data');
+
+                if (supervisor) query = query.where('supervisor', '==', supervisor);
+                if (lider) query = query.where('lider', '==', lider);
+
                 const snapshot = await query.get();
+                tableBody.innerHTML = '';
+
+                if (snapshot.empty) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="no-results">
+                                <i class="fas fa-info-circle"></i>
+                                Nenhum resultado encontrado para os filtros selecionados.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                let totais = {
+                    qtdMembros: 0,
+                    membroPresentes: 0,
+                    qtdVisitantes: 0,
+                    oferta: 0,
+                    kgAlimento: 0,
+                    quantidade: 0
+                };
 
                 snapshot.forEach(doc => {
                     const reuniao = doc.data();
-                    const row = tableBody.insertRow();
+                    totais.qtdMembros += Number(reuniao.qtdMembros) || 0;
+                    totais.membroPresentes += Number(reuniao.membroPresentes) || 0;
+                    totais.qtdVisitantes += Number(reuniao.qtdVisitantes) || 0;
+                    totais.oferta += Number(reuniao.oferta) || 0;
+                    totais.kgAlimento += Number(reuniao.kgAlimento) || 0;
+                    totais.quantidade++;
 
-                    row.insertCell().textContent = reuniao.rede;
-                    row.insertCell().textContent = reuniao.supervisor;
-                    row.insertCell().textContent = reuniao.lider;
-                    row.insertCell().textContent = reuniao.celula;
-                    row.insertCell().textContent = reuniao.data.toDate().toLocaleDateString('pt-BR');
-                    row.insertCell().textContent = reuniao.qtdMembros;
-                    row.insertCell().textContent = reuniao.membroPresentes;
-                    row.insertCell().textContent = reuniao.qtdVisitantes;
-                    row.insertCell().textContent = reuniao.oferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    row.insertCell().textContent = reuniao.kgAlimento.toLocaleString('pt-BR') + ' kg';
-
-                    // Adiciona as classes CSS às células da tabela
-                    row.querySelectorAll('td').forEach(cell => cell.classList.add('table-cell'));
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${reuniao.supervisor || ''}</td>
+                            <td>${reuniao.lider || ''}</td>
+                            <td>${reuniao.celula || ''}</td>
+                            <td class="text-center">${reuniao.data ? reuniao.data.toDate().toLocaleDateString('pt-BR') : ''}</td>
+                            <td class="text-center">${reuniao.qtdMembros || 0}</td>
+                            <td class="text-center">${reuniao.membroPresentes || 0}</td>
+                            <td class="text-center">${reuniao.qtdVisitantes || 0}</td>
+                            <td class="text-center">${(reuniao.oferta || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                            <td class="text-center">${(reuniao.kgAlimento || 0).toLocaleString('pt-BR')} kg</td>
+                        </tr>
+                    `;
                 });
 
-                // Adiciona as classes CSS ao cabeçalho da tabela
-                const headerRow = document.querySelector('#reunioesTable thead tr');
-                headerRow.querySelectorAll('th').forEach(header => header.classList.add('header-cell'));
+                // Linha de totais
+                const mediaMembros = totais.quantidade > 0 ? (totais.qtdMembros / totais.quantidade) : 0;
+                const mediaPresentes = totais.quantidade > 0 ? (totais.membroPresentes / totais.quantidade) : 0;
+                const mediaVisitantes = totais.quantidade > 0 ? (totais.qtdVisitantes / totais.quantidade) : 0;
+
+                tableBody.innerHTML += `
+                    <tr class="table-dark">
+                        <td colspan="4" class="text-center"><strong>TOTAIS</strong></td>
+                        <td class="text-center"><strong>${mediaMembros.toFixed(1)}</strong></td>
+                        <td class="text-center"><strong>${mediaPresentes.toFixed(1)}</strong></td>
+                        <td class="text-center"><strong>${mediaVisitantes.toFixed(1)}</strong></td>
+                        <td class="text-center"><strong>${totais.oferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></td>
+                        <td class="text-center"><strong>${totais.kgAlimento.toLocaleString('pt-BR')} kg</strong></td>
+                    </tr>
+                `;
+
             } catch (error) {
-                console.error('Erro ao carregar as reuniões:', error);
+                console.error('Erro ao carregar reuniões:', error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center text-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Erro ao carregar as reuniões. Por favor, tente novamente.
+                        </td>
+                    </tr>`;
+            } finally {
+                btnPesquisar.innerHTML = btnText;
+                btnPesquisar.disabled = false;
+                btnPesquisar.classList.remove('btn-loading');
             }
         }
 
         
-        // Adicionar event listeners para os selects
-        document.getElementById('rede').addEventListener('change', function() {
-            const rede = this.value;
-            alterarCorRede(rede);
-            const userInfo = recuperarInformacoesUsuario();
-            carregarOpcoes('supervisor', 'estruturacelula', 'supervisor', { field: 'rede', operator: '==', value: rede }, userInfo.supervisor).then(() => {
-                if (userInfo.supervisor) {
-                    carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: userInfo.supervisor });
-                }
-            });
-            document.getElementById('lider').innerHTML = '<option value="">Selecione um líder</option>';
+        // Adicionar apenas o event listener do botão:
+        document.getElementById('btnPesquisar').addEventListener('click', carregarReunioes);
+
+        // Modificar os event listeners dos dropdowns para apenas atualizar as opções dependentes
+        document.getElementById('coordenador').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const coordenador = this.value;
+            alterarCorCoordenador(coordenador);
+            carregarSupervisores(coordenador);
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         });
 
         document.getElementById('supervisor').addEventListener('change', function() {
-            const rede = document.getElementById('rede').value;
+            document.getElementById('reunioesTable').style.display = 'none';
+            const coordenador = document.getElementById('coordenador').value;
             const supervisor = this.value;
-            const userInfo = recuperarInformacoesUsuario();
-            carregarOpcoes('lider', 'estruturacelula', 'conclider', { field: 'supervisor', operator: '==', value: supervisor }, userInfo.lider);
+            carregarLideres(coordenador, supervisor);
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         });
-        document.getElementById('rede').addEventListener('change', carregarReunioes);
-        document.getElementById('supervisor').addEventListener('change', carregarReunioes);
-        document.getElementById('lider').addEventListener('change', carregarReunioes);
-        document.getElementById('mes').addEventListener('change', carregarReunioes);
-        document.getElementById('ano').addEventListener('change', carregarReunioes);
+
+        document.getElementById('lider').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        });
+
+        document.getElementById('mes').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        });
+
+        document.getElementById('ano').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        });
 
     </script>
 </body>

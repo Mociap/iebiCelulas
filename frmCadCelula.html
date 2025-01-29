@@ -221,6 +221,23 @@
                 <input type="text" class="form-control" id="nomecelula" required
                     onkeyup="this.value = this.value.toUpperCase();">
             </div>
+            <div class="form-group">
+                <label for="diaSemana">Dia da Semana</label>
+                <select class="form-control" id="diaSemana" required>
+                    <option value="">Selecione o dia</option>
+                    <option value="DOMINGO">DOMINGO</option>
+                    <option value="SEGUNDA">SEGUNDA-FEIRA</option>
+                    <option value="TERCA">TERÇA-FEIRA</option>
+                    <option value="QUARTA">QUARTA-FEIRA</option>
+                    <option value="QUINTA">QUINTA-FEIRA</option>
+                    <option value="SEXTA">SEXTA-FEIRA</option>
+                    <option value="SABADO">SÁBADO</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="horario">Horário</label>
+                <input type="time" class="form-control" id="horario" required>
+            </div>
             <div class="btn-group btn-block" role="group">
                 <button type="submit" class="btn btn-primary" id="cadastrarBtn">Cadastrar</button>
                 <button type="button" class="btn btn-warning" id="editarBtn">Editar</button>
@@ -271,6 +288,8 @@
             document.getElementById('nomelider2').value = data.nomelider2;
             document.getElementById('nomelider3').value = data.nomelider3;
             document.getElementById('nomecelula').value = data.nomecelula;
+            document.getElementById('diaSemana').value = data.diaSemana || '';
+            document.getElementById('horario').value = data.horario || '';
 
             alterarCorRede(data.rede);
         }
@@ -394,6 +413,8 @@
             var nomelider2 = document.getElementById('nomelider2').value.trim().toUpperCase();
             var nomelider3 = document.getElementById('nomelider3').value.trim().toUpperCase();
             var nomecelula = document.getElementById('nomecelula').value.trim().toUpperCase();
+            var diaSemana = document.getElementById('diaSemana').value.trim();
+            var horario = document.getElementById('horario').value;
 
             // Adicionar dados ao Firestore
             bancoDeDados.collection('estruturacelula').add({
@@ -412,7 +433,9 @@
                 nomelider1: nomelider1,
                 nomelider2: nomelider2,
                 nomelider3: nomelider3,
-                nomecelula: nomecelula
+                nomecelula: nomecelula,
+                diaSemana: diaSemana,
+                horario: horario
             })
                 .then(function () {
                     console.log("Célula cadastrada com sucesso");
@@ -545,88 +568,88 @@
         document.addEventListener('DOMContentLoaded', function () {
             carregarDadosCelula();
             const editarBtn = document.getElementById('editarBtn');
-const excluirBtn = document.getElementById('excluirBtn');
+            const excluirBtn = document.getElementById('excluirBtn');
 
-editarBtn.addEventListener('click', function() {
-    const lider = obterParametroURL('lider');
-    const nomecelula = obterParametroURL('nomecelula');
+            editarBtn.addEventListener('click', function() {
+                const lider = obterParametroURL('lider');
+                const nomecelula = obterParametroURL('nomecelula');
 
-    if (lider && nomecelula) {
-        bancoDeDados.collection('estruturacelula')
-            .where('conclider', '==', lider)
-            .where('nomecelula', '==', nomecelula)
-            .limit(1)
-            .get()
-            .then((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    const doc = querySnapshot.docs[0];
-                    const data = obterDadosFormulario();
-                    doc.ref.update(data)
-                        .then(() => {
-                            alert('Documento atualizado com sucesso!');
-                            window.location.href = 'frmEstruturaCelula.html';
-                        })
-                        .catch((error) => {
-                            console.error('Erro ao atualizar documento:', error);
-                            alert('Erro ao atualizar documento: ' + error.message);
+                if (lider && nomecelula) {
+                    bancoDeDados.collection('estruturacelula')
+                        .where('conclider', '==', lider)
+                        .where('nomecelula', '==', nomecelula)
+                        .limit(1)
+                        .get()
+                        .then((querySnapshot) => {
+                            if (!querySnapshot.empty) {
+                                const doc = querySnapshot.docs[0];
+                                const data = obterDadosFormulario();
+                                doc.ref.update(data)
+                                    .then(() => {
+                                        alert('Documento atualizado com sucesso!');
+                                        window.location.href = 'frmEstruturaCelula.html';
+                                    })
+                                    .catch((error) => {
+                                        console.error('Erro ao atualizar documento:', error);
+                                        alert('Erro ao atualizar documento: ' + error.message);
+                                    });
+                            }
                         });
                 }
             });
-    }
-});
 
-excluirBtn.addEventListener('click', function() {
-    if (confirm('Tem certeza que deseja excluir esta célula?')) {
-        const lider = obterParametroURL('lider');
-        const nomecelula = obterParametroURL('nomecelula');
+            excluirBtn.addEventListener('click', function() {
+                if (confirm('Tem certeza que deseja excluir esta célula?')) {
+                    const lider = obterParametroURL('lider');
+                    const nomecelula = obterParametroURL('nomecelula');
 
-        if (lider && nomecelula) {
-            bancoDeDados.collection('estruturacelula')
-                .where('conclider', '==', lider)
-                .where('nomecelula', '==', nomecelula)
-                .limit(1)
-                .get()
-                .then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        const doc = querySnapshot.docs[0];
-                        doc.ref.delete()
-                            .then(() => {
-                                alert('Documento excluído com sucesso!');
-                                window.location.href = 'frmEstruturaCelula.html';
-                            })
-                            .catch((error) => {
-                                console.error('Erro ao excluir documento:', error);
-                                alert('Erro ao excluir documento: ' + error.message);
+                    if (lider && nomecelula) {
+                        bancoDeDados.collection('estruturacelula')
+                            .where('conclider', '==', lider)
+                            .where('nomecelula', '==', nomecelula)
+                            .limit(1)
+                            .get()
+                            .then((querySnapshot) => {
+                                if (!querySnapshot.empty) {
+                                    const doc = querySnapshot.docs[0];
+                                    doc.ref.delete()
+                                        .then(() => {
+                                            alert('Documento excluído com sucesso!');
+                                            window.location.href = 'frmEstruturaCelula.html';
+                                        })
+                                        .catch((error) => {
+                                            console.error('Erro ao excluir documento:', error);
+                                            alert('Erro ao excluir documento: ' + error.message);
+                                        });
+                                }
                             });
                     }
-                });
-        }
-    }
-});
+                }
+            });
 
-function obterDadosFormulario() {
-    return {
-        nomeigreja: document.getElementById('nomeigreja').value.trim().toUpperCase(),
-        rede: document.getElementById('rede').value.trim().toUpperCase(),
-        Pastor: document.getElementById('Pastor').value.trim().toUpperCase(),
-        pastor1: document.getElementById('pastor1').value.trim().toUpperCase(),
-        pastor2: document.getElementById('pastor2').value.trim().toUpperCase(),
-        coordenador: document.getElementById('coordenador').value.trim().toUpperCase(),
-        coordenador1: document.getElementById('coordenador1').value.trim().toUpperCase(),
-        coordenador2: document.getElementById('coordenador2').value.trim().toUpperCase(),
-        supervisor: document.getElementById('supervisor').value.trim().toUpperCase(),
-        supervisor1: document.getElementById('supervisor1').value.trim().toUpperCase(),
-        supervisor2: document.getElementById('supervisor2').value.trim().toUpperCase(),
-        conclider: document.getElementById('conclider').value.trim().toUpperCase(),
-        nomelider1: document.getElementById('nomelider1').value.trim().toUpperCase(),
-        nomelider2: document.getElementById('nomelider2').value.trim().toUpperCase(),
-        nomelider3: document.getElementById('nomelider3').value.trim().toUpperCase(),
-        nomecelula: document.getElementById('nomecelula').value.trim().toUpperCase()
-    };
-}
-
+            function obterDadosFormulario() {
+                return {
+                    nomeigreja: document.getElementById('nomeigreja').value.trim().toUpperCase(),
+                    rede: document.getElementById('rede').value.trim().toUpperCase(),
+                    Pastor: document.getElementById('Pastor').value.trim().toUpperCase(),
+                    pastor1: document.getElementById('pastor1').value.trim().toUpperCase(),
+                    pastor2: document.getElementById('pastor2').value.trim().toUpperCase(),
+                    coordenador: document.getElementById('coordenador').value.trim().toUpperCase(),
+                    coordenador1: document.getElementById('coordenador1').value.trim().toUpperCase(),
+                    coordenador2: document.getElementById('coordenador2').value.trim().toUpperCase(),
+                    supervisor: document.getElementById('supervisor').value.trim().toUpperCase(),
+                    supervisor1: document.getElementById('supervisor1').value.trim().toUpperCase(),
+                    supervisor2: document.getElementById('supervisor2').value.trim().toUpperCase(),
+                    conclider: document.getElementById('conclider').value.trim().toUpperCase(),
+                    nomelider1: document.getElementById('nomelider1').value.trim().toUpperCase(),
+                    nomelider2: document.getElementById('nomelider2').value.trim().toUpperCase(),
+                    nomelider3: document.getElementById('nomelider3').value.trim().toUpperCase(),
+                    nomecelula: document.getElementById('nomecelula').value.trim().toUpperCase(),
+                    diaSemana: document.getElementById('diaSemana').value.trim(),
+                    horario: document.getElementById('horario').value
+                };
+            }
         });
-
     </script>
 </body>
 
