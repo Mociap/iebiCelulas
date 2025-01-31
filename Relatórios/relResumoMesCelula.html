@@ -1,96 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resumo do Mês por Célula - Igreja Evangélica Batista em Intermares</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <title>Resumo de Reunião - Igreja Evangélica Batista Intermares</title>
+    <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
             font-family: 'Montserrat', sans-serif;
             color: #333;
-            padding-top: 100px;
         }
-
         .container {
-            max-width: 1200px;
-            width: 100%;
-            margin-top: 20px;
-            background-color: #fff;
+            max-width: 900px;
+            margin-top: 50px;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            font-size: 14px;
         }
-
         .header {
             background-color: #000;
-            padding: 10px;
+            padding: 20px;
             text-align: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border-radius: 10px 10px 0 0;
         }
-
         .header img {
-            max-width: 150px;
+            max-width: 200px;
         }
-
         .divider {
             width: 75%;
             height: 2px;
             background-color: #000;
             margin: 30px auto;
         }
-
-        .btn-primary {
-            background-color: #000;
-            border-color: #000;
-        }
-
-        .btn-primary:hover {
-            background-color: #333;
-            border-color: #333;
-        }
-
-        #resumoTable {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        #resumoTable th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-        }
-
-        #exportButton {
-            margin-top: 20px;
+        .form-row {
+            display: flex;
+            align-items: center;
             margin-bottom: 10px;
+            font-size: 14px;
         }
-
-        #loadingSpinner {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
+        .form-row label {
+            width: 100px;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 14px;
         }
-
+        .form-row select {
+            flex: 1;
+            font-size: 14px;
+        }
         .back-button {
             position: fixed;
             top: 20px;
             left: 20px;
-            background-color: #e74c3c;
+            background-color: #3498db;;
             color: #ffffff;
             padding: 10px;
             border-radius: 30px;
@@ -101,135 +70,99 @@
             width: 40px;
             height: 40px;
             transition: all 0.3s ease;
-            z-index: 1001;
+            z-index: 1000;
         }
-
         .back-button:hover {
-            background-color: #e74c3c;
+            background-color: #9b59b6;;
             transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-
-        .back-button i {
-            margin-right: 0px;
+        .table {
+            margin-top: 20px;
         }
-
+        .table th:not(:first-child),
+        .table td:not(:first-child) {
+            text-align: center;
+        }
         .header-cell {
-            font-weight: bold !important;
+            width: 150px; /* Ajuste para primeira coluna */
             background-color: brown !important;
             color: white !important;
-            vertical-align: middle !important;
-            text-align: center !important;
+            position: sticky;
+            left: 0;
+            z-index: 1;
         }
-
-        .subtotal-row {
-            font-weight: bold;
-            background-color: #46443b !important;
-            color: white;
-            text-align: center;
-        }
-
-        .total-geral-row {
-            font-weight: bold;
-            background-color: brown !important;
-            color: white;
-            text-align: center;
-        }
-
         .table-cell {
             vertical-align: middle !important;
             text-align: center !important;
+            min-width: 120px; /* Largura mínima para células de dados */
         }
-
-        .table-responsive {
-            max-width: 100%;
-            overflow-x: auto;
+        #reunioesTable {
+            font-size: 14px;
+            display: none; /* Esconde a tabela inicialmente */
+            overflow-x: auto; /* Permite rolagem horizontal */
         }
-
-        .table-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 30px;
-            margin-bottom: 30px;
+        #mes {
+            width: 1300% !important;
         }
-
-        .splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+        .btn-loading {
+            cursor: not-allowed;
+            opacity: 0.7;
         }
-
-        .splash-screen.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .splash-content {
+        .no-results {
             text-align: center;
-            color: white;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
         }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid #fff;
-            border-top: 3px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        .table-info {
+            background-color: #e3f2fd !important;
         }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+        .table-dark {
+            background-color: brown !important;
+            color: white !important;
+            border-color: brown !important;
+        }
+        .table-dark td {
+            background-color: brown !important;
+            color: white !important;
+            border-color: brown !important;
         }
     </style>
 </head>
-
 <body>
-    <a href="../frmRelatorios.html" class="back-button">
+    <a href="frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
-        <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista em Intermares">
+        <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
-    <div class="container container-fluid">
-        <h2 class="text-center mb-4 font-weight-bold">Resumo do Mês por Célula</h2>
+    <div class="container">
+        <h2 class="text-center mb-4">RESUMO DE REUNIÃO</h2>
         <div class="divider"></div>
-        <form id="relatorioForm">
-            <div class="form-group">
-                <label for="rede">Rede:</label>
-                <select class="form-control" id="rede"
-                    onchange="alterarCorRede(this.value); carregarSupervisores(this.value)">
-                    <option value="Todos">Todos</option>
+        <form>
+            <div class="form-row">
+                <label>Coordenador:</label>
+                <select class="form-control" id="coordenador" onchange="alterarCorCoordenador(this.value)">
+                    <option value="">Selecione um coordenador</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="supervisor">Supervisor:</label>
+            <div class="form-row">
+                <label>Supervisor:</label>
                 <select class="form-control" id="supervisor">
-                    <option value="Todos">Todos</option>
+                    <option value="">Selecione um supervisor</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="mesAno">Mês/Ano:</label>
+            <div class="form-row">
+                <label>Líder:</label>
+                <select class="form-control" id="lider">
+                    <option value="">Selecione um líder</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Mês/Ano:</label>
                 <div class="d-flex">
-                    <select class="form-control mr-2" id="mes">
+                    <select class="form-control mr-2" id="mes" style="width: 150px !important; display: inline-block;">
                         <option value="">Mês</option>
                         <option value="01">Janeiro</option>
                         <option value="02">Fevereiro</option>
@@ -244,56 +177,29 @@
                         <option value="11">Novembro</option>
                         <option value="12">Dezembro</option>
                     </select>
-                    <select class="form-control" id="ano">
+                    <select class="form-control mr-2" id="ano">
                         <option value="">Ano</option>
                     </select>
+                    <button type="button" class="btn btn-primary" id="btnPesquisar">
+                        <i class="fas fa-search"></i> Pesquisar
+                    </button>
                 </div>
             </div>
         </form>
-        <div id="loadingSpinner" style="display: none;">
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Carregando...</span>
-                </div>
-            </div>
-        </div>
-        <div class="table-responsive mt-4"></div>
-        <div id="resumoTableContainer" class="table-container" style="display: none;">
-            <table id="resumoTable" class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th class="header-cell">Rede</th>
-                        <th class="header-cell">Supervisor</th>
-                        <th class="header-cell">Líderes</th>
-                        <th class="header-cell">Nome da Célula</th>
-                        <th class="header-cell">Qtd de Membros</th>
-                        <th class="header-cell">Reuniões no Mês</th>
-                        <th class="header-cell">Frequência Mês</th>
-                        <th class="header-cell">Qde Visitações no Mês</th>
-                        <th class="header-cell">Valor das Ofertas Mês</th>
-                        <th class="header-cell">Colheita do Amor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-            <button id="exportButton" class="btn btn-primary btn-block" onclick="exportarParaExcel()">
-                Exportar para Excel
-            </button>
-        </div>
-    </div>
+        <table class="table table-bordered" id="reunioesTable">
+            <thead>
+                <tr>
+                    <!-- Headers serão preenchidos dinamicamente com as datas -->
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
 
-    <div id="splash-screen" class="splash-screen">
-        <div class="splash-content">
-            <div class="spinner"></div>
-            <p>Aguarde, carregando...</p>
-        </div>
-    </div>
-
-
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <!-- Importar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
         // Configuração do Firebase
@@ -306,485 +212,206 @@
             messagingSenderId: "1068164821081",
             appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
         };
+
+        // Inicializar o Firebase
         firebase.initializeApp(firebaseConfig);
-        var db = firebase.firestore();
+
+        // Obter uma referência para o Firestore
+        const db = firebase.firestore();
+
+        // Função para carregar opções de um select baseado em uma consulta ao Firestore
+        async function carregarOpcoes(selectId, collection, field, whereClause = null, selectedValue = null) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = `<option value="">Selecione uma opção</option>`;
+            
+            let query = db.collection(collection);
+            if (whereClause) {
+                query = query.where(whereClause.field, whereClause.operator, whereClause.value);
+            }
+            
+            const snapshot = await query.get();
+            const options = new Set();
+            
+            snapshot.forEach(doc => options.add(doc.data()[field]));
+            
+            options.forEach(option => {
+                const optionElement = createElement('option', { value: option }, option);
+                if (selectedValue && option === selectedValue) {
+                    optionElement.selected = true;
+                }
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Função utilitária para criar elementos HTML
+        function createElement(tag, attributes = {}, textContent = '') {
+            const element = document.createElement(tag);
+            Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+            if (textContent) element.textContent = textContent;
+            return element;
+        }
+
+        // Função para alterar a cor do dropdown "rede"
+        function alterarCorCoordenador(coordenador) {
+            const coordenadorSelect = document.getElementById('coordenador');
+            const cores = {
+                'COORDENADOR 1': '#008000',  // Verde
+                'COORDENADOR 2': '#FF0000',  // Vermelho
+                'COORDENADOR 3': '#0000FF',  // Azul
+                'COORDENADOR 4': '#FFD700',  // Amarelo
+                'COORDENADOR 5': '#FFA500',  // Laranja
+                'COORDENADOR 6': '#800080',  // Roxo
+                'COORDENADOR 7': '#4B0082',  // Índigo
+                'COORDENADOR 8': '#FF1493',  // Rosa
+                'COORDENADOR 9': '#00CED1',  // Turquesa
+                'COORDENADOR 10': '#8B4513'  // Marrom
+            };
+
+            const cor = cores[coordenador] || '#000000';
+            coordenadorSelect.style.backgroundColor = cor;
+            coordenadorSelect.style.color = '#FFFFFF';
+        }
 
         // Função para recuperar informações do usuário
         function recuperarInformacoesUsuario() {
-            const rede = localStorage.getItem('redeUsuario');
+            const coordenador = localStorage.getItem('coordenadorUsuario');
             const supervisor = localStorage.getItem('supervisorUsuario');
+            const lider = localStorage.getItem('liderUsuario');
+            const celula = localStorage.getItem('celulaUsuario');
             const funcao = localStorage.getItem('funcaoUsuario');
-            return { rede, supervisor, funcao };
+
+            console.log('=== Informações do Usuário ===');
+            console.log('Coordenador:', coordenador);
+            console.log('Supervisor:', supervisor);
+            console.log('Líder:', lider);
+            console.log('Célula:', celula);
+            console.log('Função:', funcao);
+            console.log('===========================');
+
+            return { coordenador, supervisor, lider, celula, funcao };
         }
 
-        // Função para preencher as opções de rede
-        function preencherRedes() {
-            console.log("Iniciando preenchimento de redes");
+        function preencherCoordenadores() {
+            console.log('=== PREENCHENDO COORDENADORES ===');
+            const coordenadorSelect = document.getElementById('coordenador');
+            coordenadorSelect.innerHTML = '<option value="">Selecione um coordenador</option>';
 
-            const redeSelect = document.getElementById('rede');
-            const supervisores = JSON.parse(localStorage.getItem('supervisores'));
-            console.log("Dados de supervisores:", supervisores);
-
-            if (supervisores && Object.keys(supervisores).length > 0) {
-                let redes = Object.keys(supervisores);
-                redes.sort(); // Ordena as redes alfabeticamente
-                console.log("Redes encontradas e ordenadas:", redes);
-
-                redeSelect.innerHTML = ''; // Limpa as opções existentes
-
-                if (redes.length > 1) {
-                    // Adiciona "Todos" como primeira opção se houver mais de uma rede
-                    let optionTodos = document.createElement('option');
-                    optionTodos.value = "Todos";
-                    optionTodos.textContent = "Todos";
-                    redeSelect.appendChild(optionTodos);
-                    console.log("Opção 'Todos' adicionada como primeira opção");
-                }
-
-                // Adiciona as redes ordenadas
-                redes.forEach((rede) => {
-                    let option = document.createElement('option');
-                    option.value = rede;
-                    option.textContent = rede;
-                    redeSelect.appendChild(option);
-                    console.log("Opção de rede adicionada:", rede);
-                });
-
-                // Seleciona a opção apropriada
-                if (redes.length > 1) {
-                    redeSelect.value = "Todos";
-                    console.log("'Todos' selecionado para múltiplas redes");
-                } else {
-                    redeSelect.value = redes[0];
-                    console.log("Única rede selecionada:", redes[0]);
-                }
-
-                alterarCorRede(redeSelect.value);
-                carregarSupervisores(redeSelect.value);
-            } else {
-                console.log("Nenhuma rede encontrada no localStorage.");
-            }
-
-            console.log("Preenchimento de redes concluído");
-        }
-
-        // Função para carregar supervisores
-        function carregarSupervisores(rede) {
-            const supervisorSelect = document.getElementById('supervisor');
-            supervisorSelect.innerHTML = '';
-
-            const supervisores = JSON.parse(localStorage.getItem('supervisores'));
-            console.log("Dados de supervisores:", supervisores);
-
-            if (supervisores) {
-                let supervisoresUnicos = new Set();
-
-                if (rede === 'Todos') {
-                    Object.values(supervisores).forEach(supervisorArray => {
-                        supervisorArray.forEach(supervisor => supervisoresUnicos.add(supervisor));
+            db.collection('estruturacelula')
+                .get()
+                .then(snapshot => {
+                    const coordenadores = new Set();
+                    
+                    snapshot.forEach(doc => {
+                        const coordenador = doc.data().coordenador;
+                        if (coordenador) {
+                            coordenadores.add(coordenador);
+                        }
                     });
-                } else if (supervisores[rede]) {
-                    supervisores[rede].forEach(supervisor => supervisoresUnicos.add(supervisor));
-                }
 
-                if (supervisoresUnicos.size > 1) {
-                    let optionTodos = document.createElement('option');
-                    optionTodos.value = "Todos";
-                    optionTodos.textContent = "Todos";
-                    supervisorSelect.appendChild(optionTodos);
-                }
-
-                supervisoresUnicos.forEach(supervisor => {
-                    let option = document.createElement('option');
-                    option.value = supervisor;
-                    option.textContent = supervisor;
-                    supervisorSelect.appendChild(option);
+                    // Ordenar coordenadores
+                    [...coordenadores].sort().forEach(coordenador => {
+                        let option = document.createElement('option');
+                        option.value = coordenador;
+                        option.textContent = coordenador;
+                        coordenadorSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar coordenadores:", error);
                 });
-
-                if (supervisoresUnicos.size > 0) {
-                    if (supervisoresUnicos.size > 1) {
-                        supervisorSelect.value = "Todos";
-                    } else {
-                        supervisorSelect.value = Array.from(supervisoresUnicos)[0];
-                    }
-                    console.log("Supervisor selecionado:", supervisorSelect.value);
-                }
-            } else {
-                console.log("Nenhum supervisor encontrado no localStorage.");
-            }
-
-            console.log("Carregamento de supervisores concluído");
         }
 
-        // Função para alterar a cor da rede selecionada
-        function alterarCorRede(rede) {
-            var selectRede = document.getElementById('rede');
-            var cores = {
-                'AMARELA': '#FFD700',
-                'AZUL': '#000080',
-                'TEEN': '#4B0082',
-                'LARANJA': '#FF8C00',
-                'VERMELHA': '#8B0000',
-                'BLACK': '#000000',
-                'VERDE': '#006400'
-            };
+        function carregarSupervisores(coordenador) {
+            console.log('=== CARREGANDO SUPERVISORES ===');
+            console.log('Coordenador selecionado:', coordenador);
+            
+            const supervisorSelect = document.getElementById('supervisor');
+            const liderSelect = document.getElementById('lider');
+            
+            supervisorSelect.innerHTML = '<option value="">Selecione um supervisor</option>';
+            liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
+            
+            if (!coordenador) return;
 
-            var cor = cores[rede] || '#000000';
-            selectRede.style.backgroundColor = cor;
-            selectRede.style.color = '#FFFFFF';
+            db.collection('estruturacelula')
+                .where('coordenador', '==', coordenador)
+                .get()
+                .then(snapshot => {
+                    const supervisores = new Set();
+                    snapshot.forEach(doc => {
+                        const supervisor = doc.data().supervisor;
+                        if (supervisor) supervisores.add(supervisor);
+                    });
+
+                    [...supervisores].sort().forEach(supervisor => {
+                        let option = document.createElement('option');
+                        option.value = supervisor;
+                        option.textContent = supervisor;
+                        supervisorSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar supervisores:", error);
+                });
         }
 
-        // Comparar para Ordenar
-        function compararLinhas(a, b) {
-            if (a.rede < b.rede) return -1;
-            if (a.rede > b.rede) return 1;
-            if (a.supervisor < b.supervisor) return -1;
-            if (a.supervisor > b.supervisor) return 1;
-            if (a.lider < b.lider) return -1;
-            if (a.lider > b.lider) return 1;
-            return 0;
+        function carregarLideres(coordenador, supervisor) {
+            console.log('=== CARREGANDO LÍDERES ===');
+            console.log('Coordenador:', coordenador);
+            console.log('Supervisor:', supervisor);
+            
+            const liderSelect = document.getElementById('lider');
+            liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
+            
+            if (!supervisor) return;
+
+            db.collection('estruturacelula')
+                .where('coordenador', '==', coordenador)
+                .where('supervisor', '==', supervisor)
+                .get()
+                .then(snapshot => {
+                    const lideres = new Set();
+                    snapshot.forEach(doc => {
+                        const lider = doc.data().conclider;
+                        if (lider) lideres.add(lider);
+                    });
+
+                    [...lideres].sort().forEach(lider => {
+                        let option = document.createElement('option');
+                        option.value = lider;
+                        option.textContent = lider;
+                        liderSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar líderes:", error);
+                });
         }
 
-        // Função principal para gerar a tabela de resumo
-        async function gerarTabela() {
-            const rede = document.getElementById('rede').value;
-            const supervisor = document.getElementById('supervisor').value;
-            const mes = document.getElementById('mes').value;
-            const ano = document.getElementById('ano').value;
-
-            if (!rede || !mes || !ano) {
-                document.getElementById('resumoTableContainer').style.display = 'none';
+        // Modificar window.onload para incluir a verificação inicial
+        window.onload = function() {
+            console.log('=== INÍCIO DO CARREGAMENTO DA PÁGINA ===');
+            const userInfo = recuperarInformacoesUsuario();
+            
+            // Verifica se o usuário está autenticado e tem função definida
+            if (!userInfo.funcao) {
+                alert('Usuário sem permissões definidas. Por favor, faça login novamente.');
+                window.location.href = 'login.html';
                 return;
             }
 
-            document.getElementById('loadingSpinner').style.display = 'block';
-            document.getElementById('resumoTableContainer').style.display = 'none';
+            preencherCoordenadores();
+            preencherAnos();
 
+            // Definir o mês atual
+            const mesAtual = (new Date().getMonth() + 1).toString().padStart(2, '0');
+            document.getElementById('mes').value = mesAtual;
 
-            document.getElementById('splash-screen').classList.add('show');
-            document.getElementById('resumoTableContainer').style.display = 'none';
+            // Limpar a tabela inicialmente
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        };
 
-            try {
-
-                const mesAno = `${mes}/${ano}`;
-                const tableBody = document.querySelector('#resumoTable tbody');
-                tableBody.innerHTML = '';
-
-                let totais = {
-                    reunioes: 0,
-                    membroPresentes: 0,
-                    qtdMembros: 0,
-                    visitacoes: 0,
-                    ofertas: 0,
-                    ofertaAmor: 0
-                };
-
-                let dados = [];
-
-                try {
-                    let query = db.collection("estruturacelula");
-
-                    if (rede === "Todos") {
-                        const redesNoLocalStorage = Object.keys(JSON.parse(localStorage.getItem('supervisores')));
-                        query = query.where("rede", "in", redesNoLocalStorage);
-                    } else {
-                        query = query.where("rede", "==", rede);
-                    }
-
-
-                    if (rede !== "Todos") {
-                        query = query.where("rede", "==", rede);
-                    }
-
-                    if (supervisor && supervisor !== "Todos") {
-                        query = query.where("supervisor", "==", supervisor);
-                    }
-
-                    const celulasSnapshot = await query.get();
-                    for (const celulaDoc of celulasSnapshot.docs) {
-                        const celulaData = celulaDoc.data();
-                        const nomecelula = celulaData.nomecelula;
-                        const supervisorCelula = celulaData.supervisor;
-                        const liderCelula = celulaData.conclider;
-                        const reuniaoSnapshot = await db.collection("reuniao")
-                            .where("celula", "==", nomecelula)
-                            .where("mesAno", "==", mesAno)
-                            .get();
-
-                        let somaMembroPresentes = 0;
-                        let somaQtdMembros = 0;
-                        let somaQtdVisitantes = 0;
-                        let somaOferta = 0;
-                        let somaKgAlimento = 0;
-                        let reunioesRealizadas = 0;
-
-                        reuniaoSnapshot.forEach((doc) => {
-                            const data = doc.data();
-                            somaMembroPresentes += Number(data.membroPresentes || 0);
-                            somaQtdMembros += Number(data.qtdMembros || 0);
-                            somaQtdVisitantes += Number(data.qtdVisitantes || 0);
-                            somaOferta += Number(data.oferta || 0);
-                            somaKgAlimento += Number(data.kgAlimento || 0);
-
-                            if (data.reuniaoRealizada !== false) {
-                                reunioesRealizadas++;
-                                console.log("Reunião contabilizada");
-                            } else {
-                                console.log("Reunião não contabilizada");
-                            }
-                        });
-
-                        console.log(`Reuniões realizadas para ${nomecelula}:`, reunioesRealizadas);
-
-                        let frequencia = somaQtdMembros > 0 ? (somaMembroPresentes / somaQtdMembros * 100).toFixed(2) + "%" : "N/A";
-                        let visitacoes = somaQtdVisitantes.toLocaleString('pt-BR');
-                        let ofertas = somaOferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                        let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR') + " kg";
-
-                        // Consulta adicional para obter a quantidade de membros da célula
-                        const membroSnapshot = await db.collection("membros")
-                            .where("nomedacelula", "==", nomecelula)
-                            .get();
-
-                        const qtdMembros = membroSnapshot.size;
-
-                        dados.push({
-                            rede: celulaData.rede,
-                            supervisor: supervisorCelula,
-                            lider: liderCelula,
-                            nomecelula: nomecelula,
-                            qtdMembros: qtdMembros,
-                            reunioesRealizadas: reunioesRealizadas,
-                            frequencia: frequencia,
-                            visitacoes: visitacoes,
-                            ofertas: ofertas,
-                            ofertaAmor: ofertaAmor
-                        });
-                    }
-
-                    // Ordenar os dados por Rede, Supervisor e Líderes
-                    dados.sort(compararLinhas);
-
-                    let supervisorAtual = null;
-                    let subtotais = {
-                        reunioes: 0,
-                        membroPresentes: 0,
-                        qtdMembros: 0,
-                        visitacoes: 0,
-                        ofertas: 0,
-                        ofertaAmor: 0
-                    };
-
-                    // Preencher a tabela com os dados ordenados
-                    for (const linha of dados) {
-
-                        if (supervisorAtual !== linha.supervisor) {
-                            if (supervisorAtual !== null) {
-                                adicionarLinhaSubtotais(tableBody, subtotais, supervisorAtual);
-                                subtotais = {
-                                    reunioes: 0,
-                                    membroPresentes: 0,
-                                    qtdMembros: 0,
-                                    visitacoes: 0,
-                                    ofertas: 0,
-                                    ofertaAmor: 0
-                                };
-                            }
-                            supervisorAtual = linha.supervisor;
-                        }
-
-                        const row = tableBody.insertRow();
-                        row.insertCell(0).textContent = linha.rede;
-                        row.insertCell(1).textContent = linha.supervisor;
-                        row.insertCell(2).textContent = linha.lider;
-                        row.insertCell(3).textContent = linha.nomecelula;
-                        row.insertCell(4).textContent = linha.qtdMembros;
-                        row.insertCell(5).textContent = linha.reunioesRealizadas;
-                        row.insertCell(6).textContent = linha.frequencia;
-                        row.insertCell(7).textContent = linha.visitacoes;
-                        row.insertCell(8).textContent = linha.ofertas;
-                        row.insertCell(9).textContent = linha.ofertaAmor;
-                        row.querySelectorAll('td').forEach(cell => cell.classList.add('table-cell'));
-
-                        subtotais.reunioes += linha.reunioesRealizadas;
-                        subtotais.membroPresentes += linha.frequencia.replace('%', '') * linha.reunioesRealizadas;
-                        subtotais.qtdMembros += linha.qtdMembros;
-                        subtotais.visitacoes += parseInt(linha.visitacoes.replace(/\./g, ''));
-                        subtotais.ofertas += parseFloat(linha.ofertas.replace(/[R$\.]/g, '').replace(',', '.'));
-                        subtotais.ofertaAmor += parseFloat(linha.ofertaAmor.replace(/\./g, '').replace(' kg', ''));
-
-                        totais.reunioes += linha.reunioesRealizadas;
-                        totais.membroPresentes += linha.frequencia.replace('%', '') * linha.reunioesRealizadas;
-                        totais.qtdMembros += linha.qtdMembros;
-                        totais.visitacoes += parseInt(linha.visitacoes.replace(/\./g, ''));
-                        totais.ofertas += parseFloat(linha.ofertas.replace(/[R$\.]/g, '').replace(',', '.'));
-                        totais.ofertaAmor += parseFloat(linha.ofertaAmor.replace(/\./g, '').replace(' kg', ''));
-                    }
-
-                    // Adicionar a última linha de subtotal
-                    if (supervisorAtual !== null) {
-                        adicionarLinhaSubtotais(tableBody, subtotais, supervisorAtual);
-                    }
-
-
-                    totais.frequencia = totais.qtdMembros > 0
-                        ? ((totais.membroPresentes / totais.qtdMembros) * 100).toFixed(2)
-                        : 0;
-
-                    adicionarLinhaTotais(tableBody, totais);
-
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-
-                    document.getElementById('loadingSpinner').style.display = 'none';
-                    document.getElementById('resumoTableContainer').style.display = 'block';
-
-                } catch (error) {
-                    console.error("Erro ao gerar tabela:", error);
-                    document.getElementById('loadingSpinner').style.display = 'none';
-                    alert("Ocorreu um erro ao gerar a tabela. Por favor, tente novamente.");
-                }
-                document.getElementById('splash-screen').classList.remove('show');
-                document.getElementById('resumoTableContainer').style.display = 'block';
-            } catch (error) {
-                console.error("Erro ao gerar tabela:", error);
-                document.getElementById('splash-screen').classList.remove('show');
-                alert("Ocorreu um erro ao gerar a tabela. Por favor, tente novamente.");
-            }
-        }
-
-        function adicionarLinhaSubtotais(tableBody, subtotais, supervisor) {
-            const row = tableBody.insertRow();
-            row.classList.add('subtotal-row');
-            console.log("Classe 'subtotal-row' adicionada à linha de subtotal");
-
-            const cell = row.insertCell(0);
-            cell.colSpan = 4;
-            cell.textContent = 'Subtotal: ' + supervisor;
-
-            row.insertCell(1).textContent = subtotais.qtdMembros; // Adicionado subtotal de Qtd de Membros
-            row.insertCell(2).textContent = subtotais.reunioes;
-            row.insertCell(3).textContent = ((subtotais.membroPresentes / subtotais.qtdMembros) * 100).toFixed(2) + '%';
-            row.insertCell(4).textContent = subtotais.visitacoes.toLocaleString('pt-BR');
-            row.insertCell(5).textContent = subtotais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            row.insertCell(6).textContent = subtotais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
-        }
-
-        // Função para adicionar linha de totais à tabela
-        function adicionarLinhaTotais(tableBody, totais) {
-            const row = tableBody.insertRow();
-            row.classList.add('total-geral-row');
-            console.log("Classe 'total-geral-row' adicionada à linha de total geral");
-
-            const cell = row.insertCell(0);
-            cell.colSpan = 4; // Mesclando as colunas 1, 2, 3, 4
-            cell.textContent = 'Total Geral';
-
-            row.insertCell(1).textContent = totais.qtdMembros; // Adicionado total de Qtd de Membros
-            row.insertCell(2).textContent = totais.reunioes;
-            row.insertCell(3).textContent = totais.frequencia + '%';
-            row.insertCell(4).textContent = totais.visitacoes.toLocaleString('pt-BR');
-            row.insertCell(5).textContent = totais.ofertas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            row.insertCell(6).textContent = totais.ofertaAmor.toLocaleString('pt-BR') + ' kg';
-        }
-
-        // Função para imprimir a tabela
-        function imprimirTabela() {
-            window.print();
-        }
-
-        function exportarParaExcel() {
-            const table = document.getElementById('resumoTable');
-            const wb = XLSX.utils.book_new();
-
-            // Captura os estilos da tabela
-            const ws = XLSX.utils.table_to_sheet(table, {
-                raw: false,
-                dateNF: 'dd/mm/yyyy'
-            });
-
-            // Define larguras das colunas
-            const wscols = [
-                { wch: 15 }, // Rede
-                { wch: 20 }, // Supervisor
-                { wch: 20 }, // Líderes
-                { wch: 25 }, // Nome da Célula
-                { wch: 15 }, // Qtd Membros
-                { wch: 15 }, // Reuniões
-                { wch: 15 }, // Frequência
-                { wch: 15 }, // Visitações
-                { wch: 20 }, // Ofertas
-                { wch: 15 }  // Colheita
-            ];
-            ws['!cols'] = wscols;
-
-            // Aplica estilos nas células
-            for (let cell in ws) {
-                if (cell[0] === '!') continue;
-
-                // Configuração padrão para todas as células
-                ws[cell].s = {
-                    alignment: {
-                        vertical: 'center',
-                        horizontal: 'center'
-                    },
-                    font: {
-                        name: 'Arial',
-                        sz: 11
-                    }
-                };
-
-                // Estilo para cabeçalho
-                if (cell.slice(1) === '1') {
-                    ws[cell].s.fill = {
-                        fgColor: { rgb: "8B0000" },
-                        patternType: 'solid'
-                    };
-                    ws[cell].s.font.color = { rgb: "FFFFFF" };
-                    ws[cell].s.font.bold = true;
-                }
-            }
-
-            XLSX.utils.book_append_sheet(wb, ws, "Resumo Mensal");
-
-            // Gera o nome do arquivo com mês e ano selecionados
-            const mes = document.getElementById('mes').value;
-            const ano = document.getElementById('ano').value;
-            const fileName = `Resumo_Celulas_${mes}_${ano}.xlsx`;
-
-            XLSX.writeFile(wb, fileName);
-        }
-
-        // Função para preencher as opções de mês
-        function preencherMeses() {
-            const mesAtual = new Date().getMonth() + 1;
-            const mesSelect = document.getElementById('mes');
-            mesSelect.innerHTML = ''; // Limpa as opções existentes
-
-            const nomesMeses = [
-                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-            ];
-
-            for (let i = 1; i <= 12; i++) {
-                let option = document.createElement('option');
-                option.value = i.toString().padStart(2, '0');
-                option.textContent = nomesMeses[i - 1];
-                mesSelect.appendChild(option);
-            }
-
-            mesSelect.value = mesAtual.toString().padStart(2, '0');
-        }
-
-        // Função auxiliar para obter o nome do mês a partir do número
-        function obterNomeMes(mes) {
-            const nomesMeses = [
-                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-            ];
-            return nomesMeses[mes - 1];
-        }
-
-        // Função para preencher as opções de ano
         function preencherAnos() {
             const anoAtual = new Date().getFullYear();
             const anoSelect = document.getElementById('ano');
@@ -797,37 +424,156 @@
             anoSelect.value = anoAtual;
         }
 
-        // Inicialização da página
-        window.onload = function () {
-            preencherRedes();
-            preencherMeses();
-            preencherAnos();
-            gerarTabela();
-
-            // Obtém todas as chaves do localStorage
-            const chaves = Object.keys(localStorage);
-
-            // Verifica se há chaves no localStorage
-            if (chaves.length > 0) {
-                console.log("Dados armazenados no localStorage:");
-
-                // Percorre as chaves e exibe os valores correspondentes
-                chaves.forEach(function (chave) {
-                    const valor = localStorage.getItem(chave);
-                    console.log(`${chave}: ${valor}`);
-                });
-            } else {
-                console.log("Não há dados armazenados no localStorage.");
+        // Função para carregar as reuniões na tabela
+        async function carregarReunioes() {
+            const mes = document.getElementById('mes').value;
+            const ano = document.getElementById('ano').value;
+    
+            if (!mes || !ano) {
+                alert('Por favor, selecione o mês e o ano para pesquisar.');
+                return;
             }
 
-        };
+            document.getElementById('reunioesTable').style.display = 'table';
+            const btnPesquisar = document.getElementById('btnPesquisar');
+            const btnText = btnPesquisar.innerHTML;
+            btnPesquisar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
+            btnPesquisar.disabled = true;
+            btnPesquisar.classList.add('btn-loading');
 
-        // Adicionar event listeners para os elementos de formulário
-        document.getElementById('rede').addEventListener('change', gerarTabela);
-        document.getElementById('supervisor').addEventListener('change', gerarTabela);
-        document.getElementById('mes').addEventListener('change', gerarTabela);
-        document.getElementById('ano').addEventListener('change', gerarTabela);
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>';
+
+            try {
+                const supervisor = document.getElementById('supervisor').value;
+                const lider = document.getElementById('lider').value;
+                const mesAno = `${mes}/${ano}`;
+
+                let query = db.collection('reuniao')
+                    .where('mesAno', '==', mesAno)
+                    .orderBy('supervisor')
+                    .orderBy('lider')
+                    .orderBy('data');
+
+                if (supervisor) query = query.where('supervisor', '==', supervisor);
+                if (lider) query = query.where('lider', '==', lider);
+
+                const snapshot = await query.get();
+                tableBody.innerHTML = '';
+
+                if (snapshot.empty) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="no-results">
+                                <i class="fas fa-info-circle"></i>
+                                Nenhum resultado encontrado para os filtros selecionados.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                // Estrutura para armazenar dados por coluna
+                const dados = {
+                    'Data da Reunião': [],
+                    'Qtd de Membros': [],
+                    'Membros Presentes': [],
+                    'Visitantes': [],
+                    'Oferta': [],
+                    'Colheita do Amor': [],
+                    'Líder': [],
+                    'Nome da Célula': []
+                };
+
+                snapshot.forEach(doc => {
+                    const reuniao = doc.data();
+                    dados['Data da Reunião'].push(reuniao.data ? reuniao.data.toDate().toLocaleDateString('pt-BR') : '');
+                    dados['Qtd de Membros'].push(reuniao.qtdMembros || 0);
+                    dados['Membros Presentes'].push(reuniao.membroPresentes || 0);
+                    dados['Visitantes'].push(reuniao.qtdVisitantes || 0);
+                    dados['Oferta'].push((reuniao.oferta || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                    dados['Colheita do Amor'].push(`${(reuniao.kgAlimento || 0).toLocaleString('pt-BR')} kg`);
+                    dados['Líder'].push(reuniao.lider || '');
+                    dados['Nome da Célula'].push(reuniao.celula || '');
+                    
+                });
+
+                // Gerar linhas da tabela transposta
+                Object.entries(dados).forEach(([titulo, valores]) => {
+                    const row = document.createElement('tr');
+            
+                    // Primeira coluna com o título
+                    const headerCell = document.createElement('th');
+                    headerCell.textContent = titulo;
+                    headerCell.className = 'header-cell';
+                    row.appendChild(headerCell);
+
+                    // Células com os valores
+                    valores.forEach(valor => {
+                        const cell = document.createElement('td');
+                        cell.textContent = valor;
+                        cell.className = 'table-cell';
+                        row.appendChild(cell);
+                    });
+
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar reuniões:', error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center text-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Erro ao carregar as reuniões. Por favor, tente novamente.
+                        </td>
+                    </tr>`;
+            } finally {
+                btnPesquisar.innerHTML = btnText;
+                btnPesquisar.disabled = false;
+                btnPesquisar.classList.remove('btn-loading');
+            }
+        }
+        
+        // Adicionar apenas o event listener do botão:
+        document.getElementById('btnPesquisar').addEventListener('click', carregarReunioes);
+
+        // Modificar os event listeners dos dropdowns para apenas atualizar as opções dependentes
+        document.getElementById('coordenador').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const coordenador = this.value;
+            alterarCorCoordenador(coordenador);
+            carregarSupervisores(coordenador);
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        });
+
+        document.getElementById('supervisor').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const coordenador = document.getElementById('coordenador').value;
+            const supervisor = this.value;
+            carregarLideres(coordenador, supervisor);
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        });
+
+        document.getElementById('lider').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        });
+
+        document.getElementById('mes').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        });
+
+        document.getElementById('ano').addEventListener('change', function() {
+            document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
+        });
+
     </script>
 </body>
-
 </html>

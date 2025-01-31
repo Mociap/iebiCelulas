@@ -191,7 +191,7 @@
 </head>
 
 <body>
-    <a href="index.html" class="back-button">
+    <a href="frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
@@ -307,7 +307,7 @@
                         //coordenadorBody.innerHTML += `<p>Rede: ${coordenador.rede}</p>`;
                         const supervisoresOrdenados = Object.entries(coordenador.supervisores).sort((a, b) => a[1].nome.localeCompare(b[1].nome));
                         
-                        for (const [supervisorKey, supervisor] of Object.entries(coordenador.supervisores)) {
+                        for (const [supervisorKey, supervisor] of supervisoresOrdenados) {
                             const cardSupervisor = criarCard('Supervisor', supervisor.nome, supervisorKey);
                             coordenadorBody.appendChild(cardSupervisor);
 
@@ -320,11 +320,11 @@
                                 cardElement.className = 'card mb-2 leader-card';
                                 cardElement.innerHTML = `
         <div class="card-body">
-            <p class="mb-1"><i class="fas fa-user"></i> Líder: ${celula.lider}</p>
-            <h6 class="mb-1">Célula: ${celula.nome}</h6>
-            <p class="mb-1"><i class="far fa-calendar-alt"></i> Dia: ${celula.dia || 'Não definido'}</p>
-            <p class="mb-1"><i class="far fa-clock"></i> Horário: ${celula.horario || 'Não definido'}</p>
-            <p class="mb-0"><i class="fas fa-map-marker"></i> Local: ${celula.local || 'Não definido'}</p>
+            <h6 class="mb-1"><i class="fas fa-user"></i><b> Líder:</b> ${celula.lider}</h6>
+            <p class="mb-1" style="padding-left: 40px;"><b> Célula:</b> ${celula.nome}</p>
+            <p class="mb-1" style="padding-left: 40px;"><i class="far fa-calendar-alt"></i><b> Dia:</b> ${celula.dia || 'Não definido'}</p>
+            <p class="mb-1" style="padding-left: 40px;"><i class="far fa-clock"></i><b> Horário:</b> ${celula.horario || 'Não definido'}</p>
+            <p class="mb-0" style="padding-left: 40px;"><i class="fas fa-map-marker"></i><b> Local:</b> ${celula.local || 'Não definido'}</p>
         </div>
     `;
                                 cardElement.addEventListener('click', () => abrirEdicao(celula.lider, celula.nome));

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <a href="index.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
@@ -16,13 +18,14 @@
     <div class="user-info">
         <p><strong>Nome:</strong> <span id="userName"></span></p>
         <p><strong>Email:</strong> <span id="userEmail"></span></p>
-        <p><strong>Função:</strong> <span id="userFuncao"></span></p>  
+        <p><strong>Função:</strong> <span id="userFuncao"></span></p>
         <p><a href="#" id="logoutLink" class="logout-link">Sair</a></p>
     </div>
     <div class="header">
         <img src="./assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
     <div class="container">
+        <!-- Cards-->
         <div class="card-container">
             <a href="./Relatórios/frmOrganograma.html" class="card" data-permissao="organograma">
                 <i class="fas fa-sitemap card-icon"></i>
@@ -30,10 +33,10 @@
                 <p>Visualize a estrutura hierárquica das células da igreja.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
-            <a href="./Relatórios/resumoreuniao.html" class="card" data-permissao="dadosReunioes">
-                <i class="fas fa-calendar-alt card-icon"></i>
-                <h2>Dados das Reuniões</h2>
-                <p>Acesse os dados registrados das reuniões semanais.</p>
+            <a href="./Relatórios/relResumoMesCelula.html" class="card" data-permissao="resumoMensal">
+                <i class="fas fa-chart-bar card-icon"></i>
+                <h2>Resumo Mensal</h2>
+                <p>Visualize um resumo das atividades e dados do mês.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
             <a href="./Relatórios/frmDashboard.html" class="card" data-permissao="indicadores">
@@ -48,10 +51,10 @@
                 <p>Acesse informações detalhadas sobre os membros da igreja.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
-            <a href="./Relatórios/relResumoMesCelula.html" class="card" data-permissao="resumoMensal">
-                <i class="fas fa-chart-bar card-icon"></i>
-                <h2>Resumo Mensal</h2>
-                <p>Visualize um resumo das atividades e dados do mês.</p>
+            <a href="./Relatórios/resumoreuniao.html" class="card" data-permissao="dadosReunioes">
+                <i class="fas fa-calendar-alt card-icon"></i>
+                <h2>Dados das Reuniões</h2>
+                <p>Acesse os dados registrados das reuniões semanais.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
             <a href="./Relatórios/relResumoPastoral.html" class="card" data-permissao="relApresentacao">
@@ -61,6 +64,26 @@
                 <div class="btn-primary">Acessar</div>
             </a>
         </div>
+
+        <!-- Listas-->
+        <div class="link-list" data-permissao="acessoRapido">
+            <h3>Acesso Rápido</h3>
+            <ul>
+                <li>
+                    <i class="fas fa-sitemap"></i>
+                    <a href="frmEstruturaCelula.html">Estrutura de Célula</a>
+                </li>
+                <li>
+                    <i class="fas fa-users"></i>
+                    <a href="frmProcMembros.html">Procurar Membros</a>
+                </li>
+                <li>
+                    <i class="fas fa-users"></i>
+                    <a href="relResumoMesCelula.html">Resumo Células Dia/Mês</a>
+                </li>
+            </ul>
+        </div>
+
     </div>
     <div id="splash-screen" class="splash-screen">
         <div class="splash-content">
@@ -69,123 +92,133 @@
         </div>
     </div>
 
-<script src="hierarquias.js"></script>
+    <script src="hierarquias.js"></script>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
-
-    const configuracaoFirebase = {
-        apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
-        authDomain: "dbiebi.firebaseapp.com",
-        databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
-        projectId: "dbiebi",
-        storageBucket: "dbiebi.appspot.com",
-        messagingSenderId: "1068164821081",
-        appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
-    };
-
-    const app = initializeApp(configuracaoFirebase);
-    const bancoDeDados = getFirestore(app);
-    const auth = getAuth(app);
-
-    function verificarTempoSessao() {
-        const tempoLogin = localStorage.getItem('tempoLogin');
-        const tempoAtual = new Date().getTime();
-        const tempoLimite = 30 * 60 * 1000; // 30 minutos
-
-        if (tempoAtual - tempoLogin > tempoLimite) {
-            realizarLogout();
-        }
-    }
-
-    function realizarLogout() {
-        signOut(auth).then(() => {
-            localStorage.clear();
-            window.location.href = 'formlogin.html';
-        }).catch((erro) => {
-            console.error('Erro ao fazer logout:', erro);
-        });
-    }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 
-    setInterval(verificarTempoSessao, 60000); // Verifica a cada minuto
-    verificarTempoSessao(); // Verifica imediatamente ao carregar a página
+        const configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
 
-    window.onload = function() {
-        const userName = localStorage.getItem('nomeUsuario');
-        const userEmail = localStorage.getItem('emailUsuario');
-        const userFuncao = localStorage.getItem('funcaoUsuario');
-                            
-        document.getElementById('userName').textContent = userName || 'Não disponível';
-        document.getElementById('userEmail').textContent = userEmail || 'Não disponível';
-        document.getElementById('userFuncao').textContent = userFuncao || 'Não disponível';
-        
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            const permissao = card.getAttribute('data-permissao');
-            if (!temPermissao(userFuncao, permissao)) {
-                card.style.display = 'none';
+        const app = initializeApp(configuracaoFirebase);
+        const bancoDeDados = getFirestore(app);
+        const auth = getAuth(app);
+
+        function verificarTempoSessao() {
+            const tempoLogin = localStorage.getItem('tempoLogin');
+            const tempoAtual = new Date().getTime();
+            const tempoLimite = 30 * 60 * 1000; // 30 minutos
+
+            if (tempoAtual - tempoLogin > tempoLimite) {
+                realizarLogout();
             }
-        });
-        
-        // Obtém todas as chaves do localStorage
-        const chaves = Object.keys(localStorage);
-
-        // Verifica se há chaves no localStorage
-        if (chaves.length > 0) {
-            console.log("Dados armazenados no localStorage:");
-
-            // Percorre as chaves e exibe os valores correspondentes
-            chaves.forEach(function(chave) {
-                const valor = localStorage.getItem(chave);
-                console.log(`${chave}: ${valor}`);
-            });
-        } else {
-            console.log("Não há dados armazenados no localStorage.");
         }
 
-        document.getElementById('logoutLink').addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Botão de logout clicado');
-            realizarLogout();
-        });
-    };
+        function realizarLogout() {
+            signOut(auth).then(() => {
+                localStorage.clear();
+                window.location.href = 'formlogin.html';
+            }).catch((erro) => {
+                console.error('Erro ao fazer logout:', erro);
+            });
+        }
 
-    function mostrarTelaSplash() {
-        document.getElementById('splash-screen').classList.add('show');
-    }
 
-    function esconderTelaSplash() {
-        document.getElementById('splash-screen').classList.remove('show');
-    }
+        setInterval(verificarTempoSessao, 60000); // Verifica a cada minuto
+        verificarTempoSessao(); // Verifica imediatamente ao carregar a página
 
-    document.querySelectorAll('.card').forEach(card => {
-        card.addEventListener('click', function(e) {
-            e.preventDefault();
-            mostrarTelaSplash();
-            
-            // Simula o carregamento ou processamento de dados
-            setTimeout(() => {
-                esconderTelaSplash();
-                window.location.href = this.getAttribute('href');
-            }, 2000); // Ajuste este tempo conforme necessário
-        });
+        window.onload = function () {
+            const userName = localStorage.getItem('nomeUsuario');
+            const userEmail = localStorage.getItem('emailUsuario');
+            const userFuncao = localStorage.getItem('funcaoUsuario');
+
+            document.getElementById('userName').textContent = userName || 'Não disponível';
+            document.getElementById('userEmail').textContent = userEmail || 'Não disponível';
+            document.getElementById('userFuncao').textContent = userFuncao || 'Não disponível';
+
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const permissao = card.getAttribute('data-permissao');
+                if (!temPermissao(userFuncao, permissao)) {
+                    card.style.display = 'none';
+                }
+            });
+
+
+            const linkListDivs = document.querySelectorAll('.link-list');
+    linkListDivs.forEach(div => {
+        const permissao = div.getAttribute('data-permissao');
+        if (!temPermissao(userFuncao, permissao)) {
+            div.style.display = 'none';
+        }
     });
 
-    // Adicione este código no final da função window.onload ou em um script separado
-    /*const chaves = Object.keys(localStorage);
-    chaves.forEach(function(chave) {
-        try {
-            const valor = JSON.parse(localStorage.getItem(chave));
-            console.log(`${chave}:`, valor);
-        } catch (e) {
-            console.log(`${chave}: ${localStorage.getItem(chave)} (Não é um JSON válido)`);
-        }
-    });*/
+            // Obtém todas as chaves do localStorage
+            const chaves = Object.keys(localStorage);
 
-</script>
+            // Verifica se há chaves no localStorage
+            if (chaves.length > 0) {
+                console.log("Dados armazenados no localStorage:");
+
+                // Percorre as chaves e exibe os valores correspondentes
+                chaves.forEach(function (chave) {
+                    const valor = localStorage.getItem(chave);
+                    console.log(`${chave}: ${valor}`);
+                });
+            } else {
+                console.log("Não há dados armazenados no localStorage.");
+            }
+
+            document.getElementById('logoutLink').addEventListener('click', function (e) {
+                e.preventDefault();
+                console.log('Botão de logout clicado');
+                realizarLogout();
+            });
+        };
+
+        function mostrarTelaSplash() {
+            document.getElementById('splash-screen').classList.add('show');
+        }
+
+        function esconderTelaSplash() {
+            document.getElementById('splash-screen').classList.remove('show');
+        }
+
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', function (e) {
+                e.preventDefault();
+                mostrarTelaSplash();
+
+                // Simula o carregamento ou processamento de dados
+                setTimeout(() => {
+                    esconderTelaSplash();
+                    window.location.href = this.getAttribute('href');
+                }, 2000); // Ajuste este tempo conforme necessário
+            });
+        });
+
+        // Adicione este código no final da função window.onload ou em um script separado
+        /*const chaves = Object.keys(localStorage);
+        chaves.forEach(function(chave) {
+            try {
+                const valor = JSON.parse(localStorage.getItem(chave));
+                console.log(`${chave}:`, valor);
+            } catch (e) {
+                console.log(`${chave}: ${localStorage.getItem(chave)} (Não é um JSON válido)`);
+            }
+        });*/
+
+    </script>
 </body>
+
 </html>

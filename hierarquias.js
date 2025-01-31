@@ -10,7 +10,8 @@ const hierarquias = {
             'indicadores', 
             'relatorioMembros', 
             'dadosReunioes',
-            'relApresentacao'
+            'relApresentacao',
+            'acessoRapido'
         ]
     },
     Pastor: {
