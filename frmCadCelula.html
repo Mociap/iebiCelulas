@@ -238,6 +238,11 @@
                 <label for="horario">Horário</label>
                 <input type="time" class="form-control" id="horario" required>
             </div>
+            <div class="form-group">
+                <label for="local">Local</label>
+                <input type="text" class="form-control" id="local" required 
+                    onkeyup="this.value = this.value.toUpperCase();">
+            </div>
             <div class="btn-group btn-block" role="group">
                 <button type="submit" class="btn btn-primary" id="cadastrarBtn">Cadastrar</button>
                 <button type="button" class="btn btn-warning" id="editarBtn">Editar</button>
@@ -290,6 +295,7 @@
             document.getElementById('nomecelula').value = data.nomecelula;
             document.getElementById('diaSemana').value = data.diaSemana || '';
             document.getElementById('horario').value = data.horario || '';
+            document.getElementById('local').value = data.local || '';
 
             alterarCorRede(data.rede);
         }
@@ -415,6 +421,7 @@
             var nomecelula = document.getElementById('nomecelula').value.trim().toUpperCase();
             var diaSemana = document.getElementById('diaSemana').value.trim();
             var horario = document.getElementById('horario').value;
+            var local = document.getElementById('local').value;
 
             // Adicionar dados ao Firestore
             bancoDeDados.collection('estruturacelula').add({
@@ -435,7 +442,8 @@
                 nomelider3: nomelider3,
                 nomecelula: nomecelula,
                 diaSemana: diaSemana,
-                horario: horario
+                horario: horario,
+                local: local
             })
                 .then(function () {
                     console.log("Célula cadastrada com sucesso");
@@ -646,7 +654,8 @@
                     nomelider3: document.getElementById('nomelider3').value.trim().toUpperCase(),
                     nomecelula: document.getElementById('nomecelula').value.trim().toUpperCase(),
                     diaSemana: document.getElementById('diaSemana').value.trim(),
-                    horario: document.getElementById('horario').value
+                    horario: document.getElementById('horario').value,
+                    local: document.getElementById('local').value
                 };
             }
         });

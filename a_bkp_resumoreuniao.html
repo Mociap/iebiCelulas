@@ -181,52 +181,26 @@
                 </div>
             </div>
         </form>
-
+    </div>
     
-    <div class="container-fluid mt-4">
-        <table class="table table-bordered" id="reunioesTable" style="display: none;">
+        <table class="table table-bordered" id="reunioesTable">
             <thead>
                 <tr>
-                    <th class="header-cell" style="width: 200px;">RESUMO DE REUNIÕES</th>
-                    <td id="headerReunioes" class="text-center"></td>
-                    <th class="header-cell text-center">TOTAIS</th>
+                    <th class="header-cell">Supervisor</th>
+                    <th class="header-cell">Líder</th>
+                    <th class="header-cell">Nome da Célula</th>
+                    <th class="header-cell">Data da Reunião</th>
+                    <th class="header-cell">Qtd de Membros</th>
+                    <th class="header-cell">Membros Presentes</th>
+                    <th class="header-cell">Visitantes</th>
+                    <th class="header-cell">Oferta</th>
+                    <th class="header-cell">Colheita do Amor</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th class="header-cell">Data da Reunião</th>
-                    <td id="datasReunioes" class="text-center"></td>
-                    <td class="text-center">-</td>
-                </tr>
-                <tr>
-                    <th class="header-cell">Qtd de Membros</th>
-                    <td id="qtdMembros" class="text-center"></td>
-                    <td id="totalMembros" class="text-center"></td>
-                </tr>
-                <tr>
-                    <th class="header-cell">Membros Presentes</th>
-                    <td id="membrosPresentes" class="text-center"></td>
-                    <td id="totalPresentes" class="text-center"></td>
-                </tr>
-                <tr>
-                    <th class="header-cell">Visitantes</th>
-                    <td id="visitantes" class="text-center"></td>
-                    <td id="totalVisitantes" class="text-center"></td>
-                </tr>
-                <tr>
-                    <th class="header-cell">Oferta</th>
-                    <td id="ofertas" class="text-center"></td>
-                    <td id="totalOfertas" class="text-center"></td>
-                </tr>
-                <tr>
-                    <th class="header-cell">Colheita do Amor</th>
-                    <td id="colheitas" class="text-center"></td>
-                    <td id="totalColheitas" class="text-center"></td>
-                </tr>
             </tbody>
         </table>
-    </div>
-</div>
+    
 
     <!-- Importar Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -424,6 +398,7 @@
             console.log('=== INÍCIO DO CARREGAMENTO DA PÁGINA ===');
             const userInfo = recuperarInformacoesUsuario();
             
+            // Verifica se o usuário está autenticado e tem função definida
             if (!userInfo.funcao) {
                 alert('Usuário sem permissões definidas. Por favor, faça login novamente.');
                 window.location.href = 'login.html';
@@ -436,6 +411,10 @@
             // Definir o mês atual
             const mesAtual = (new Date().getMonth() + 1).toString().padStart(2, '0');
             document.getElementById('mes').value = mesAtual;
+
+            // Limpar a tabela inicialmente
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         };
 
         function preencherAnos() {
@@ -452,7 +431,6 @@
 
         // Função para carregar as reuniões na tabela
         async function carregarReunioes() {
-            console.log('=== INICIANDO CARREGAMENTO DE REUNIÕES ===');
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
             
@@ -461,10 +439,15 @@
                 return;
             }
 
+            document.getElementById('reunioesTable').style.display = 'table';
             const btnPesquisar = document.getElementById('btnPesquisar');
             const btnText = btnPesquisar.innerHTML;
             btnPesquisar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
             btnPesquisar.disabled = true;
+            btnPesquisar.classList.add('btn-loading');
+
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>';
 
             try {
                 const supervisor = document.getElementById('supervisor').value;
@@ -473,16 +456,24 @@
 
                 let query = db.collection('reuniao')
                     .where('mesAno', '==', mesAno)
+                    .orderBy('supervisor')
+                    .orderBy('lider')
                     .orderBy('data');
 
                 if (supervisor) query = query.where('supervisor', '==', supervisor);
                 if (lider) query = query.where('lider', '==', lider);
 
                 const snapshot = await query.get();
-                console.log(`Encontradas ${snapshot.size} reuniões para ${mesAno}`);
+                tableBody.innerHTML = '';
 
                 if (snapshot.empty) {
-                    alert('Nenhum resultado encontrado para os filtros selecionados.');
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="no-results">
+                                <i class="fas fa-info-circle"></i>
+                                Nenhum resultado encontrado para os filtros selecionados.
+                            </td>
+                        </tr>`;
                     return;
                 }
 
@@ -492,73 +483,62 @@
                     qtdVisitantes: 0,
                     oferta: 0,
                     kgAlimento: 0,
-                    quantidade: snapshot.size
+                    quantidade: 0
                 };
 
-                // Primeiro criar o headerHTML com a quantidade correta de reuniões
-                const headerHTML = Array(totais.quantidade).fill(0)
-                    .map((_, i) => `<th class="header-cell text-center">Reunião ${i + 1}</th>`)
-                    .join('');
-
-                // Gerar células sem colspan
-                let datasHTML = '';
-                let membrosHTML = '';
-                let presentesHTML = '';
-                let visitantesHTML = '';
-                let ofertasHTML = '';
-                let colheitasHTML = '';
-
-                // Processar cada reunião
                 snapshot.forEach(doc => {
                     const reuniao = doc.data();
-                    
-                    // Primeiro adicionar as células
-                    datasHTML += `<td class="text-center">${reuniao.data ? reuniao.data.toDate().toLocaleDateString('pt-BR') : ''}</td>`;
-                    membrosHTML += `<td class="text-center">${reuniao.qtdMembros || 0}</td>`;
-                    presentesHTML += `<td class="text-center">${reuniao.membroPresentes || 0}</td>`;
-                    visitantesHTML += `<td class="text-center">${reuniao.qtdVisitantes || 0}</td>`;
-                    ofertasHTML += `<td class="text-center">${(reuniao.oferta || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>`;
-                    colheitasHTML += `<td class="text-center">${(reuniao.kgAlimento || 0).toLocaleString('pt-BR')} kg</td>`;
-
-                    // Depois acumular os totais
                     totais.qtdMembros += Number(reuniao.qtdMembros) || 0;
                     totais.membroPresentes += Number(reuniao.membroPresentes) || 0;
                     totais.qtdVisitantes += Number(reuniao.qtdVisitantes) || 0;
                     totais.oferta += Number(reuniao.oferta) || 0;
                     totais.kgAlimento += Number(reuniao.kgAlimento) || 0;
+                    totais.quantidade++;
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${reuniao.supervisor || ''}</td>
+                            <td>${reuniao.lider || ''}</td>
+                            <td>${reuniao.celula || ''}</td>
+                            <td class="text-center">${reuniao.data ? reuniao.data.toDate().toLocaleDateString('pt-BR') : ''}</td>
+                            <td class="text-center">${reuniao.qtdMembros || 0}</td>
+                            <td class="text-center">${reuniao.membroPresentes || 0}</td>
+                            <td class="text-center">${reuniao.qtdVisitantes || 0}</td>
+                            <td class="text-center">${(reuniao.oferta || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                            <td class="text-center">${(reuniao.kgAlimento || 0).toLocaleString('pt-BR')} kg</td>
+                        </tr>
+                    `;
                 });
 
-                // Calcular médias após processar todas as reuniões
+                // Linha de totais
                 const mediaMembros = totais.quantidade > 0 ? (totais.qtdMembros / totais.quantidade) : 0;
                 const mediaPresentes = totais.quantidade > 0 ? (totais.membroPresentes / totais.quantidade) : 0;
                 const mediaVisitantes = totais.quantidade > 0 ? (totais.qtdVisitantes / totais.quantidade) : 0;
 
-                // Atualizar a tabela
-                document.getElementById('headerReunioes').innerHTML = headerHTML;
-                document.getElementById('datasReunioes').innerHTML = datasHTML;
-                document.getElementById('qtdMembros').innerHTML = membrosHTML;
-                document.getElementById('membrosPresentes').innerHTML = presentesHTML;
-                document.getElementById('visitantes').innerHTML = visitantesHTML;
-                document.getElementById('ofertas').innerHTML = ofertasHTML;
-                document.getElementById('colheitas').innerHTML = colheitasHTML;
-
-                // Atualizar totais
-                document.getElementById('totalMembros').innerHTML = `<strong>${mediaMembros.toFixed(1)}</strong>`;
-                document.getElementById('totalPresentes').innerHTML = `<strong>${mediaPresentes.toFixed(1)}</strong>`;
-                document.getElementById('totalVisitantes').innerHTML = `<strong>${mediaVisitantes.toFixed(1)}</strong>`;
-                document.getElementById('totalOfertas').innerHTML = `<strong>${totais.oferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
-                document.getElementById('totalColheitas').innerHTML = `<strong>${totais.kgAlimento.toLocaleString('pt-BR')} kg</strong>`;
-
-                document.getElementById('reunioesTable').style.display = 'table';
-                console.log('=== CARREGAMENTO CONCLUÍDO ===');
+                tableBody.innerHTML += `
+                    <tr class="table-dark">
+                        <td colspan="4" class="text-center"><strong>TOTAIS</strong></td>
+                        <td class="text-center"><strong>${mediaMembros.toFixed(1)}</strong></td>
+                        <td class="text-center"><strong>${mediaPresentes.toFixed(1)}</strong></td>
+                        <td class="text-center"><strong>${mediaVisitantes.toFixed(1)}</strong></td>
+                        <td class="text-center"><strong>${totais.oferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></td>
+                        <td class="text-center"><strong>${totais.kgAlimento.toLocaleString('pt-BR')} kg</strong></td>
+                    </tr>
+                `;
 
             } catch (error) {
-                console.error('=== ERRO NO CARREGAMENTO ===');
-                console.error('Detalhes:', error);
-                alert('Erro ao carregar as reuniões. Por favor, tente novamente.');
+                console.error('Erro ao carregar reuniões:', error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center text-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Erro ao carregar as reuniões. Por favor, tente novamente.
+                        </td>
+                    </tr>`;
             } finally {
                 btnPesquisar.innerHTML = btnText;
                 btnPesquisar.disabled = false;
+                btnPesquisar.classList.remove('btn-loading');
             }
         }
 
@@ -566,12 +546,14 @@
         // Adicionar apenas o event listener do botão:
         document.getElementById('btnPesquisar').addEventListener('click', carregarReunioes);
 
-        // Modificar os event listeners dos dropdowns
+        // Modificar os event listeners dos dropdowns para apenas atualizar as opções dependentes
         document.getElementById('coordenador').addEventListener('change', function() {
             document.getElementById('reunioesTable').style.display = 'none';
             const coordenador = this.value;
             alterarCorCoordenador(coordenador);
             carregarSupervisores(coordenador);
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         });
 
         document.getElementById('supervisor').addEventListener('change', function() {
@@ -579,18 +561,26 @@
             const coordenador = document.getElementById('coordenador').value;
             const supervisor = this.value;
             carregarLideres(coordenador, supervisor);
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         });
 
         document.getElementById('lider').addEventListener('change', function() {
             document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         });
 
         document.getElementById('mes').addEventListener('change', function() {
             document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         });
 
         document.getElementById('ano').addEventListener('change', function() {
             document.getElementById('reunioesTable').style.display = 'none';
+            const tableBody = document.querySelector('#reunioesTable tbody');
+            tableBody.innerHTML = '';
         });
 
     </script>
