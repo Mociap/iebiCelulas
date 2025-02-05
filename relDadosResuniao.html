@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Reuniões</title>
+    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .filter-section {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            background-color: #3c3c3c;
+            border: none;
+            color: #ffffff;
+        }
+
+        .card {
+            background-color: #2c2c2c;
+            border: none;
+            margin-bottom: 15px;
+            border-left: 5px solid;
+        }
+
+        .card.realizada {
+            border-left-color: #28a745;
+        }
+
+        .card.nao-realizada {
+            border-left-color: #dc3545;
+        }
+
+        .status-indicator {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+
+        .status-realizada {
+            background-color: #28a745;
+        }
+
+        .status-nao-realizada {
+            background-color: #dc3545;
+        }
+        .week-container {
+    background-color: #2c2c2c;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.week-container h4 {
+    color: #9919cc;
+    border-bottom: 2px solid #9919cc;
+    padding-bottom: 10px;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Relatório de Reuniões</h2>
+        
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <select class="form-control" id="coordenador">
+                        <option value="">Selecione o Coordenador</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-control" id="supervisor">
+                        <option value="">Selecione o Supervisor</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-control" id="lider">
+                        <option value="">Selecione o Líder</option>
+                    </select>
+                </div>
+<div class="col-md-3">
+    <button id="btnAtualizar" class="btn btn-primary w-100" style="background-color: #9919cc; border-color: #9919cc;">
+        <i class="fas fa-sync-alt mr-2"></i>Atualizar Relatório
+    </button>
+</div>
+            </div>
+        </div>
+
+        <div id="reunioes-container">
+            <!-- Cards serão inseridos aqui dinamicamente -->
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+    <script>
+        // Firebase config from auth-check.js
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Populate filters
+        function populateFilters() {
+            // Similar structure to formDadosReuniao.html but adapted for coordenador
+            db.collection("estruturacelula").get().then(snapshot => {
+                const coordenadores = new Set();
+                snapshot.forEach(doc => {
+                    if(doc.data().coordenador) coordenadores.add(doc.data().coordenador);
+                });
+                const coordSelect = document.getElementById('coordenador');
+                coordenadores.forEach(coord => {
+                    const option = document.createElement('option');
+                    option.value = coord;
+                    option.text = coord;
+                    coordSelect.add(option);
+                });
+            });
+        }
+          function createReunionCard(reuniao, docId) {
+              const card = document.createElement('div');
+              card.className = `card ${reuniao.reuniaoRealizada ? 'realizada' : 'nao-realizada'} mb-3`;
+              card.style.cursor = 'pointer';
+    
+              const date = reuniao.data.toDate();
+              const formattedDate = date.toLocaleDateString('pt-BR');
+
+              card.innerHTML = `
+                  <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center">
+                          <h5 class="card-title">Líder: ${reuniao.lider}</h5>
+                          <span class="status-indicator ${reuniao.reuniaoRealizada ? 'status-realizada' : 'status-nao-realizada'}">
+                              ${reuniao.reuniaoRealizada ? 'Realizada' : 'Não Realizada'}
+                          </span>
+                      </div>
+                      <p class="card-text">
+                          Data: ${formattedDate}<br>
+                          Célula: ${reuniao.celula}<br>
+                          Supervisor: ${reuniao.supervisor}<br>
+                          ${reuniao.reuniaoRealizada ? `
+                              Presentes: ${reuniao.membroPresentes}/${reuniao.qtdMembros}<br>
+                              Visitantes: ${reuniao.qtdVisitantes}<br>
+                              Oferta: R$ ${reuniao.oferta.toFixed(2)}<br>
+                              Colheita do Amor: ${reuniao.tipoAlimento} - ${reuniao.qtdAlimento} unidades
+                          ` : ''}
+                      </p>
+                  </div>
+              `;
+
+              card.addEventListener('click', () => {
+                  window.location.href = `formDadosReuniao_Profile.html?id=${docId}`;
+              });
+
+              return card;
+          }          function groupByWeek(reunioes) {
+              const weeks = {};
+            
+              reunioes.forEach(reuniao => {
+                  const date = reuniao.data.toDate();
+                  const weekStart = new Date(date);
+                  weekStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
+                  const weekKey = weekStart.toISOString().split('T')[0];
+                
+                  if (!weeks[weekKey]) {
+                      weeks[weekKey] = [];
+                  }
+                  weeks[weekKey].push(reuniao);
+              });
+            
+              return weeks;
+          }
+
+          function displayReunions(snapshot) {
+              const container = document.getElementById('reunioes-container');
+              container.innerHTML = '';
+            
+              const reunioes = [];
+              snapshot.forEach(doc => {
+                  reunioes.push({
+                      id: doc.id,
+                      ...doc.data()
+                  });
+              });
+            
+              const weeklyReunions = groupByWeek(reunioes);
+            
+              Object.entries(weeklyReunions)
+                  .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+                  .forEach(([weekStart, reunioes]) => {
+                      const weekContainer = document.createElement('div');
+                      weekContainer.className = 'week-container mb-4';
+                    
+                      const weekHeader = document.createElement('h4');
+                      const startDate = new Date(weekStart);
+                      const endDate = new Date(startDate);
+                      endDate.setDate(startDate.getDate() + 6);
+                    
+                      weekHeader.textContent = `Semana: ${startDate.toLocaleDateString('pt-BR')} - ${endDate.toLocaleDateString('pt-BR')}`;
+                      weekHeader.className = 'text-light mb-3';
+                    
+                      weekContainer.appendChild(weekHeader);
+                    
+                      reunioes
+                          .sort((a, b) => b.data.toDate() - a.data.toDate())
+                          .forEach(reuniao => {
+                              weekContainer.appendChild(createReunionCard(reuniao, reuniao.id));
+                          });
+                        
+                      container.appendChild(weekContainer);
+                  });
+          }
+
+                // Atualização em cascata dos filtros
+document.getElementById('coordenador').addEventListener('change', function() {
+          const coordenadorSelecionado = this.value;
+          const selectSupervisor = document.getElementById('supervisor');
+    
+          // Limpa os selects dependentes
+          selectSupervisor.innerHTML = '<option value="">Selecione o Supervisor</option>';
+          document.getElementById('lider').innerHTML = '<option value="">Selecione o Líder</option>';
+    
+          if (coordenadorSelecionado) {
+              db.collection("estruturacelula")
+                  .where("coordenador", "==", coordenadorSelecionado)
+                  .get()
+                  .then((querySnapshot) => {
+                      const supervisores = new Set();
+                      querySnapshot.forEach((doc) => {
+                          supervisores.add(doc.data().supervisor);
+                      });
+
+                      Array.from(supervisores).sort().forEach((supervisor) => {
+                          const option = document.createElement("option");
+                          option.value = supervisor;
+                          option.text = supervisor;
+                          selectSupervisor.add(option);
+                      });
+                  });
+          }
+          updateReport();
+});
+
+document.getElementById('supervisor').addEventListener('change', function() {
+          const supervisorSelecionado = this.value;
+          const selectLider = document.getElementById('lider');
+    
+          selectLider.innerHTML = '<option value="">Selecione o Líder</option>';
+    
+          if (supervisorSelecionado) {
+              db.collection("estruturacelula")
+                  .where("supervisor", "==", supervisorSelecionado)
+                  .get()
+                  .then((querySnapshot) => {
+                      const lideres = new Set();
+                      querySnapshot.forEach((doc) => {
+                          lideres.add(doc.data().conclider);
+                      });
+
+                      Array.from(lideres).sort().forEach((lider) => {
+                          const option = document.createElement("option");
+                          option.value = lider;
+                          option.text = lider;
+                          selectLider.add(option);
+                      });
+                  });
+          }
+          updateReport();
+});
+            function getLastSixWeeksDate() {
+                const date = new Date();
+                date.setDate(date.getDate() - (6 * 7)); // 6 semanas * 7 dias
+                return date;
+            }
+
+            // Adiciona evento de clique no botão
+            document.getElementById('btnAtualizar').addEventListener('click', updateReport);
+
+            function updateReport() {
+                const coordenador = document.getElementById('coordenador').value;
+                const supervisor = document.getElementById('supervisor').value;
+                const lider = document.getElementById('lider').value;
+
+                // Data limite de 6 semanas atrás
+                const limitDate = getLastSixWeeksDate();
+
+                let query = db.collection('reuniao')
+                    .where('data', '>=', firebase.firestore.Timestamp.fromDate(limitDate));
+    
+                if(supervisor) query = query.where('supervisor', '==', supervisor);
+                if(lider) query = query.where('lider', '==', lider);
+    
+                query.orderBy('data', 'desc')
+                    .get()
+                    .then(snapshot => {
+                        displayReunions(snapshot);
+                    });
+            }          
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFilters();
+            updateReport();
+        });
+    </script>
+</body>
+</html>
+

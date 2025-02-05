@@ -375,7 +375,7 @@
         VMasker(inputCep).maskPattern("99999-999");
 
         // Add this after the existing VMasker declarations
-        VMasker(document.getElementById("dtnasc")).maskPattern("99/99/9999");
+        //VMasker(document.getElementById("dtnasc")).maskPattern("99/99/9999");
 
         // Função para requerer CEP pelo Nascimento
         function verificarDataNascimento() {
@@ -486,47 +486,37 @@
               inputCelula.value = "";
           }
       });
-      bancoDeDados        .collection("estruturacelula")
-        .orderBy("nomecelula")
-        .get()
-        .then((querySnapshot) => {
-          const selectNomedaCelula = document.getElementById("nomedacelula");
+      
+      // Atualizar o evento de change do líder
+document.getElementById("lidercelula").addEventListener("change", function() {
+    const liderSelecionado = this.value;
+    const inputCelula = document.getElementById("nomedacelula");
 
-          // Adicionar opção padrão
-          const optionPadrao = document.createElement("option");
-          optionPadrao.value = "";
-          optionPadrao.text = "Selecione uma célula";
-          optionPadrao.disabled = true;
-          optionPadrao.selected = true;
-          selectNomedaCelula.add(optionPadrao);
+    const opcoesEspeciais = [
+        "SOU PASTOR DE REDE",
+        "SOU COORDENADOR DE REDE",
+        "SOU SUPERVISOR DE REDE"
+    ];
 
-          // Adicionar novas opções no início da lista
-          const optionCoordenador = document.createElement("option");
-          optionCoordenador.value = "SOU COORDENADOR DE REDE";
-          optionCoordenador.text = "SOU COORDENADOR DE REDE";
-          selectNomedaCelula.add(optionCoordenador);
+    if (opcoesEspeciais.includes(liderSelecionado)) {
+        inputCelula.value = "";
+        return;
+    }
 
-          const optionSupervisor = document.createElement("option");
-          optionSupervisor.value = "SOU SUPERVISOR DE REDE";
-          optionSupervisor.text = "SOU SUPERVISOR DE REDE";
-          selectNomedaCelula.add(optionSupervisor);
+    if (liderSelecionado) {
+        bancoDeDados.collection("estruturacelula")
+            .where("conclider", "==", liderSelecionado)
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    inputCelula.value = doc.data().nomecelula.toUpperCase();
+                });
+            });
+    } else {
+        inputCelula.value = "";
+    }
+});
 
-          querySnapshot.forEach((doc) => {
-            const nomecelula = doc.data().nomecelula;
-            if (nomecelula !== "0") {
-              const option = document.createElement("option");
-              option.value = nomecelula;
-              option.text = nomecelula;
-              selectNomedaCelula.add(option);
-            }
-          });
-        })
-        .catch((error) => {
-          console.error(
-            'Erro ao consultar a coleção "estruturacelula":',
-            error
-          );
-        });
       // Primeiro, vamos obter a referência do select de líderes
       const selectLider = document.getElementById("lidercelula");
         // Primeiro, vamos desabilitar o campo líder inicialmente
@@ -666,105 +656,83 @@
 
       // Adicionar evento de envio do formulário
       formulario.addEventListener("submit", function (e) {
-        e.preventDefault();
-        console.log("Formulário submetido");
+    e.preventDefault();
+    
+    var nome = document.getElementById("nome").value.trim().toUpperCase();
+    var email = document.getElementById("email").value.trim();
 
-        var nome = document.getElementById("nome").value.trim().toUpperCase();
-        //var email = document.getElementById('email').value.trim();
-        //console.log("Nome:", nome, "Email:", email);
+    Promise.all([
+        verificarNomeExistente(nome),
+        email ? verificarEmailExistente(email) : Promise.resolve(false)
+    ])
+    .then(([nomeExistente, emailExistente]) => {
+        if (nomeExistente) {
+            alert("Este nome já está cadastrado. Por favor, use um nome diferente.");
+            return;
+        }
+        if (emailExistente) {
+            alert("Este email já está cadastrado. Por favor, use um email diferente.");
+            return;
+        }
+        cadastrarMembro(nome, email);
+    })
+    .catch(error => {
+        console.log("Erro na verificação:", error);
+        alert("Ocorreu um erro na verificação. Por favor, tente novamente.");
+    });
+});
 
-        verificarNomeExistente(nome)
-          .then(function (nomeExistente) {
-            if (nomeExistente) {
-              console.log("Nome já cadastrado");
-              alert(
-                "Este nome já está cadastrado. Por favor, use um nome diferente."
-              );
-            } else {
-              console.log("Iniciando cadastro de novo membro");
-              // Obter valores dos campos
-              var dataNascimento = document.getElementById("dtnasc").value;
-              var cep = document.getElementById("cep").value.toUpperCase();
-              var bairro = document
-                .getElementById("bairro")
-                .value.toUpperCase();
-              var cidade = document
-                .getElementById("cidade")
-                .value.toUpperCase();
-              var uf = document.getElementById("uf").value.toUpperCase();
-              var sexo = document.getElementById("sexo").value;
-              var estadoCivil = document.getElementById("estadoCivil").value;
-              var celular = document.getElementById("celular").value;
-              var igreja = document.getElementById("igreja").value;
-              var nomedacelula = document
-                .getElementById("nomedacelula")
-                .value.toUpperCase();
-              var lidercelula = document
-                .getElementById("lidercelula")
-                .value.toUpperCase();
-              var rede = document.getElementById("rede").value.toUpperCase();
-              var arrolamento = document.getElementById("arrolamento").value;
+function cadastrarMembro(nome, email) {
+    var dataNascimento = document.getElementById("dtnasc").value;
+    var cep = document.getElementById("cep").value.toUpperCase();
+    var bairro = document.getElementById("bairro").value.toUpperCase();
+    var cidade = document.getElementById("cidade").value.toUpperCase();
+    var uf = document.getElementById("uf").value.toUpperCase();
+    var sexo = document.getElementById("sexo").value;
+    var estadoCivil = document.getElementById("estadoCivil").value;
+    var celular = document.getElementById("celular").value;
+    var igreja = document.getElementById("igreja").value;
+    var nomedacelula = document.getElementById("nomedacelula").value.toUpperCase();
+    var lidercelula = document.getElementById("lidercelula").value.toUpperCase();
+    var arrolamento = document.getElementById("arrolamento").value;
 
-              // Formatar data de nascimento para dd/mm/aaaa
-              var dataNascimentoFormatada = new Date(dataNascimento);
-              var dia = dataNascimentoFormatada
-                .getDate()
-                .toString()
-                .padStart(2, "0");
-              var mes = (dataNascimentoFormatada.getMonth() + 1)
-                .toString()
-                .padStart(2, "0");
-              var ano = dataNascimentoFormatada.getFullYear();
-              var dataNascFormatada = `${dia}/${mes}/${ano}`;
+    var dataNascimentoFormatada = new Date(dataNascimento);
+    var dia = dataNascimentoFormatada.getDate().toString().padStart(2, "0");
+    var mes = (dataNascimentoFormatada.getMonth() + 1).toString().padStart(2, "0");
+    var ano = dataNascimentoFormatada.getFullYear();
+    var dataNascFormatada = `${dia}/${mes}/${ano}`;
 
-              const timelineInicial = [
-                {
-                  data: new Date().toLocaleString("en-US", {
-                    timeZone: "America/Sao_Paulo",
-                  }),
-                  acao: "Criação do perfil",
-                  alteracoes: "Perfil criado",
-                },
-              ];
+    const timelineInicial = [{
+        data: new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}),
+        acao: "Criação do perfil",
+        alteracoes: "Perfil criado"
+    }];
 
-              // Adicionar dados ao Firestore
-              bancoDeDados
-                .collection("membros")
-                .add({
-                  nome: nome,
-                  email: email,
-                  dtnasc: dataNascFormatada,
-                  cep: cep,
-                  bairro: bairro,
-                  cidade: cidade,
-                  uf: uf,
-                  sexo: sexo,
-                  estadoCivil: estadoCivil,
-                  celular: celular,
-                  igreja: igreja,
-                  nomedacelula: nomedacelula,
-                  lidercelula: lidercelula,
-                  rede: rede,
-                  arrolamento: arrolamento,
-                  timeline: timelineInicial,
-                })
-                .then(function () {
-                  console.log("Membro cadastrado com sucesso");
-                  window.location.href = "agradecimento.html";
-                })
-                .catch(function (error) {
-                  console.error("Erro ao cadastrar membro:", error);
-                  alert("Erro ao cadastrar membro: " + error.message);
-                });
-            }
-          })
-          .catch(function (error) {
-            console.error("Erro ao verificar nome ou email existente:", error);
-            alert(
-              "Ocorreu um erro ao verificar o nome ou email. Por favor, tente novamente."
-            );
-          });
-      });
+    bancoDeDados.collection("membros").add({
+        nome: nome,
+        email: email,
+        dtnasc: dataNascFormatada,
+        cep: cep,
+        bairro: bairro,
+        cidade: cidade,
+        uf: uf,
+        sexo: sexo,
+        estadoCivil: estadoCivil,
+        celular: celular,
+        igreja: igreja,
+        nomedacelula: nomedacelula,
+        lidercelula: lidercelula,
+        arrolamento: arrolamento,
+        timeline: timelineInicial
+    })
+    .then(function() {
+        window.location.href = "agradecimento.html";
+    })
+    .catch(function(error) {
+        console.error("Erro ao cadastrar membro:", error);
+        alert("Erro ao cadastrar membro: " + error.message);
+    });
+}
 
 
       // Função para alternar a seleção dos ChoiceChips

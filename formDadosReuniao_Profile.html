@@ -220,7 +220,6 @@
       cursor: not-allowed;
     }
   </style>
-
 </head>
 
 <body>
@@ -234,98 +233,107 @@
   <div class="container">
     <h2 class="text-center mb-4">Dados da Reunião</h2>
     <div class="divider"></div>
-      <form id="reuniaoForm">
-        <div class="form-group-switch reuniao-realizada-switch">
-          <label class="switch-label" for="reuniaoRealizada">Reunião Realizada</label>
-          <label class="switch">
-            <input type="checkbox" id="reuniaoRealizada" checked />
-            <span class="slider round"></span>
-          </label>
+    <form id="reuniaoForm">
+      <div class="form-group-switch reuniao-realizada-switch">
+        <label class="switch-label" for="reuniaoRealizada">Reunião Realizada</label>
+        <label class="switch">
+          <input type="checkbox" id="reuniaoRealizada" checked />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div id="camposReuniao">
+        <div class="form-group">
+          <label for="data">Data da Reunião</label>
+          <input type="text" class="form-control" id="data" placeholder="Selecione a data..." required readonly />
         </div>
 
-        <div id="camposReuniao">
-          <div class="form-group">
-            <label for="data">Data da Reunião</label>
-            <input type="text" class="form-control" id="data" placeholder="Selecione a data..." required readonly />
-          </div>
+        <div class="form-group" style="display: none">
+          <label for="ano">Ano</label>
+          <input type="number" class="form-control" id="ano" readonly />
+        </div>
 
-          <div class="form-group" style="display: none">
-            <label for="ano">Ano</label>
-            <input type="number" class="form-control" id="ano" readonly />
-          </div>
+        <div class="form-group" style="display: none">
+          <label for="mesAno">Mês/Ano</label>
+          <input type="text" class="form-control" id="mesAno" readonly />
+        </div>
 
-          <div class="form-group" style="display: none">
-            <label for="mesAno">Mês/Ano</label>
-            <input type="text" class="form-control" id="mesAno" readonly />
-          </div>
+        <div class="form-group">
+          <label for="igreja">Igreja</label>
+          <input type="text" class="form-control" id="igreja" readonly>
+      </div>
+      
+      <div class="form-group">
+          <label for="supervisor">Supervisor</label>
+          <input type="text" class="form-control" id="supervisor" readonly>
+      </div>
+      
+      <div class="form-group">
+          <label for="lider">Líder</label>
+          <input type="text" class="form-control" id="lider" readonly>
+      </div>
 
-          <div class="form-group">
-            <label for="igreja">Igreja</label>
-            <select class="form-control" id="igreja" required></select>
-          </div>
-
-          <div class="form-group">
-            <label for="supervisor">Supervisor</label>
-            <select class="form-control" id="supervisor" required disabled></select>
-          </div>
-
-          <div class="form-group">
-            <label for="lider">Líder</label>
-            <select class="form-control" id="lider" required disabled onchange="carregarCelula(this.value)"></select>
-          </div>
-
-          <div class="form-group">
-            <label for="celula">Célula</label>
-            <input type="text" class="form-control" id="celula" readonly />
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label>Presença</label>
-            <div id="presencaContainer"></div>
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label for="qtdVisitantes">Quantidade de Visitantes</label>
-            <input type="number" class="form-control" id="qtdVisitantes" required />
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label for="oferta">Oferta</label>
-            <input type="text" class="form-control" id="oferta" required />
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label>Colheita do Amor</label>
-            <select class="form-control" id="tipoAlimento" required>
-              <option value="" disabled selected>
-                Selecione um alimento.
-              </option>
-            </select>
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label>Quant Unidades</label>
-            <input type="number" class="form-control" id="qtdAlimento" placeholder="Quantidade" min="1" step="1"
-              onkeypress="return event.charCode >= 48 && event.charCode <= 57" required disabled />
-          </div>
-
+        <div class="form-group">
+          <label for="celula">Célula</label>
+          <input type="text" class="form-control" id="celula" readonly />
         </div>
 
         <div class="form-group campo-reuniao">
-          <label for="qtdMembros">Quantidade de Membros</label>
-          <input type="number" class="form-control" id="qtdMembros" readonly />
+          <label>Presença</label>
+          <div id="presencaContainer"></div>
         </div>
 
         <div class="form-group campo-reuniao">
-          <label for="membroPresentes">Membros Presentes</label>
-          <input type="number" class="form-control" id="membroPresentes" readonly />
+          <label for="qtdVisitantes">Quantidade de Visitantes</label>
+          <input type="number" class="form-control" id="qtdVisitantes" required />
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">
-          Enviar
-        </button>
-      </form>
+        <div class="form-group campo-reuniao">
+          <label for="oferta">Oferta</label>
+          <input type="text" class="form-control" id="oferta" required />
+        </div>
+
+        <div class="form-group campo-reuniao">
+          <label>Colheita do Amor</label>
+          <select class="form-control" id="tipoAlimento" required>
+            <option value="" disabled selected>
+              Selecione um alimento.
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group campo-reuniao">
+          <label>Quant Unidades</label>
+          <input type="number" class="form-control" id="qtdAlimento" placeholder="Quantidade" min="1" step="1"
+            onkeypress="return event.charCode >= 48 && event.charCode <= 57" required  />
+        </div>
+
+      </div>
+
+      <div class="form-group campo-reuniao">
+        <label for="qtdMembros">Quantidade de Membros</label>
+        <input type="number" class="form-control" id="qtdMembros" readonly />
+      </div>
+
+      <div class="form-group campo-reuniao">
+        <label for="membroPresentes">Membros Presentes</label>
+        <input type="number" class="form-control" id="membroPresentes" readonly />
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+            <button type="button" class="btn btn-primary btn-block" id="btnAtualizar">
+                <i class="fas fa-sync-alt mr-2"></i>Atualizar
+            </button>
+        </div>
+        <div class="col-md-6">
+            <button type="button" class="btn btn-danger btn-block" id="btnExcluir">
+                <i class="fas fa-trash-alt mr-2"></i>Excluir
+            </button>
+        </div>
     </div>
+    </form>
+  </div>
   </div>
 
   <!-- Importar Firebase -->
@@ -343,8 +351,41 @@
       messagingSenderId: "1068164821081",
       appId: "1:1068164821081:web:2d3e0030d5311d94f30148",
     };
+    
     firebase.initializeApp(configuracaoFirebase);
     var bancoDeDados = firebase.firestore();
+
+    // Obtém o ID da reunião da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const reuniaoId = urlParams.get('id');
+
+    if (reuniaoId) {
+      // Carrega os dados da reunião
+      bancoDeDados.collection('reuniao').doc(reuniaoId).get()
+        .then(doc => {
+          if (doc.exists) {
+            const dados = doc.data();  
+
+            // Preenchimento dos campos
+            document.getElementById('data').value = dados.data.toDate().toLocaleDateString('pt-BR');
+            document.getElementById('igreja').value= dados.igreja;
+            document.getElementById('supervisor').value = dados.supervisor;
+            document.getElementById('lider').value = dados.lider;
+            document.getElementById('celula').value = dados.celula;
+            document.getElementById('reuniaoRealizada').checked = dados.reuniaoRealizada;
+            document.getElementById('qtdVisitantes').value = dados.qtdVisitantes;
+            document.getElementById('oferta').value = `R$ ${dados.oferta.toFixed(2)}`;
+            document.getElementById('tipoAlimento').value = dados.tipoAlimento;
+            document.getElementById('qtdAlimento').value = dados.qtdAlimento;
+            document.getElementById('qtdMembros').value = dados.qtdMembros;
+            document.getElementById('membroPresentes').value = dados.membroPresentes;
+
+
+            toggleCamposReuniao(); // Atualiza a exibição do formulário
+          }
+        });
+    }
+
 
     // Referência ao formulário
     var formulario = document.getElementById("reuniaoForm");
@@ -393,153 +434,7 @@
       e.target.value = "R$ " + value;
     });
 
-    // Referência ao select de igreja
-    const selectIgrejas = document.getElementById("igreja");
-
-    // Preencher o dropdown de igrejas
-    bancoDeDados.collection("igreja").get().then((querySnapshot) => {
-      // Adicionar opção default
-      const optionPadrao = document.createElement("option");
-      optionPadrao.value = "";
-      optionPadrao.text = "Selecione uma igreja";
-      optionPadrao.disabled = true;
-      optionPadrao.selected = true;
-      selectIgrejas.add(optionPadrao);
-
-      querySnapshot.forEach((doc) => {
-        const option = document.createElement("option");
-        option.value = doc.data().nomeigreja;
-        option.text = doc.data().nomeigreja;
-        selectIgrejas.add(option);
-      });
-    });
-
-    // Atualizar função carregarSupervisores para filtrar por igreja
-    function carregarSupervisores(igrejaSelecionada) {
-      const selectSupervisor = document.getElementById("supervisor");
-
-      if (igrejaSelecionada) {
-        selectSupervisor.disabled = false;
-        selectSupervisor.innerHTML = '';
-
-        const optionPadrao = document.createElement("option");
-        optionPadrao.value = "";
-        optionPadrao.text = "Selecione um supervisor";
-        optionPadrao.disabled = true;
-        optionPadrao.selected = true;
-        selectSupervisor.add(optionPadrao);
-
-        bancoDeDados.collection("estruturacelula")
-          .where("nomeigreja", "==", igrejaSelecionada)
-          .get()
-          .then((querySnapshot) => {
-            const supervisores = new Set();
-            querySnapshot.forEach((doc) => {
-              supervisores.add(doc.data().supervisor);
-            });
-
-            Array.from(supervisores).sort().forEach((supervisor) => {
-              const option = document.createElement("option");
-              option.value = supervisor;
-              option.text = supervisor;
-              selectSupervisor.add(option);
-            });
-          });
-      } else {
-        selectSupervisor.disabled = true;
-        selectSupervisor.innerHTML = '';
-      }
-    }
-
-    // Adicionar evento de change no select de igreja
-    document.getElementById("igreja").addEventListener("change", function () {
-      const igrejaSelecionada = this.value;
-      carregarSupervisores(igrejaSelecionada);
-
-      // Limpar campos dependentes
-      document.getElementById("lider").innerHTML = '';
-      document.getElementById("celula").value = '';
-      document.getElementById("presencaContainer").innerHTML = '';
-    });
-    // Função para carregar os líderes com base no supervisor selecionado
-    function carregarLideres(supervisor) {
-      const selectLideres = document.getElementById("lider");
-      const igrejaSelecionada = document.getElementById("igreja").value;
-
-      selectLideres.innerHTML = "";
-      inputCelula.value = "";
-      presencaContainer.innerHTML = "";
-
-      if (supervisor && igrejaSelecionada) {
-        // Adiciona opção padrão
-        const optionPadrao = document.createElement("option");
-        optionPadrao.value = "";
-        optionPadrao.text = "Selecione um líder";
-        optionPadrao.disabled = true;
-        optionPadrao.selected = true;
-        selectLideres.add(optionPadrao);
-
-        // Resto do código de carregamento dos líderes...
-        bancoDeDados
-          .collection("estruturacelula")
-          .where("supervisor", "==", supervisor)
-          .where("nomeigreja", "==", igrejaSelecionada)
-          .get()
-          .then((querySnapshot) => {
-            const lideres = new Set();
-            querySnapshot.forEach((doc) => {
-              lideres.add(doc.data().conclider);
-            });
-
-            Array.from(lideres).sort().forEach((lider) => {
-              const option = document.createElement("option");
-              option.value = lider;
-              option.text = lider;
-              selectLideres.add(option);
-            });
-          });
-      }
-    }
-
-    document.getElementById("supervisor").addEventListener("change", function () {
-      const supervisorSelecionado = this.value;
-      const selectLider = document.getElementById("lider");
-
-      if (supervisorSelecionado) {
-        selectLider.disabled = false;
-        carregarLideres(supervisorSelecionado);
-      } else {
-        selectLider.disabled = true;
-        selectLider.innerHTML = '';
-      }
-    });    // Função para inicializar o campo "Membros Presentes"
-    function inicializarMembroPresentes() {
-      document.getElementById("membroPresentes").value = 0;
-    }
-
-    // Função para carregar a célula com base no líder selecionado
-    function carregarCelula(lider) {
-      if (lider) {
-        bancoDeDados
-          .collection("estruturacelula")
-          .where("conclider", "==", lider)
-          .get()
-          .then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-              inputCelula.value = doc.data().nomecelula;
-              inicializarMembroPresentes(); // Inicializar o campo "Membros Presentes"
-              carregarMembros(lider); // Carregar os membros
-            });
-          })
-          .catch((error) => {
-            console.error("Erro ao carregar célula:", error);
-          });
-      } else {
-        inputCelula.value = "";
-        inicializarMembroPresentes(); // Inicializar o campo "Membros Presentes"
-      }
-    }
-
+   
     // Função para carregar a lista de membros com base no líder selecionado
     function carregarMembros(lider) {
       presencaContainer.innerHTML = ""; // Limpar o container primeiro
@@ -674,7 +569,7 @@
             }
           });
         });
-        enviarBtn.textContent = "Enviar";
+        //enviarBtn.textContent = "Enviar";
       } else {
         camposReuniao.forEach(function (campo) {
           campo.style.display = "none";
@@ -709,120 +604,51 @@
     // Chamar a função inicialmente para garantir o estado correto
     toggleCamposReuniao();
 
-    // Adicionar evento de envio do formulário
-    formulario.addEventListener("submit", function (e) {
-      e.preventDefault();
+document.getElementById('btnAtualizar').addEventListener('click', function() {
+    const dataInput = document.getElementById('data').value;
+    const [dia, mes, ano] = dataInput.split("/").map(Number);
 
-      var data = document.getElementById("data").value;
-      var celula = document.getElementById("celula").value;
-      var reuniaoRealizada =
-        document.getElementById("reuniaoRealizada").checked;
+    const dadosAtualizados = {
+        data: firebase.firestore.Timestamp.fromDate(new Date(ano, mes - 1, dia, 21, 0, 0))
+    };
 
-      // Converter a data do formato dd/mm/yyyy para yyyy-mm-dd
-      var [dia, mes, ano] = data.split("/");
-      var dataFormatada = `${ano}-${mes}-${dia}`;
-
-      // Verificar se já existe um registro com a mesma data e célula
-      bancoDeDados
-        .collection("reuniao")
-        .where(
-          "data",
-          "==",
-          firebase.firestore.Timestamp.fromDate(new Date(dataFormatada))
-        )
-        .where("celula", "==", celula)
-        .get()
-        .then((querySnapshot) => {
-          if (!querySnapshot.empty) {
-            // Já existe um registro para esta data e célula
-            alert(
-              "Já existe um registro para esta data e célula. Por favor, verifique os dados."
-            );
-          } else {
-            // Não existe registro, prosseguir com o envio
-            enviarDadosReuniao(reuniaoRealizada);
-          }
-        })
-        .catch((error) => {
-          console.error("Erro ao verificar registros existentes: ", error);
-          alert(
-            "Ocorreu um erro ao verificar os registros. Por favor, tente novamente."
-          );
-        });
-    });
-
-    function enviarDadosReuniao(reuniaoRealizada) {
-      var dataInput = document.getElementById("data").value;
-      var [dia, mes, ano] = dataInput.split("/").map(Number);
-
-      var dadosReuniao = {
-        reuniaoRealizada: reuniaoRealizada,
-        data: firebase.firestore.Timestamp.fromDate(new Date(ano, mes - 1, dia, 21, 0, 0)),
-        igreja: document.getElementById("igreja").value,
-        supervisor: document.getElementById("supervisor").value,
-        lider: document.getElementById("lider").value,
-        celula: document.getElementById("celula").value,
-      };
-
-      if (reuniaoRealizada) {
-        // Adicione os outros campos apenas se a reunião foi realizada
-        dadosReuniao.ano = parseInt(document.getElementById("ano").value);
-        dadosReuniao.mesAno = document.getElementById("mesAno").value;
-        dadosReuniao.presenca = Array.from(
-          document.querySelectorAll('input[type="checkbox"]:checked')
-        )
-          .filter((checkbox) => checkbox.id !== "reuniaoRealizada")
-          .map(function (checkbox) {
-            return checkbox.value;
-          });
-        dadosReuniao.qtdVisitantes = parseInt(
-          document.getElementById("qtdVisitantes").value
-        );
-        dadosReuniao.oferta = parseFloat(
-          document
-            .getElementById("oferta")
-            .value.replace(/[^\d,]/g, "")
-            .replace(",", ".")
-        );
-
-        dadosReuniao.tipoAlimento =
-          document.getElementById("tipoAlimento").value;
-        dadosReuniao.qtdAlimento = parseInt(
-          document.getElementById("qtdAlimento").value
-        );
-
-        dadosReuniao.qtdMembros = parseInt(
-          document.getElementById("qtdMembros").value
-        );
-        dadosReuniao.membroPresentes = parseInt(
-          document.getElementById("membroPresentes").value
-        );
-      }
-
-      bancoDeDados
-        .collection("reuniao")
-        .add(dadosReuniao)
-        .then(function () {
-          alert(
-            reuniaoRealizada
-              ? "Dados da reunião enviados com sucesso!"
-              : "Não realização da reunião registrada com sucesso!"
-          );
-          var url = `resumoMes.html?rede=${encodeURIComponent(
-            dadosReuniao.rede
-          )}&supervisor=${encodeURIComponent(
-            dadosReuniao.supervisor
-          )}&lider=${encodeURIComponent(
-            dadosReuniao.lider
-          )}&data=${encodeURIComponent(
-            dataInput
-          )}&celula=${encodeURIComponent(dadosReuniao.celula)}`;
-          window.location.href = url;
-        })
-        .catch(function (error) {
-          alert("Erro ao enviar dados: " + error.message);
-        });
+    if (document.getElementById('reuniaoRealizada').checked) {
+      //  dadosAtualizados.presenca = Array.from(
+      //      document.querySelectorAll('input[type="checkbox"]:checked')
+      //  )
+      //      .filter(checkbox => checkbox.id !== 'reuniaoRealizada')
+      //      .map(checkbox => checkbox.value);
+        dadosAtualizados.qtdVisitantes = parseInt(document.getElementById('qtdVisitantes').value);
+        dadosAtualizados.oferta = parseFloat(document.getElementById('oferta').value.replace(/[^\d,]/g, '').replace(',', '.'));
+        dadosAtualizados.tipoAlimento = document.getElementById('tipoAlimento').value;
+        dadosAtualizados.qtdAlimento = parseInt(document.getElementById('qtdAlimento').value);
+        //dadosAtualizados.qtdMembros = parseInt(document.getElementById('qtdMembros').value);
+        //dadosAtualizados.membroPresentes = parseInt(document.getElementById('membroPresentes').value);
     }
+
+    bancoDeDados.collection('reuniao').doc(reuniaoId).update(dadosAtualizados)
+        .then(() => {
+            alert('Reunião atualizada com sucesso!');
+            window.location.href = 'relatorioReunioes.html';
+        })
+        .catch(error => {
+            alert('Erro ao atualizar reunião: ' + error.message);
+        });
+});
+
+document.getElementById('btnExcluir').addEventListener('click', function() {
+    if (confirm('Tem certeza que deseja excluir esta reunião?')) {
+        bancoDeDados.collection('reuniao').doc(reuniaoId).delete()
+            .then(() => {
+                alert('Reunião excluída com sucesso!');
+                window.location.href = 'relatorioReunioes.html';
+            })
+            .catch(error => {
+                alert('Erro ao excluir reunião: ' + error.message);
+            });
+    }
+});
+  
   </script>
 </body>
 
