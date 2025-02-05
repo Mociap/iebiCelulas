@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Reuniões</title>
+    <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .filter-section {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            background-color: #3c3c3c;
+            border: none;
+            color: #ffffff;
+        }
+
+        .card {
+            background-color: #2c2c2c;
+            border: none;
+            margin-bottom: 15px;
+            border-left: 5px solid #9919cc;
+        }
+
+        .week-container {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .week-container h4 {
+            color: #9919cc;
+            border-bottom: 2px solid #9919cc;
+            padding-bottom: 10px;
+        }
+
+        .table {
+            color: #ffffff;
+            background-color: #2c2c2c;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background-color: #9919cc;
+            border: none;
+        }
+
+        .table td {
+            border-color: #3c3c3c;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Relatório de Células</h2>
+
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-4">
+                    <select class="form-control" id="supervisor">
+                        <option value="">Selecione o Supervisor</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-control" id="lider">
+                        <option value="">Selecione o Líder</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button id="btnAtualizar" class="btn btn-primary w-100"
+                        style="background-color: #9919cc; border-color: #9919cc;">
+                        <i class="fas fa-sync-alt mr-2"></i>Atualizar Relatório
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="reunioes-container">
+            <!-- Cards serão inseridos aqui dinamicamente -->
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function populateFilters() {
+            db.collection("estruturacelula").get().then(snapshot => {
+                const supervisores = new Set();
+                snapshot.forEach(doc => {
+                    if (doc.data().supervisor) supervisores.add(doc.data().supervisor);
+                });
+                const supervisorSelect = document.getElementById('supervisor');
+                Array.from(supervisores).sort().forEach(supervisor => {
+                    const option = document.createElement('option');
+                    option.value = supervisor;
+                    option.text = supervisor;
+                    supervisorSelect.add(option);
+                });
+            });
+        }
+
+        function displayCelulas(snapshot) {
+            const hoje = new Date();
+
+            const inicioSemanaAtual = new Date(hoje);
+            inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay());
+            inicioSemanaAtual.setHours(0, 0, 0, 0);
+
+            const fimSemanaAtual = new Date(inicioSemanaAtual);
+            fimSemanaAtual.setDate(inicioSemanaAtual.getDate() + 6);
+            fimSemanaAtual.setHours(23, 59, 59, 999);
+
+            const inicioSemanaAnterior = new Date(inicioSemanaAtual);
+            inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7);
+
+            const fimSemanaAnterior = new Date(inicioSemanaAnterior);
+            fimSemanaAnterior.setDate(inicioSemanaAnterior.getDate() + 6);
+            fimSemanaAnterior.setHours(23, 59, 59, 999);
+
+            db.collection('reuniao')
+                .where('data', '>=', firebase.firestore.Timestamp.fromDate(inicioSemanaAnterior))
+                .where('data', '<=', firebase.firestore.Timestamp.fromDate(fimSemanaAtual))
+                .get()
+                .then(reunioesSnapshot => {
+                    const reunioes = new Map();
+                    let contadorAtual = 0;
+                    let contadorAnterior = 0;
+
+                    reunioesSnapshot.forEach(doc => {
+                        const reuniao = doc.data();
+                        const data = reuniao.data.toDate();
+                        const lider = reuniao.lider;
+
+                        if (data >= inicioSemanaAtual && data <= fimSemanaAtual) {
+                            reunioes.set(`${lider}_atual`, true);
+                            contadorAtual++;
+                        } else if (data >= inicioSemanaAnterior && data <= fimSemanaAnterior) {
+                            reunioes.set(`${lider}_anterior`, true);
+                            contadorAnterior++;
+                        }
+                    });
+
+                    const celulas = [];
+                    snapshot.forEach(doc => {
+                        const dadosCelula = doc.data();
+                        const temReuniaoAtual = reunioes.get(`${dadosCelula.conclider}_atual`);
+                        const temReuniaoAnterior = reunioes.get(`${dadosCelula.conclider}_anterior`);
+
+                        celulas.push({
+                            ...dadosCelula,
+                            semAtual: temReuniaoAtual
+                                ? '<i class="far fa-check-circle text-success fa-lg"></i>'
+                                : '<i class="far fa-circle text-danger fa-lg"></i>',
+                            semAnterior: temReuniaoAnterior
+                                ? '<i class="far fa-check-circle text-success fa-lg"></i>'
+                                : '<i class="far fa-circle text-danger fa-lg"></i>'
+                        });
+                    });
+
+                    celulas.sort((a, b) => {
+                        const compareCoord = a.coordenador.localeCompare(b.coordenador);
+                        if (compareCoord !== 0) return compareCoord;
+
+                        const compareSuper = a.supervisor.localeCompare(b.supervisor);
+                        if (compareSuper !== 0) return compareSuper;
+
+                        return a.conclider.localeCompare(b.conclider);
+                    });
+
+                    const table = criarTabela(celulas);
+                    const container = document.getElementById('reunioes-container');
+                    container.innerHTML = '';
+
+                    //Whatsapp
+                    criarBotaoWhatsApp(celulas);
+                    container.appendChild(table);
+                });
+        }
+            function criarTabela(celulas) {
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'table-responsive';
+            
+                const table = document.createElement('table');
+                table.className = 'table table-dark table-striped';
+            
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="d-flex align-items-center">
+                                    Coordenador
+                                    <div class="dropdown ml-2">
+                                        <i class="fas fa-filter" style="cursor: pointer" data-toggle="dropdown"></i>
+                                        <div class="dropdown-menu dropdown-menu-dark">
+                                            <input type="text" class="form-control bg-dark text-white" placeholder="Buscar..." onkeyup="filtrarColuna(this, 0)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex align-items-center">
+                                    Supervisor
+                                    <div class="dropdown ml-2">
+                                        <i class="fas fa-filter" style="cursor: pointer" data-toggle="dropdown"></i>
+                                        <div class="dropdown-menu dropdown-menu-dark">
+                                            <input type="text" class="form-control bg-dark text-white" placeholder="Buscar..." onkeyup="filtrarColuna(this, 1)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex align-items-center">
+                                    Líder
+                                    <div class="dropdown ml-2">
+                                        <i class="fas fa-filter" style="cursor: pointer" data-toggle="dropdown"></i>
+                                        <div class="dropdown-menu dropdown-menu-dark">
+                                            <input type="text" class="form-control bg-dark text-white" placeholder="Buscar..." onkeyup="filtrarColuna(this, 2)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex align-items-center">
+                                    Célula
+                                    <div class="dropdown ml-2">
+                                        <i class="fas fa-filter" style="cursor: pointer" data-toggle="dropdown"></i>
+                                        <div class="dropdown-menu dropdown-menu-dark">
+                                            <input type="text" class="form-control bg-dark text-white" placeholder="Buscar..." onkeyup="filtrarColuna(this, 3)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex align-items-center">
+                                    Sem Atual
+                                    <div class="dropdown ml-2">
+                                        <i class="fas fa-filter" style="cursor: pointer" data-toggle="dropdown"></i>
+                                        <div class="dropdown-menu dropdown-menu-dark">
+                                            <a class="dropdown-item" href="#" onclick="filtrarStatus('todos', 4)">Todos</a>
+                                            <a class="dropdown-item" href="#" onclick="filtrarStatus('feito', 4)">Feitos</a>
+                                            <a class="dropdown-item" href="#" onclick="filtrarStatus('pendente', 4)">Pendentes</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex align-items-center">
+                                    Sem Anterior
+                                    <div class="dropdown ml-2">
+                                        <i class="fas fa-filter" style="cursor: pointer" data-toggle="dropdown"></i>
+                                        <div class="dropdown-menu dropdown-menu-dark">
+                                            <a class="dropdown-item" href="#" onclick="filtrarStatus('todos', 5)">Todos</a>
+                                            <a class="dropdown-item" href="#" onclick="filtrarStatus('feito', 5)">Feitos</a>
+                                            <a class="dropdown-item" href="#" onclick="filtrarStatus('pendente', 5)">Pendentes</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${celulas.map(celula => `
+                            <tr>
+                                <td>${celula.coordenador}</td>
+                                <td>${celula.supervisor}</td>
+                                <td>${celula.conclider}</td>
+                                <td>${celula.nomecelula}</td>
+                                <td class="text-center">${celula.semAtual}</td>
+                                <td class="text-center">${celula.semAnterior}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+            
+                tableContainer.appendChild(table);
+                return tableContainer;
+            }
+
+            function filtrarColuna(input, colIndex) {
+                const filter = input.value.toLowerCase();
+                const table = document.querySelector('table');
+                const rows = table.querySelectorAll('tbody tr');
+            
+                rows.forEach(row => {
+                    const cell = row.cells[colIndex];
+                    const text = cell.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            }
+        function filtrarStatus(valor, colIndex) {
+            const table = document.querySelector('table');
+            const rows = table.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const cell = row.cells[colIndex];
+                const isFeito = cell.innerHTML.includes('check-circle');
+
+                switch (valor) {
+                    case 'feito':
+                        row.style.display = isFeito ? '' : 'none';
+                        break;
+                    case 'pendente':
+                        row.style.display = !isFeito ? '' : 'none';
+                        break;
+                    default:
+                        row.style.display = '';
+                }
+            });
+        }
+
+        document.getElementById('supervisor').addEventListener('change', function () {
+            const supervisorSelecionado = this.value;
+            const selectLider = document.getElementById('lider');
+
+            selectLider.innerHTML = '<option value="">Selecione o Líder</option>';
+
+            if (supervisorSelecionado) {
+                db.collection("estruturacelula")
+                    .where("supervisor", "==", supervisorSelecionado)
+                    .get()
+                    .then((querySnapshot) => {
+                        const lideres = new Set();
+                        querySnapshot.forEach((doc) => {
+                            lideres.add(doc.data().conclider);
+                        });
+
+                        Array.from(lideres).sort().forEach((lider) => {
+                            const option = document.createElement("option");
+                            option.value = lider;
+                            option.text = lider;
+                            selectLider.add(option);
+                        });
+                    });
+            }
+            updateReport();
+        });
+
+        document.getElementById('lider').addEventListener('change', updateReport);
+        document.getElementById('btnAtualizar').addEventListener('click', updateReport);
+
+        function updateReport() {
+            const supervisor = document.getElementById('supervisor').value;
+            const lider = document.getElementById('lider').value;
+
+            let query = db.collection('estruturacelula');
+
+            if (supervisor) query = query.where('supervisor', '==', supervisor);
+            if (lider) query = query.where('conclider', '==', lider);
+
+            query.get().then(snapshot => {
+                displayCelulas(snapshot);
+            });
+        }
+
+        //Whatsapp
+        function criarBotaoWhatsApp(celulas) {
+            const pendentes = celulas
+                .filter(celula => !celula.semAtual.includes('check-circle'))
+                .map(celula => `${celula.conclider} (${celula.supervisor})`);
+
+            if (pendentes.length > 0) {
+                const mensagem = `*Líderes com reunião pendente desta semana:*\n\n${pendentes.join('\n')}`;
+                const mensagemCodificada = encodeURIComponent(mensagem);
+                const linkWhatsApp = `https://api.whatsapp.com/send?text=${mensagemCodificada}`;
+
+                const botao = document.createElement('button');
+                botao.className = 'btn btn-success mb-3';
+                botao.innerHTML = '<i class="fab fa-whatsapp"></i> Enviar Pendentes WhatsApp';
+                botao.onclick = () => window.open(linkWhatsApp, '_blank');
+
+                document.getElementById('reunioes-container').prepend(botao);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFilters();
+            updateReport();
+        });
+
+    </script>
+</body>
+
+</html>
