@@ -115,6 +115,8 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
 
     <script>
         const firebaseConfig = {
@@ -147,7 +149,6 @@
 
         function displayCelulas(snapshot) {
             const hoje = new Date();
-
             const inicioSemanaAtual = new Date(hoje);
             inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay());
             inicioSemanaAtual.setHours(0, 0, 0, 0);
@@ -171,6 +172,7 @@
                     const reunioes = new Map();
                     let contadorAtual = 0;
                     let contadorAnterior = 0;
+                    let totalCelulas = 0;
 
                     reunioesSnapshot.forEach(doc => {
                         const reuniao = doc.data();
@@ -188,6 +190,7 @@
 
                     const celulas = [];
                     snapshot.forEach(doc => {
+                        totalCelulas++;
                         const dadosCelula = doc.data();
                         const temReuniaoAtual = reunioes.get(`${dadosCelula.conclider}_atual`);
                         const temReuniaoAnterior = reunioes.get(`${dadosCelula.conclider}_anterior`);
@@ -213,23 +216,41 @@
                         return a.conclider.localeCompare(b.conclider);
                     });
 
-                    const table = criarTabela(celulas);
                     const container = document.getElementById('reunioes-container');
                     container.innerHTML = '';
 
-                    //Whatsapp
+                    // Stats Section
+                    const statsDiv = document.createElement('div');
+                    statsDiv.className = 'd-flex justify-content-between align-items-center mb-3';
+
+                    const percentualAtual = Math.round((contadorAtual / totalCelulas) * 100);
+                    const percentualAnterior = Math.round((contadorAnterior / totalCelulas) * 100);
+
+                    statsDiv.innerHTML = `
+                <div class="d-flex gap-2">
+                    <span class="badge badge-success p-2">
+                        Semana Atual: ${percentualAtual}% (${contadorAtual}/${totalCelulas})
+                    </span>
+                    <span class="badge badge-info p-2">
+                        Semana Anterior: ${percentualAnterior}% (${contadorAnterior}/${totalCelulas})
+                    </span>
+                </div>
+            `;
+
                     criarBotaoWhatsApp(celulas);
-                    container.appendChild(table);
+                    container.appendChild(statsDiv);
+                    container.appendChild(criarTabela(celulas));
                 });
         }
-            function criarTabela(celulas) {
-                const tableContainer = document.createElement('div');
-                tableContainer.className = 'table-responsive';
-            
-                const table = document.createElement('table');
-                table.className = 'table table-dark table-striped';
-            
-                table.innerHTML = `
+
+        function criarTabela(celulas) {
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'table-responsive';
+
+            const table = document.createElement('table');
+            table.className = 'table table-dark table-striped';
+
+            table.innerHTML = `
                     <thead>
                         <tr>
                             <th>
@@ -317,22 +338,23 @@
                         `).join('')}
                     </tbody>
                 `;
-            
-                tableContainer.appendChild(table);
-                return tableContainer;
-            }
 
-            function filtrarColuna(input, colIndex) {
-                const filter = input.value.toLowerCase();
-                const table = document.querySelector('table');
-                const rows = table.querySelectorAll('tbody tr');
-            
-                rows.forEach(row => {
-                    const cell = row.cells[colIndex];
-                    const text = cell.textContent.toLowerCase();
-                    row.style.display = text.includes(filter) ? '' : 'none';
-                });
-            }
+            tableContainer.appendChild(table);
+            return tableContainer;
+        }
+
+        function filtrarColuna(input, colIndex) {
+            const filter = input.value.toLowerCase();
+            const table = document.querySelector('table');
+            const rows = table.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const cell = row.cells[colIndex];
+                const text = cell.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+
         function filtrarStatus(valor, colIndex) {
             const table = document.querySelector('table');
             const rows = table.querySelectorAll('tbody tr');
@@ -400,23 +422,50 @@
 
         //Whatsapp
         function criarBotaoWhatsApp(celulas) {
-            const pendentes = celulas
-                .filter(celula => !celula.semAtual.includes('check-circle'))
-                .map(celula => `${celula.conclider} (${celula.supervisor})`);
+    const pendentes = celulas
+        .filter(celula => !celula.semAtual.includes('check-circle'))
+        .map(celula => `${celula.conclider} (${celula.supervisor})`);
 
-            if (pendentes.length > 0) {
-                const mensagem = `*Líderes com reunião pendente desta semana:*\n\n${pendentes.join('\n')}`;
-                const mensagemCodificada = encodeURIComponent(mensagem);
-                const linkWhatsApp = `https://api.whatsapp.com/send?text=${mensagemCodificada}`;
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'd-flex gap-2 mb-3';
 
-                const botao = document.createElement('button');
-                botao.className = 'btn btn-success mb-3';
-                botao.innerHTML = '<i class="fab fa-whatsapp"></i> Enviar Pendentes WhatsApp';
-                botao.onclick = () => window.open(linkWhatsApp, '_blank');
+    if (pendentes.length > 0) {
+        const mensagem = `*Líderes com reunião pendente desta semana:*\n\n${pendentes.join('\n')}`;
+        const mensagemCodificada = encodeURIComponent(mensagem);
+        const linkWhatsApp = `https://api.whatsapp.com/send?text=${mensagemCodificada}`;
 
-                document.getElementById('reunioes-container').prepend(botao);
-            }
-        }
+        const botaoWhatsApp = document.createElement('button');
+        botaoWhatsApp.className = 'btn btn-success';
+        botaoWhatsApp.innerHTML = '<i class="fab fa-whatsapp"></i> Enviar Pendentes WhatsApp';
+        botaoWhatsApp.onclick = () => window.open(linkWhatsApp, '_blank');
+        buttonContainer.appendChild(botaoWhatsApp);
+    }
+
+    const botaoExcel = document.createElement('button');
+    botaoExcel.className = 'btn btn-primary';
+    botaoExcel.innerHTML = '<i class="fas fa-file-excel"></i> Exportar Excel';
+    botaoExcel.onclick = () => exportarParaExcel(celulas);
+    buttonContainer.appendChild(botaoExcel);
+
+    document.getElementById('reunioes-container').prepend(buttonContainer);
+}
+
+function exportarParaExcel(celulas) {
+    const data = celulas.map(celula => ({
+        'Coordenador': celula.coordenador,
+        'Supervisor': celula.supervisor,
+        'Líder': celula.conclider,
+        'Célula': celula.nomecelula,
+        'Semana Atual': celula.semAtual.includes('check-circle') ? 'Realizada' : 'Não Realizada',
+        'Semana Anterior': celula.semAnterior.includes('check-circle') ? 'Realizada' : 'Não Realizada'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório de Células');
+    XLSX.writeFile(workbook, 'relatorio_celulas.xlsx');
+}
+
 
         document.addEventListener('DOMContentLoaded', () => {
             populateFilters();
