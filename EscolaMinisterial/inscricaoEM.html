@@ -102,47 +102,67 @@
         .back-button i {
             margin-right: 0px;
         }
+
         .splash-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-}
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
 
-.splash-screen.show {
-    opacity: 1;
-    visibility: visible;
-}
+        .splash-screen.show {
+            opacity: 1;
+            visibility: visible;
+        }
 
-.splash-content {
-    text-align: center;
-    color: white;
-}
+        .splash-content {
+            text-align: center;
+            color: white;
+        }
 
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid #fff;
-    border-top: 3px solid #007bff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #fff;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+        #celula {
+            background-color: #3c3c3c !important;
+            color: #ffffff !important;
+            cursor: default;
+        }
 
+        #celula:focus,
+        #celula:disabled,
+        #celula[readonly] {
+            background-color: #3c3c3c !important;
+            color: #ffffff !important;
+            box-shadow: none;
+        }
+
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -162,16 +182,17 @@
         <div class="divider"></div>
         <form id="inscricaoForm">
             <div class="form-group">
-                <label for="celula">Célula</label>
-                <select class="form-control" id="celula" required></select>
-            </div>
-            <div class="form-group">
                 <label for="nome">Nome Completo</label>
-                <select class="form-control" id="nome" required></select>
-                <div id="alerta" class="alert alert-warning mt-2" style="display: none;">
-                    Nenhum nome encontrado para a célula selecionada.
-                </div>
+                <input type="text" class="form-control" id="nome" required
+                    oninput="this.value = this.value.toUpperCase(); buscarNomes(this.value);">
+                <div id="sugestoesNomes" class="sugestoes"></div>
             </div>
+
+            <div class="form-group">
+                <label for="celula">Célula</label>
+                <input type="text" class="form-control" id="celula" readonly>
+            </div>
+
             <div class="form-group">
                 <label for="turma">Turma</label>
                 <select class="form-control" id="turma" required></select>
@@ -185,7 +206,10 @@
 
             <div style="height: 20px;"></div>
 
-            <button type="submit" class="btn btn-primary btn-block" id="inscreverBtn">Inscrever</button>
+            <button type="submit" class="btn btn-primary btn-block" id="inscreverBtn">
+                <i class="fas fa-user-plus mr-2"></i>Inscrever
+            </button>
+
         </form>
         <div id="splash-screen" class="splash-screen">
             <div class="splash-content">
@@ -193,7 +217,7 @@
                 <p>Carregando disciplinas...</p>
             </div>
         </div>
-        
+
     </div>
 
     <!-- Importar Firebase -->
@@ -204,7 +228,7 @@
     <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
 
     <script>
-        // Configuração do Firebase (copiada de formCadMembros.html)
+        // Configuração do Firebase
         var configuracaoFirebase = {
             apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
             authDomain: "dbiebi.firebaseapp.com",
@@ -222,337 +246,230 @@
         var inputNome = document.getElementById('nome');
         var disciplinasContainer = document.getElementById('disciplinasContainer');
         var inscreverBtn = document.getElementById('inscreverBtn');
-        var listaSugestoes = document.getElementById('sugestoes');
-        var alerta = document.getElementById('alerta');
-        var membrosCelula = [];
-        
-        // Adiciona ouvinte de eventos para atualizar disciplinas quando um curso é selecionado
-        const selectCursoElement = document.getElementById('curso');
-        if (selectCursoElement) {
-            console.log('Elemento select curso encontrado');
-        } else {
-            console.log('Elemento select curso não encontrado');
+
+        // Função para buscar nomes
+        function buscarNomes(texto) {
+            if (texto.length < 3) {
+                document.getElementById('sugestoesNomes').innerHTML = '';
+                return;
+            }
+
+            bancoDeDados.collection('membros')
+                .where('nome', '>=', texto)
+                .where('nome', '<=', texto + '\uf8ff')
+                .limit(5)
+                .get()
+                .then((querySnapshot) => {
+                    let sugestoes = '';
+                    querySnapshot.forEach((doc) => {
+                        sugestoes += `<div class="sugestao-item" onclick="selecionarNome('${doc.data().nome}')">${doc.data().nome}</div>`;
+                    });
+                    document.getElementById('sugestoesNomes').innerHTML = sugestoes;
+                });
+        }
+
+        // Função para selecionar nome e preencher célula
+        function selecionarNome(nome) {
+            document.getElementById('nome').value = nome;
+            document.getElementById('sugestoesNomes').innerHTML = '';
+
+            bancoDeDados.collection('membros')
+                .where('nome', '==', nome)
+                .get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        // Busca o líder da célula usando nomedacelula
+                        bancoDeDados.collection('estruturacelula')
+                            .where('nomecelula', '==', doc.data().nomedacelula)
+                            .get()
+                            .then((celulaSnapshot) => {
+                                celulaSnapshot.forEach((celulaDoc) => {
+                                    document.getElementById('celula').value = celulaDoc.data().conclider;
+                                });
+                            });
+                    });
+                });
         }
 
 
-        // Função para carregar as disciplinas do curso selecionado
-        function carregarDisciplinas(cursoId) {
+        // Carregar turmas
+        function carregarTurmas() {
+    return new Promise((resolve, reject) => {
+        const selectTurma = document.getElementById('turma');
+        selectTurma.innerHTML = '';
+        const hoje = new Date();
+
+        bancoDeDados.collection('cursosTurmas')
+            .orderBy('dtIniInsc', 'desc')
+            .get()
+            .then((querySnapshot) => {
+                const turmasUnicas = new Set();
+                
+                querySnapshot.forEach((doc) => {
+                    const turma = doc.data();
+                    const dtIniInsc = converterData(turma.dtIniInsc);
+                    const dtFimInsc = converterData(turma.dtFimInsc);
+                    
+                    if (hoje >= dtIniInsc && hoje <= dtFimInsc) {
+                        turmasUnicas.add(turma.nomeTurma);
+                    }
+                });
+
+                const turmasArray = Array.from(turmasUnicas);
+
+                if (turmasArray.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = "";
+                    option.text = "Nenhuma turma com inscrições abertas";
+                    selectTurma.add(option);
+                } else {
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = "";
+                    defaultOption.text = "Selecione a Turma...";
+                    selectTurma.add(defaultOption);
+
+                    turmasArray.forEach((nomeTurma) => {
+                        const option = document.createElement('option');
+                        option.value = nomeTurma;
+                        option.text = nomeTurma;
+                        selectTurma.add(option);
+                    });
+                }
+                resolve();
+            })
+            .catch(reject);
+    });
+}
+
+
+        function converterData(dataString) {
+            const [dia, mes, ano] = dataString.split('/');
+            return new Date(ano, mes - 1, dia);
+        }
+
+        // Carregar disciplinas
+        function carregarDisciplinas(turmaSelecionada) {
             const selectDisciplina = document.getElementById('disciplina');
             selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina</option>';
+            const hoje = new Date();
 
-            bancoDeDados.collection('cursos').doc(cursoId).collection('disciplinas').get().then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const option = document.createElement('option');
-                    option.value = doc.id;
-                    option.text = `${doc.data().nomeDisc} - Prof. ${doc.data().professor}`;
-                    selectDisciplina.add(option);
-                });
-            });
-        }
-            document.addEventListener('DOMContentLoaded', function() {
-                const selectCurso = document.getElementById('curso');
-                if (selectCurso) {
-                    selectCurso.addEventListener('change', function () {
-                        carregarDisciplinas(this.value);
-                    });
-                } else {
-                    console.log('Elemento select curso não encontrado');
-                }
-            });
-        // Event listener para o formulário
-        formulario.addEventListener('submit', function (e) {
-            e.preventDefault();
-            console.log('Formulário submetido');
+            document.getElementById('splash-screen').classList.add('show');
 
-            const nomeSelect = document.getElementById('nome');
-            const nomeMembro = nomeSelect.options[nomeSelect.selectedIndex].text;
-            console.log('Nome selecionado:', nomeMembro);
-
-            const celulaSelect = document.getElementById('celula');
-            const celulaNome = celulaSelect.value;
-            console.log('Célula selecionada:', celulaNome);
-
-            const turmaSelect = document.getElementById('turma');
-            const turmaNome = turmaSelect.options[turmaSelect.selectedIndex].text;
-            console.log('Turma selecionada:', turmaNome);
-
-            const disciplinaSelect = document.getElementById('disciplina');
-            const disciplinaNome = disciplinaSelect.options[disciplinaSelect.selectedIndex].text;
-            console.log('Disciplina selecionada:', disciplinaNome);
-
-            bancoDeDados.collection('cursosInscricoes').add({
-                nome: nomeMembro,
-                celula: celulaNome,
-                turma: turmaNome,
-                disciplina: disciplinaNome,
-                dataInscricao: new Date()
-            })
-            .then(function () {
-                console.log('Inscrição realizada com sucesso');
-                alert('Inscrição realizada com sucesso!');
-                formulario.reset();
-                
-                // Chama o evento usado ao carregar a página inicialmente
-                Promise.all([
-                    carregarCelulas(),
-                    carregarTurmas()
-                ]).then(() => {
-                    console.log('Dados recarregados após inscrição');
-                }).catch(error => {
-                    console.error("Erro ao recarregar dados:", error);
-                });
-            })
-            .catch(function (error) {
-                console.error("Erro ao realizar inscrição:", error);
-                alert('Erro ao realizar inscrição: ' + error.message);
-            });
-        });
-        var selectCelula = document.getElementById('celula');
-        var selectNome = document.getElementById('nome');
-        // Função para carregar as células
-        function carregarCelulas() {
-            bancoDeDados.collection('estruturacelula')
-                .orderBy('nomecelula')
+            bancoDeDados.collection('cursosTurmas')
+                .where('nomeTurma', '==', turmaSelecionada)
                 .get()
                 .then((querySnapshot) => {
-                    selectCelula.innerHTML = '<option value="">Selecione sua Célula</option>';
+                    const disciplinasUnicas = new Set();
+                    
                     querySnapshot.forEach((doc) => {
-                        const option = document.createElement('option');
-                        option.value = doc.data().nomecelula; // Use o nome da célula como valor
-                        option.text = `${doc.data().nomecelula} - ${doc.data().conclider}`;
-                        selectCelula.add(option);
+                        const turma = doc.data();
+                        const dtIniInsc = converterData(turma.dtIniInsc);
+                        const dtFimInsc = converterData(turma.dtFimInsc);
+                        
+                        if (hoje >= dtIniInsc && hoje <= dtFimInsc) {
+                            disciplinasUnicas.add(turma.disciplinas);
+                        }
                     });
-                })
-                .catch((error) => {
-                    console.error("Erro ao carregar células:", error);
-                });
-        }
-          window.onload = function () {
-              document.getElementById('splash-screen').classList.add('show');
-              Promise.all([
-                  carregarCelulas(),
-                  carregarTurmas()
-              ]).then(() => {
-                  document.getElementById('splash-screen').classList.remove('show');
-              }).catch(error => {
-                  console.error("Error loading initial data:", error);
-                  document.getElementById('splash-screen').classList.remove('show');
-              });
-          };
-        
 
-        var selectNome = document.getElementById('nome');
-        var selectCelula = document.getElementById('celula');
-        selectCelula.addEventListener('change', function () {
-            carregarMembrosCelula(this.value);
-        });
-
-        function carregarMembrosCelula(celulaId) {
-            console.log('Iniciando carregamento de membros para a célula:', celulaId);
-            bancoDeDados.collection('membros')
-                .where('nomedacelula', '==', celulaId)
-                .orderBy('nome')
-                .get()
-                .then((querySnapshot) => {
-                    console.log('Query executada. Número de documentos:', querySnapshot.size);
-                    selectNome.innerHTML = '<option value="">Selecione seu nome</option>';
-                    console.log('Select resetado');
-                    querySnapshot.forEach((doc) => {
-                        console.log('Adicionando membro:', doc.data().nome);
+                    if (disciplinasUnicas.size === 0) {
                         const option = document.createElement('option');
-                        option.value = doc.id;
-                        option.text = doc.data().nome;
-                        selectNome.add(option);
-                    });
-                    console.log('Lista de nomes atualizada. Total de opções:', selectNome.options.length);
+                        option.value = "";
+                        option.text = "Nenhuma disciplina disponível";
+                        selectDisciplina.add(option);
+                    } else {
+                        disciplinasUnicas.forEach((disciplina) => {
+                            const option = document.createElement('option');
+                            option.value = disciplina;
+                            option.text = disciplina;
+                            selectDisciplina.add(option);
+                        });
+                    }
                 })
-                .catch((error) => {
-                    console.error("Erro ao carregar membros da célula:", error);
-                });
-        }
-        selectCelula.addEventListener('change', function () {
-            console.log('Célula selecionada:', this.value);
-            carregarMembrosCelula(this.value);
-        });
-
-        function carregarMembrosCelula(celulaId) {
-            bancoDeDados.collection('membros')
-                .where('nomedacelula', '==', celulaId)
-                .orderBy('nome')
-                .get()
-                .then((querySnapshot) => {
-                    selectNome.innerHTML = '<option value="">Selecione seu nome</option>';
-                    querySnapshot.forEach((doc) => {
-                        const option = document.createElement('option');
-                        option.value = doc.id;
-                        option.text = doc.data().nome;
-                        selectNome.add(option);
-                    });
-                })
-                .catch((error) => {
-                    console.error("Erro ao carregar membros da célula:", error);
+                .finally(() => {
+                    document.getElementById('splash-screen').classList.remove('show');
                 });
         }
 
-        selectCelula.addEventListener('change', function () {
-            carregarMembrosCelula(this.value);
-        });
-
-        function filtrarMembros(texto) {
-            if (texto.length >= 3) {
-                const sugestoesFiltradas = membrosCelula.filter(membro =>
-                    membro.toLowerCase().includes(texto.toLowerCase())
-                );
-
-                if (sugestoesFiltradas.length > 0) {
-                    mostrarSugestoes(sugestoesFiltradas);
-                    alerta.style.display = 'none';
-                } else {
-                    listaSugestoes.style.display = 'none';
-                    alerta.style.display = 'block';
-                }
-            } else {
-                listaSugestoes.style.display = 'none';
-                alerta.style.display = 'none';
-            }
-        }
-
-        function mostrarSugestoes(sugestoes) {
-            listaSugestoes.innerHTML = '';
-            sugestoes.forEach(sugestao => {
-                const li = document.createElement('li');
-                li.textContent = sugestao;
-                li.className = 'list-group-item';
-                li.onclick = function () {
-                    inputNome.value = sugestao;
-                    listaSugestoes.style.display = 'none';
-                };
-                listaSugestoes.appendChild(li);
-            });
-            listaSugestoes.style.display = 'block';
-        }
-
-        window.onerror = function (message, source, lineno, colno, error) {
-            console.error('Erro não tratado:', message, 'em', source, 'linha', lineno);
-            return true;
-        };
-        // Adicione um event listener para o select de turmas
-        document.getElementById('turma').addEventListener('change', function() {
+        // Event Listeners        
+        document.getElementById('turma').addEventListener('change', function () {
             carregarDisciplinas(this.value);
         });
-          function carregarDisciplinas(turmaSelecionada) {
-              console.log('Carregando disciplinas para a turma:', turmaSelecionada);
-              const selectDisciplina = document.getElementById('disciplina');
-              selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina</option>';
 
-              document.getElementById('splash-screen').classList.add('show');
+        // Inicialização
+        window.onload = function () {
+            document.getElementById('splash-screen').classList.add('show');
+            carregarTurmas()
+                .then(() => {
+                    document.getElementById('splash-screen').classList.remove('show');
+                })
+                .catch(error => {
+                    console.error("Error loading initial data:", error);
+                    document.getElementById('splash-screen').classList.remove('show');
+                });
+        };
 
-              bancoDeDados.collection('cursosTurmas')
-                  .where('nomeTurma', '==', turmaSelecionada)
-                  .get()
-                  .then((querySnapshot) => {
-                      const disciplinasUnicas = new Set();
-                      querySnapshot.forEach((doc) => {
-                          disciplinasUnicas.add(doc.data().disciplinas);
-                      });
+        // Submit do formulário
+        formulario.addEventListener('submit', function (e) {
+            e.preventDefault();
 
-                      disciplinasUnicas.forEach((disciplina) => {
-                          console.log('Adicionando disciplina:', disciplina);
-                          const option = document.createElement('option');
-                          option.value = disciplina;
-                          option.text = disciplina;
-                          selectDisciplina.add(option);
-                      });
+            const nomeMembro = document.getElementById('nome').value.trim();
+            const celulaNome = document.getElementById('celula').value.trim();
+            const turmaSelect = document.getElementById('turma');
+            const disciplinaSelect = document.getElementById('disciplina');
 
-                      if (disciplinasUnicas.size === 0) {
-                          console.log('Nenhuma disciplina encontrada para a turma:', turmaSelecionada);
-                      }
-                  })
-                  .catch((error) => {
-                      console.error('Erro ao carregar disciplinas:', error);
-                  })
-                  .finally(() => {
-                      document.getElementById('splash-screen').classList.remove('show');
-                  });
-          }        
-        // Remova este trecho
-        function carregarCursos() {
-            return new Promise((resolve, reject) => {
-                selectCurso.innerHTML = '<option value="">Selecione o Curso...</option>';
-                bancoDeDados.collection('cursos').get().then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        const option = document.createElement('option');
-                        option.value = doc.id;
-                        option.text = doc.data().nomeCurso;
-                        selectCurso.add(option);
-                    });
-                    resolve();
-                }).catch(reject);
-            });
-        }
-          function carregarCelulas() {
-              console.log('Iniciando carregamento de células');
-              bancoDeDados.collection('estruturacelula')
-                  .orderBy('nomecelula')
-                  .get()
-                  .then((querySnapshot) => {
-                      console.log('Número de células recuperadas:', querySnapshot.size);
-                      selectCelula.innerHTML = '<option value="">Selecione sua Célula</option>';
-                      querySnapshot.forEach((doc) => {
-                          const option = document.createElement('option');
-                          option.value = doc.data().nomecelula;
-                          option.text = `${doc.data().nomecelula} - ${doc.data().conclider}`;
-                          selectCelula.add(option);
-                          console.log('Célula adicionada:', option.text);
-                      });
-                      console.log('Total de células no dropdown:', selectCelula.options.length - 1);
-                  })
-                  .catch((error) => {
-                      console.error("Erro ao carregar células:", error);
-                  });
-          }
-                    function carregarTurmas() {
-                        return new Promise((resolve, reject) => {
-                            const selectTurma = document.getElementById('turma');
-                            selectTurma.innerHTML = '';
+            // Validações iniciais
+            if (!nomeMembro) {
+                alert('Por favor, selecione um nome válido, ou faça o cadastro com seu Líder de Célula!');
+                return;
+            }
 
-                            bancoDeDados.collection('cursosTurmas')
-                                .orderBy('nomeTurma')
-                                .get()
-                                .then((querySnapshot) => {
-                                    const turmasUnicas = new Set();
-                                    querySnapshot.forEach((doc) => {
-                                        turmasUnicas.add(doc.data().nomeTurma);
-                                    });
+            if (!celulaNome) {
+                alert('Célula não identificada, verifique com seu líder de Célula!');
+                return;
+            }
 
-                                    const turmasArray = Array.from(turmasUnicas);
+            if (turmaSelect.selectedIndex === 0) {
+                alert('Por favor, selecione uma turma');
+                return;
+            }
 
-                                    if (turmasArray.length === 1) {
-                                        const option = document.createElement('option');
-                                        option.value = turmasArray[0];
-                                        option.text = turmasArray[0];
-                                        selectTurma.add(option);
-                                        selectTurma.value = turmasArray[0];
-                                        carregarDisciplinas(turmasArray[0]);
-                                    } else {
-                                        const defaultOption = document.createElement('option');
-                                        defaultOption.value = "";
-                                        defaultOption.text = "Selecione a Turma...";
-                                        selectTurma.add(defaultOption);
+            if (disciplinaSelect.selectedIndex === 0) {
+                alert('Por favor, selecione uma disciplina');
+                return;
+            }
 
-                                        turmasArray.forEach((turma) => {
-                                            const option = document.createElement('option');
-                                            option.value = turma;
-                                            option.text = turma;
-                                            selectTurma.add(option);
-                                        });
-                                    }
-                                    resolve();
-                                })
-                                .catch(reject);
+            // Verificar se o membro já tem qualquer inscrição
+            bancoDeDados.collection('cursosInscricoes')
+                .where('nome', '==', nomeMembro)
+                .get()
+                .then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        alert('Você já está inscrito em uma disciplina. É permitida apenas uma inscrição por vez.');
+                        return;
+                    }
+
+                    // Prossegue com a inscrição
+                    bancoDeDados.collection('cursosInscricoes').add({
+                        nome: nomeMembro,
+                        celula: celulaNome,
+                        turma: turmaSelect.options[turmaSelect.selectedIndex].text,
+                        disciplina: disciplinaSelect.options[disciplinaSelect.selectedIndex].text,
+                        dataInscricao: new Date()
+                    })
+                        .then(function () {
+                            alert('Inscrição realizada com sucesso!');
+                            formulario.reset();
+                            carregarTurmas();
+                        })
+                        .catch(function (error) {
+                            console.error("Erro ao realizar inscrição:", error);
+                            alert('Erro ao realizar inscrição: ' + error.message);
                         });
-                    }                           
+                });
+        });
+
     </script>
+
 </body>
 
 </html>

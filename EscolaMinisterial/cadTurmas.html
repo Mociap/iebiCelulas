@@ -101,26 +101,24 @@
         .back-button i {
             margin-right: 0px;
         }
-        
-.sugestoes {
-    position: absolute;
-    background-color: #3c3c3c;
-    border: 1px solid #555;
-    max-height: 150px;
-    overflow-y: auto;
-    z-index: 1000;
-}
 
-.sugestao-item {
-    padding: 5px 10px;
-    cursor: pointer;
-}
+        .sugestoes {
+            position: absolute;
+            background-color: #3c3c3c;
+            border: 1px solid #555;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
 
-.sugestao-item:hover {
-    background-color: #4c4c4c;
-}
+        .sugestao-item {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
 
-
+        .sugestao-item:hover {
+            background-color: #4c4c4c;
+        }
     </style>
 </head>
 
@@ -137,15 +135,19 @@
         <form id="turmaForm">
             <div class="form-group">
                 <label for="nomeTurma">Nome da Turma</label>
-                <input type="text" class="form-control" id="nomeTurma" required oninput="this.value = this.value.toUpperCase();">
+                <input type="text" class="form-control" id="nomeTurma" required
+                    oninput="this.value = this.value.toUpperCase();">
             </div>
             <div class="form-group">
                 <label for="disciplinas">Disciplina</label>
-                <input type="text" class="form-control" id="disciplinas" required oninput="this.value = this.value.toUpperCase();">
+                <select class="form-control" id="disciplinas" required>
+                    <option value="">Selecione uma disciplina</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="professor">Professor</label>
-                <input type="text" class="form-control" id="professor" oninput="this.value = this.value.toUpperCase(); buscarProfessores(this.value);">
+                <input type="text" class="form-control" id="professor"
+                    oninput="this.value = this.value.toUpperCase(); buscarProfessores(this.value);">
                 <div id="sugestoesProfessores" class="sugestoes"></div>
             </div>
             <div class="form-group">
@@ -156,6 +158,14 @@
                 <label for="dtFim">Data de Término</label>
                 <input type="text" class="form-control" id="dtFim" required placeholder="DD/MM/AAAA">
             </div>
+            <div class="form-group">
+                <label for="dtIniInsc">Início das Inscrições</label>
+                <input type="text" class="form-control" id="dtIniInsc" required placeholder="DD/MM/AAAA">
+            </div>
+            <div class="form-group">
+                <label for="dtFimInsc">Término das Inscrições</label>
+                <input type="text" class="form-control" id="dtFimInsc" required placeholder="DD/MM/AAAA">
+            </div>            
             <button type="submit" class="btn btn-primary btn-block" id="cadastrarBtn">Cadastrar Turma</button>
         </form>
     </div>
@@ -184,92 +194,128 @@
         var formulario = document.getElementById('turmaForm');
 
         function buscarProfessores(texto) {
-    if (texto.length < 3) {
-        document.getElementById('sugestoesProfessores').innerHTML = '';
-        return;
-    }
-
-    bancoDeDados.collection('membros')
-        .where('nome', '>=', texto)
-        .where('nome', '<=', texto + '\uf8ff')
-        .limit(5)
-        .get()
-        .then((querySnapshot) => {
-            let sugestoes = '';
-            querySnapshot.forEach((doc) => {
-                sugestoes += `<div class="sugestao-item" onclick="selecionarProfessor('${doc.data().nome}')">${doc.data().nome}</div>`;
-            });
-            document.getElementById('sugestoesProfessores').innerHTML = sugestoes;
-        });
-}
-
-function selecionarProfessor(nome) {
-    document.getElementById('professor').value = nome;
-    document.getElementById('sugestoesProfessores').innerHTML = '';
-}
-
-        // Apply mask to date fields
-        VMasker(document.getElementById("dtIni")).maskPattern("99/99/9999");
-        VMasker(document.getElementById("dtFim")).maskPattern("99/99/9999");
-
-        console.log("Máscaras aplicadas aos campos de data");
-
-        // Ensure only numbers are entered
-        function onlyNumbers(event) {
-            var key = event.keyCode || event.which;
-            key = String.fromCharCode(key);
-            var regex = /[0-9]|\./;
-            if (!regex.test(key)) {
-                event.returnValue = false;
-                if (event.preventDefault) event.preventDefault();
-                console.log("Caractere não numérico bloqueado:", key);
-            } else {
-                console.log("Caractere numérico aceito:", key);
+            if (texto.length < 3) {
+                document.getElementById('sugestoesProfessores').innerHTML = '';
+                return;
             }
+
+            bancoDeDados.collection('membros')
+                .where('nome', '>=', texto)
+                .where('nome', '<=', texto + '\uf8ff')
+                .limit(5)
+                .get()
+                .then((querySnapshot) => {
+                    let sugestoes = '';
+                    querySnapshot.forEach((doc) => {
+                        sugestoes += `<div class="sugestao-item" onclick="selecionarProfessor('${doc.data().nome}')">${doc.data().nome}</div>`;
+                    });
+                    document.getElementById('sugestoesProfessores').innerHTML = sugestoes;
+                });
         }
 
-        // Add event listeners to date fields
-        document.getElementById("dtIni").addEventListener("keypress", onlyNumbers);
-        document.getElementById("dtFim").addEventListener("keypress", onlyNumbers);
-
-        console.log("Event listeners adicionados aos campos de data");
-
-        // Adicionar evento de envio do formulário
-        formulario.addEventListener('submit', function (e) {
-            e.preventDefault();
-            console.log("Formulário submetido");
-
-            var dtIni = document.getElementById('dtIni').value;
-            var dtFim = document.getElementById('dtFim').value;
-
-            console.log("Data de Início:", dtIni);
-            console.log("Data de Término:", dtFim);
-
-            // Obter valores dos campos
-            var nomeTurma = document.getElementById('nomeTurma').value.trim();
-            var disciplinas = document.getElementById('disciplinas').value.trim();
-            var professor = document.getElementById('professor').value.trim();
-
-            // Adicionar dados ao Firestore
-            bancoDeDados.collection('cursosTurmas').add({
-                nomeTurma: nomeTurma,
-                disciplinas: disciplinas,
-                professor: professor,
-                dtIni: dtIni,
-                dtFim: dtFim
-            })
-                .then(function () {
-                    console.log("Turma cadastrada com sucesso");
-                    alert('Turma cadastrada com sucesso!');
-                    formulario.reset();
+        // Carregar disciplinas ao iniciar a página
+        function carregarDisciplinas() {
+            bancoDeDados.collection('cursos')
+                .where('status', '==', 'ATIVO')
+                .get()
+                .then((querySnapshot) => {
+                    const selectDisciplinas = document.getElementById('disciplinas');
+                    
+                    querySnapshot.forEach((cursoDoc) => {
+                        cursoDoc.ref.collection('disciplina')
+                            .where('inscricao', '==', 'SIM')
+                            .get()
+                            .then((disciplinasSnapshot) => {
+                                disciplinasSnapshot.forEach((disciplinaDoc) => {
+                                    const disciplina = disciplinaDoc.data();
+                                    const option = document.createElement('option');
+                                    option.value = disciplina.nomeDisc;
+                                    option.textContent = disciplina.nomeDisc;
+                                    selectDisciplinas.appendChild(option);
+                                });
+                            });
+                    });
                 })
-                .catch(function (error) {
-                    console.error("Erro ao cadastrar turma:", error);
-                    alert('Erro ao cadastrar turma: ' + error.message);
+                .catch((error) => {
+                    console.error("Erro ao carregar disciplinas:", error);
                 });
+        }
+
+        // Chamar a função quando a página carregar
+        document.addEventListener('DOMContentLoaded', carregarDisciplinas);
+
+        function selecionarProfessor(nome) {
+            document.getElementById('professor').value = nome;
+            document.getElementById('sugestoesProfessores').innerHTML = '';
+        }
+
+          // Apply mask to date fields
+          VMasker(document.getElementById("dtIni")).maskPattern("99/99/9999");
+          VMasker(document.getElementById("dtFim")).maskPattern("99/99/9999");
+          VMasker(document.getElementById("dtIniInsc")).maskPattern("99/99/9999");
+          VMasker(document.getElementById("dtFimInsc")).maskPattern("99/99/9999");
+
+          console.log("Máscaras aplicadas aos campos de data");
+
+          // Ensure only numbers are entered
+          function onlyNumbers(event) {
+              var key = event.keyCode || event.which;
+              key = String.fromCharCode(key);
+              var regex = /[0-9]|\./;
+              if (!regex.test(key)) {
+                  event.returnValue = false;
+                  if (event.preventDefault) event.preventDefault();
+                  console.log("Caractere não numérico bloqueado:", key);
+              } else {
+                  console.log("Caractere numérico aceito:", key);
+              }
+          }
+
+          // Add event listeners to date fields
+          document.getElementById("dtIni").addEventListener("keypress", onlyNumbers);
+          document.getElementById("dtFim").addEventListener("keypress", onlyNumbers);
+          document.getElementById("dtIniInsc").addEventListener("keypress", onlyNumbers);
+          document.getElementById("dtFimInsc").addEventListener("keypress", onlyNumbers);
+
+          console.log("Event listeners adicionados aos campos de data");
+
+          // Adicionar evento de envio do formulário
+          formulario.addEventListener('submit', function (e) {
+              e.preventDefault();
+              console.log("Formulário submetido");
+
+              var dtIni = document.getElementById('dtIni').value;
+              var dtFim = document.getElementById('dtFim').value;
+
+              console.log("Data de Início:", dtIni);
+              console.log("Data de Término:", dtFim);
+
+              // Obter valores dos campos
+              var nomeTurma = document.getElementById('nomeTurma').value.trim();
+              var disciplinas = document.getElementById('disciplinas').value.trim();
+              var professor = document.getElementById('professor').value.trim();
+
+              // Adicionar dados ao Firestore
+              bancoDeDados.collection('cursosTurmas').add({
+                  nomeTurma: nomeTurma,
+                  disciplinas: disciplinas,
+                  professor: professor,
+                  dtIni: dtIni,
+                  dtFim: dtFim,
+                  dtIniInsc: document.getElementById('dtIniInsc').value,
+                  dtFimInsc: document.getElementById('dtFimInsc').value
+              })
+                  .then(function () {
+                      console.log("Turma cadastrada com sucesso");
+                      alert('Turma cadastrada com sucesso!');
+                      formulario.reset();
+                  })
+                  .catch(function (error) {
+                      console.error("Erro ao cadastrar turma:", error);
+                      alert('Erro ao cadastrar turma: ' + error.message);
+                  });
         });
     </script>
 </body>
 
 </html>
-

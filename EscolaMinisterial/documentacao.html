@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação Escola Ministerial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+            margin-top: 60px; /* Altura do header */
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #34495e;
+            padding: 2rem;
+            color: white;
+            position: fixed;
+            height: calc(100% - 60px); /* Ajuste para considerar o header */
+            top: 60px; /* Posiciona abaixo do header */
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .sidebar ul li a:hover {
+            color: #3498db;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 250px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+            display: none;
+        }
+
+        section.active {
+            display: block;
+        }
+        .task-group {
+    margin-bottom: 20px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.task-item:hover {
+    background-color: #e9ecef;
+}
+
+.task-item input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.task-item label {
+    cursor: pointer;
+    flex: 1;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #e9ecef;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.progress {
+    width: 0%;
+    height: 100%;
+    background-color: #3498db;
+    transition: width 0.3s ease;
+}
+
+#progressText {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-weight: bold;
+}
+.firebase-structure {
+    padding: 10px;
+}
+
+.collection-title {
+    color: #e67e22;
+    font-weight: bold;
+}
+
+.subcollection-title {
+    color: #2980b9;
+    font-weight: bold;
+}
+
+.document-title {
+    color: #27ae60;
+    font-style: italic;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Documentação Sistema Escola Ministerial - Programa Lidere</h1>
+    </header>
+    
+    <div class="container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="#" onclick="showSection('estrutura')">Estrutura Base</a></li>
+                <li><a href="#" onclick="showSection('entidades')">Entidades</a></li>
+                <li><a href="#" onclick="showSection('fluxos')">Fluxos Principais</a></li>
+                <li><a href="#" onclick="showSection('database')">Banco de Dados</a></li>
+                <li><a href="#" onclick="showSection('relatorios')">Relatórios</a></li>
+                <li><a href="#" onclick="showSection('requisitos')">Requisitos Técnicos</a></li>
+                <li><a href="#" onclick="showSection('tarefas')">Lista de Tarefas</a></li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <section id="estrutura">
+                <h2>Estrutura Base</h2>
+                <div class="card">
+                    <h3>Cursos do Programa</h3>
+                    <ul>
+                        <li>Iniciar</li>
+                        <li>Identificar</li>
+                        <li>Edificar</li>
+                        <li>Impactar</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="entidades">
+                <h2>Entidades Principais</h2>
+                <div class="card">
+                    <h3>Alunos</h3>
+                    <ul>
+                        <li>Nome completo</li>
+                        <li>Data de nascimento</li>
+                        <li>Contato</li>
+                        <li>Endereço</li>
+                        <li>Status</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Turmas</h3>
+                    <ul>
+                        <li>Código da turma</li>
+                        <li>Professor responsável</li>
+                        <li>Horário</li>
+                        <li>Capacidade máxima</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="fluxos">
+                <h2>Fluxos Principais</h2>
+                <div class="card">
+                    <h3>Processo de Matrícula</h3>
+                    <ol>
+                        <li>Cadastro do aluno</li>
+                        <li>Verificação de pré-requisitos</li>
+                        <li>Escolha da turma</li>
+                        <li>Confirmação de pagamento</li>
+                        <li>Efetivação da matrícula</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section id="database">
+                <h2>Banco de Dados</h2>
+                <div class="card">
+                    <h3>Firebase Collections</h3>
+                    <p>O sistema utiliza o Firebase como banco de dados NoSQL. Abaixo estão as principais coleções:</p>
+                </div>
+            
+                <div class="card">
+                    <h3>Collection: membros</h3>
+                    <ul>
+                        <li>arrolamento (string)</li>
+                        <li>bairro (string)</li>
+                        <li>celular (string)</li>
+                        <li>cidade (string)</li>
+                        <li>dtnasc (string)</li>
+                        <li>estadoCivil (string)</li>
+                        <li>igreja (string)</li>
+                        <li>lidercelula (string)</li>
+                        <li>nome (string)</li>
+                        <li>nomedacelula (string)</li>
+                        <li>rede (string)</li>
+                        <li>sexo (string)</li>
+                        <li>uf (string)</li>
+                    </ul>
+                </div>
+            
+                <div class="card">
+                    <h3>Collection: cursos</h3>
+                    <div class="firebase-structure">
+                        <ul>
+                            <li>
+                                <span class="collection-title">Documento Curso</span>
+                                <ul>
+                                    <li>nomeCurso (string)</li>
+                                    <li>responsavel (string)</li>
+                                    <li>
+                                        <span class="subcollection-title">Subcollection: disciplina</span>
+                                        <ul>
+                                            <li>
+                                                <span class="document-title">Documento Disciplina</span>
+                                                <ul>
+                                                    <li>nomeDisc (string)</li>
+                                                    <li>professor (string)</li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+            
+                <div class="card">
+                    <h3>Collection: cursosInscricoes</h3>
+                    <ul>
+                        <li>celula (string)</li>
+                        <li>dataInscricao (timestamp)</li>
+                        <li>disciplina (string)</li>
+                        <li>nome (string)</li>
+                        <li>turma (string)</li>
+                    </ul>
+                </div>
+            
+                <div class="card">
+                    <h3>Collection: cursosPresencas</h3>
+                    <ul>
+                        <li>dataAula (string)</li>
+                        <li>disciplina (string)</li>
+                        <li>presencas (map)</li>
+                        <li>turma (string)</li>
+                    </ul>
+                </div>
+            
+                <div class="card">
+                    <h3>Collection: cursosTurmas</h3>
+                    <ul>
+                        <li>disciplinas (string)</li>
+                        <li>dtFim (string)</li>
+                        <li>dtIni (string)</li>
+                        <li>nomeTurma (string)</li>
+                        <li>professor (string)</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="relatorios">
+                <h2>Relatórios Necessários</h2>
+                <div class="card">
+                    <ul>
+                        <li>Alunos matriculados por curso</li>
+                        <li>Desempenho por turma</li>
+                        <li>Frequência dos alunos</li>
+                        <li>Situação financeira</li>
+                        <li>Histórico de conclusões</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="requisitos">
+                <h2>Requisitos Técnicos</h2>
+                <div class="card">
+                    <h3>Backend</h3>
+                    <ul>
+                        <li>API REST</li>
+                        <li>Banco de dados relacional</li>
+                        <li>Sistema de autenticação</li>
+                        <li>Gestão de permissões</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Frontend</h3>
+                    <ul>
+                        <li>Painel administrativo</li>
+                        <li>Área do aluno</li>
+                        <li>Área do professor</li>
+                        <li>Relatórios e dashboards</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="tarefas">
+                <h2>Lista de Tarefas</h2>
+                <div class="card">
+                    <div class="progress-bar">
+                        <div class="progress" id="taskProgress"></div>
+                    </div>
+                    <p id="progressText">0% concluído</p>
+                                          <div class="task-group">
+                                              <h3>Configuração Inicial</h3>
+                                              <div class="task-item">
+                                                  <input type="checkbox" id="task1" onchange="updateProgress()">
+                                                  <label for="task1">Criar banco de dados</label>
+                                              </div>
+                                              <div class="task-item">
+                                                  <input type="checkbox" id="taskdb1" onchange="updateProgress()">
+                                                  <label for="taskdb1">Adicionar campos histórico, status e data cadastro em membros</label>
+                                              </div>
+                                              <div class="task-item">
+                                                  <input type="checkbox" id="taskdb2" onchange="updateProgress()">
+                                                  <label for="taskdb2">Adicionar campos carga horária, pré-requisitos e ordem em cursos</label>
+                                              </div>
+                                              <div class="task-item">
+                                                  <input type="checkbox" id="taskdb3" onchange="updateProgress()">
+                                                  <label for="taskdb3">Adicionar campos status, pagamento e ID membro em cursosInscricoes</label>
+                                              </div>
+                                              <div class="task-item">
+                                                  <input type="checkbox" id="taskdb4" onchange="updateProgress()">
+                                                  <label for="taskdb4">Adicionar campos justificativa e total presenças em cursosPresencas</label>
+                                              </div>
+                                              <div class="task-item">
+                                                  <input type="checkbox" id="taskdb5" onchange="updateProgress()">
+                                                  <label for="taskdb5">Adicionar campos capacidade, status e horário em cursosTurmas</label>
+                                              </div>
+                                              <div class="task-item">
+                                                  <input type="checkbox" id="taskdb6" onchange="updateProgress()">
+                                                  <label for="taskdb6">Criar collection avaliacoes</label>
+                                              </div>
+                                              <div class="task-item">
+                                                  <input type="checkbox" id="taskdb7" onchange="updateProgress()">
+                                                  <label for="taskdb7">Criar collection certificados</label>
+                                              </div>
+                                          </div>
+            
+                    <div class="task-group">
+                        <h3>Módulo de Alunos</h3>
+                        <div class="task-item">
+                            <input type="checkbox" id="task3" onchange="updateProgress()">
+                            <label for="task3">Criar cadastro de alunos</label>
+                        </div>
+                        <div class="task-item">
+                            <input type="checkbox" id="task4" onchange="updateProgress()">
+                            <label for="task4">Implementar matrícula online</label>
+                        </div>
+                    </div>
+            
+                    <div class="task-group">
+                        <h3>Módulo de Turmas</h3>
+                        <div class="task-item">
+                            <input type="checkbox" id="task5" onchange="updateProgress()">
+                            <label for="task5">Criar gestão de turmas</label>
+                        </div>
+                        <div class="task-item">
+                            <input type="checkbox" id="task6" onchange="updateProgress()">
+                            <label for="task6">Implementar controle de frequência</label>
+                        </div>
+                    </div>
+            
+                    <div class="task-group">
+                        <h3>Relatórios</h3>
+                        <div class="task-item">
+                            <input type="checkbox" id="task7" onchange="updateProgress()">
+                            <label for="task7">Desenvolver dashboard principal</label>
+                        </div>
+                        <div class="task-item">
+                            <input type="checkbox" id="task8" onchange="updateProgress()">
+                            <label for="task8">Criar relatórios de desempenho</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+        </main>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // Esconde todas as seções
+            document.querySelectorAll('section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Mostra apenas a seção selecionada
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        // Mostra a primeira seção ao carregar a página
+        window.onload = function() {
+            showSection('estrutura');
+        }
+        
+        function updateProgress() {
+        const totalTasks = document.querySelectorAll('input[type="checkbox"]').length;
+        const completedTasks = document.querySelectorAll('input[type="checkbox"]:checked').length;
+        const progressPercentage = (completedTasks / totalTasks) * 100;
+        
+        document.getElementById('taskProgress').style.width = progressPercentage + '%';
+        document.getElementById('progressText').textContent = 
+            Math.round(progressPercentage) + '% concluído (' + completedTasks + '/' + totalTasks + ' tarefas)';
+    }
+    </script>
+</body>
+</html>
