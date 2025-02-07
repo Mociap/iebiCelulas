@@ -438,13 +438,14 @@
                 return;
             }
 
-            // Verificar se o membro já tem qualquer inscrição
+            // Verificar se o membro já tem inscrição na turma selecionada
             bancoDeDados.collection('cursosInscricoes')
                 .where('nome', '==', nomeMembro)
+                .where('turma', '==', turmaSelect.options[turmaSelect.selectedIndex].text)
                 .get()
                 .then((querySnapshot) => {
                     if (!querySnapshot.empty) {
-                        alert('Você já está inscrito em uma disciplina. É permitida apenas uma inscrição por vez.');
+                        alert('Você já está inscrito nesta turma. É permitida apenas uma inscrição por turma.');
                         return;
                     }
 

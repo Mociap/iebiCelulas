@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Chart.js para os gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -49,10 +50,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container mt-4">
         <h2 class="text-center mb-4">Dashboard Escola Ministerial</h2>
-        
+
         <!-- Cards de Estatísticas -->
         <div class="row">
             <div class="col-md-3">
@@ -232,7 +234,7 @@
         };
         firebase.initializeApp(configuracaoFirebase);
         const bancoDeDados = firebase.firestore();
-    
+
         // Funções Principais
         function carregarEstatisticas() {
             const hoje = new Date();
@@ -245,19 +247,20 @@
             carregarTabelaDisciplinas();
             carregarFiltros();
         }
-    
+
         function contarAlunosAtivos() {
             const hoje = new Date();
             bancoDeDados.collection('cursosTurmas')
-                .where('dtIni', '<=', hoje.toLocaleDateString())
                 .where('dtFim', '>=', hoje.toLocaleDateString())
                 .get()
                 .then(turmasSnapshot => {
                     const turmasAtivas = new Set();
                     turmasSnapshot.forEach(doc => {
-                        turmasAtivas.add(doc.data().nomeTurma);
+                        if (doc.data().dtIni <= hoje.toLocaleDateString()) {
+                            turmasAtivas.add(doc.data().nomeTurma);
+                        }
                     });
-    
+
                     if (turmasAtivas.size > 0) {
                         bancoDeDados.collection('cursosInscricoes')
                             .where('turma', 'in', Array.from(turmasAtivas))
@@ -270,7 +273,7 @@
                     }
                 });
         }
-    
+
         function carregarTurmasAtivas() {
             bancoDeDados.collection('cursosTurmas')
                 .where('dtFim', '>=', new Date().toLocaleDateString())
@@ -279,17 +282,22 @@
                     document.getElementById('totalTurmas').textContent = snapshot.size;
                 });
         }
-    
+
         function carregarDisciplinasDisponiveis(hoje) {
             bancoDeDados.collection('cursosTurmas')
-                .where('dtIniInsc', '<=', hoje.toLocaleDateString())
                 .where('dtFimInsc', '>=', hoje.toLocaleDateString())
                 .get()
                 .then(snapshot => {
-                    document.getElementById('totalDisciplinas').textContent = snapshot.size;
+                    let count = 0;
+                    snapshot.forEach(doc => {
+                        if (doc.data().dtIniInsc <= hoje.toLocaleDateString()) {
+                            count++;
+                        }
+                    });
+                    document.getElementById('totalDisciplinas').textContent = count;
                 });
         }
-    
+
         function carregarInscricoesRecentes(hoje) {
             const ontem = new Date(hoje);
             ontem.setDate(ontem.getDate() - 1);
@@ -300,13 +308,13 @@
                     document.getElementById('inscricoesHoje').textContent = snapshot.size;
                 });
         }
-    
+
         function inicializarGraficos() {
             inicializarGraficoInscricoes();
             inicializarGraficoDisciplinas();
             inicializarGraficoEvolucao();
         }
-    
+
         function inicializarGraficoInscricoes() {
             const ctx = document.getElementById('inscricoesChart').getContext('2d');
             new Chart(ctx, {
@@ -345,7 +353,7 @@
                 }
             });
         }
-    
+
         // Funções de Exportação
         function exportarDados() {
             const filtros = {
@@ -353,20 +361,154 @@
                 disciplina: document.getElementById('filtroDisciplina').value,
                 periodo: document.getElementById('filtroPeriodo').value
             };
-            
+
             gerarRelatorio(filtros)
                 .then(dados => {
                     const csv = converterParaCSV(dados);
                     downloadCSV(csv, 'relatorio_escola_ministerial.csv');
                 });
         }
-    
+
         // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             carregarEstatisticas();
             inicializarGraficos();
         });
+
+        function carregarTabelaTurmas() {
+            const tbody = document.getElementById('turmasTableBody');
+            const hoje = new Date();
+
+            bancoDeDados.collection('cursosTurmas')
+                .orderBy('dtIni', 'desc')
+                .get()
+                .then(snapshot => {
+                    tbody.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const turma = doc.data();
+                        const row = `
+                    <tr>
+                        <td>${turma.nomeTurma}</td>
+                        <td>${turma.dtIni} - ${turma.dtFim}</td>
+                        <td>${turma.dtIniInsc <= hoje.toLocaleDateString() &&
+                                turma.dtFimInsc >= hoje.toLocaleDateString() ?
+                                '<span class="badge badge-success">Abertas</span>' :
+                                '<span class="badge badge-danger">Fechadas</span>'}</td>
+                        <td>${turma.disciplinas}</td>
+                        <td>${turma.status || 'Em andamento'}</td>
+                    </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                });
+        }
+
+        function carregarTabelaAlunos() {
+            const tbody = document.getElementById('alunosTableBody');
+
+            bancoDeDados.collection('cursosInscricoes')
+                .orderBy('dataInscricao', 'desc')
+                .get()
+                .then(snapshot => {
+                    tbody.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const aluno = doc.data();
+                        const row = `
+                    <tr>
+                        <td>${aluno.nome}</td>
+                        <td>${aluno.celula}</td>
+                        <td>${aluno.disciplina}</td>
+                        <td><span class="badge badge-success">Ativo</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="verHistorico('${doc.id}')">
+                                <i class="fas fa-history"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                });
+        }
+
+        function carregarTabelaDisciplinas() {
+            const tbody = document.getElementById('disciplinasTableBody');
+            const hoje = new Date();
+
+            bancoDeDados.collection('cursosTurmas')
+                .orderBy('dtIni', 'desc')
+                .get()
+                .then(snapshot => {
+                    tbody.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const turma = doc.data();
+                        const row = `
+                    <tr>
+                        <td>${turma.disciplinas}</td>
+                        <td>${turma.professor || 'A definir'}</td>
+                        <td>${turma.dtIniInsc} - ${turma.dtFimInsc}</td>
+                        <td>${turma.dtIni} - ${turma.dtFim}</td>
+                        <td>
+                            ${turma.dtIniInsc <= hoje.toLocaleDateString() &&
+                                turma.dtFimInsc >= hoje.toLocaleDateString() ?
+                                '<span class="badge badge-success">Inscrições Abertas</span>' :
+                                '<span class="badge badge-danger">Inscrições Fechadas</span>'}
+                        </td>
+                    </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                });
+        }
+
+        function carregarFiltros() {
+            // Carregar filtro de células/líderes
+            const filtroCelula = document.getElementById('filtroCelula');
+            bancoDeDados.collection('estruturacelula')
+                .orderBy('conclider')
+                .get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => {
+                        const option = document.createElement('option');
+                        option.value = doc.data().conclider;
+                        option.text = doc.data().conclider;
+                        filtroCelula.appendChild(option);
+                    });
+                });
+
+            // Carregar filtro de turmas
+            const filtroTurma = document.getElementById('filtroTurma');
+            bancoDeDados.collection('cursosTurmas')
+                .orderBy('nomeTurma')
+                .get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => {
+                        const option = document.createElement('option');
+                        option.value = doc.data().nomeTurma;
+                        option.text = doc.data().nomeTurma;
+                        filtroTurma.appendChild(option);
+                    });
+                });
+
+            // Carregar filtro de disciplinas
+            const filtroDisciplina = document.getElementById('filtroDisciplina');
+            bancoDeDados.collection('cursosTurmas')
+                .orderBy('disciplinas')
+                .get()
+                .then(snapshot => {
+                    const disciplinasUnicas = new Set();
+                    snapshot.forEach(doc => {
+                        disciplinasUnicas.add(doc.data().disciplinas);
+                    });
+                    disciplinasUnicas.forEach(disciplina => {
+                        const option = document.createElement('option');
+                        option.value = disciplina;
+                        option.text = disciplina;
+                        filtroDisciplina.appendChild(option);
+                    });
+                });
+        }
+
+
     </script>
-    
+
 </body>
+
 </html>
