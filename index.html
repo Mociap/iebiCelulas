@@ -173,9 +173,12 @@
 
         .banner-container {
             width: 100%;
-            max-width: 970px;
-            height: 250px;
-            background-color: #2c2c2c;
+            max-width: 1000px;
+            min-width: 310px;
+            height: auto;
+            /* 250px; */
+            background-color: transparent;
+            /* #2c2c2c; */
             margin: 20px auto;
             border-radius: 10px;
             overflow: hidden;
@@ -186,11 +189,24 @@
             font-size: 24px;
         }
 
-        .banner-image {
+        .banner-container a {
+            cursor: pointer;
+            display: block;
+        }
+
+        /* .banner-image {
             object-fit: cover;
             width: 100%;
             height: 100%;
 
+        }*/
+
+        .banner-image {
+            width: 100%;
+            height: auto;
+            /* Permite que a altura seja proporcional */
+            display: block;
+            /* Elimina espaço extra abaixo da imagem */
         }
 
         .banner-video {
@@ -199,10 +215,6 @@
             object-fit: cover;
         }
 
-        .banner-container a {
-            cursor: pointer;
-            display: block;
-        }
 
         .welcome-title {
             position: absolute;
@@ -214,21 +226,41 @@
         }
 
         .mobile-video {
-    display: none;
-}
+            display: none;
+        }
 
-.desktop-video {
-    display: block;
-}
+        .desktop-video {
+            display: block;
+        }
 
-@media screen and (max-width: 840px) {
-    .mobile-video {
-        display: block;
-    }
-    .desktop-video {
-        display: none;
-    }
-}
+        .mobile-image {
+            display: none;
+        }
+
+        .desktop-image {
+            display: block;
+        }
+
+        @media screen and (max-width: 840px) {
+            .mobile-image {
+                display: block;
+            }
+
+            .desktop-image {
+                display: none;
+            }
+        }
+
+
+        @media screen and (max-width: 840px) {
+            .mobile-video {
+                display: block;
+            }
+
+            .desktop-video {
+                display: none;
+            }
+        }
 
 
         @media screen and (max-width: 768px) {
@@ -261,10 +293,13 @@
         <!-- Banner Tela Inicial -->
         <div class="banner-container">
             <a href="EscolaMinisterial/inscricaoEM.html">
-                <img src="./assets/Banner_Index.png" alt="Banner IEBI" class="banner-image">
+                <img src="./assets/Banner_Index.png" alt="Banner IEBI" class="banner-image desktop-image">
+                <img src="./assets/Banner_Index.png" alt="Banner IEBI Mobile" class="banner-image mobile-image">
+                <!--  <img src="./assets/Banner_Index_Mobile.png" alt="Banner IEBI Mobile" class="banner-image mobile-image">
+            -->
             </a>
             <!-- VÍDEO BANNER INICIAL -->
-             <!--
+            <!--
             <a href="https://mociap.github.io/Acamp360/" target="_blank">
                 <video autoplay muted loop class="banner-video desktop-video">
                     <source src="./assets/Banner_Video.mp4" type="video/mp4">
@@ -274,7 +309,7 @@
                 </video> 
             </a>-->
         </div>
-        
+
 
         <div class="spacer"></div>
         <div class="card-container">
