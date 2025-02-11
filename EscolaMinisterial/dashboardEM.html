@@ -52,7 +52,7 @@
 </head>
 
 <body>
-    <div class="container mt-4">
+    <div class="container-fluid mt-4">
         <h2 class="text-center mb-4">Dashboard Escola Ministerial</h2>
 
         <!-- Cards de Estatísticas -->
@@ -95,122 +95,139 @@
             </div>
         </div>
 
-        <!-- Seção de Turmas -->
-        <div class="dashboard-card mt-4">
-            <div class="card-title">
-                <i class="fas fa-chalkboard-teacher mr-2"></i>Gestão de Turmas
-            </div>
-            <div class="table-responsive">
-                <table class="table table-dark table-hover">
-                    <thead>
-                        <tr>
-                            <th>Turma</th>
-                            <th>Período</th>
-                            <th>Status Inscrições</th>
-                            <th>Alunos</th>
-                            <th>Disciplinas</th>
-                        </tr>
-                    </thead>
-                    <tbody id="turmasTableBody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <!-- Seções de Gestão -->
+        <div class="row">
+            <div class="col-12">
 
-        <!-- Seção de Alunos -->
-        <div class="dashboard-card mt-4">
-            <div class="card-title">
-                <i class="fas fa-users mr-2"></i>Gestão de Alunos
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <select class="form-control bg-dark text-white" id="filtroCelula">
-                        <option value="">Todos os Líderes</option>
-                    </select>
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-dark table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Líder</th>
-                            <th>Disciplina Atual</th>
-                            <th>Status</th>
-                            <th>Histórico</th>
-                        </tr>
-                    </thead>
-                    <tbody id="alunosTableBody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                <!-- Seção de Turmas -->
+                <div class="dashboard-card mt-4">
+                    <div class="card-title">
+                        <i class="fas fa-chalkboard-teacher mr-2"></i>Gestão de Turmas
+                    </div>
 
-        <!-- Seção de Disciplinas -->
-        <div class="dashboard-card mt-4">
-            <div class="card-title">
-                <i class="fas fa-book mr-2"></i>Gestão de Disciplinas
-            </div>
-            <div class="table-responsive">
-                <table class="table table-dark table-hover">
-                    <thead>
-                        <tr>
-                            <th>Disciplina</th>
-                            <th>Professor</th>
-                            <th>Inscrições</th>
-                            <th>Período</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="disciplinasTableBody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <select class="form-control bg-dark text-white" id="filtroStatusTurma">
+                                <!--    <option value="todos">Todos os Status</option>  -->
+                                <option value="abertas">Em Andamento</option>
+                                <option value="fechadas">Encerradas</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <!-- Seção de Relatórios -->
-        <div class="dashboard-card mt-4">
-            <div class="card-title">
-                <i class="fas fa-chart-line mr-2"></i>Relatórios e Análises
-            </div>
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <select class="form-control bg-dark text-white" id="filtroTurma">
-                        <option value="">Todas as Turmas</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-control bg-dark text-white" id="filtroDisciplina">
-                        <option value="">Todas as Disciplinas</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-control bg-dark text-white" id="filtroPeriodo">
-                        <option value="7">Últimos 7 dias</option>
-                        <option value="30">Últimos 30 dias</option>
-                        <option value="90">Últimos 3 meses</option>
-                        <option value="180">Últimos 6 meses</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-primary btn-block" onclick="exportarDados()">
-                        <i class="fas fa-download mr-2"></i>Exportar Dados
-                    </button>
-                </div>
-            </div>
-
-            <!-- Gráficos Estatísticos -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="dashboard-card">
-                        <div class="card-title">Inscrições por Disciplina</div>
-                        <canvas id="graficoDisciplinas"></canvas>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Turma</th>
+                                    <th>Disciplinas</th>
+                                    <th>Período</th>
+                                    <th>Inscrições</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="turmasTableBody">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="dashboard-card">
-                        <div class="card-title">Evolução de Inscrições</div>
-                        <canvas id="graficoEvolucao"></canvas>
+
+                <!-- Seção de Disciplinas -->
+                <div class="dashboard-card mt-4">
+                    <div class="card-title">
+                        <i class="fas fa-book mr-2"></i>Gestão de Disciplinas
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Disciplina</th>
+                                    <th>Professor</th>
+                                    <th>Inscrições</th>
+                                    <th>Período</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="disciplinasTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Seção de Alunos -->
+                <div class="dashboard-card mt-4">
+                    <div class="card-title">
+                        <i class="fas fa-users mr-2"></i>Gestão de Alunos
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <select class="form-control bg-dark text-white" id="filtroCelula">
+                                <option value="">Todos os Líderes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Líder</th>
+                                    <th>Disciplina Atual</th>
+                                    <th>Status</th>
+                                    <th>Histórico</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alunosTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Seção de Relatórios -->
+                <div class="dashboard-card mt-4">
+                    <div class="card-title">
+                        <i class="fas fa-chart-line mr-2"></i>Relatórios e Análises
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <select class="form-control bg-dark text-white" id="filtroTurma">
+                                <option value="">Todas as Turmas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control bg-dark text-white" id="filtroDisciplina">
+                                <option value="">Todas as Disciplinas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control bg-dark text-white" id="filtroPeriodo">
+                                <option value="7">Últimos 7 dias</option>
+                                <option value="30">Últimos 30 dias</option>
+                                <option value="90">Últimos 3 meses</option>
+                                <option value="180">Últimos 6 meses</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary btn-block" onclick="exportarDados()">
+                                <i class="fas fa-download mr-2"></i>Exportar Dados
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos Estatísticos -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="dashboard-card">
+                                <div class="card-title">Inscrições por Disciplina</div>
+                                <canvas id="graficoDisciplinas"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="dashboard-card">
+                                <div class="card-title">Evolução de Inscrições</div>
+                                <canvas id="graficoEvolucao"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -250,14 +267,19 @@
 
         function contarAlunosAtivos() {
             const hoje = new Date();
+
             bancoDeDados.collection('cursosTurmas')
-                .where('dtFim', '>=', hoje.toLocaleDateString())
                 .get()
                 .then(turmasSnapshot => {
                     const turmasAtivas = new Set();
+
                     turmasSnapshot.forEach(doc => {
-                        if (doc.data().dtIni <= hoje.toLocaleDateString()) {
-                            turmasAtivas.add(doc.data().nomeTurma);
+                        const dados = doc.data();
+                        const partesData = dados.dtFim.split('/');
+                        const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+
+                        if (dataFim >= hoje) {
+                            turmasAtivas.add(dados.nomeTurma);
                         }
                     });
 
@@ -275,11 +297,24 @@
         }
 
         function carregarTurmasAtivas() {
+            const hoje = new Date();
+
             bancoDeDados.collection('cursosTurmas')
-                .where('dtFim', '>=', new Date().toLocaleDateString())
                 .get()
                 .then(snapshot => {
-                    document.getElementById('totalTurmas').textContent = snapshot.size;
+                    let turmasAtivas = 0;
+
+                    snapshot.forEach(doc => {
+                        const dados = doc.data();
+                        const partesData = dados.dtFim.split('/');
+                        const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+
+                        if (dataFim >= hoje) {
+                            turmasAtivas++;
+                        }
+                    });
+
+                    document.getElementById('totalTurmas').textContent = turmasAtivas;
                 });
         }
 
@@ -372,11 +407,12 @@
         // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             carregarEstatisticas();
-            inicializarGraficos();
+            // inicializarGraficos();
         });
 
         function carregarTabelaTurmas() {
             const tbody = document.getElementById('turmasTableBody');
+            const filtroStatus = document.getElementById('filtroStatusTurma').value;
             const hoje = new Date();
 
             bancoDeDados.collection('cursosTurmas')
@@ -386,77 +422,120 @@
                     tbody.innerHTML = '';
                     snapshot.forEach(doc => {
                         const turma = doc.data();
-                        const row = `
-                    <tr>
-                        <td>${turma.nomeTurma}</td>
-                        <td>${turma.dtIni} - ${turma.dtFim}</td>
-                        <td>${turma.dtIniInsc <= hoje.toLocaleDateString() &&
-                                turma.dtFimInsc >= hoje.toLocaleDateString() ?
-                                '<span class="badge badge-success">Abertas</span>' :
-                                '<span class="badge badge-danger">Fechadas</span>'}</td>
-                        <td>${turma.disciplinas}</td>
-                        <td>${turma.status || 'Em andamento'}</td>
-                    </tr>`;
-                        tbody.innerHTML += row;
+                        const statusInscricao = turma.dtIniInsc <= hoje.toLocaleDateString() &&
+                            turma.dtFimInsc >= hoje.toLocaleDateString() ? 'abertas' : 'fechadas';
+
+                        if (filtroStatus === 'todos' || filtroStatus === statusInscricao) {
+                            const row = `
+                        <tr>
+                            <td>${turma.nomeTurma}</td>
+                            <td>${turma.disciplinas}</td>
+                            <td>${turma.dtIni} - ${turma.dtFim}</td>
+                            <td>${statusInscricao === 'abertas' ?
+                                    '<span class="badge badge-success">Abertas</span>' :
+                                    '<span class="badge badge-danger">Fechadas</span>'}</td>
+                            <td>${turma.status || 'Em andamento'}</td>
+                        </tr>`;
+                            tbody.innerHTML += row;
+                        }
                     });
                 });
         }
 
-        function carregarTabelaAlunos() {
-            const tbody = document.getElementById('alunosTableBody');
+        document.getElementById('filtroStatusTurma').addEventListener('change', carregarTabelaTurmas);
+                    function carregarTabelaAlunos() {
+                        const tbody = document.getElementById('alunosTableBody');
+                        const hoje = new Date();
 
-            bancoDeDados.collection('cursosInscricoes')
-                .orderBy('dataInscricao', 'desc')
-                .get()
-                .then(snapshot => {
-                    tbody.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const aluno = doc.data();
-                        const row = `
-                    <tr>
-                        <td>${aluno.nome}</td>
-                        <td>${aluno.celula}</td>
-                        <td>${aluno.disciplina}</td>
-                        <td><span class="badge badge-success">Ativo</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-info" onclick="verHistorico('${doc.id}')">
-                                <i class="fas fa-history"></i>
-                            </button>
-                        </td>
-                    </tr>`;
-                        tbody.innerHTML += row;
-                    });
-                });
-        }
+                        // Primeiro, buscar turmas ativas
+                        bancoDeDados.collection('cursosTurmas')
+                            .get()
+                            .then(turmasSnapshot => {
+                                const turmasAtivas = new Set();
 
-        function carregarTabelaDisciplinas() {
-            const tbody = document.getElementById('disciplinasTableBody');
-            const hoje = new Date();
+                                // Identificar turmas ativas
+                                turmasSnapshot.forEach(doc => {
+                                    const turma = doc.data();
+                                    const partesData = turma.dtFim.split('/');
+                                    const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
 
-            bancoDeDados.collection('cursosTurmas')
-                .orderBy('dtIni', 'desc')
-                .get()
-                .then(snapshot => {
-                    tbody.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const turma = doc.data();
-                        const row = `
-                    <tr>
-                        <td>${turma.disciplinas}</td>
-                        <td>${turma.professor || 'A definir'}</td>
-                        <td>${turma.dtIniInsc} - ${turma.dtFimInsc}</td>
-                        <td>${turma.dtIni} - ${turma.dtFim}</td>
-                        <td>
-                            ${turma.dtIniInsc <= hoje.toLocaleDateString() &&
-                                turma.dtFimInsc >= hoje.toLocaleDateString() ?
-                                '<span class="badge badge-success">Inscrições Abertas</span>' :
-                                '<span class="badge badge-danger">Inscrições Fechadas</span>'}
-                        </td>
-                    </tr>`;
-                        tbody.innerHTML += row;
-                    });
-                });
-        }
+                                    if (dataFim >= hoje) {
+                                        turmasAtivas.add(turma.nomeTurma);
+                                    }
+                                });
+
+                                // Buscar alunos apenas das turmas ativas
+                                if (turmasAtivas.size > 0) {
+                                    bancoDeDados.collection('cursosInscricoes')
+                                        .where('turma', 'in', Array.from(turmasAtivas))
+                                        .orderBy('nome')
+                                        .get()
+                                        .then(snapshot => {
+                                            tbody.innerHTML = '';
+                                            snapshot.forEach(doc => {
+                                                const aluno = doc.data();
+                                                const row = `
+                                                    <tr>
+                                                        <td>${aluno.nome}</td>
+                                                        <td>${aluno.celula}</td>
+                                                        <td>${aluno.disciplina}</td>
+                                                        <td><span class="badge badge-success">Ativo</span></td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-info" onclick="verHistorico('${doc.id}')">
+                                                                <i class="fas fa-history"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>`;
+                                                tbody.innerHTML += row;
+                                            });
+                                        });
+                                } else {
+                                    tbody.innerHTML = '<tr><td colspan="5">Não há turmas ativas no momento</td></tr>';
+                                }
+                            });
+                    }
+          function carregarTabelaDisciplinas() {
+              const tbody = document.getElementById('disciplinasTableBody');
+              const hoje = new Date();
+
+              bancoDeDados.collection('cursosTurmas')
+                  .orderBy('dtIni', 'desc')
+                  .get()
+                  .then(snapshot => {
+                      tbody.innerHTML = '';
+            
+                      snapshot.forEach(doc => {
+                          const turma = doc.data();
+                          const partesData = turma.dtFim.split('/');
+                          const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+
+                          if (dataFim >= hoje) {
+                              bancoDeDados.collection('cursosInscricoes')
+                                  .where('turma', '==', turma.nomeTurma)
+                                  .where('disciplina', '==', turma.disciplinas)
+                                  .get()
+                                  .then(inscricoesSnapshot => {
+                                      const totalInscritos = inscricoesSnapshot.size;
+                            
+                                      const row = `
+                                      <tr>
+                                          <td>${turma.disciplinas}</td>
+                                          <td>${turma.professor || 'A definir'}</td>
+                                          <td>${totalInscritos}</td>
+                                          <td>${turma.dtIni} - ${turma.dtFim}</td>
+                                          <td>
+                                              ${turma.dtIniInsc <= hoje.toLocaleDateString() &&
+                                              turma.dtFimInsc >= hoje.toLocaleDateString() ?
+                                              '<span class="badge badge-success">Inscrições Abertas</span>' :
+                                              '<span class="badge badge-danger">Inscrições Fechadas</span>'}
+                                          </td>
+                                      </tr>`;
+                                      tbody.innerHTML += row;
+                                  });
+                          }
+                      });
+                  });
+          }                     
 
         function carregarFiltros() {
             // Carregar filtro de células/líderes
@@ -505,7 +584,6 @@
                     });
                 });
         }
-
 
     </script>
 
