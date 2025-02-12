@@ -96,7 +96,10 @@
             background-color: #2980b9;
             transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: #ffffff;
         }
+
 
         .back-button i {
             margin-right: 0px;
@@ -123,11 +126,11 @@
 </head>
 
 <body>
-    <a href="index.html" class="back-button">
+    <a href="../index.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
-        <img src="../LogoBranco.png" alt="Logo da Igreja Evangélica Batista">
+        <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
     <div class="container">
         <h2 class="text-center mb-4 font-weight-bold">Cadastro de Turmas</h2>
@@ -165,7 +168,7 @@
             <div class="form-group">
                 <label for="dtFimInsc">Término das Inscrições</label>
                 <input type="text" class="form-control" id="dtFimInsc" required placeholder="DD/MM/AAAA">
-            </div>            
+            </div>
             <button type="submit" class="btn btn-primary btn-block" id="cadastrarBtn">Cadastrar Turma</button>
         </form>
     </div>
@@ -220,7 +223,7 @@
                 .get()
                 .then((querySnapshot) => {
                     const selectDisciplinas = document.getElementById('disciplinas');
-                    
+
                     querySnapshot.forEach((cursoDoc) => {
                         cursoDoc.ref.collection('disciplina')
                             .where('inscricao', '==', 'SIM')
@@ -249,71 +252,71 @@
             document.getElementById('sugestoesProfessores').innerHTML = '';
         }
 
-          // Apply mask to date fields
-          VMasker(document.getElementById("dtIni")).maskPattern("99/99/9999");
-          VMasker(document.getElementById("dtFim")).maskPattern("99/99/9999");
-          VMasker(document.getElementById("dtIniInsc")).maskPattern("99/99/9999");
-          VMasker(document.getElementById("dtFimInsc")).maskPattern("99/99/9999");
+        // Apply mask to date fields
+        VMasker(document.getElementById("dtIni")).maskPattern("99/99/9999");
+        VMasker(document.getElementById("dtFim")).maskPattern("99/99/9999");
+        VMasker(document.getElementById("dtIniInsc")).maskPattern("99/99/9999");
+        VMasker(document.getElementById("dtFimInsc")).maskPattern("99/99/9999");
 
-          console.log("Máscaras aplicadas aos campos de data");
+        console.log("Máscaras aplicadas aos campos de data");
 
-          // Ensure only numbers are entered
-          function onlyNumbers(event) {
-              var key = event.keyCode || event.which;
-              key = String.fromCharCode(key);
-              var regex = /[0-9]|\./;
-              if (!regex.test(key)) {
-                  event.returnValue = false;
-                  if (event.preventDefault) event.preventDefault();
-                  console.log("Caractere não numérico bloqueado:", key);
-              } else {
-                  console.log("Caractere numérico aceito:", key);
-              }
-          }
+        // Ensure only numbers are entered
+        function onlyNumbers(event) {
+            var key = event.keyCode || event.which;
+            key = String.fromCharCode(key);
+            var regex = /[0-9]|\./;
+            if (!regex.test(key)) {
+                event.returnValue = false;
+                if (event.preventDefault) event.preventDefault();
+                console.log("Caractere não numérico bloqueado:", key);
+            } else {
+                console.log("Caractere numérico aceito:", key);
+            }
+        }
 
-          // Add event listeners to date fields
-          document.getElementById("dtIni").addEventListener("keypress", onlyNumbers);
-          document.getElementById("dtFim").addEventListener("keypress", onlyNumbers);
-          document.getElementById("dtIniInsc").addEventListener("keypress", onlyNumbers);
-          document.getElementById("dtFimInsc").addEventListener("keypress", onlyNumbers);
+        // Add event listeners to date fields
+        document.getElementById("dtIni").addEventListener("keypress", onlyNumbers);
+        document.getElementById("dtFim").addEventListener("keypress", onlyNumbers);
+        document.getElementById("dtIniInsc").addEventListener("keypress", onlyNumbers);
+        document.getElementById("dtFimInsc").addEventListener("keypress", onlyNumbers);
 
-          console.log("Event listeners adicionados aos campos de data");
+        console.log("Event listeners adicionados aos campos de data");
 
-          // Adicionar evento de envio do formulário
-          formulario.addEventListener('submit', function (e) {
-              e.preventDefault();
-              console.log("Formulário submetido");
+        // Adicionar evento de envio do formulário
+        formulario.addEventListener('submit', function (e) {
+            e.preventDefault();
+            console.log("Formulário submetido");
 
-              var dtIni = document.getElementById('dtIni').value;
-              var dtFim = document.getElementById('dtFim').value;
+            var dtIni = document.getElementById('dtIni').value;
+            var dtFim = document.getElementById('dtFim').value;
 
-              console.log("Data de Início:", dtIni);
-              console.log("Data de Término:", dtFim);
+            console.log("Data de Início:", dtIni);
+            console.log("Data de Término:", dtFim);
 
-              // Obter valores dos campos
-              var nomeTurma = document.getElementById('nomeTurma').value.trim();
-              var disciplinas = document.getElementById('disciplinas').value.trim();
-              var professor = document.getElementById('professor').value.trim();
+            // Obter valores dos campos
+            var nomeTurma = document.getElementById('nomeTurma').value.trim();
+            var disciplinas = document.getElementById('disciplinas').value.trim();
+            var professor = document.getElementById('professor').value.trim();
 
-              // Adicionar dados ao Firestore
-              bancoDeDados.collection('cursosTurmas').add({
-                  nomeTurma: nomeTurma,
-                  disciplinas: disciplinas,
-                  professor: professor,
-                  dtIni: dtIni,
-                  dtFim: dtFim,
-                  dtIniInsc: document.getElementById('dtIniInsc').value,
-                  dtFimInsc: document.getElementById('dtFimInsc').value
-              })
-                  .then(function () {
-                      console.log("Turma cadastrada com sucesso");
-                      alert('Turma cadastrada com sucesso!');
-                      formulario.reset();
-                  })
-                  .catch(function (error) {
-                      console.error("Erro ao cadastrar turma:", error);
-                      alert('Erro ao cadastrar turma: ' + error.message);
-                  });
+            // Adicionar dados ao Firestore
+            bancoDeDados.collection('cursosTurmas').add({
+                nomeTurma: nomeTurma,
+                disciplinas: disciplinas,
+                professor: professor,
+                dtIni: dtIni,
+                dtFim: dtFim,
+                dtIniInsc: document.getElementById('dtIniInsc').value,
+                dtFimInsc: document.getElementById('dtFimInsc').value
+            })
+                .then(function () {
+                    console.log("Turma cadastrada com sucesso");
+                    alert('Turma cadastrada com sucesso!');
+                    formulario.reset();
+                })
+                .catch(function (error) {
+                    console.error("Erro ao cadastrar turma:", error);
+                    alert('Erro ao cadastrar turma: ' + error.message);
+                });
         });
     </script>
 </body>
