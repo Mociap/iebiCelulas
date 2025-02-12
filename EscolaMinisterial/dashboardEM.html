@@ -48,48 +48,49 @@
             height: 300px;
             margin-top: 20px;
         }
+
         .header {
-        background-color: #2c2c2c;
-        padding: 20px 0;
-        text-align: center;
-        position: relative;
-        z-index: 1000;
-    }
+            background-color: #2c2c2c;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+            z-index: 1000;
+        }
 
-    .header img {
-        max-width: 180px;
-    }
+        .header img {
+            max-width: 180px;
+        }
 
-    .back-button {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        background-color: #3498db;
-        color: #ffffff;
-        padding: 10px;
-        border-radius: 30px;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        transition: all 0.3s ease;
-        z-index: 1001;
-    }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
 
-    .back-button:hover {
-    background-color: #2980b9;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    text-decoration: none;
-    color: #ffffff;
-}
+        .back-button:hover {
+            background-color: #2ecc71;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: #ffffff;
+        }
 
 
-    .back-button i {
-        margin-right: 0px;
-    }
+        .back-button i {
+            margin-right: 0px;
+        }
     </style>
 </head>
 
@@ -100,8 +101,8 @@
     <div class="header">
         <img src="../LogoBranco.png" alt="Logo da Igreja Evangélica Batista">
     </div>
-    
-    
+
+
 
     <div class="container-fluid mt-4">
         <h2 class="text-center mb-4">Dashboard Escola Ministerial</h2>
@@ -494,38 +495,38 @@
         }
 
         document.getElementById('filtroStatusTurma').addEventListener('change', carregarTabelaTurmas);
-                    function carregarTabelaAlunos() {
-                        const tbody = document.getElementById('alunosTableBody');
-                        const hoje = new Date();
+        function carregarTabelaAlunos() {
+            const tbody = document.getElementById('alunosTableBody');
+            const hoje = new Date();
 
-                        // Primeiro, buscar turmas ativas
-                        bancoDeDados.collection('cursosTurmas')
+            // Primeiro, buscar turmas ativas
+            bancoDeDados.collection('cursosTurmas')
+                .get()
+                .then(turmasSnapshot => {
+                    const turmasAtivas = new Set();
+
+                    // Identificar turmas ativas
+                    turmasSnapshot.forEach(doc => {
+                        const turma = doc.data();
+                        const partesData = turma.dtFim.split('/');
+                        const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+
+                        if (dataFim >= hoje) {
+                            turmasAtivas.add(turma.nomeTurma);
+                        }
+                    });
+
+                    // Buscar alunos apenas das turmas ativas
+                    if (turmasAtivas.size > 0) {
+                        bancoDeDados.collection('cursosInscricoes')
+                            .where('turma', 'in', Array.from(turmasAtivas))
+                            .orderBy('nome')
                             .get()
-                            .then(turmasSnapshot => {
-                                const turmasAtivas = new Set();
-
-                                // Identificar turmas ativas
-                                turmasSnapshot.forEach(doc => {
-                                    const turma = doc.data();
-                                    const partesData = turma.dtFim.split('/');
-                                    const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
-
-                                    if (dataFim >= hoje) {
-                                        turmasAtivas.add(turma.nomeTurma);
-                                    }
-                                });
-
-                                // Buscar alunos apenas das turmas ativas
-                                if (turmasAtivas.size > 0) {
-                                    bancoDeDados.collection('cursosInscricoes')
-                                        .where('turma', 'in', Array.from(turmasAtivas))
-                                        .orderBy('nome')
-                                        .get()
-                                        .then(snapshot => {
-                                            tbody.innerHTML = '';
-                                            snapshot.forEach(doc => {
-                                                const aluno = doc.data();
-                                                const row = `
+                            .then(snapshot => {
+                                tbody.innerHTML = '';
+                                snapshot.forEach(doc => {
+                                    const aluno = doc.data();
+                                    const row = `
                                                     <tr>
                                                         <td>${aluno.nome}</td>
                                                         <td>${aluno.celula}</td>
@@ -537,38 +538,38 @@
                                                             </button>
                                                         </td>
                                                     </tr>`;
-                                                tbody.innerHTML += row;
-                                            });
-                                        });
-                                } else {
-                                    tbody.innerHTML = '<tr><td colspan="5">Não há turmas ativas no momento</td></tr>';
-                                }
+                                    tbody.innerHTML += row;
+                                });
                             });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5">Não há turmas ativas no momento</td></tr>';
                     }
-          function carregarTabelaDisciplinas() {
-              const tbody = document.getElementById('disciplinasTableBody');
-              const hoje = new Date();
+                });
+        }
+        function carregarTabelaDisciplinas() {
+            const tbody = document.getElementById('disciplinasTableBody');
+            const hoje = new Date();
 
-              bancoDeDados.collection('cursosTurmas')
-                  .orderBy('dtIni', 'desc')
-                  .get()
-                  .then(snapshot => {
-                      tbody.innerHTML = '';
-            
-                      snapshot.forEach(doc => {
-                          const turma = doc.data();
-                          const partesData = turma.dtFim.split('/');
-                          const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+            bancoDeDados.collection('cursosTurmas')
+                .orderBy('dtIni', 'desc')
+                .get()
+                .then(snapshot => {
+                    tbody.innerHTML = '';
 
-                          if (dataFim >= hoje) {
-                              bancoDeDados.collection('cursosInscricoes')
-                                  .where('turma', '==', turma.nomeTurma)
-                                  .where('disciplina', '==', turma.disciplinas)
-                                  .get()
-                                  .then(inscricoesSnapshot => {
-                                      const totalInscritos = inscricoesSnapshot.size;
-                            
-                                      const row = `
+                    snapshot.forEach(doc => {
+                        const turma = doc.data();
+                        const partesData = turma.dtFim.split('/');
+                        const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+
+                        if (dataFim >= hoje) {
+                            bancoDeDados.collection('cursosInscricoes')
+                                .where('turma', '==', turma.nomeTurma)
+                                .where('disciplina', '==', turma.disciplinas)
+                                .get()
+                                .then(inscricoesSnapshot => {
+                                    const totalInscritos = inscricoesSnapshot.size;
+
+                                    const row = `
                                       <tr>
                                           <td>${turma.disciplinas}</td>
                                           <td>${turma.professor || 'A definir'}</td>
@@ -576,17 +577,17 @@
                                           <td>${turma.dtIni} - ${turma.dtFim}</td>
                                           <td>
                                               ${turma.dtIniInsc <= hoje.toLocaleDateString() &&
-                                              turma.dtFimInsc >= hoje.toLocaleDateString() ?
-                                              '<span class="badge badge-success">Inscrições Abertas</span>' :
-                                              '<span class="badge badge-danger">Inscrições Fechadas</span>'}
+                                            turma.dtFimInsc >= hoje.toLocaleDateString() ?
+                                            '<span class="badge badge-success">Inscrições Abertas</span>' :
+                                            '<span class="badge badge-danger">Inscrições Fechadas</span>'}
                                           </td>
                                       </tr>`;
-                                      tbody.innerHTML += row;
-                                  });
-                          }
-                      });
-                  });
-          }                     
+                                    tbody.innerHTML += row;
+                                });
+                        }
+                    });
+                });
+        }
 
         function carregarFiltros() {
             // Carregar filtro de células/líderes
