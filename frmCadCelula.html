@@ -96,6 +96,8 @@
             background-color: #2980b9;
             transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: #ffffff;
         }
 
         .back-button i {
@@ -240,7 +242,7 @@
             </div>
             <div class="form-group">
                 <label for="local">Local</label>
-                <input type="text" class="form-control" id="local" required 
+                <input type="text" class="form-control" id="local" required
                     onkeyup="this.value = this.value.toUpperCase();">
             </div>
             <div class="btn-group btn-block" role="group">
@@ -578,7 +580,7 @@
             const editarBtn = document.getElementById('editarBtn');
             const excluirBtn = document.getElementById('excluirBtn');
 
-            editarBtn.addEventListener('click', function() {
+            editarBtn.addEventListener('click', function () {
                 const lider = obterParametroURL('lider');
                 const nomecelula = obterParametroURL('nomecelula');
 
@@ -606,7 +608,7 @@
                 }
             });
 
-            excluirBtn.addEventListener('click', function() {
+            excluirBtn.addEventListener('click', function () {
                 if (confirm('Tem certeza que deseja excluir esta célula?')) {
                     const lider = obterParametroURL('lider');
                     const nomecelula = obterParametroURL('nomecelula');
