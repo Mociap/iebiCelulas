@@ -131,7 +131,7 @@
     </style>
 </head>
 <body>
-    <a href="frmRelatorios.html" class="back-button">
+    <a href="../frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
@@ -428,7 +428,7 @@
         async function carregarReunioes() {
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
-    
+
             if (!mes || !ano) {
                 alert('Por favor, selecione o mês e o ano para pesquisar.');
                 return;
@@ -479,28 +479,45 @@
                     'Membros Presentes': [],
                     'Visitantes': [],
                     'Oferta': [],
+                    'Alimento': [],
+                    'Qtd Pacotes Alimento': [],
                     'Colheita do Amor': [],
                     'Líder': [],
                     'Nome da Célula': []
                 };
 
+                // Criar mapa de gramaturas
+                const gramaturas = new Map();
+                const alimentosSnapshot = await db.collection('listaAlimentos').get();
+                alimentosSnapshot.forEach(doc => {
+                    const alimento = doc.data();
+                    gramaturas.set(alimento.nomeAlimento, alimento.gramaturaKg);
+                });
+
+                // Na iteração dos dados da reunião
                 snapshot.forEach(doc => {
                     const reuniao = doc.data();
+                    const qtdAlimento = reuniao.qtdAlimento || 0;
+                    const tipoAlimento = reuniao.tipoAlimento;
+                    const gramatura = gramaturas.get(tipoAlimento) || 1;
+                    const totalKg = qtdAlimento * gramatura;
+
                     dados['Data da Reunião'].push(reuniao.data ? reuniao.data.toDate().toLocaleDateString('pt-BR') : '');
                     dados['Qtd de Membros'].push(reuniao.qtdMembros || 0);
                     dados['Membros Presentes'].push(reuniao.membroPresentes || 0);
                     dados['Visitantes'].push(reuniao.qtdVisitantes || 0);
                     dados['Oferta'].push((reuniao.oferta || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
-                    dados['Colheita do Amor'].push(`${(reuniao.kgAlimento || 0).toLocaleString('pt-BR')} kg`);
+                    dados['Alimento'].push(tipoAlimento || '-');
+                    dados['Qtd Pacotes Alimento'].push(`${qtdAlimento.toLocaleString('pt-BR')} pct` || '-');
+                    dados['Colheita do Amor'].push(`${totalKg.toLocaleString('pt-BR')} kg`);
                     dados['Líder'].push(reuniao.lider || '');
                     dados['Nome da Célula'].push(reuniao.celula || '');
-                    
                 });
 
                 // Gerar linhas da tabela transposta
                 Object.entries(dados).forEach(([titulo, valores]) => {
                     const row = document.createElement('tr');
-            
+    
                     // Primeira coluna com o título
                     const headerCell = document.createElement('th');
                     headerCell.textContent = titulo;

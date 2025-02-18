@@ -375,7 +375,7 @@
                 { label: 'Média de Membros Presentes', key: 'mediaMembrosPresentes', format: (v) => formatNumber(v, 1) },
                 { label: '% Frequência', key: 'frequencia', format: (v) => formatNumber(v, 1, '') + '%' },
                 { label: 'Oferta Mês (R$)', key: 'totalOfertaMes', format: (v) => formatNumber(v, 2) },
-                { label: 'Colheita do Amor (Kg)', key: 'totalColheitaAmor', format: (v) => formatNumber(v, 0) }
+                { label: 'Colheita do Amor (PCT)', key: 'totalColheitaAmor', format: (v) => formatNumber(v, 0) }
             ];
 
             // Construir o corpo da tabela
@@ -475,7 +475,7 @@
             criarOuAtualizarGrafico('frequenciaChart', 'bar', meses, dadosMensais.map(d => d.frequencia), '% Frequência', 'rgba(54, 162, 235, 0.5)', 'rgba(54, 162, 235, 1)');
             criarOuAtualizarGrafico('visitacoesChart', 'bar', meses, dadosMensais.map(d => d.mediaVisitantes), 'Média de Visitações', 'rgba(255, 206, 86, 0.5)', 'rgba(255, 206, 86, 1)');
             criarOuAtualizarGrafico('ofertaChart', 'bar', meses, dadosMensais.map(d => d.totalOfertaMes), 'Oferta Mês (R$)', 'rgba(75, 192, 192, 0.5)', 'rgba(75, 192, 192, 1)');
-            criarOuAtualizarGrafico('colheitaChart', 'bar', meses, dadosMensais.map(d => d.totalColheitaAmor), 'Colheita do Amor (Kg)', 'rgba(153, 102, 255, 0.5)', 'rgba(153, 102, 255, 1)');
+            criarOuAtualizarGrafico('colheitaChart', 'bar', meses, dadosMensais.map(d => d.totalColheitaAmor), 'Colheita do Amor (PCT)', 'rgba(153, 102, 255, 0.5)', 'rgba(153, 102, 255, 1)');
         }
 
         // Função para alterar a cor do dropdown "rede"
