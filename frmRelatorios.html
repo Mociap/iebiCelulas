@@ -128,7 +128,7 @@
         function realizarLogout() {
             signOut(auth).then(() => {
                 localStorage.clear();
-                window.location.href = 'formlogin.html';
+                window.location.href = 'index.html';
             }).catch((erro) => {
                 console.error('Erro ao fazer logout:', erro);
             });
