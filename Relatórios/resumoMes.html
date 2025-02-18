@@ -66,7 +66,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares">
     </div>
     <div class="container">
         <div class="thank-you-message">
@@ -90,7 +90,7 @@
             <p>- Colheita do Amor: <span id="ofertaAmor"></span></p>
         </div>
         <div class="footer-logo">
-            <img src="./Logo.png" alt="Logo">
+            <img src="../assets/Logo.png" alt="Logo">
         </div>
     </div>
 
@@ -165,7 +165,7 @@
                 let somaQtdMembros = 0;
                 let somaQtdVisitantes = 0;
                 let somaOferta = 0;
-                let somaKgAlimento = 0;
+                let somaqtdAlimento = 0;
 
                 querySnapshot.forEach((doc) => {
                     let data = doc.data();
@@ -174,7 +174,7 @@
                     somaQtdMembros += Number(data.qtdMembros || 0);
                     somaQtdVisitantes += Number(data.qtdVisitantes || 0);
                     somaOferta += Number(data.oferta || 0);
-                    somaKgAlimento += Number(data.kgAlimento || 0);
+                    somaqtdAlimento += Number(data.qtdAlimento || 0);
                 });
 
                 console.log("Somas:", {
@@ -182,7 +182,7 @@
                     somaQtdMembros,
                     somaQtdVisitantes,
                     somaOferta,
-                    somaKgAlimento
+                    somaqtdAlimento
                 });
 
                 // Cálculo da frequência
@@ -191,7 +191,7 @@
                 // Formatação dos valores
                 let visitacoes = somaQtdVisitantes.toLocaleString('pt-BR');
                 let ofertas = somaOferta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                let ofertaAmor = somaKgAlimento.toLocaleString('pt-BR');
+                let ofertaAmor = somaqtdAlimento.toLocaleString('pt-BR') + " pct";
 
                 // Exibição dos resultados
                 document.getElementById('frequencia').textContent = frequencia;

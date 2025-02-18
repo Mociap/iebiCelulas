@@ -629,7 +629,7 @@ document.getElementById('btnAtualizar').addEventListener('click', function() {
     bancoDeDados.collection('reuniao').doc(reuniaoId).update(dadosAtualizados)
         .then(() => {
             alert('Reunião atualizada com sucesso!');
-            window.location.href = 'relatorioReunioes.html';
+            window.location.href = './Relatórios/relDadosResuniao.html';
         })
         .catch(error => {
             alert('Erro ao atualizar reunião: ' + error.message);
@@ -641,13 +641,14 @@ document.getElementById('btnExcluir').addEventListener('click', function() {
         bancoDeDados.collection('reuniao').doc(reuniaoId).delete()
             .then(() => {
                 alert('Reunião excluída com sucesso!');
-                window.location.href = 'relatorioReunioes.html';
+                window.location.href = './Relatórios/relDadosResuniao.html';
             })
             .catch(error => {
                 alert('Erro ao excluir reunião: ' + error.message);
             });
     }
 });
+
   
   </script>
 </body>
