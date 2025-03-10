@@ -197,38 +197,66 @@
         // Adicionar event listener ao campo de data
         document.getElementById("dataAula").addEventListener("keypress", onlyNumbers);
 
-            // Carregar turmas
-            function carregarTurmas() {
-                selectTurma.innerHTML = '<option value="">Selecione uma turma</option>';
-                bancoDeDados.collection('cursosTurmas')
-                    .orderBy('nomeTurma')
-                    .get()
-                    .then((querySnapshot) => {
-                        const turmasUnicas = new Set();
-                        querySnapshot.forEach((doc) => {
-                            turmasUnicas.add(doc.data().nomeTurma);
-                        });
-                    
-                        const turmasArray = Array.from(turmasUnicas);
-                    
-                        if (turmasArray.length === 1) {
-                            const option = document.createElement('option');
-                            option.value = turmasArray[0];
-                            option.textContent = turmasArray[0];
-                            selectTurma.appendChild(option);
-                            selectTurma.value = turmasArray[0];
-                            carregarDisciplinas(turmasArray[0]);
-                        } else {
-                            turmasArray.forEach((turma) => {
-                                const option = document.createElement('option');
-                                option.value = turma;
-                                option.textContent = turma;
-                                selectTurma.appendChild(option);
-                            });
+        // função auxiliar para converter data string DD/MM/AAAA para objeto Date
+        function converterStringParaData(dataString) {
+            const [dia, mes, ano] = dataString.split('/');
+            return new Date(ano, mes - 1, dia);
+        }
+
+
+        // função para verificar se uma data está dentro do período
+        function estaNoPerido(dataAtual, dataInicio, dataFim) {
+            const dtAtual = converterStringParaData(dataAtual);
+            const dtInicio = converterStringParaData(dataInicio);
+            const dtFim = converterStringParaData(dataFim);
+
+            return dtAtual >= dtInicio && dtAtual <= dtFim;
+        }
+
+        // Carregar turmas
+        function carregarTurmas() {
+            const dataAtual = getDataAtual();
+            selectTurma.innerHTML = '<option value="">Selecione uma turma</option>';
+
+            bancoDeDados.collection('cursosTurmas')
+                .orderBy('nomeTurma')
+                .get()
+                .then((querySnapshot) => {
+                    const turmasUnicas = new Set();
+
+                    querySnapshot.forEach((doc) => {
+                        const dadosTurma = doc.data();
+                        if (estaNoPerido(dataAtual, dadosTurma.dtIni, dadosTurma.dtFim)) {
+                            turmasUnicas.add(dadosTurma.nomeTurma);
                         }
                     });
-            }
-                
+
+                    const turmasArray = Array.from(turmasUnicas);
+
+
+                    if (turmasArray.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "Nenhuma turma ativa";
+                        selectTurma.appendChild(option);
+                    } else if (turmasArray.length === 1) {
+                        const option = document.createElement('option');
+                        option.value = turmasArray[0];
+                        option.textContent = turmasArray[0];
+                        selectTurma.appendChild(option);
+                        selectTurma.value = turmasArray[0];
+                        carregarDisciplinas(turmasArray[0]);
+                    } else {
+                        turmasArray.forEach((turma) => {
+                            const option = document.createElement('option');
+                            option.value = turma;
+                            option.textContent = turma;
+                            selectTurma.appendChild(option);
+                        });
+                    }
+                });
+        }
+
         // Carregar disciplinas
         function carregarDisciplinas(turma) {
             selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina</option>';
@@ -259,12 +287,12 @@
                 .then((querySnapshot) => {
                     let alunos = [];
                     querySnapshot.forEach((doc) => {
-                        alunos.push({id: doc.id, ...doc.data()});
+                        alunos.push({ id: doc.id, ...doc.data() });
                     });
-                    
+
                     // Ordenar alunos por nome
                     alunos.sort((a, b) => a.nome.localeCompare(b.nome));
-                    
+
                     alunos.forEach((aluno) => {
                         const alunoItem = document.createElement('div');
                         alunoItem.className = 'aluno-item';
@@ -285,7 +313,7 @@
             carregarAlunos(selectTurma.value, this.value);
         });
 
-        formulario.addEventListener('submit', function(e) {
+        formulario.addEventListener('submit', function (e) {
             e.preventDefault();
             const turma = selectTurma.value;
             const disciplina = selectDisciplina.value;
@@ -303,24 +331,26 @@
                 dataAula: dataAula,
                 presencas: presencas
             })
-            .then(() => {
-                alert('Presença registrada com sucesso!');
-                formulario.reset();
-                listaAlunos.innerHTML = '';
-            })
-            .catch(error => {
-                console.error("Erro ao registrar presença: ", error);
-                alert('Erro ao registrar presença. Por favor, tente novamente.');
-            });
+                .then(() => {
+                    alert('Presença registrada com sucesso!');
+                    formulario.reset();
+                    listaAlunos.innerHTML = '';
+                    // Redireciona para a página frmEM.html após o registro
+                    window.location.href = 'frmEM.html';
+                })
+                .catch(error => {
+                    console.error("Erro ao registrar presença: ", error);
+                    alert('Erro ao registrar presença. Por favor, tente novamente.');
+                });
         });
 
         function getDataAtual() {
-    const hoje = new Date();
-    const dia = String(hoje.getDate()).padStart(2, '0');
-    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-    const ano = hoje.getFullYear();
-    return `${dia}/${mes}/${ano}`;
-}
+            const hoje = new Date();
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const ano = hoje.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
 
         // Preencher o campo de data com a data atual
         document.getElementById('dataAula').value = getDataAtual();
@@ -331,4 +361,3 @@
 </body>
 
 </html>
-
