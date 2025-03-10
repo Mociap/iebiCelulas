@@ -173,7 +173,7 @@
                                 <tr>
                                     <th>Turma</th>
                                     <th>Disciplinas</th>
-                                    <th>Período</th>
+                                    <th>Período de Aulas</th>
                                     <th>Inscrições</th>
                                     <th>Status</th>
                                 </tr>
@@ -196,7 +196,7 @@
                                     <th>Disciplina</th>
                                     <th>Professor</th>
                                     <th>Inscrições</th>
-                                    <th>Período</th>
+                                    <th>Período de Aulas</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -462,6 +462,18 @@
             // inicializarGraficos();
         });
 
+        // Função auxiliar para definir a ordem das disciplinas
+        function getDisciplinaOrdem(disciplina) {
+            const ordemEspecifica = {
+                'INICIAR': 1,
+                'EDIFICAR': 2,
+                'IDENTIFICAR': 3,
+                'IMPACTAR': 4,
+                'TEEN INICIAR': 5
+            };
+            return ordemEspecifica[disciplina] || 999; // 999 para as demais disciplinas
+        }
+
         function carregarTabelaTurmas() {
             const tbody = document.getElementById('turmasTableBody');
             const filtroStatus = document.getElementById('filtroStatusTurma').value;
@@ -472,60 +484,92 @@
                 .get()
                 .then(snapshot => {
                     tbody.innerHTML = '';
+
+                    // Converter snapshot para array para poder ordenar
+                    let turmas = [];
                     snapshot.forEach(doc => {
-                        const turma = doc.data();
-                        const statusInscricao = turma.dtIniInsc <= hoje.toLocaleDateString() &&
-                            turma.dtFimInsc >= hoje.toLocaleDateString() ? 'abertas' : 'fechadas';
+                        turmas.push(doc.data());
+                    });
+
+                    // Ordenar turmas
+                    turmas.sort((a, b) => {
+                        // Primeiro ordenar por data (mais recente primeiro)
+                        const dataA = new Date(a.dtIni.split('/').reverse().join('-'));
+                        const dataB = new Date(b.dtIni.split('/').reverse().join('-'));
+
+                        if (dataB - dataA !== 0) return dataB - dataA;
+
+                        // Se as datas forem iguais, ordenar por disciplina
+                        const ordemA = getDisciplinaOrdem(a.disciplinas);
+                        const ordemB = getDisciplinaOrdem(b.disciplinas);
+
+                        if (ordemA !== ordemB) return ordemA - ordemB;
+
+                        // Se a ordem for igual, usar ordem alfabética
+                        return a.disciplinas.localeCompare(b.disciplinas);
+                    });
+
+
+                    // Renderizar turmas ordenadas
+                    turmas.forEach(turmaItem => {
+                        //const turma = doc.data();
+                        const statusInscricao = !turmaItem.dtFimInsc || turmaItem.dtFimInsc <= hoje.toLocaleDateString() ? 'fechadas' : 'abertas';
 
                         if (filtroStatus === 'todos' || filtroStatus === statusInscricao) {
                             const row = `
                         <tr>
-                            <td>${turma.nomeTurma}</td>
-                            <td>${turma.disciplinas}</td>
-                            <td>${turma.dtIni} - ${turma.dtFim}</td>
+                            <td>${turmaItem.nomeTurma}</td>
+                            <td>${turmaItem.disciplinas}</td>
+                            <td>${turmaItem.dtIni} - ${turmaItem.dtFim}</td>
                             <td>${statusInscricao === 'abertas' ?
                                     '<span class="badge badge-success">Abertas</span>' :
                                     '<span class="badge badge-danger">Fechadas</span>'}</td>
-                            <td>${turma.status || 'Em andamento'}</td>
+                            <td>${turmaItem.status || 'Em andamento'}</td>
                         </tr>`;
                             tbody.innerHTML += row;
                         }
                     });
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar turmas:", error);
+                    tbody.innerHTML = '<tr><td colspan="5">Erro ao carregar as turmas</td></tr>';
                 });
         }
-          document.getElementById('filtroStatusTurma').addEventListener('change', carregarTabelaTurmas);
-          function carregarTabelaAlunos() {
-              const tbody = document.getElementById('alunosTableBody');
-              const hoje = new Date();
 
-              // Primeiro, buscar turmas ativas
-              bancoDeDados.collection('cursosTurmas')
-                  .get()
-                  .then(turmasSnapshot => {
-                      const turmasAtivas = new Set();
+        document.getElementById('filtroStatusTurma').addEventListener('change', carregarTabelaTurmas);
 
-                      // Identificar turmas ativas
-                      turmasSnapshot.forEach(doc => {
-                          const turma = doc.data();
-                          const partesData = turma.dtFim.split('/');
-                          const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+        function carregarTabelaAlunos() {
+            const tbody = document.getElementById('alunosTableBody');
+            const hoje = new Date();
 
-                          if (dataFim >= hoje) {
-                              turmasAtivas.add(turma.nomeTurma);
-                          }
-                      });
+            // Primeiro, buscar turmas ativas
+            bancoDeDados.collection('cursosTurmas')
+                .get()
+                .then(turmasSnapshot => {
+                    const turmasAtivas = new Set();
 
-                      // Buscar alunos apenas das turmas ativas
-                      if (turmasAtivas.size > 0) {
-                          bancoDeDados.collection('cursosInscricoes')
-                              .where('turma', 'in', Array.from(turmasAtivas))
-                              .orderBy('nome')
-                              .get()
-                              .then(snapshot => {
-                                  tbody.innerHTML = '';
-                                  snapshot.forEach(doc => {
-                                      const aluno = doc.data();
-                                      const row = `
+                    // Identificar turmas ativas
+                    turmasSnapshot.forEach(doc => {
+                        const turma = doc.data();
+                        const partesData = turma.dtFim.split('/');
+                        const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+
+                        if (dataFim >= hoje) {
+                            turmasAtivas.add(turma.nomeTurma);
+                        }
+                    });
+
+                    // Buscar alunos apenas das turmas ativas
+                    if (turmasAtivas.size > 0) {
+                        bancoDeDados.collection('cursosInscricoes')
+                            .where('turma', 'in', Array.from(turmasAtivas))
+                            .orderBy('nome')
+                            .get()
+                            .then(snapshot => {
+                                tbody.innerHTML = '';
+                                snapshot.forEach(doc => {
+                                    const aluno = doc.data();
+                                    const row = `
                                                       <tr>
                                                           <td>${aluno.nome}</td>
                                                           <td>${aluno.celula}</td>
@@ -537,65 +581,65 @@
                                                               </button>
                                                           </td>
                                                       </tr>`;
-                                      tbody.innerHTML += row;
-                                  });
-                              });
-                      } else {
-                          tbody.innerHTML = '<tr><td colspan="5">Não há turmas ativas no momento</td></tr>';
-                      }
-                  });
-          }
+                                    tbody.innerHTML += row;
+                                });
+                            });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5">Não há turmas ativas no momento</td></tr>';
+                    }
+                });
+        }
 
-          // Adicionar este código ao final do script
-          document.getElementById('filtroCelula').addEventListener('change', function() {
-              carregarTabelaAlunosFiltrados(this.value);
-          });
+        // Adicionar este código ao final do script
+        document.getElementById('filtroCelula').addEventListener('change', function () {
+            carregarTabelaAlunosFiltrados(this.value);
+        });
 
-          function carregarTabelaAlunosFiltrados(liderSelecionado) {
-              const tbody = document.getElementById('alunosTableBody');
-              const hoje = new Date();
-            
-              // Buscar turmas ativas primeiro
-              bancoDeDados.collection('cursosTurmas')
-                  .get()
-                  .then(turmasSnapshot => {
-                      const turmasAtivas = new Set();
-                    
-                      turmasSnapshot.forEach(doc => {
-                          const turma = doc.data();
-                          const partesData = turma.dtFim.split('/');
-                          const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
-                        
-                          if (dataFim >= hoje) {
-                              turmasAtivas.add(turma.nomeTurma);
-                          }
-                      });
-                    
-                      // Base query
-                      let query = bancoDeDados.collection('cursosInscricoes')
-                          .where('turma', 'in', Array.from(turmasAtivas))
-                          .orderBy('nome');
-                        
-                      // Adicionar filtro por líder se necessário
-                      if (liderSelecionado) {
-                          query = bancoDeDados.collection('cursosInscricoes')
-                              .where('turma', 'in', Array.from(turmasAtivas))
-                              .where('celula', '==', liderSelecionado)
-                              .orderBy('nome');
-                      }
-                    
-                      // Executar a query
-                      if (turmasAtivas.size > 0) {
-                          query.get().then(snapshot => {
-                              tbody.innerHTML = '';
-                              if (snapshot.empty) {
-                                  tbody.innerHTML = '<tr><td colspan="5">Nenhum aluno encontrado com este filtro</td></tr>';
-                                  return;
-                              }
-                            
-                              snapshot.forEach(doc => {
-                                  const aluno = doc.data();
-                                  const row = `
+        function carregarTabelaAlunosFiltrados(liderSelecionado) {
+            const tbody = document.getElementById('alunosTableBody');
+            const hoje = new Date();
+
+            // Buscar turmas ativas primeiro
+            bancoDeDados.collection('cursosTurmas')
+                .get()
+                .then(turmasSnapshot => {
+                    const turmasAtivas = new Set();
+
+                    turmasSnapshot.forEach(doc => {
+                        const turma = doc.data();
+                        const partesData = turma.dtFim.split('/');
+                        const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
+
+                        if (dataFim >= hoje) {
+                            turmasAtivas.add(turma.nomeTurma);
+                        }
+                    });
+
+                    // Base query
+                    let query = bancoDeDados.collection('cursosInscricoes')
+                        .where('turma', 'in', Array.from(turmasAtivas))
+                        .orderBy('nome');
+
+                    // Adicionar filtro por líder se necessário
+                    if (liderSelecionado) {
+                        query = bancoDeDados.collection('cursosInscricoes')
+                            .where('turma', 'in', Array.from(turmasAtivas))
+                            .where('celula', '==', liderSelecionado)
+                            .orderBy('nome');
+                    }
+
+                    // Executar a query
+                    if (turmasAtivas.size > 0) {
+                        query.get().then(snapshot => {
+                            tbody.innerHTML = '';
+                            if (snapshot.empty) {
+                                tbody.innerHTML = '<tr><td colspan="5">Nenhum aluno encontrado com este filtro</td></tr>';
+                                return;
+                            }
+
+                            snapshot.forEach(doc => {
+                                const aluno = doc.data();
+                                const row = `
                                       <tr>
                                           <td>${aluno.nome}</td>
                                           <td>${aluno.celula}</td>
@@ -607,14 +651,15 @@
                                               </button>
                                           </td>
                                       </tr>`;
-                                  tbody.innerHTML += row;
-                              });
-                          });
-                      } else {
-                          tbody.innerHTML = '<tr><td colspan="5">Não há turmas ativas no momento</td></tr>';
-                      }
-                  });
-          }
+                                tbody.innerHTML += row;
+                            });
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5">Não há turmas ativas no momento</td></tr>';
+                    }
+                });
+        }
+
         function carregarTabelaDisciplinas() {
             const tbody = document.getElementById('disciplinasTableBody');
             const hoje = new Date();
@@ -625,37 +670,54 @@
                 .then(snapshot => {
                     tbody.innerHTML = '';
 
+                    // Converter snapshot para array para poder ordenar
+
+                    // Converter snapshot para array para poder ordenar
+                    let disciplinas = [];
                     snapshot.forEach(doc => {
                         const turma = doc.data();
                         const partesData = turma.dtFim.split('/');
                         const dataFim = new Date(partesData[2], partesData[1] - 1, partesData[0]);
 
                         if (dataFim >= hoje) {
-                            bancoDeDados.collection('cursosInscricoes')
-                                .where('turma', '==', turma.nomeTurma)
-                                .where('disciplina', '==', turma.disciplinas)
-                                .get()
-                                .then(inscricoesSnapshot => {
-                                    const totalInscritos = inscricoesSnapshot.size;
-
-                                    const row = `
-                                      <tr>
-                                          <td>${turma.disciplinas}</td>
-                                          <td>${turma.professor || 'A definir'}</td>
-                                          <td>${totalInscritos}</td>
-                                          <td>${turma.dtIni} - ${turma.dtFim}</td>
-                                          <td>
-                                              ${turma.dtIniInsc <= hoje.toLocaleDateString() &&
-                                            turma.dtFimInsc >= hoje.toLocaleDateString() ?
-                                            '<span class="badge badge-success">Inscrições Abertas</span>' :
-                                            '<span class="badge badge-danger">Inscrições Fechadas</span>'}
-                                          </td>
-                                      </tr>`;
-                                    tbody.innerHTML += row;
-                                });
+                            disciplinas.push(turma);
                         }
                     });
-                });
+
+                    // Ordenar disciplinas conforme ordem específica
+                    disciplinas.sort((a, b) => {
+                        const ordemA = getDisciplinaOrdem(a.disciplinas);
+                        const ordemB = getDisciplinaOrdem(b.disciplinas);
+
+                        if (ordemA !== ordemB) return ordemA - ordemB;
+                        return a.disciplinas.localeCompare(b.disciplinas);
+                    });
+
+                    // Renderizar disciplinas ordenadas
+                    disciplinas.forEach(turma => {
+                        bancoDeDados.collection('cursosInscricoes')
+                            .where('turma', '==', turma.nomeTurma)
+                            .where('disciplina', '==', turma.disciplinas)
+                            .get()
+                            .then(inscricoesSnapshot => {
+                                const totalInscritos = inscricoesSnapshot.size;
+
+                                const row = `
+                        <tr>
+                            <td>${turma.disciplinas}</td>
+                            <td>${turma.professor || 'A definir'}</td>
+                            <td>${totalInscritos}</td>
+                            <td>${turma.dtIni} - ${turma.dtFim}</td>
+                            <td>
+                                ${!turma.dtFimInsc || turma.dtFimInsc <= hoje.toLocaleDateString() ?
+                                        '<span class="badge badge-danger">Inscrições Fechadas</span>' :
+                                        '<span class="badge badge-success">Inscrições Abertas</span>'}
+                            </td>
+                        </tr>`;
+                                tbody.innerHTML += row;
+                            });
+                    });
+            });
         }
 
         function carregarFiltros() {

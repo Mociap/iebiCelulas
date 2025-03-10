@@ -252,6 +252,20 @@
         var db = firebase.firestore();
 
         // Função para gerar a tabela de membros
+        // Encontre a função gerarTabela() e substitua pela versão abaixo:
+
+        // Função auxiliar para definir a ordem das disciplinas
+        function getDisciplinaOrdem(disciplina) {
+            const ordemEspecifica = {
+                'INICIAR': 1,
+                'EDIFICAR': 2,
+                'IDENTIFICAR': 3,
+                'IMPACTAR': 4,
+                'TEEN INICIAR': 5
+            };
+            return ordemEspecifica[disciplina] || 999; // 999 para as demais disciplinas
+        }
+
         async function gerarTabela() {
             const tableBody = document.querySelector('#membrosTable tbody');
             tableBody.innerHTML = '';
@@ -275,8 +289,35 @@
                     resumo[key].totalInscritos++;
                 });
 
+                // Converter o objeto resumo em array e ordenar
+                let resumoArray = Object.values(resumo);
+                resumoArray.sort((a, b) => {
+                    // Primeiro, ordenar por turma (Z-A)
+                    const compareTurma = b.turma.localeCompare(a.turma);
+
+                    if (compareTurma !== 0) return compareTurma;
+
+                    // Se as turmas forem iguais, ordenar por disciplina
+                    const ordemA = getDisciplinaOrdem(a.disciplina);
+                    const ordemB = getDisciplinaOrdem(b.disciplina);
+
+                    if (ordemA !== 999 && ordemB !== 999) {
+                        // Ambas têm ordem específica
+                        return ordemA - ordemB;
+                    } else if (ordemA !== 999) {
+                        // Apenas A tem ordem específica
+                        return -1;
+                    } else if (ordemB !== 999) {
+                        // Apenas B tem ordem específica
+                        return 1;
+                    } else {
+                        // Nenhuma tem ordem específica, usar ordem alfabética
+                        return a.disciplina.localeCompare(b.disciplina);
+                    }
+                });
+
                 let totalGeral = 0;
-                Object.values(resumo).forEach(item => {
+                resumoArray.forEach(item => {
                     const row = tableBody.insertRow();
                     row.insertCell(0).textContent = item.turma;
                     row.insertCell(1).textContent = item.disciplina;
