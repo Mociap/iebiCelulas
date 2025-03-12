@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração de Inscrições</title>
+    <link rel="shortcut icon" href="../3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container-fluid {
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .card {
+            background-color: #3c3c3c;
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        .form-control {
+            background-color: #4c4c4c;
+            border: none;
+            color: #ffffff;
+        }
+
+        .form-control:focus {
+            background-color: #4c4c4c;
+    color: #ffffff;
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+
+        }
+
+        .form-control::placeholder {
+    color: #ffffff !important;
+    opacity: 1;
+}
+
+/* Estilo específico para os campos de busca */
+#filtroNome, #filtroCelula {
+    background-color: #3c3c3c;
+    color: #ffffff !important;
+    border: 1px solid #4c4c4c;
+    transition: all 0.3s ease;
+}
+
+#filtroNome:focus, #filtroCelula:focus {
+    background-color: #4c4c4c;
+    border-color: #3498db;
+    color: #ffffff !important;
+}
+
+        .table {
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #2ecc71;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .back-button:hover {
+            background-color: #27ae60;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="frmEM.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+
+    <div class="container-fluid">
+        <h2 class="text-center mb-4">Painel Administrativo - Inscrições Escola Ministerial</h2>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Filtros de busca -->
+                <div class="card mb-3">
+                    <div class="card-header">Filtros</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <select id="filtroTurma" class="form-control">
+                                    <option value="">Todas as Turmas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="filtroDisciplina" class="form-control">
+                                    <option value="">Todas as Disciplinas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" id="filtroNome" class="form-control" placeholder="Buscar por nome">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" id="filtroCelula" class="form-control"
+                                    placeholder="Buscar por célula">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de inscrições -->
+                <div class="table-responsive">
+                    <table class="table table-striped" id="tabelaInscricoes">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Célula</th>
+                                <th>Turma</th>
+                                <th>Disciplina</th>
+                                <th>Data de Inscrição</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaInscricoes">
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="loader"></div>
+                                    <p>Carregando inscrições...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3">
+                    <button class="btn btn-success" id="btnExportar">
+                        <i class="fas fa-file-excel"></i> Exportar para Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div class="modal fade" id="modalEdicao" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Inscrição</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEdicao">
+                        <input type="hidden" id="inscricaoId">
+                        <div class="form-group">
+                            <label for="editNome">Nome</label>
+                            <input type="text" class="form-control" id="editNome">
+                        </div>
+                        <div class="form-group">
+                            <label for="editCelula">Célula</label>
+                            <input type="text" class="form-control" id="editCelula">
+                        </div>
+                        <div class="form-group">
+                            <label for="editTurma">Turma</label>
+                            <select class="form-control" id="editTurma"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editDisciplina">Disciplina</label>
+                            <select class="form-control" id="editDisciplina"></select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSalvarEdicao">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="modalConfirmacao" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir esta inscrição?</p>
+                    <p id="nomeExclusao"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarExclusao">Confirmar Exclusão</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts necessários -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Hierarquias e permissões -->
+    <script src="../hierarquias.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        const db = firebase.firestore();
+
+
+
+
+        // Carregar todas as inscrições
+        function carregarInscricoes(filtros = {}) {
+            const tbody = document.getElementById('listaInscricoes');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center"><div class="loader"></div><p>Carregando inscrições...</p></td></tr>';
+
+            let query = db.collection('cursosInscricoes');
+
+            // Aplicar filtros
+            if (filtros.turma) {
+                query = query.where('turma', '==', filtros.turma);
+            }
+            if (filtros.disciplina) {
+                query = query.where('disciplina', '==', filtros.disciplina);
+            }
+
+            query.get().then(snapshot => {
+                tbody.innerHTML = '';
+
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma inscrição encontrada</td></tr>';
+                    return;
+                }
+
+                let inscricoes = [];
+
+                snapshot.forEach(doc => {
+                    const dados = doc.data();
+                    dados.id = doc.id;
+                    inscricoes.push(dados);
+                });
+
+                // Filtros adicionais (client-side)
+                if (filtros.nome) {
+                    inscricoes = inscricoes.filter(inscricao =>
+                        inscricao.nome.toLowerCase().includes(filtros.nome.toLowerCase())
+                    );
+                }
+
+                if (filtros.celula) {
+                    inscricoes = inscricoes.filter(inscricao =>
+                        inscricao.celula.toLowerCase().includes(filtros.celula.toLowerCase())
+                    );
+                }
+
+                if (inscricoes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma inscrição encontrada</td></tr>';
+                    return;
+                }
+
+                // Ordenar por nome
+                inscricoes.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                inscricoes.forEach(inscricao => {
+                    const dataInscricao = inscricao.dataInscricao ?
+                        new Date(inscricao.dataInscricao.seconds * 1000).toLocaleDateString() :
+                        'Data não registrada';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                    <td>${inscricao.nome}</td>
+                    <td>${inscricao.celula}</td>
+                    <td>${inscricao.turma}</td>
+                    <td>${inscricao.disciplina}</td>
+                    <td>${dataInscricao}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary editar-inscricao" data-id="${inscricao.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger excluir-inscricao" data-id="${inscricao.id}" data-nome="${inscricao.nome}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                    tbody.appendChild(tr);
+                });
+
+                // Adicionar event listeners
+                adicionarEventListeners();
+            });
+        }
+
+        // Carregar filtros
+        function carregarFiltros() {
+            // Carregar turmas para filtro
+            db.collection('cursosTurmas')
+                .get()
+                .then(snapshot => {
+                    const turmas = new Set();
+                    snapshot.forEach(doc => {
+                        turmas.add(doc.data().nomeTurma);
+                    });
+
+                    const selectTurma = document.getElementById('filtroTurma');
+                    turmas.forEach(turma => {
+                        const option = document.createElement('option');
+                        option.value = turma;
+                        option.textContent = turma;
+                        selectTurma.appendChild(option);
+                    });
+                });
+
+            // Carregar disciplinas para filtro
+            db.collection('cursosTurmas')
+                .get()
+                .then(snapshot => {
+                    const disciplinas = new Set();
+                    snapshot.forEach(doc => {
+                        const turma = doc.data();
+                        if (turma.disciplinas) {
+                            disciplinas.add(turma.disciplinas);
+                        }
+                    });
+
+                    const selectDisciplina = document.getElementById('filtroDisciplina');
+                    disciplinas.forEach(disciplina => {
+                        const option = document.createElement('option');
+                        option.value = disciplina;
+                        option.textContent = disciplina;
+                        selectDisciplina.appendChild(option);
+                    });
+                });
+        }
+
+        // Eventos de filtro
+        function configurarFiltros() {
+            document.getElementById('filtroTurma').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroDisciplina').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroNome').addEventListener('input', aplicarFiltros);
+            document.getElementById('filtroCelula').addEventListener('input', aplicarFiltros);
+        }
+
+        function aplicarFiltros() {
+            const filtros = {
+                turma: document.getElementById('filtroTurma').value,
+                disciplina: document.getElementById('filtroDisciplina').value,
+                nome: document.getElementById('filtroNome').value,
+                celula: document.getElementById('filtroCelula').value
+            };
+
+            carregarInscricoes(filtros);
+        }
+
+        // Exportar para Excel
+        function exportarParaExcel() {
+            const tabela = document.getElementById('tabelaInscricoes');
+            const wb = XLSX.utils.table_to_book(tabela, { sheet: "Inscrições" });
+            XLSX.writeFile(wb, `Inscricoes_EM_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        // Edição de inscrição
+        function abrirModalEdicao(id) {
+            const modal = new bootstrap.Modal(document.getElementById('modalEdicao'));
+            document.getElementById('inscricaoId').value = id;
+
+            // Carregar dados da inscrição
+            db.collection('cursosInscricoes').doc(id).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const inscricao = doc.data();
+
+                        document.getElementById('editNome').value = inscricao.nome;
+                        document.getElementById('editCelula').value = inscricao.celula;
+
+                        // Carregar turmas disponíveis
+                        const selectTurma = document.getElementById('editTurma');
+                        selectTurma.innerHTML = '';
+
+                        db.collection('cursosTurmas')
+                            .get()
+                            .then(snapshot => {
+                                const turmas = new Set();
+                                snapshot.forEach(doc => {
+                                    turmas.add(doc.data().nomeTurma);
+                                });
+
+                                turmas.forEach(turma => {
+                                    const option = document.createElement('option');
+                                    option.value = turma;
+                                    option.textContent = turma;
+                                    option.selected = turma === inscricao.turma;
+                                    selectTurma.appendChild(option);
+                                });
+
+                                // Carregar disciplinas para a turma selecionada
+                                carregarDisciplinasParaTurma(inscricao.turma, inscricao.disciplina);
+                            });
+
+                        modal.show();
+                    }
+                });
+        }
+
+        function carregarDisciplinasParaTurma(turmaSelecionada, disciplinaAtual = null) {
+            const selectDisciplina = document.getElementById('editDisciplina');
+            selectDisciplina.innerHTML = '';
+
+            db.collection('cursosTurmas')
+                .where('nomeTurma', '==', turmaSelecionada)
+                .get()
+                .then(querySnapshot => {
+                    const disciplinas = new Set();
+
+                    querySnapshot.forEach(doc => {
+                        disciplinas.add(doc.data().disciplinas);
+                    });
+
+                    disciplinas.forEach(disciplina => {
+                        const option = document.createElement('option');
+                        option.value = disciplina;
+                        option.textContent = disciplina;
+                        option.selected = disciplina === disciplinaAtual;
+                        selectDisciplina.appendChild(option);
+                    });
+                });
+        }
+
+        // Salvar alterações
+        function salvarEdicao() {
+            const id = document.getElementById('inscricaoId').value;
+            const nome = document.getElementById('editNome').value;
+            const celula = document.getElementById('editCelula').value;
+            const turma = document.getElementById('editTurma').value;
+            const disciplina = document.getElementById('editDisciplina').value;
+
+            if (!nome || !celula || !turma || !disciplina) {
+                alert('Todos os campos são obrigatórios!');
+                return;
+            }
+
+            db.collection('cursosInscricoes').doc(id).update({
+                nome: nome,
+                celula: celula,
+                turma: turma,
+                disciplina: disciplina,
+                dataAtualizacao: new Date()
+            })
+                .then(() => {
+                    alert('Inscrição atualizada com sucesso!');
+                    // Corrigindo o fechamento do modal
+                    $('#modalEdicao').modal('hide');
+                    carregarInscricoes(); // Recarregar lista
+                })
+                .catch(error => {
+                    console.error("Erro ao atualizar inscrição:", error);
+                    alert('Erro ao atualizar inscrição: ' + error.message);
+                });
+        }
+
+        // Exclusão de inscrição
+        function abrirModalEdicao(id) {
+            document.getElementById('inscricaoId').value = id;
+
+            // Carregar dados da inscrição
+            db.collection('cursosInscricoes').doc(id).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const inscricao = doc.data();
+
+                        document.getElementById('editNome').value = inscricao.nome;
+                        document.getElementById('editCelula').value = inscricao.celula;
+
+                        // Carregar turmas disponíveis
+                        const selectTurma = document.getElementById('editTurma');
+                        selectTurma.innerHTML = '';
+
+                        db.collection('cursosTurmas')
+                            .get()
+                            .then(snapshot => {
+                                const turmas = new Set();
+                                snapshot.forEach(doc => {
+                                    turmas.add(doc.data().nomeTurma);
+                                });
+
+                                turmas.forEach(turma => {
+                                    const option = document.createElement('option');
+                                    option.value = turma;
+                                    option.textContent = turma;
+                                    option.selected = turma === inscricao.turma;
+                                    selectTurma.appendChild(option);
+                                });
+
+                                // Carregar disciplinas para a turma selecionada
+                                carregarDisciplinasParaTurma(inscricao.turma, inscricao.disciplina);
+                            });
+
+                        // Abrir modal usando jQuery
+                        $('#modalEdicao').modal('show');
+                    }
+                });
+        }
+
+        // Adicionar antes da função confirmarExclusao()
+        function abrirModalExclusao(id, nome) {
+            // Configurar o modal de exclusão
+            document.getElementById('nomeExclusao').textContent = `Aluno: ${nome}`;
+            document.getElementById('btnConfirmarExclusao').dataset.id = id;
+
+            // Abrir o modal usando jQuery
+            $('#modalConfirmacao').modal('show');
+        }
+
+        // Exclusão de inscrição
+        function confirmarExclusao() {
+            const id = document.getElementById('btnConfirmarExclusao').dataset.id;
+
+            db.collection('cursosInscricoes').doc(id).delete()
+                .then(() => {
+                    alert('Inscrição excluída com sucesso!');
+                    $('#modalConfirmacao').modal('hide');
+                    carregarInscricoes(); // Recarrega a lista
+                })
+                .catch(error => {
+                    console.error("Erro ao excluir inscrição:", error);
+                    alert('Erro ao excluir inscrição: ' + error.message);
+                });
+        }
+
+
+        // Adicionar event listeners aos botões dinâmicos
+        function adicionarEventListeners() {
+            // Event listener para botões de edição
+            document.querySelectorAll('.editar-inscricao').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    abrirModalEdicao(id);
+                });
+            });
+
+            // Event listener para botões de exclusão
+            document.querySelectorAll('.excluir-inscricao').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const nome = btn.dataset.nome;
+                    abrirModalExclusao(id, nome);
+                });
+            });
+        }
+
+        // Inicializar Bootstrap modals
+        function inicializarModals() {
+            window.modalEdicao = new bootstrap.Modal(document.getElementById('modalEdicao'));
+            window.modalConfirmacao = new bootstrap.Modal(document.getElementById('modalConfirmacao'));
+        }
+
+        // Carregar dados e configurar eventos ao iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+
+            carregarInscricoes();
+            carregarFiltros();
+            configurarFiltros();
+            inicializarModals();
+
+            // Event listeners fixos
+            document.getElementById('btnExportar').addEventListener('click', exportarParaExcel);
+            document.getElementById('btnSalvarEdicao').addEventListener('click', salvarEdicao);
+            document.getElementById('btnConfirmarExclusao').addEventListener('click', confirmarExclusao);
+
+            // Event listener para carregar disciplinas quando trocar a turma
+            document.getElementById('editTurma').addEventListener('change', function () {
+                carregarDisciplinasParaTurma(this.value);
+            });
+        });
+    </script>
+</body>
+
+</html>

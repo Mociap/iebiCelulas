@@ -1,16 +1,47 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escola Ministerial - Igreja Evangélica Batista Intermares</title>
+    <title>Escola Ministerial - Igreja Evangélica Batista de Intermares</title>
     <link rel="shortcut icon" href="../3.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
+
+    <style>
+        /* Estilo para o badge de função */
+        .funcao-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2c2c2c;
+            color: #ffffff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 3px solid #3498db;
+        }
+
+        .funcao-badge i {
+            color: #3498db;
+        }
+    </style>
+
 </head>
+
 <body>
+    <div id="funcao-display" class="funcao-badge">
+        <i class="fas fa-user-tag"></i>
+        <span id="funcao-texto">Carregando...</span>
+    </div>
+
     <a href="../index.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
@@ -19,11 +50,26 @@
     </div>
     <div class="container">
         <div class="card-container">
+            <!-- Card de Inscrição -->
+            <a href="inscricaoEM.html" class="card" data-permissao="inscricoes">
+                <i class="fas fa-user-edit card-icon"></i>
+                <h2>Fazer Inscrição</h2>
+                <p>Realize a inscrição para a Escola Ministerial.</p>
+                <div class="btn-primary">Acessar</div>
+            </a>
+
             <!-- Card do Dashboard -->
             <a href="dashboardEM.html" class="card" data-permissao="dashboard">
                 <i class="fas fa-tachometer-alt card-icon"></i>
                 <h2>Dashboard</h2>
                 <p>Visualize estatísticas e métricas da Escola Ministerial.</p>
+                <div class="btn-primary">Acessar</div>
+            </a>
+
+            <a href="admin-inscricoes.html" class="card" data-permissao="acessoRapido">
+                <i class="fas fa-cogs card-icon"></i>
+                <h2>Administrar Inscrições</h2>
+                <p>Gerencie todas as inscrições da Escola Ministerial.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
 
@@ -62,5 +108,45 @@
         // Implement logout functionality
         // Add splash screen logic
     </script>
+
+
+    <script>
+        // Função para exibir a função do usuário
+        function exibirFuncaoUsuario() {
+            const funcaoEM = localStorage.getItem('funcaoEM') || 'Aluno';
+            const funcaoTexto = document.getElementById('funcao-texto');
+
+            if (funcaoTexto) {
+                funcaoTexto.textContent = funcaoEM;
+            }
+
+            // Opcionalmente, alterar a cor da borda baseada na função
+            const funcaoBadge = document.getElementById('funcao-display');
+            if (funcaoBadge) {
+                // Definir cores diferentes para diferentes funções
+                switch (funcaoEM) {
+                    case 'ADMIN':
+                        funcaoBadge.style.borderLeftColor = '#e74c3c'; // Vermelho
+                        break;
+                    case 'Pastor':
+                        funcaoBadge.style.borderLeftColor = '#9b59b6'; // Roxo
+                        break;
+                    case 'Coordenador':
+                        funcaoBadge.style.borderLeftColor = '#3498db'; // Azul
+                        break;
+                    case 'Supervisor':
+                        funcaoBadge.style.borderLeftColor = '#2ecc71'; // Verde
+                        break;
+                    default:
+                        funcaoBadge.style.borderLeftColor = '#f39c12'; // Laranja para o padrão
+                }
+            }
+        }
+
+        // Executar a função quando a página carregar
+        document.addEventListener('DOMContentLoaded', exibirFuncaoUsuario);
+
+    </script>
 </body>
+
 </html>

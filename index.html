@@ -243,7 +243,7 @@
 
         @media screen and (max-width: 840px) {
             .mobile-image {
-                
+
                 display: block;
             }
 
@@ -332,15 +332,75 @@
                 <p>Visualize os relatórios das reuniões.</p>
                 <div class="btn-primary">Acessar</div>
             </div>
-            <div class="card" onclick="verificarStatusLogin('EscolaMinisterial/frmEM.html')">
+
+            <div class="card" onclick="verificarStatusLoginEscolaMinisterial()">
                 <i class="fas fa-graduation-cap card-icon"></i>
                 <h2>Escola Ministerial</h2>
                 <p>Acesse a área da Escola Ministerial.</p>
                 <div class="btn-primary">Acessar</div>
             </div>
+
         </div>
 
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
         <script>
+
+            // Inicialização do Firebase (caso ainda não esteja presente)
+            var configuracaoFirebase = {
+                apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+                authDomain: "dbiebi.firebaseapp.com",
+                databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+                projectId: "dbiebi",
+                storageBucket: "dbiebi.appspot.com",
+                messagingSenderId: "1068164821081",
+                appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+            };
+
+            // Inicializa Firebase se ainda não estiver inicializado
+            if (!firebase.apps.length) {
+                firebase.initializeApp(configuracaoFirebase);
+            }
+
+            function verificarStatusLoginEscolaMinisterial() {
+                const tempoLogin = localStorage.getItem('tempoLogin');
+                const tempoAtual = new Date().getTime();
+                const nomeUsuario = localStorage.getItem('nome'); // Nome armazenado durante login
+
+                if (tempoLogin && (tempoAtual - tempoLogin < 5 * 60 * 1000)) {
+                    // Usuário está logado, agora buscar função no Firebase
+                    const db = firebase.firestore();
+                    db.collection('cursosEstrutura')
+                        .where('nome', '==', nomeUsuario)
+                        .get()
+                        .then((querySnapshot) => {
+                            if (!querySnapshot.empty) {
+                                // Encontrou o documento com o nome
+                                const funcao = querySnapshot.docs[0].data().funcao;
+                                // Armazenar no localStorage
+                                localStorage.setItem('funcaoEM', funcao);
+                                console.log('Função EM definida:', funcao);
+                            } else {
+                                console.log('Usuário não encontrado na estrutura de cursos');
+                                localStorage.setItem('funcaoEM', 'Aluno'); // Valor padrão
+                            }
+                            // Redirecionar para a página da Escola Ministerial
+                            window.location.href = 'EscolaMinisterial/frmEM.html';
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao buscar função do usuário:', error);
+                            localStorage.setItem('funcaoEM', 'Aluno'); // Valor padrão em caso de erro
+                            window.location.href = 'EscolaMinisterial/frmEM.html';
+                        });
+                } else {
+                    // Usuário não está logado, redirecionar para login
+                    localStorage.setItem('paginaDestino', 'EscolaMinisterial/frmEM.html');
+                    window.location.href = 'formlogin.html';
+                }
+            }
+
 
             function verificarStatusLogin(destino) {
                 const tempoLogin = localStorage.getItem('tempoLogin');
@@ -385,6 +445,57 @@
 
             //window.addEventListener('load', checkTitlePosition);
             //window.addEventListener('resize', checkTitlePosition);
+
+
+
+                // Adicionando logs para monitorar cliques nos cards e verificar a função EM
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleciona todos os cards da página
+        const cards = document.querySelectorAll('.card');
+        
+        // Adiciona evento de clique a cada card
+        cards.forEach(card => {
+            card.addEventListener('click', function(event) {
+                // Obtém a permissão necessária para o card
+                const permissaoRequerida = this.getAttribute('data-permissao');
+                
+                // Recupera a função armazenada
+                const funcaoAtual = localStorage.getItem('funcaoEM');
+                
+                console.log('------ Log de Clique no Card ------');
+                console.log('Card clicado:', this.querySelector('h2').textContent);
+                console.log('Permissão requerida:', permissaoRequerida);
+                console.log('Função atual do usuário:', funcaoAtual);
+                
+                // Verifica se a função tem permissão (se hierarquias.js estiver disponível)
+                if (typeof temPermissao === 'function') {
+                    const temAcesso = temPermissao(funcaoAtual, permissaoRequerida);
+                    console.log('Tem permissão de acesso:', temAcesso);
+                }
+                
+                // Log do nível hierárquico
+                if (typeof getNivelHierarquico === 'function') {
+                    const nivel = getNivelHierarquico(funcaoAtual);
+                    console.log('Nível hierárquico do usuário:', nivel);
+                }
+                
+                // Verificando outras informações de usuário no localStorage
+                console.log('Dados completos do usuário no localStorage:');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.includes('funcao') || key.includes('usuario') || key.includes('EM')) {
+                        console.log(`${key}: ${localStorage.getItem(key)}`);
+                    }
+                }
+                console.log('----------------------------------');
+                
+                // Não impede a navegação padrão do card
+            });
+        });
+        
+        console.log('Monitor de cliques nos cards da EM inicializado');
+        console.log('Função atual do usuário EM:', localStorage.getItem('funcaoEM'));
+    });
 
         </script>
 </body>

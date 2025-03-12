@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscrição Escola Ministerial</title>
+    <title>Funções na Escola Ministerial</title>
     <link rel="shortcut icon" href="../3.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-/* Estilos copiados de formCadMembros.html */
+        /* Estilos copiados de formCadMembros.html */
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #1a1a1a;
@@ -155,6 +155,25 @@
             box-shadow: none;
         }
 
+        .sugestoes {
+            background-color: #3c3c3c;
+            border-radius: 0 0 5px 5px;
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .sugestao-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #4c4c4c;
+        }
+
+        .sugestao-item:hover {
+            background-color: #4c4c4c;
+        }
 
         @keyframes spin {
             0% {
@@ -165,23 +184,23 @@
                 transform: rotate(360deg);
             }
         }
+
         /*teste*/
     </style>
 </head>
 
 <body>
-    <a href="frmEM.html" class="back-button">
+    <a href="../index.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div id="alerta" class="alert alert-warning mt-2" style="display: none;">
         Nenhum nome encontrado para a célula selecionada.
     </div>
-    </a>
     <div class="header">
         <img src="../LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
     </div>
     <div class="container">
-        <h2 class="text-center mb-4 font-weight-bold">Inscrição Escola Ministerial</h2>
+        <h2 class="text-center mb-4 font-weight-bold">Funções EM</h2>
         <div class="divider"></div>
         <form id="inscricaoForm">
             <div class="form-group">
@@ -197,27 +216,21 @@
             </div>
 
             <div class="form-group">
-                <label for="turma">Turma</label>
+                <label for="turma">Função</label>
                 <select class="form-control" id="turma" required></select>
-            </div>
-
-            <div class="form-group">
-                <label for="disciplinas">Disciplinas</label>
-                <select class="form-control" id="disciplina" required></select>
-                <div id="disciplinasContainer"></div>
             </div>
 
             <div style="height: 20px;"></div>
 
             <button type="submit" class="btn btn-primary btn-block" id="inscreverBtn">
-                <i class="fas fa-user-plus mr-2"></i>Inscrever
-            </button>
+                <i class="fas fa-user-plus mr-2"></i>Cadastrar
+            </button>            
 
         </form>
         <div id="splash-screen" class="splash-screen">
             <div class="splash-content">
                 <div class="spinner"></div>
-                <p>Carregando disciplinas...</p>
+                <p>Carregando funções...</p>
             </div>
         </div>
 
@@ -229,6 +242,9 @@
 
     <!-- Importar Vanilla Masker -->
     <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
+
+    <!-- Importar arquivo de hierarquias -->
+    <script src="../hierarquias.js"></script>
 
     <script>
         // Configuração do Firebase
@@ -247,7 +263,6 @@
         // Referências aos elementos do formulário
         var formulario = document.getElementById('inscricaoForm');
         var inputNome = document.getElementById('nome');
-        var disciplinasContainer = document.getElementById('disciplinasContainer');
         var inscreverBtn = document.getElementById('inscreverBtn');
 
         // Função para buscar nomes
@@ -270,134 +285,73 @@
                     document.getElementById('sugestoesNomes').innerHTML = sugestoes;
                 });
         }
-          // Função para selecionar nome e preencher célula
-          function selecionarNome(nome) {
-              document.getElementById('nome').value = nome;
-              document.getElementById('sugestoesNomes').innerHTML = '';
-              document.getElementById('celula').value = '';
 
-              bancoDeDados.collection('membros')
-                  .where('nome', '==', nome)
-                  .get()
-                  .then((querySnapshot) => {
-                      querySnapshot.forEach((doc) => {
-                          document.getElementById('celula').value = doc.data().lidercelula;
-                      });
-                  });
-          }
-        // Carregar turmas
-        function carregarTurmas() {
-    return new Promise((resolve, reject) => {
-        const selectTurma = document.getElementById('turma');
-        selectTurma.innerHTML = '';
-        const hoje = new Date();
+        // Função para selecionar nome e preencher célula
+        function selecionarNome(nome) {
+            document.getElementById('nome').value = nome;
+            document.getElementById('sugestoesNomes').innerHTML = '';
+            document.getElementById('celula').value = '';
 
-        bancoDeDados.collection('cursosTurmas')
-            .orderBy('dtIniInsc', 'desc')
-            .get()
-            .then((querySnapshot) => {
-                const turmasUnicas = new Set();
-                
-                querySnapshot.forEach((doc) => {
-                    const turma = doc.data();
-                    const dtIniInsc = converterData(turma.dtIniInsc);
-                    const dtFimInsc = converterData(turma.dtFimInsc);
-                    
-                    if (hoje >= dtIniInsc && hoje <= dtFimInsc) {
-                        turmasUnicas.add(turma.nomeTurma);
-                    }
-                });
-
-                const turmasArray = Array.from(turmasUnicas);
-
-                if (turmasArray.length === 0) {
-                    const option = document.createElement('option');
-                    option.value = "";
-                    option.text = "Nenhuma turma com inscrições abertas";
-                    selectTurma.add(option);
-                } else {
-                    const defaultOption = document.createElement('option');
-                    defaultOption.value = "";
-                    defaultOption.text = "Selecione a Turma...";
-                    selectTurma.add(defaultOption);
-
-                    turmasArray.forEach((nomeTurma) => {
-                        const option = document.createElement('option');
-                        option.value = nomeTurma;
-                        option.text = nomeTurma;
-                        selectTurma.add(option);
-                    });
-                }
-                resolve();
-            })
-            .catch(reject);
-    });
-}
-
-
-        function converterData(dataString) {
-            const [dia, mes, ano] = dataString.split('/');
-            return new Date(ano, mes - 1, dia);
-        }
-
-        // Carregar disciplinas
-        function carregarDisciplinas(turmaSelecionada) {
-            const selectDisciplina = document.getElementById('disciplina');
-            selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina</option>';
-            const hoje = new Date();
-
-            document.getElementById('splash-screen').classList.add('show');
-
-            bancoDeDados.collection('cursosTurmas')
-                .where('nomeTurma', '==', turmaSelecionada)
+            bancoDeDados.collection('membros')
+                .where('nome', '==', nome)
                 .get()
                 .then((querySnapshot) => {
-                    const disciplinasUnicas = new Set();
-                    
                     querySnapshot.forEach((doc) => {
-                        const turma = doc.data();
-                        const dtIniInsc = converterData(turma.dtIniInsc);
-                        const dtFimInsc = converterData(turma.dtFimInsc);
-                        
-                        if (hoje >= dtIniInsc && hoje <= dtFimInsc) {
-                            disciplinasUnicas.add(turma.disciplinas);
-                        }
+                        document.getElementById('celula').value = doc.data().lidercelula;
                     });
-
-                    if (disciplinasUnicas.size === 0) {
-                        const option = document.createElement('option');
-                        option.value = "";
-                        option.text = "Nenhuma disciplina disponível";
-                        selectDisciplina.add(option);
-                    } else {
-                        disciplinasUnicas.forEach((disciplina) => {
-                            const option = document.createElement('option');
-                            option.value = disciplina;
-                            option.text = disciplina;
-                            selectDisciplina.add(option);
-                        });
-                    }
-                })
-                .finally(() => {
-                    document.getElementById('splash-screen').classList.remove('show');
                 });
         }
 
-        // Event Listeners        
-        document.getElementById('turma').addEventListener('change', function () {
-            carregarDisciplinas(this.value);
+        // Carregar funções disponíveis
+        function carregarFuncoes() {
+            return new Promise((resolve, reject) => {
+                const selectFuncao = document.getElementById('turma');
+                selectFuncao.innerHTML = '';
+
+                try {
+                    // Funções específicas para a Escola Ministerial
+                    const funcoes = ["ADM", "COORDENADOR", "SUPERVISOR", "PROFESSOR"];
+
+                    // Adicionar opção padrão
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = "";
+                    defaultOption.text = "Selecione a Função...";
+                    selectFuncao.add(defaultOption);
+
+                    // Adicionar cada função como uma opção
+                    funcoes.forEach(funcao => {
+                        const option = document.createElement('option');
+                        option.value = funcao;
+                        option.text = funcao;
+                        selectFuncao.add(option);
+                    });
+
+                    resolve();
+                } catch (error) {
+                    console.error("Erro ao carregar funções:", error);
+                    reject(error);
+                }
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('nome').addEventListener('input', function () {
+            if (this.value.trim() === '') {
+                document.getElementById('celula').value = '';
+            }
         });
 
         // Inicialização
         window.onload = function () {
             document.getElementById('splash-screen').classList.add('show');
-            carregarTurmas()
+            carregarFuncoes()
                 .then(() => {
                     document.getElementById('splash-screen').classList.remove('show');
                 })
                 .catch(error => {
-                    console.error("Error loading initial data:", error);
+                    console.error("Erro ao carregar dados iniciais:", error);
                     document.getElementById('splash-screen').classList.remove('show');
+                    alert("Erro ao carregar funções. Por favor, tente novamente.");
                 });
         };
 
@@ -407,8 +361,8 @@
 
             const nomeMembro = document.getElementById('nome').value.trim();
             const celulaNome = document.getElementById('celula').value.trim();
-            const turmaSelect = document.getElementById('turma');
-            const disciplinaSelect = document.getElementById('disciplina');
+            const funcaoSelect = document.getElementById('turma');
+            const funcaoSelecionada = funcaoSelect.options[funcaoSelect.selectedIndex].text;
 
             // Validações iniciais
             if (!nomeMembro) {
@@ -421,58 +375,83 @@
                 return;
             }
 
-            if (turmaSelect.selectedIndex === 0) {
-                alert('Por favor, selecione uma turma');
+            if (funcaoSelect.selectedIndex === 0) {
+                alert('Por favor, selecione uma função');
                 return;
             }
 
-            if (disciplinaSelect.selectedIndex === 0) {
-                alert('Por favor, selecione uma disciplina');
-                return;
-            }
-
-            // Verificar se o membro já tem inscrição na turma selecionada
-            bancoDeDados.collection('cursosInscricoes')
+            // Verificar se o membro já tem uma função registrada
+            bancoDeDados.collection('cursosEstrutura')
                 .where('nome', '==', nomeMembro)
-                .where('turma', '==', turmaSelect.options[turmaSelect.selectedIndex].text)
                 .get()
                 .then((querySnapshot) => {
                     if (!querySnapshot.empty) {
-                        alert('Você já está inscrito nesta turma. É permitida apenas uma inscrição por turma.');
-                        return;
-                    }
-
-                    // Prossegue com a inscrição
-                    bancoDeDados.collection('cursosInscricoes').add({
-                        nome: nomeMembro,
-                        celula: celulaNome,
-                        turma: turmaSelect.options[turmaSelect.selectedIndex].text,
-                        disciplina: disciplinaSelect.options[disciplinaSelect.selectedIndex].text,
-                        dataInscricao: new Date()
-                    })
-                        .then(function () {
-                            alert('Inscrição realizada com sucesso!');
-                            formulario.reset();
-                            carregarTurmas();
+                        if (confirm('Este membro já possui uma função registrada. Deseja atualizar para a nova função selecionada?')) {
+                            // Atualizar a função existente
+                            const docId = querySnapshot.docs[0].id;
+                            bancoDeDados.collection('cursosEstrutura').doc(docId).update({
+                                funcao: funcaoSelecionada,
+                                dataAtualizacao: new Date()
+                            })
+                                .then(function () {
+                                    alert('Função atualizada com sucesso!');
+                                    formulario.reset();
+                                })
+                                .catch(function (error) {
+                                    console.error("Erro ao atualizar função:", error);
+                                    alert('Erro ao atualizar função: ' + error.message);
+                                });
+                        }
+                    } else {
+                        // Criar um novo registro
+                        bancoDeDados.collection('cursosEstrutura').add({
+                            nome: nomeMembro,
+                            celula: celulaNome,
+                            funcao: funcaoSelecionada,
+                            dataCadastro: new Date(),
+                            dataAtualizacao: new Date()
                         })
-                        .catch(function (error) {
-                            console.error("Erro ao realizar inscrição:", error);
-                            alert('Erro ao realizar inscrição: ' + error.message);
-                        });
+                            .then(function () {
+                                alert('Função registrada com sucesso!');
+                                formulario.reset();
+                            })
+                            .catch(function (error) {
+                                console.error("Erro ao registrar função:", error);
+                                alert('Erro ao registrar função: ' + error.message);
+                            });
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Erro ao verificar função existente:", error);
+                    alert('Erro ao verificar registros: ' + error.message);
                 });
         });
 
-        document.getElementById('nome').addEventListener('input', function() {
-    if (this.value.trim() === '') {
-        document.getElementById('celula').value = '';
-    }
-});
-
-
+        // Adicionar estilo para a lista de sugestões
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .sugestoes {
+                    background-color: #3c3c3c;
+                    border-radius: 0 0 5px 5px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    position: absolute;
+                    width: calc(100% - 30px);
+                    z-index: 100;
+                }
+                .sugestao-item {
+                    padding: 8px 10px;
+                    cursor: pointer;
+                    color: #ffffff;
+                    border-bottom: 1px solid #4c4c4c;
+                }
+                .sugestao-item:hover {
+                    background-color: #4c4c4c;
+                }
+            </style>
+        `);
     </script>
 
 </body>
 
 </html>
-
-
