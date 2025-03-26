@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard iebiCelulas</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: bold;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+        }
+        
+        .btn-action {
+            margin-right: 5px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .logo-container {
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-container h4 {
+            margin: 0;
+            color: white;
+        }
+        
+        .user-info {
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-info .user-role {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .filter-card {
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-title {
+            font-weight: 600;
+            color: #343a40;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .table td[contenteditable="true"]:focus {
+            outline: 2px solid #007bff;
+            padding: 5px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar / Menu Lateral -->
+        <div class="sidebar">
+            <div class="logo-container">
+                <h4>iebiCelulas</h4>
+            </div>
+            <div class="user-info">
+                <h6 id="userName">Usuário</h6>
+                <div class="user-role" id="userRole">Função</div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#rede" onclick="showSection('rede')">
+                        <i class="fas fa-network-wired"></i> Rede
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#estruturacelula" onclick="showSection('estruturacelula')">
+                        <i class="fas fa-sitemap"></i> Estrutura Célula
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#membros" onclick="showSection('membros')">
+                        <i class="fas fa-users"></i> Membros
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#reuniao" onclick="showSection('reuniao')">
+                        <i class="fas fa-calendar-alt"></i> Reunião
+                    </a>
+                </li>
+                <li class="nav-item mt-5">
+                    <a class="nav-link" href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="main-content">
+            <!-- Alerta para notificações -->
+            <div class="alert-container" id="alertContainer"></div>
+            
+            <!-- Seção Dashboard -->
+            <div id="dashboard" class="section active">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Dashboard</h2>
+                    <p class="text-muted">Visão geral das informações do sistema</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-users"></i> Total de Membros</h5>
+                                <h2 class="card-text" id="totalMembros">Carregando...</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-home"></i> Total de Células</h5>
+                                <h2 class="card-text" id="totalCelulas">Carregando...</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-calendar-check"></i> Reuniões</h5>
+                                <h2 class="card-text" id="totalReunioes">Carregando...</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-user-plus"></i> Novos Membros</h5>
+                                <h2 class="card-text" id="novosMembros">Carregando...</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line"></i> Atividade Recente
+                            </div>
+                            <div class="card-body">
+                                <div id="atividadeRecente">Carregando...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-tasks"></i> Próximas Reuniões
+                            </div>
+                            <div class="card-body">
+                                <div id="proximasReunioes">Carregando...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seções para cada coleção -->
+            <div id="rede" class="section">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Gerenciar Rede</h2>
+                    <p class="text-muted">Visualize, edite e exclua informações da rede</p>
+                </div>
+                
+                <div class="card filter-card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="redeCampoFiltro">Filtrar por campo:</label>
+                                    <select class="form-control" id="redeCampoFiltro"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="redeValorFiltro">Filtrar por valor:</label>
+                                    <input class="form-control" id="redeValorFiltro" list="redeValorFiltroOptions" autocomplete="off">
+                                    <datalist id="redeValorFiltroOptions"></datalist>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button class="btn btn-primary btn-block" onclick="adicionarItem('rede')">
+                                        <i class="fas fa-plus"></i> Adicionar Novo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading-spinner" id="redeLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Carregando...</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="redeTabelaDados">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="estruturacelula" class="section">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Gerenciar Estrutura de Células</h2>
+                    <p class="text-muted">Visualize, edite e exclua informações da estrutura de células</p>
+                </div>
+                
+                <div class="card filter-card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="estruturacelulaCampoFiltro">Filtrar por campo:</label>
+                                    <select class="form-control" id="estruturacelulaCampoFiltro"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="estruturacelulaValorFiltro">Filtrar por valor:</label>
+                                    <input class="form-control" id="estruturacelulaValorFiltro" list="estruturacelulaValorFiltroOptions" autocomplete="off">
+                                    <datalist id="estruturacelulaValorFiltroOptions"></datalist>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button class="btn btn-primary btn-block" onclick="adicionarItem('estruturacelula')">
+                                        <i class="fas fa-plus"></i> Adicionar Novo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading-spinner" id="estruturacelulaLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Carregando...</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="estruturacelulaTabelaDados">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="membros" class="section">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Gerenciar Membros</h2>
+                    <p class="text-muted">Visualize, edite e exclua informações dos membros</p>
+                </div>
+                
+                <div class="card filter-card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                                                        <label for="membrosCampoFiltro">Filtrar por campo:</label>
+                                    <select class="form-control" id="membrosCampoFiltro"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="membrosValorFiltro">Filtrar por valor:</label>
+                                    <input class="form-control" id="membrosValorFiltro" list="membrosValorFiltroOptions" autocomplete="off">
+                                    <datalist id="membrosValorFiltroOptions"></datalist>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button class="btn btn-primary btn-block" onclick="adicionarItem('membros')">
+                                        <i class="fas fa-plus"></i> Adicionar Novo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading-spinner" id="membrosLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Carregando...</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="membrosTabelaDados">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="reuniao" class="section">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Gerenciar Reuniões</h2>
+                    <p class="text-muted">Visualize, edite e exclua informações das reuniões</p>
+                </div>
+                
+                <div class="card filter-card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="reuniaoCampoFiltro">Filtrar por campo:</label>
+                                    <select class="form-control" id="reuniaoCampoFiltro"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="reuniaoValorFiltro">Filtrar por valor:</label>
+                                    <input class="form-control" id="reuniaoValorFiltro" list="reuniaoValorFiltroOptions" autocomplete="off">
+                                    <datalist id="reuniaoValorFiltroOptions"></datalist>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button class="btn btn-primary btn-block" onclick="adicionarItem('reuniao')">
+                                        <i class="fas fa-plus"></i> Adicionar Novo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading-spinner" id="reuniaoLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Carregando...</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="reuniaoTabelaDados">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar/editar item -->
+    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalLabel">Adicionar Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="itemForm">
+                        <div id="formFields"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveItemBtn">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação para exclusão -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Importar scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-auth.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // Variáveis globais
+        let currentUser = null;
+        let userRole = null;
+        let currentCollection = null;
+        let itemToDelete = null;
+        let editingItemId = null;
+        
+        // Hierarquias e permissões
+        const hierarquias = {
+            ADMIN: {
+                nivel: 5,
+                permissoes: [
+                    'resumoMensal', 
+                    'organograma', 
+                    'indicadores', 
+                    'relatorioMembros', 
+                    'dadosReunioes',
+                    'relApresentacao',
+                    'acessoRapido'
+                ]
+            },
+            Pastor: {
+                nivel: 4,
+                permissoes: [
+                    'resumoMensal', 
+                    'organograma', 
+                    'indicadores', 
+                    'relatorioMembros', 
+                    'dadosReunioes',
+                    'relApresentacao'
+                ]
+            },
+            Coordenador: {
+                nivel: 3,
+                permissoes: [
+                    'resumoMensal', 
+                    'organograma', 
+                    'indicadores', 
+                    'relatorioMembros', 
+                    'dadosReunioes'
+                ]
+            },
+            Supervisor: {
+                nivel: 2,
+                permissoes: [
+                    'resumoMensal', 
+                    'organograma', 
+                    'indicadores', 
+                    'relatorioMembros', 
+                    'dadosReunioes'
+                ]
+            },
+            Lider: {
+                nivel: 1,
+                permissoes: [
+                    'organograma', 
+                    'indicadores', 
+                    'relatorioMembros', 
+                    'dadosReunioes'
+                ]
+            },
+            Membro: {
+                nivel: 0,
+                permissoes: [
+                    'organograma', 
+                    'indicadores', 
+                    'relatorioMembros', 
+                    'dadosReunioes'
+                ]
+            }
+        };
+
+        function temPermissao(funcao, permissao) {
+            return hierarquias[funcao] && hierarquias[funcao].permissoes.includes(permissao);
+        }
+
+        function getNivelHierarquico(funcao) {
+            return hierarquias[funcao] ? hierarquias[funcao].nivel : -1;
+        }
+        
+        // Verificar autenticação
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                // Buscar função do usuário no Firestore
+                db.collection('membros').where('email', '==', user.email).get()
+                    .then(snapshot => {
+                        if (!snapshot.empty) {
+                            const userData = snapshot.docs[0].data();
+                            userRole = userData.funcao || 'Membro';
+                            document.getElementById('userName').textContent = userData.nome || user.displayName || user.email;
+                            document.getElementById('userRole').textContent = userRole;
+                            
+                            // Carregar dashboard inicial
+                            carregarDashboard();
+                        } else {
+                            userRole = 'Membro';
+                            document.getElementById('userName').textContent = user.displayName || user.email;
+                            document.getElementById('userRole').textContent = userRole;
+                            carregarDashboard();
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro ao buscar dados do usuário:", error);
+                        mostrarAlerta("Erro ao carregar dados do usuário", "danger");
+                    });
+            } else {
+                // Redirecionar para página de login
+                window.location.href = 'login.html';
+            }
+        });
+        
+        // Função para mostrar seção
+        function showSection(sectionId) {
+            // Esconder todas as seções
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar a seção selecionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Atualizar links ativos no menu
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`.nav-link[href="#${sectionId}"]`).classList.add('active');
+            
+            // Carregar dados se for uma coleção
+            if (sectionId !== 'dashboard') {
+                currentCollection = sectionId;
+                carregarDados(sectionId);
+            }
+        }
+        
+        // Função para carregar dashboard
+        function carregarDashboard() {
+            // Carregar contadores
+            carregarContadores();
+            
+            // Carregar atividade recente
+            carregarAtividadeRecente();
+            
+            // Carregar próximas reuniões
+            carregarProximasReunioes();
+        }
+        
+        // Função para carregar contadores
+        function carregarContadores() {
+            // Total de membros
+            db.collection('membros').get()
+                .then(snapshot => {
+                    document.getElementById('totalMembros').textContent = snapshot.size;
+                })
+                .catch(error => {
+                    console.error("Erro ao contar membros:", error);
+                    document.getElementById('totalMembros').textContent = "Erro";
+                });
+            
+            // Total de células
+            db.collection('estruturacelula').get()
+                .then(snapshot => {
+                    document.getElementById('totalCelulas').textContent = snapshot.size;
+                })
+                .catch(error => {
+                    console.error("Erro ao contar células:", error);
+                    document.getElementById('totalCelulas').textContent = "Erro";
+                });
+            
+            // Total de reuniões
+            db.collection('reuniao').get()
+                .then(snapshot => {
+                    document.getElementById('totalReunioes').textContent = snapshot.size;
+                })
+                .catch(error => {
+                    console.error("Erro ao contar reuniões:", error);
+                    document.getElementById('totalReunioes').textContent = "Erro";
+                });
+            
+            // Novos membros (últimos 30 dias)
+            const dataLimite = new Date();
+            dataLimite.setDate(dataLimite.getDate() - 30);
+            
+            db.collection('membros')
+                .where('dataCadastro', '>=', dataLimite)
+                .get()
+                .then(snapshot => {
+                    document.getElementById('novosMembros').textContent = snapshot.size;
+                })
+                .catch(error => {
+                    console.error("Erro ao contar novos membros:", error);
+                    document.getElementById('novosMembros').textContent = "Erro";
+                });
+        }
+        
+        // Função para carregar atividade recente
+        function carregarAtividadeRecente() {
+                        const atividadeContainer = document.getElementById('atividadeRecente');
+            atividadeContainer.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div> Carregando...</div>';
+            
+            // Buscar as últimas 5 reuniões
+            db.collection('reuniao')
+                .orderBy('data', 'desc')
+                .limit(5)
+                .get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        atividadeContainer.innerHTML = '<p class="text-muted">Nenhuma atividade recente encontrada.</p>';
+                        return;
+                    }
+                    
+                    let html = '<ul class="list-group list-group-flush">';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const dataFormatada = new Date(data.data.seconds * 1000).toLocaleDateString('pt-BR');
+                        html += `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${data.tipo || 'Reunião'}</strong>
+                                    <p class="mb-0 text-muted">${data.descricao || 'Sem descrição'}</p>
+                                </div>
+                                <span class="badge badge-primary badge-pill">${dataFormatada}</span>
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                    atividadeContainer.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar atividade recente:", error);
+                    atividadeContainer.innerHTML = '<p class="text-danger">Erro ao carregar atividades recentes.</p>';
+                });
+        }
+        
+        // Função para carregar próximas reuniões
+        function carregarProximasReunioes() {
+            const reunioesContainer = document.getElementById('proximasReunioes');
+            reunioesContainer.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div> Carregando...</div>';
+            
+            // Data atual
+            const dataAtual = new Date();
+            
+            // Buscar as próximas 5 reuniões
+            db.collection('reuniao')
+                .where('data', '>=', dataAtual)
+                .orderBy('data', 'asc')
+                .limit(5)
+                .get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        reunioesContainer.innerHTML = '<p class="text-muted">Nenhuma reunião agendada.</p>';
+                        return;
+                    }
+                    
+                    let html = '<ul class="list-group list-group-flush">';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const dataFormatada = new Date(data.data.seconds * 1000).toLocaleDateString('pt-BR');
+                        const horaFormatada = new Date(data.data.seconds * 1000).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                        html += `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${data.tipo || 'Reunião'}</strong>
+                                    <p class="mb-0 text-muted">${data.local || 'Local não informado'}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="badge badge-success badge-pill">${dataFormatada}</span>
+                                    <div class="small">${horaFormatada}</div>
+                                </div>
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                    reunioesContainer.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar próximas reuniões:", error);
+                    reunioesContainer.innerHTML = '<p class="text-danger">Erro ao carregar próximas reuniões.</p>';
+                });
+        }
+        
+        // Função para carregar dados de uma coleção
+        function carregarDados(colecao) {
+            // Mostrar spinner de carregamento
+            document.getElementById(`${colecao}Loading`).style.display = 'block';
+            
+            // Referências aos elementos
+            const campoFiltro = document.getElementById(`${colecao}CampoFiltro`);
+            const valorFiltro = document.getElementById(`${colecao}ValorFiltro`);
+            const tabelaDados = document.getElementById(`${colecao}TabelaDados`);
+            const thead = tabelaDados.getElementsByTagName('thead')[0];
+            const tbody = tabelaDados.getElementsByTagName('tbody')[0];
+            
+            // Limpar tabela
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+            
+            // Carregar campos para filtro
+            popularCamposFiltro(colecao);
+            
+            // Buscar dados no Firestore
+            db.collection(colecao).get()
+                .then(querySnapshot => {
+                    // Esconder spinner
+                    document.getElementById(`${colecao}Loading`).style.display = 'none';
+                    
+                    if (querySnapshot.size > 0) {
+                        // Criar cabeçalho da tabela
+                        const trCabecalho = document.createElement('tr');
+                        const campos = Object.keys(querySnapshot.docs[0].data());
+                        
+                        // Adicionar campos ao cabeçalho
+                        campos.forEach(campo => {
+                            const th = document.createElement('th');
+                            th.textContent = campo;
+                            trCabecalho.appendChild(th);
+                        });
+                        
+                        // Adicionar coluna de ações
+                        const thAcoes = document.createElement('th');
+                        thAcoes.textContent = 'Ações';
+                        trCabecalho.appendChild(thAcoes);
+                        
+                        thead.appendChild(trCabecalho);
+                        
+                        // Converter querySnapshot para array e ordenar
+                        let documents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        
+                        // Exibir dados na tabela
+                        documents.forEach(doc => {
+                            const trDados = document.createElement('tr');
+                            trDados.setAttribute('data-id', doc.id);
+                            
+                            campos.forEach(campo => {
+                                const valor = doc[campo];
+                                const td = document.createElement('td');
+                                
+                                // Verificar se o valor é um timestamp
+                                if (valor && typeof valor === 'object' && valor.seconds) {
+                                    const data = new Date(valor.seconds * 1000);
+                                    td.textContent = data.toLocaleDateString('pt-BR');
+                                } else {
+                                    td.textContent = valor !== undefined ? valor : '';
+                                }
+                                
+                                td.setAttribute('data-campo', campo);
+                                td.contentEditable = true;
+                                td.addEventListener('blur', () => atualizarDados(colecao, doc.id, campo, td.textContent));
+                                
+                                trDados.appendChild(td);
+                            });
+                            
+                            // Adicionar botões de ação
+                            const tdAcoes = document.createElement('td');
+                            tdAcoes.innerHTML = `
+                                <button class="btn btn-sm btn-info btn-action" onclick="editarItem('${colecao}', '${doc.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-action" onclick="confirmarExclusao('${colecao}', '${doc.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            `;
+                            trDados.appendChild(tdAcoes);
+                            
+                            tbody.appendChild(trDados);
+                        });
+                    } else {
+                        // Sem dados
+                        const tr = document.createElement('tr');
+                        const td = document.createElement('td');
+                        td.textContent = 'Nenhum dado encontrado.';
+                        td.colSpan = 5;
+                        td.className = 'text-center';
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
+                    }
+                })
+                .catch(error => {
+                    // Esconder spinner
+                    document.getElementById(`${colecao}Loading`).style.display = 'none';
+                    
+                    console.error(`Erro ao carregar dados de ${colecao}:`, error);
+                    mostrarAlerta(`Erro ao carregar dados: ${error.message}`, 'danger');
+                    
+                    // Exibir mensagem de erro na tabela
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.textContent = 'Erro ao carregar dados.';
+                    td.colSpan = 5;
+                    td.className = 'text-center text-danger';
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+                });
+        }
+        
+        // Função para popular campos de filtro
+        function popularCamposFiltro(colecao) {
+            const selectCampoFiltro = document.getElementById(`${colecao}CampoFiltro`);
+            selectCampoFiltro.innerHTML = '<option value="">Selecione um campo</option>';
+            
+            db.collection(colecao).limit(1).get()
+                .then(querySnapshot => {
+                    if (!querySnapshot.empty) {
+                        const campos = Object.keys(querySnapshot.docs[0].data());
+                        campos.forEach(campo => {
+                            const option = document.createElement('option');
+                            option.value = campo;
+                            option.textContent = campo;
+                            selectCampoFiltro.appendChild(option);
+                        });
+                        
+                        // Adicionar evento de mudança
+                        selectCampoFiltro.addEventListener('change', () => {
+                            const campoSelecionado = selectCampoFiltro.value;
+                            if (campoSelecionado) {
+                                popularValoresFiltro(colecao, campoSelecionado);
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error(`Erro ao obter campos de ${colecao}:`, error);
+                });
+        }
+        
+        // Função para popular valores de filtro
+        function popularValoresFiltro(colecao, campo) {
+            const datalist = document.getElementById(`${colecao}ValorFiltroOptions`);
+            datalist.innerHTML = '';
+            
+            db.collection(colecao).get()
+                .then(querySnapshot => {
+                    const valoresUnicos = new Set();
+                    querySnapshot.forEach(doc => {
+                        const valor = doc.data()[campo];
+                        if (valor !== undefined && valor !== '') {
+                            // Verificar se é um timestamp
+                            if (valor && typeof valor === 'object' && valor.seconds) {
+                                const data = new Date(valor.seconds * 1000);
+                                valoresUnicos.add(data.toLocaleDateString('pt-BR'));
+                            } else {
+                                valoresUnicos.add(String(valor));
+                            }
+                        }
+                    });
+                    
+                    const valoresOrdenados = Array.from(valoresUnicos).sort();
+                    valoresOrdenados.forEach(valor => {
+                        const option = document.createElement('option');
+                        option.value = valor;
+                        datalist.appendChild(option);
+                    });
+                    
+                    // Adicionar evento de input ao campo de valor
+                    const inputValorFiltro = document.getElementById(`${colecao}ValorFiltro`);
+                    inputValorFiltro.addEventListener('input', () => {
+                        filtrarDados(colecao, campo, inputValorFiltro.value);
+                    });
+                })
+                .catch(error => {
+                    console.error(`Erro ao obter valores de ${colecao}:`, error);
+                });
+        }
+        
+        // Função para filtrar dados
+        function filtrarDados(colecao, campo, valor) {
+            const tabelaDados = document.getElementById(`${colecao}TabelaDados`);
+            const linhas = tabelaDados.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            for (let i = 0; i < linhas.length; i++) {
+                const linha = linhas[i];
+                const celulas = linha.getElementsByTagName('td');
+                
+                let encontrado = false;
+                for (let j = 0; j < celulas.length; j++) {
+                    const celula = celulas[j];
+                    if (celula.getAttribute('data-campo') === campo) {
+                        const conteudo = celula.textContent.toLowerCase();
+                        if (conteudo.includes(valor.toLowerCase())) {
+                            encontrado = true;
+                            break;
+                        }
+                    }
+                }
+                
+                linha.style.display = encontrado || valor === '' ? '' : 'none';
+            }
+        }
+        
+        // Função para atualizar dados
+        function atualizarDados(colecao, id, campo, novoValor) {
+            // Verificar se o valor realmente mudou
+            const celulaAtual = document.querySelector(`tr[data-id="${id}"] td[data-campo="${campo}"]`);
+            const valorAntigo = celulaAtual.getAttribute('data-valor-original');
+            
+            if (valorAntigo === novoValor) {
+                return; // Valor não mudou
+            }
+            
+            // Atualizar no Firestore
+            db.collection(colecao).doc(id).update({
+                [campo]: novoValor
+            })
+            .then(() => {
+                mostrarAlerta('Dados atualizados com sucesso!', 'success');
+                celulaAtual.setAttribute('data-valor-original', novoValor);
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar dados:', error);
+                mostrarAlerta('Erro ao atualizar dados. Tente novamente.', 'danger');
+                // Reverter para o valor original
+                celulaAtual.textContent = valorAntigo;
+            });
+        }
+        
+        // Função para adicionar novo item
+        function adicionarItem(colecao) {
+            // Resetar formulário
+            document.getElementById('formFields').innerHTML = '';
+            document.getElementById('itemModalLabel').textContent = 'Adicionar Novo Item';
+            
+            // Obter campos da coleção
+            db.collection(colecao).limit(1).get()
+                .then(querySnapshot => {
+                    if (!querySnapshot.empty) {
+                        const campos = Object.keys(querySnapshot.docs[0].data());
+                        let formHtml = '';
+                        
+                        campos.forEach(campo => {
+                            formHtml += `
+                                <div class="form-group">
+                                    <label for="${campo}">${campo}</label>
+                                                                        <input type="text" class="form-control" id="${campo}" name="${campo}">
+                                </div>
+                            `;
+                        });
+                        
+                        document.getElementById('formFields').innerHTML = formHtml;
+                        
+                        // Configurar botão de salvar
+                        const saveBtn = document.getElementById('saveItemBtn');
+                        saveBtn.onclick = function() {
+                            salvarNovoItem(colecao);
+                        };
+                        
+                        // Abrir modal
+                        $('#itemModal').modal('show');
+                    } else {
+                        mostrarAlerta('Não foi possível obter a estrutura da coleção.', 'warning');
+                    }
+                })
+                .catch(error => {
+                    console.error(`Erro ao obter estrutura de ${colecao}:`, error);
+                    mostrarAlerta('Erro ao preparar formulário.', 'danger');
+                });
+        }
+        
+        // Função para salvar novo item
+        function salvarNovoItem(colecao) {
+            // Coletar dados do formulário
+            const formFields = document.getElementById('formFields').querySelectorAll('input, select, textarea');
+            const dados = {};
+            
+            formFields.forEach(field => {
+                dados[field.name] = field.value;
+            });
+            
+            // Salvar no Firestore
+            db.collection(colecao).add(dados)
+                .then(() => {
+                    mostrarAlerta('Item adicionado com sucesso!', 'success');
+                    $('#itemModal').modal('hide');
+                    
+                    // Recarregar dados
+                    carregarDados(colecao);
+                })
+                .catch(error => {
+                    console.error('Erro ao adicionar item:', error);
+                    mostrarAlerta('Erro ao adicionar item. Tente novamente.', 'danger');
+                });
+        }
+        
+        // Função para editar item
+        function editarItem(colecao, id) {
+            // Resetar formulário
+            document.getElementById('formFields').innerHTML = '';
+            document.getElementById('itemModalLabel').textContent = 'Editar Item';
+            
+            // Buscar dados do item
+            db.collection(colecao).doc(id).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const dados = doc.data();
+                        const campos = Object.keys(dados);
+                        let formHtml = '';
+                        
+                        campos.forEach(campo => {
+                            let valor = dados[campo];
+                            
+                            // Verificar se é um timestamp
+                            if (valor && typeof valor === 'object' && valor.seconds) {
+                                const data = new Date(valor.seconds * 1000);
+                                valor = data.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                            }
+                            
+                            formHtml += `
+                                <div class="form-group">
+                                    <label for="${campo}">${campo}</label>
+                                    <input type="text" class="form-control" id="${campo}" name="${campo}" value="${valor || ''}">
+                                </div>
+                            `;
+                        });
+                        
+                        document.getElementById('formFields').innerHTML = formHtml;
+                        
+                        // Configurar botão de salvar
+                        const saveBtn = document.getElementById('saveItemBtn');
+                        saveBtn.onclick = function() {
+                            atualizarItem(colecao, id);
+                        };
+                        
+                        // Abrir modal
+                        $('#itemModal').modal('show');
+                    } else {
+                        mostrarAlerta('Item não encontrado.', 'warning');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar item:', error);
+                    mostrarAlerta('Erro ao buscar dados do item.', 'danger');
+                });
+        }
+        
+        // Função para atualizar item
+        function atualizarItem(colecao, id) {
+            // Coletar dados do formulário
+            const formFields = document.getElementById('formFields').querySelectorAll('input, select, textarea');
+            const dados = {};
+            
+            formFields.forEach(field => {
+                dados[field.name] = field.value;
+            });
+            
+            // Atualizar no Firestore
+            db.collection(colecao).doc(id).update(dados)
+                .then(() => {
+                    mostrarAlerta('Item atualizado com sucesso!', 'success');
+                    $('#itemModal').modal('hide');
+                    
+                    // Recarregar dados
+                    carregarDados(colecao);
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar item:', error);
+                    mostrarAlerta('Erro ao atualizar item. Tente novamente.', 'danger');
+                });
+        }
+        
+        // Função para confirmar exclusão
+        function confirmarExclusao(colecao, id) {
+            itemToDelete = { colecao, id };
+            
+            // Configurar botão de confirmação
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            confirmBtn.onclick = function() {
+                excluirItem(colecao, id);
+            };
+            
+            // Abrir modal de confirmação
+            $('#deleteModal').modal('show');
+        }
+        
+        // Função para excluir item
+        function excluirItem(colecao, id) {
+            db.collection(colecao).doc(id).delete()
+                .then(() => {
+                    mostrarAlerta('Item excluído com sucesso!', 'success');
+                    $('#deleteModal').modal('hide');
+                    
+                    // Recarregar dados
+                    carregarDados(colecao);
+                })
+                .catch(error => {
+                    console.error('Erro ao excluir item:', error);
+                    mostrarAlerta('Erro ao excluir item. Tente novamente.', 'danger');
+                    $('#deleteModal').modal('hide');
+                });
+        }
+        
+        // Função para mostrar alerta
+        function mostrarAlerta(mensagem, tipo) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            
+            const alertHtml = `
+                <div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                    ${mensagem}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            alertContainer.innerHTML += alertHtml;
+            
+            // Remover alerta após 5 segundos
+            setTimeout(() => {
+                const alertElement = document.getElementById(alertId);
+                if (alertElement) {
+                    alertElement.classList.remove('show');
+                    setTimeout(() => {
+                        alertElement.remove();
+                    }, 150);
+                }
+            }, 5000);
+        }
+        
+        // Função para fazer logout
+        function logout() {
+            auth.signOut()
+                .then(() => {
+                    window.location.href = 'login.html';
+                })
+                .catch(error => {
+                    console.error('Erro ao fazer logout:', error);
+                    mostrarAlerta('Erro ao fazer logout. Tente novamente.', 'danger');
+                });
+        }
+        
+        // Inicializar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar eventos de filtro
+            const colecoes = ['rede', 'estruturacelula', 'membros', 'reuniao'];
+            
+            colecoes.forEach(colecao => {
+                const inputValorFiltro = document.getElementById(`${colecao}ValorFiltro`);
+                inputValorFiltro.addEventListener('input', () => {
+                    const campoFiltro = document.getElementById(`${colecao}CampoFiltro`).value;
+                    if (campoFiltro) {
+                        filtrarDados(colecao, campoFiltro, inputValorFiltro.value);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

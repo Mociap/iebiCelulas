@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento de Turmas - Escola Ministerial</title>
+    <link rel="shortcut icon" href="../3.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container-fluid {
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .card {
+            background-color: #3c3c3c;
+            border: none;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-control {
+            background-color: #4c4c4c;
+            border: none;
+            color: #ffffff;
+        }
+
+        .form-control:focus {
+            background-color: #4c4c4c;
+            color: #ffffff;
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .table {
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #2ecc71;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .back-button:hover {
+            background-color: #27ae60;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #aaa;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="frmEM.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+
+    <div class="container-fluid">
+        <h2 class="text-center mb-4">Monitoramento de Turmas - Escola Ministerial</h2>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">Filtros</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select id="filtroTurma" class="form-control">
+                                    <option value="">Todas as Turmas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="filtroDisciplina" class="form-control">
+                                    <option value="">Todas as Disciplinas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="filtroPeriodo" class="form-control">
+                                    <option value="7">Últimos 7 dias</option>
+                                    <option value="15">Últimos 15 dias</option>
+                                    <option value="30">Últimos 30 dias</option>
+                                    <option value="90" selected>Últimos 3 meses</option>
+                                    <option value="180">Últimos 6 meses</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo Estatístico -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Total de Alunos</div>
+                    <div class="stat-value" id="totalAlunos">0</div>
+                    <div class="text-muted">Inscrições ativas</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Frequência Média</div>
+                    <div class="stat-value" id="frequenciaMedia">0%</div>
+                    <div class="text-muted">Período selecionado</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Taxa de Evasão</div>
+                    <div class="stat-value" id="taxaEvasao">0%</div>
+                    <div class="text-muted">Ausencia > 3 aulas</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Aulas Realizadas</div>
+                    <div class="stat-value" id="aulasRealizadas">0</div>
+                    <div class="text-muted">No período selecionado</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Frequência por Aula</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="frequenciaChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Distribuição de Alunos por Turma</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="distribuicaoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Frequência por Aluno -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">Frequência Detalhada por Aluno</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="tabelaFrequencia">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Turma</th>
+                                        <th>Disciplina</th>
+                                        <th>Presenças</th>
+                                        <th>Faltas</th>
+                                        <th>% Frequência</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaFrequencia">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="loader"></div>
+                                            <p>Carregando dados de frequência...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts necessários -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Hierarquias e permissões -->
+    <script src="../hierarquias.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+        firebase.initializeApp(configuracaoFirebase);
+        const db = firebase.firestore();
+
+        // Variáveis globais para armazenar dados
+        let todasInscricoes = [];
+        let todasPresencas = [];
+        let todasTurmas = [];
+        let todasDisciplinas = [];
+        let chartFrequencia, chartDistribuicao;
+
+        // Verificar permissões do usuário
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                // Buscar função do usuário
+                db.collection('usuarios').doc(user.uid).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const funcao = doc.data().funcao;
+                            // Verificar se tem permissão para acessar relatórios
+                            if (temPermissao(funcao, 'relatorioMembros') &&
+                                getNivelHierarquico(funcao) >= 3) {
+                                inicializarPagina();
+                            } else {
+                                alert('Você não tem permissão para acessar esta página.');
+                                window.location.href = 'frmEM.html';
+                            }
+                        }
+                    });
+            } else {
+                window.location.href = '../login.html';
+            }
+        });
+
+        // Função para converter data string DD/MM/AAAA para objeto Date
+        function converterStringParaData(dataString) {
+            const [dia, mes, ano] = dataString.split('/');
+            return new Date(ano, mes - 1, dia);
+        }
+
+        // Função para formatar data para DD/MM/AAAA
+        function formatarData(data) {
+            const dia = String(data.getDate()).padStart(2, '0');
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const ano = data.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        // Função para obter data de N dias atrás
+        function getDataAnterior(dias) {
+            const data = new Date();
+            data.setDate(data.getDate() - dias);
+            return data;
+        }
+
+        // Adicione este código na seção de scripts, antes da função inicializarPagina()
+
+        // Função para criar tabela detalhada de presença
+        function criarTabelaPresencaDetalhada(inscricoes, presencas) {
+            const container = document.createElement('div');
+            container.className = 'row mt-4';
+            container.innerHTML = `
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">Tabela Detalhada de Presença por Disciplina</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="tabelaPresencaDetalhada">
+                            <thead>
+                                <tr>
+                                    <th>Disciplina</th>
+                                    <th>Nome do Aluno</th>
+                                    <th id="datasPresenca">Datas de Presença</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaPresencaDetalhada">
+                                <tr>
+                                    <td colspan="3" class="text-center">
+                                        <div class="loader"></div>
+                                        <p>Carregando dados de presença...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+            // Adicionar a tabela ao final da página
+            document.querySelector('.container-fluid').appendChild(container);
+
+            // Preencher a tabela com os dados
+            preencherTabelaPresencaDetalhada(inscricoes, presencas);
+        }
+
+        // Função para preencher a tabela detalhada de presença
+        function preencherTabelaPresencaDetalhada(inscricoes, presencas) {
+            const tbody = document.getElementById('listaPresencaDetalhada');
+            const theadDatas = document.getElementById('datasPresenca');
+            tbody.innerHTML = '';
+
+            if (inscricoes.length === 0 || presencas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center">Nenhum dado de presença encontrado</td></tr>';
+                return;
+            }
+
+            // Ordenar disciplinas na ordem especificada
+            const ordemDisciplinas = [
+                'Iniciar', 'Edificar', 'Identificar', 'Impactar',
+                'Teen - Iniciar', 'Teen - Edificar', 'Teen - Identificar', 'Teen - Impactar'
+            ];
+
+            // Ordenar presenças por data
+            const presencasOrdenadas = [...presencas].sort((a, b) => {
+                return converterStringParaData(a.dataAula) - converterStringParaData(b.dataAula);
+            });
+
+            // Obter todas as datas únicas de aulas
+            const datasUnicas = [...new Set(presencasOrdenadas.map(p => p.dataAula))];
+
+            // Atualizar cabeçalho com as datas
+            let headerHTML = `
+        <th>Disciplina</th>
+        <th>Nome do Aluno</th>
+    `;
+
+            datasUnicas.forEach(data => {
+                headerHTML += `<th>${data}</th>`;
+            });
+
+            const headerRow = document.querySelector('#tabelaPresencaDetalhada thead tr');
+            headerRow.innerHTML = headerHTML;
+
+            // Mapear aulas por turma e disciplina para calcular risco de evasão
+            const aulasPorTurmaDisciplina = {};
+            presencas.forEach(p => {
+                const chave = `${p.turma}|${p.disciplina}`;
+                if (!aulasPorTurmaDisciplina[chave]) {
+                    aulasPorTurmaDisciplina[chave] = [];
+                }
+                aulasPorTurmaDisciplina[chave].push(p);
+            });
+
+            // Calcular faltas consecutivas para identificar alunos em risco
+            const alunosComFaltas = calcularFaltasConsecutivasCorrigido(inscricoes, aulasPorTurmaDisciplina);
+
+            // Identificar alunos em risco de evasão
+            const alunosEmRisco = new Set();
+            alunosComFaltas.forEach(aluno => {
+                const chave = `${aluno.turma}|${aluno.disciplina}`;
+                const aulasDisponiveis = aulasPorTurmaDisciplina[chave] || [];
+
+                // Critérios de risco de evasão
+                if (aulasDisponiveis.length >= 3 && aluno.faltasConsecutivas >= 2) {
+                    alunosEmRisco.add(`${aluno.nome}|${aluno.disciplina}`);
+                } else if (aulasDisponiveis.length > 0 &&
+                    aluno.faltasConsecutivas >= aulasDisponiveis.length) {
+                    alunosEmRisco.add(`${aluno.nome}|${aluno.disciplina}`);
+                }
+            });
+
+            // Agrupar inscrições por disciplina
+            const inscricoesPorDisciplina = {};
+            inscricoes.forEach(inscricao => {
+                if (!inscricoesPorDisciplina[inscricao.disciplina]) {
+                    inscricoesPorDisciplina[inscricao.disciplina] = [];
+                }
+                inscricoesPorDisciplina[inscricao.disciplina].push(inscricao);
+            });
+
+            // Ordenar disciplinas conforme a ordem especificada
+            const disciplinasOrdenadas = Object.keys(inscricoesPorDisciplina).sort((a, b) => {
+                const indexA = ordemDisciplinas.indexOf(a);
+                const indexB = ordemDisciplinas.indexOf(b);
+
+                // Se a disciplina não estiver na lista, colocá-la no final
+                if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+                if (indexA === -1) return 1;
+                if (indexB === -1) return -1;
+
+                return indexA - indexB;
+            });
+
+            // Para cada disciplina, listar alunos em ordem alfabética
+            disciplinasOrdenadas.forEach(disciplina => {
+                const alunosDisciplina = inscricoesPorDisciplina[disciplina];
+
+                // Ordenar alunos por nome (A-Z)
+                alunosDisciplina.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                alunosDisciplina.forEach(aluno => {
+                    const tr = document.createElement('tr');
+
+                    // Verificar se o aluno está em risco de evasão
+                    const emRisco = alunosEmRisco.has(`${aluno.nome}|${aluno.disciplina}`);
+
+                    if (emRisco) {
+                        tr.className = 'bg-warning text-dark';
+                    }
+
+                    // Adicionar células para disciplina e nome
+                    tr.innerHTML = `
+                <td>${disciplina}</td>
+                <td>${aluno.nome}</td>
+            `;
+
+                    // Adicionar células para cada data de aula
+                    datasUnicas.forEach(data => {
+                        const aulaData = presencas.find(p =>
+                            p.dataAula === data &&
+                            p.disciplina === aluno.disciplina &&
+                            p.turma === aluno.turma
+                        );
+
+                        let presencaHTML = '<td>-</td>'; // Padrão se não houver registro
+
+                        if (aulaData && aulaData.presencas) {
+                            const presencasAula = aulaData.presencas;
+
+                            if (aluno.nome in presencasAula) {
+                                if (presencasAula[aluno.nome] === true) {
+                                    presencaHTML = '<td style="background-color: rgba(40, 167, 69, 0.3);">P</td>'; // Verde claro
+                                } else {
+                                    presencaHTML = '<td style="background-color: rgba(220, 53, 69, 0.3);">F</td>'; // Vermelho claro
+                                }
+                            }
+                        }
+
+                        tr.innerHTML += presencaHTML;
+                    });
+
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        // Inicializar a página
+        function inicializarPagina() {
+            carregarFiltros();
+            carregarDados();
+            configurarEventListeners();
+        }
+
+        // Carregar filtros
+        function carregarFiltros() {
+            const dataAtual = formatarData(new Date());
+
+            // Carregar turmas para filtro
+            db.collection('cursosTurmas')
+                .get()
+                .then(snapshot => {
+                    const turmas = new Set();
+                    snapshot.forEach(doc => {
+                        const dadosTurma = doc.data();
+
+                        // Verificar se a turma está ativa (dentro do período)
+                        if (estaNoPerido(dataAtual, dadosTurma.dtIni, dadosTurma.dtFim)) {
+                            turmas.add(dadosTurma.nomeTurma);
+                            todasTurmas.push(dadosTurma);
+                        }
+                    });
+
+                    const selectTurma = document.getElementById('filtroTurma');
+                    selectTurma.innerHTML = '';
+
+                    // Converter Set para Array para facilitar o manuseio
+                    const turmasArray = Array.from(turmas);
+
+                    if (turmasArray.length === 0) {
+                        // Nenhuma turma ativa
+                        const option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "Nenhuma turma ativa";
+                        selectTurma.appendChild(option);
+                    } else if (turmasArray.length === 1) {
+                        // Apenas uma turma ativa - selecionar automaticamente
+                        const option = document.createElement('option');
+                        option.value = turmasArray[0];
+                        option.textContent = turmasArray[0];
+                        selectTurma.appendChild(option);
+                        selectTurma.value = turmasArray[0];
+
+                        // Carregar disciplinas para esta turma
+                        carregarDisciplinasPorTurma(turmasArray[0]);
+                    } else {
+                        // Múltiplas turmas - mostrar opção "Todas as Turmas"
+                        const optionTodas = document.createElement('option');
+                        optionTodas.value = "";
+                        optionTodas.textContent = "Todas as Turmas";
+                        selectTurma.appendChild(optionTodas);
+
+                        // Adicionar cada turma como opção
+                        turmasArray.forEach(turma => {
+                            const option = document.createElement('option');
+                            option.value = turma;
+                            option.textContent = turma;
+                            selectTurma.appendChild(option);
+                        });
+                    }
+                });
+        }
+
+        // Função para verificar se uma data está dentro do período
+        function estaNoPerido(dataAtual, dataInicio, dataFim) {
+            const dtAtual = converterStringParaData(dataAtual);
+            const dtInicio = converterStringParaData(dataInicio);
+            const dtFim = converterStringParaData(dataFim);
+
+            return dtAtual >= dtInicio && dtAtual <= dtFim;
+        }
+
+        // Função para carregar disciplinas específicas de uma turma
+        function carregarDisciplinasPorTurma(turma) {
+            const dataAtual = formatarData(new Date());
+            const selectDisciplina = document.getElementById('filtroDisciplina');
+            selectDisciplina.innerHTML = '';
+
+            db.collection('cursosTurmas')
+                .where('nomeTurma', '==', turma)
+                .get()
+                .then(querySnapshot => {
+                    const disciplinas = new Set();
+
+                    querySnapshot.forEach(doc => {
+                        const dadosTurma = doc.data();
+                        if (estaNoPerido(dataAtual, dadosTurma.dtIni, dadosTurma.dtFim) && dadosTurma.disciplinas) {
+                            disciplinas.add(dadosTurma.disciplinas);
+                            todasDisciplinas.push(dadosTurma.disciplinas);
+                        }
+                    });
+
+                    const disciplinasArray = Array.from(disciplinas);
+
+                    if (disciplinasArray.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "Nenhuma disciplina disponível";
+                        selectDisciplina.appendChild(option);
+                    } else if (disciplinasArray.length === 1) {
+                        // Se houver apenas uma disciplina, seleciona automaticamente
+                        const option = document.createElement('option');
+                        option.value = disciplinasArray[0];
+                        option.textContent = disciplinasArray[0];
+                        selectDisciplina.appendChild(option);
+                        selectDisciplina.value = disciplinasArray[0];
+
+                        // Aplicar filtros com a turma e disciplina já selecionadas
+                        setTimeout(() => aplicarFiltros(), 100);
+                    } else {
+                        // Múltiplas disciplinas
+                        const optionTodas = document.createElement('option');
+                        optionTodas.value = "";
+                        optionTodas.textContent = "Todas as Disciplinas";
+                        selectDisciplina.appendChild(optionTodas);
+
+                        disciplinasArray.forEach(disciplina => {
+                            const option = document.createElement('option');
+                            option.value = disciplina;
+                            option.textContent = disciplina;
+                            selectDisciplina.appendChild(option);
+                        });
+
+                        // Aplicar filtros apenas com a turma selecionada
+                        setTimeout(() => aplicarFiltros(), 100);
+                    }
+                });
+        }
+
+        // Carregar todos os dados necessários
+        function carregarDados() {
+            Promise.all([
+                carregarInscricoes(),
+                carregarPresencas()
+            ]).then(() => {
+                aplicarFiltros();
+            });
+        }
+
+        // Carregar inscrições
+        function carregarInscricoes() {
+            return db.collection('cursosInscricoes')
+                .get()
+                .then(snapshot => {
+                    todasInscricoes = [];
+                    snapshot.forEach(doc => {
+                        const dados = doc.data();
+                        dados.id = doc.id;
+                        todasInscricoes.push(dados);
+                    });
+                    return todasInscricoes;
+                });
+        }
+
+        // Carregar presenças
+        function carregarPresencas() {
+            return db.collection('cursosPresencas')
+                .get()
+                .then(snapshot => {
+                    todasPresencas = [];
+                    snapshot.forEach(doc => {
+                        const dados = doc.data();
+                        dados.id = doc.id;
+                        todasPresencas.push(dados);
+                    });
+                    return todasPresencas;
+                });
+        }
+
+        // Configurar event listeners
+        function configurarEventListeners() {
+            document.getElementById('filtroTurma').addEventListener('change', function () {
+                const turmaSelecionada = this.value;
+                if (turmaSelecionada) {
+                    carregarDisciplinasPorTurma(turmaSelecionada);
+                } else {
+                    // Se "Todas as Turmas" for selecionado, carregar todas as disciplinas ativas
+                    carregarTodasDisciplinasAtivas();
+                }
+            });
+            document.getElementById('filtroDisciplina').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroPeriodo').addEventListener('change', aplicarFiltros);
+        }
+
+        // Função para carregar todas as disciplinas ativas
+        function carregarTodasDisciplinasAtivas() {
+            const dataAtual = formatarData(new Date());
+            const selectDisciplina = document.getElementById('filtroDisciplina');
+            selectDisciplina.innerHTML = '';
+
+            db.collection('cursosTurmas')
+                .get()
+                .then(snapshot => {
+                    const disciplinas = new Set();
+                    snapshot.forEach(doc => {
+                        const turma = doc.data();
+                        if (estaNoPerido(dataAtual, turma.dtIni, turma.dtFim) && turma.disciplinas) {
+                            disciplinas.add(turma.disciplinas);
+                        }
+                    });
+
+                    const disciplinasArray = Array.from(disciplinas);
+
+                    if (disciplinasArray.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "Nenhuma disciplina ativa";
+                        selectDisciplina.appendChild(option);
+                    } else {
+                        const optionTodas = document.createElement('option');
+                        optionTodas.value = "";
+                        optionTodas.textContent = "Todas as Disciplinas";
+                        selectDisciplina.appendChild(optionTodas);
+
+                        disciplinasArray.forEach(disciplina => {
+                            const option = document.createElement('option');
+                            option.value = disciplina;
+                            option.textContent = disciplina;
+                            selectDisciplina.appendChild(option);
+                        });
+                    }
+
+                    // Aplicar filtros após carregar as disciplinas
+                    aplicarFiltros();
+                });
+        }
+
+        // Aplicar filtros e atualizar visualizações
+        function aplicarFiltros() {
+            const filtroTurma = document.getElementById('filtroTurma').value;
+            const filtroDisciplina = document.getElementById('filtroDisciplina').value;
+            const filtroPeriodo = parseInt(document.getElementById('filtroPeriodo').value);
+
+            const dataLimite = getDataAnterior(filtroPeriodo);
+
+            // Filtrar inscrições
+            let inscricoesFiltradas = [...todasInscricoes];
+            if (filtroTurma) {
+                inscricoesFiltradas = inscricoesFiltradas.filter(i => i.turma === filtroTurma);
+            }
+            if (filtroDisciplina) {
+                inscricoesFiltradas = inscricoesFiltradas.filter(i => i.disciplina === filtroDisciplina);
+            }
+
+            // Filtrar presenças pelo período
+            let presencasFiltradas = todasPresencas.filter(p => {
+                const dataAula = converterStringParaData(p.dataAula);
+                return dataAula >= dataLimite;
+            });
+
+            // Filtrar presenças por turma e disciplina
+            if (filtroTurma) {
+                presencasFiltradas = presencasFiltradas.filter(p => p.turma === filtroTurma);
+            }
+            if (filtroDisciplina) {
+                presencasFiltradas = presencasFiltradas.filter(p => p.disciplina === filtroDisciplina);
+            }
+
+            // Atualizar visualizações
+            atualizarEstatisticas(inscricoesFiltradas, presencasFiltradas);
+            atualizarGraficos(inscricoesFiltradas, presencasFiltradas);
+            atualizarTabelaFrequencia(inscricoesFiltradas, presencasFiltradas);
+
+            // Remover tabela anterior se existir
+            const tabelaAnterior = document.querySelector('.row.mt-4');
+            if (tabelaAnterior) {
+                tabelaAnterior.remove();
+            }
+
+            // Criar nova tabela detalhada de presença
+            criarTabelaPresencaDetalhada(inscricoesFiltradas, presencasFiltradas);
+        }
+
+        // Atualizar estatísticas gerais
+        function atualizarEstatisticas(inscricoes, presencas) {
+            // Total de alunos
+            document.getElementById('totalAlunos').textContent = inscricoes.length;
+
+            // Aulas realizadas
+            const aulasUnicas = new Set();
+
+            // Mapear aulas por turma e disciplina
+            const aulasPorTurmaDisciplina = {};
+
+            presencas.forEach(p => {
+                aulasUnicas.add(p.dataAula);
+
+                // Criar chave única para turma+disciplina
+                const chave = `${p.turma}|${p.disciplina}`;
+                if (!aulasPorTurmaDisciplina[chave]) {
+                    aulasPorTurmaDisciplina[chave] = [];
+                }
+                aulasPorTurmaDisciplina[chave].push(p);
+            });
+
+            document.getElementById('aulasRealizadas').textContent = aulasUnicas.size;
+
+            // Calcular frequência média
+            if (presencas.length > 0 && aulasUnicas.size > 0) {
+                let totalPresencas = 0;
+                let totalPossivel = 0;
+
+                presencas.forEach(aula => {
+                    const presencasAula = Object.values(aula.presencas || {});
+                    const presentesNaAula = presencasAula.filter(p => p === true).length;
+                    const totalAlunosNaAula = presencasAula.length;
+
+                    totalPresencas += presentesNaAula;
+                    totalPossivel += totalAlunosNaAula;
+                });
+
+                const frequenciaMedia = totalPossivel > 0 ? (totalPresencas / totalPossivel) * 100 : 0;
+                document.getElementById('frequenciaMedia').textContent = `${frequenciaMedia.toFixed(1)}%`;
+
+                // Calcular taxa de evasão corretamente
+                const alunosComFaltas = calcularFaltasConsecutivasCorrigido(inscricoes, aulasPorTurmaDisciplina);
+
+                // Definir critério de evasão: 
+                // - Se houver 3 ou mais aulas na turma/disciplina: 3+ faltas consecutivas
+                // - Se houver menos de 3 aulas: faltou em todas as aulas disponíveis
+                const alunosEvadidos = alunosComFaltas.filter(aluno => {
+                    const chave = `${aluno.turma}|${aluno.disciplina}`;
+                    const aulasDisponiveis = aulasPorTurmaDisciplina[chave] || [];
+
+                    // Se não há aulas para esta turma/disciplina, não considerar evadido
+                    if (aulasDisponiveis.length === 0) return false;
+
+                    // Se há 3 ou mais aulas, considerar evadido se tiver 3+ faltas consecutivas
+                    if (aulasDisponiveis.length >= 3) {
+                        return aluno.faltasConsecutivas >= 3;
+                    }
+
+                    // Se há menos de 3 aulas, considerar evadido se faltou em todas
+                    return aluno.faltasConsecutivas >= aulasDisponiveis.length && aulasDisponiveis.length > 0;
+                });
+
+                const taxaEvasao = inscricoes.length > 0 ? (alunosEvadidos.length / inscricoes.length) * 100 : 0;
+                document.getElementById('taxaEvasao').textContent = `${taxaEvasao.toFixed(1)}%`;
+            } else {
+                document.getElementById('frequenciaMedia').textContent = "0%";
+                document.getElementById('taxaEvasao').textContent = "0%";
+            }
+        }
+
+        // Função corrigida para calcular faltas consecutivas
+        function calcularFaltasConsecutivasCorrigido(inscricoes, aulasPorTurmaDisciplina) {
+            return inscricoes.map(inscricao => {
+                // Obter apenas as aulas da turma e disciplina do aluno
+                const chave = `${inscricao.turma}|${inscricao.disciplina}`;
+                const aulasRelevantes = aulasPorTurmaDisciplina[chave] || [];
+
+                // Se não há aulas para esta turma/disciplina, retornar 0 faltas
+                if (aulasRelevantes.length === 0) {
+                    return {
+                        ...inscricao,
+                        faltasConsecutivas: 0,
+                        totalAulas: 0,
+                        totalFaltas: 0
+                    };
+                }
+
+                // Ordenar aulas por data
+                aulasRelevantes.sort((a, b) => {
+                    return converterStringParaData(a.dataAula) - converterStringParaData(b.dataAula);
+                });
+
+                let faltasConsecutivas = 0;
+                let maxFaltasConsecutivas = 0;
+                let totalFaltas = 0;
+
+                // Verificar presença em cada aula relevante
+                aulasRelevantes.forEach(aula => {
+                    const presencasAula = aula.presencas || {};
+
+                    // Verificar se o aluno estava presente nesta aula
+                    const estaPresente = Object.entries(presencasAula).some(
+                        ([nome, presente]) => nome === inscricao.nome && presente === true
+                    );
+
+                    // Se o aluno está na lista de presenças mas não estava presente, contar como falta
+                    const estaListado = Object.keys(presencasAula).some(nome => nome === inscricao.nome);
+
+                    if (estaListado && !estaPresente) {
+                        faltasConsecutivas++;
+                        totalFaltas++;
+                        maxFaltasConsecutivas = Math.max(maxFaltasConsecutivas, faltasConsecutivas);
+                    } else if (estaPresente) {
+                        faltasConsecutivas = 0;
+                    }
+                    // Se o aluno não está listado na aula, não contar como falta nem presença
+                });
+
+                return {
+                    ...inscricao,
+                    faltasConsecutivas: maxFaltasConsecutivas,
+                    totalAulas: aulasRelevantes.length,
+                    totalFaltas: totalFaltas
+                };
+            });
+        }
+
+        // Atualizar gráficos
+        function atualizarGraficos(inscricoes, presencas) {
+            atualizarGraficoFrequencia(presencas);
+            atualizarGraficoDistribuicao(inscricoes);
+        }
+
+        // Gráfico de frequência por disciplina com percentuais nas barras
+        function atualizarGraficoFrequencia(presencas) {
+            if (presencas.length === 0) {
+                const ctx = document.getElementById('frequenciaChart').getContext('2d');
+                if (chartFrequencia) {
+                    chartFrequencia.destroy();
+                }
+
+                // Criar gráfico vazio com mensagem
+                chartFrequencia = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sem dados'],
+                        datasets: [{
+                            label: '', // Remova o texto do label aqui
+                            data: [0],
+                            backgroundColor: 'rgba(200, 200, 200, 0.2)',
+                            borderColor: 'rgba(200, 200, 200, 0.5)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false // Desativa a legenda
+                            },
+                            tooltip: {
+                                enabled: false
+                            },
+                            title: {
+                                display: false // Desativa o título
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+
+            // Agrupar dados por disciplina
+            const disciplinasDados = {};
+
+            presencas.forEach(aula => {
+                const disciplina = aula.disciplina;
+                const presencasAula = Object.values(aula.presencas || {});
+                const totalPresentes = presencasAula.filter(presente => presente === true).length;
+                const totalAlunos = presencasAula.length;
+
+                if (!disciplinasDados[disciplina]) {
+                    disciplinasDados[disciplina] = {
+                        totalPresentes: 0,
+                        totalAlunos: 0,
+                        aulas: 0
+                    };
+                }
+
+                disciplinasDados[disciplina].totalPresentes += totalPresentes;
+                disciplinasDados[disciplina].totalAlunos += totalAlunos;
+                disciplinasDados[disciplina].aulas += 1;
+            });
+
+            // Ordenar disciplinas na ordem padrão
+            const ordemDisciplinas = [
+                'INICIAR', 'EDIFICAR', 'IDENTIFICAR', 'IMPACTAR', 'TEEN - INICIAR'
+            ];
+
+            // Obter disciplinas ordenadas
+            const disciplinas = Object.keys(disciplinasDados).sort((a, b) => {
+                const indexA = ordemDisciplinas.indexOf(a);
+                const indexB = ordemDisciplinas.indexOf(b);
+
+                // Se a disciplina não estiver na lista, colocá-la no final
+                if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+                if (indexA === -1) return 1;
+                if (indexB === -1) return -1;
+
+                return indexA - indexB;
+            });
+
+            // Calcular taxa de frequência média por disciplina
+            const taxasFrequencia = disciplinas.map(disciplina => {
+                const dados = disciplinasDados[disciplina];
+                return dados.totalAlunos > 0 ? (dados.totalPresentes / dados.totalAlunos) * 100 : 0;
+            });
+
+            // Criar array de cores para as barras
+            const coresBarra = taxasFrequencia.map(valor => {
+                if (valor >= 75) {
+                    return 'rgba(46, 204, 113, 0.7)'; // Verde para valores altos
+                } else if (valor >= 50) {
+                    return 'rgba(241, 196, 15, 0.7)'; // Amarelo para valores médios
+                } else {
+                    return 'rgba(231, 76, 60, 0.7)';  // Vermelho para valores baixos
+                }
+            });
+
+            const ctx = document.getElementById('frequenciaChart').getContext('2d');
+
+            if (chartFrequencia) {
+                chartFrequencia.destroy();
+            }
+
+            chartFrequencia = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: disciplinas,
+                    datasets: [{
+                        label: '', // Remova o texto do label aqui
+                        data: taxasFrequencia,
+                        backgroundColor: coresBarra,
+                        borderColor: coresBarra.map(cor => cor.replace('0.7', '1')),
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        maxBarThickness: 60
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'x', // Barras verticais
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function (value) {
+                                    return value + '%';
+                                },
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            border: {
+                                color: 'rgba(255, 255, 255, 0.3)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            border: {
+                                color: 'rgba(255, 255, 255, 0.3)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false, // Desativa a legenda/título
+                            position: 'top',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                },
+                                padding: 15,
+                                usePointStyle: true,
+                                boxWidth: 8
+                            }
+                        },
+                        title: {
+                            display: false // Garante que nenhum título seja exibido
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: 'rgba(255, 255, 255, 1)',
+                            bodyColor: 'rgba(255, 255, 255, 0.8)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function (context) {
+                                    return `Frequência média: ${context.parsed.y.toFixed(1)}%`;
+                                },
+                                afterLabel: function (context) {
+                                    const disciplina = disciplinas[context.dataIndex];
+                                    const dados = disciplinasDados[disciplina];
+                                    return [
+                                        `Total de aulas: ${dados.aulas}`,
+                                        `Presenças: ${dados.totalPresentes} de ${dados.totalAlunos} possíveis`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    // Ajuste o layout para evitar que o gráfico ultrapasse o limite do card
+                    layout: {
+                        padding: {
+                            top: 20, // Adiciona espaço no topo
+                            right: 0,
+                            bottom: 0,
+                            left: 0
+                        }
+                    }
+                },
+                plugins: [{
+                    // Plugin personalizado para adicionar percentuais no topo das barras
+                    id: 'percentLabels',
+
+                    beforeLayout: function (chart) {
+                        chart.options.layout.padding.top = 20; // Adicionar padding dinâmico
+                    },
+
+                    afterDatasetsDraw: function (chart) {
+                        const ctx = chart.ctx;
+
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    // Obter valor e posição
+                                    const value = dataset.data[index];
+                                    const position = element.getCenterPoint();
+
+                                    // Configurações do texto
+                                    ctx.fillStyle = '#ffffff';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'bottom';
+                                    ctx.font = 'bold 12px Arial';
+
+                                    // Adicionar sombra para melhor legibilidade
+                                    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                                    ctx.shadowBlur = 3;
+                                    ctx.shadowOffsetX = 1;
+                                    ctx.shadowOffsetY = 1;
+
+                                    // Desenhar texto com percentual
+                                    ctx.fillText(value.toFixed(1) + '%', position.x, element.y - 10); // Aumentei de -5 para -10
+
+                                    // Resetar sombra
+                                    ctx.shadowColor = 'transparent';
+                                    ctx.shadowBlur = 0;
+                                    ctx.shadowOffsetX = 0;
+                                    ctx.shadowOffsetY = 0;
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
+        }
+
+
+        // Gráfico de distribuição de alunos por disciplina
+        function atualizarGraficoDistribuicao(inscricoes) {
+            if (inscricoes.length === 0) {
+                const ctx = document.getElementById('distribuicaoChart').getContext('2d');
+                if (chartDistribuicao) {
+                    chartDistribuicao.destroy();
+                }
+
+                // Criar gráfico vazio com mensagem
+                chartDistribuicao = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sem dados'],
+                        datasets: [{
+                            label: '', // Remova o texto do label aqui
+                            data: [0],
+                            backgroundColor: 'rgba(200, 200, 200, 0.2)',
+                            borderColor: 'rgba(200, 200, 200, 0.5)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false // Desativa a legenda
+                            },
+                            tooltip: {
+                                enabled: false
+                            },
+                            title: {
+                                display: false // Desativa o título
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+
+            // Contar alunos por disciplina
+            const disciplinasCount = {};
+            inscricoes.forEach(inscricao => {
+                disciplinasCount[inscricao.disciplina] = (disciplinasCount[inscricao.disciplina] || 0) + 1;
+            });
+
+            // Ordenar disciplinas na ordem padrão
+            const ordemDisciplinas = [
+                'INICIAR', 'EDIFICAR', 'IDENTIFICAR', 'IMPACTAR',
+                'TEEN - INICIAR'
+            ];
+
+            // Obter disciplinas ordenadas
+            const disciplinas = Object.keys(disciplinasCount).sort((a, b) => {
+                const indexA = ordemDisciplinas.indexOf(a);
+                const indexB = ordemDisciplinas.indexOf(b);
+
+                // Se a disciplina não estiver na lista, colocá-la no final
+                if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+                if (indexA === -1) return 1;
+                if (indexB === -1) return -1;
+
+                return indexA - indexB;
+            });
+
+            const dados = disciplinas.map(disciplina => disciplinasCount[disciplina]);
+
+            // Calcular percentuais para exibição
+            const total = dados.reduce((a, b) => a + b, 0);
+            const percentuais = dados.map(valor => total > 0 ? (valor / total) * 100 : 0);
+
+            // Gerar cores para as barras
+            const cores = [
+                'rgba(52, 152, 219, 0.7)',  // Azul
+                'rgba(46, 204, 113, 0.7)',  // Verde
+                'rgba(155, 89, 182, 0.7)',  // Roxo
+                'rgba(241, 196, 15, 0.7)',  // Amarelo
+                'rgba(230, 126, 34, 0.7)',  // Laranja
+                'rgba(231, 76, 60, 0.7)'    // Vermelho
+            ];
+
+            // Garantir que temos cores suficientes (repetindo se necessário)
+            const coresBarra = disciplinas.map((_, index) => cores[index % cores.length]);
+
+            const ctx = document.getElementById('distribuicaoChart').getContext('2d');
+
+            if (chartDistribuicao) {
+                chartDistribuicao.destroy();
+            }
+
+            // Atualizar o título do card - CORREÇÃO DO SELETOR
+            // Encontrar o elemento card-header que contém o gráfico de distribuição
+            const cardHeaders = document.querySelectorAll('.card-header');
+            cardHeaders.forEach(header => {
+                if (header.textContent.includes('Distribuição de Alunos por Turma')) {
+                    header.textContent = "Distribuição de Alunos por Disciplina";
+                }
+            });
+
+            chartDistribuicao = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: disciplinas,
+                    datasets: [{
+                        label: '', // Remova o texto do label aqui
+                        data: dados,
+                        backgroundColor: coresBarra,
+                        borderColor: coresBarra.map(cor => cor.replace('0.7', '1')),
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        maxBarThickness: 60
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Isso remove a legenda/título do gráfico
+                        },
+                        title: {
+                            display: false // Isso garante que nenhum título seja exibido
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: 'rgba(255, 255, 255, 1)',
+                            bodyColor: 'rgba(255, 255, 255, 0.8)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function (context) {
+                                    const valor = context.parsed.y;
+                                    const percentual = percentuais[context.dataIndex].toFixed(1);
+                                    return `${valor} alunos (${percentual}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,  // Apenas números inteiros
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            border: {
+                                color: 'rgba(255, 255, 255, 0.3)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            border: {
+                                color: 'rgba(255, 255, 255, 0.3)'
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    // Plugin personalizado para adicionar rótulos no topo das barras
+                    id: 'barLabels',
+                    beforeLayout: function (chart) {
+                        chart.options.layout.padding.top = 20; // Adicionar padding dinâmico
+                    },
+                    afterDatasetsDraw: function (chart) {
+                        const ctx = chart.ctx;
+
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    // Obter valor e posição
+                                    const value = dataset.data[index];
+                                    const percentual = percentuais[index].toFixed(1);
+                                    const position = element.getCenterPoint();
+
+                                    // Configurações do texto
+                                    ctx.fillStyle = '#ffffff';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'bottom';
+                                    ctx.font = 'bold 12px Arial';
+
+                                    // Adicionar sombra para melhor legibilidade
+                                    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                                    ctx.shadowBlur = 3;
+                                    ctx.shadowOffsetX = 1;
+                                    ctx.shadowOffsetY = 1;
+
+                                    // Desenhar texto com valor e percentual
+                                    ctx.fillText(`${value} (${percentual}%)`, position.x, element.y - 5);
+
+                                    // Resetar sombra
+                                    ctx.shadowColor = 'transparent';
+                                    ctx.shadowBlur = 0;
+                                    ctx.shadowOffsetX = 0;
+                                    ctx.shadowOffsetY = 0;
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
+        }
+
+
+        // Atualizar tabela de frequência por aluno
+        function atualizarTabelaFrequencia(inscricoes, presencas) {
+            const tbody = document.getElementById('listaFrequencia');
+            tbody.innerHTML = '';
+
+            if (inscricoes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum aluno encontrado com os filtros atuais</td></tr>';
+                return;
+            }
+
+            // Calcular estatísticas de frequência por aluno
+            const estatisticasAlunos = calcularEstatisticasFrequencia(inscricoes, presencas);
+
+            // Ordenar por nome
+            estatisticasAlunos.sort((a, b) => a.nome.localeCompare(b.nome));
+
+            estatisticasAlunos.forEach(aluno => {
+                const tr = document.createElement('tr');
+
+                // Determinar status baseado na frequência
+                let status, statusClass;
+                if (aluno.percentualFrequencia >= 75) {
+                    status = 'Regular';
+                    statusClass = 'text-success';
+                } else if (aluno.percentualFrequencia >= 50) {
+                    status = 'Atenção';
+                    statusClass = 'text-warning';
+                } else {
+                    status = 'Crítico';
+                    statusClass = 'text-danger';
+                }
+
+                tr.innerHTML = `
+                    <td>${aluno.nome}</td>
+                    <td>${aluno.turma}</td>
+                    <td>${aluno.disciplina}</td>
+                    <td>${aluno.presencas}</td>
+                    <td>${aluno.faltas}</td>
+                    <td>${aluno.percentualFrequencia.toFixed(1)}%</td>
+                    <td class="${statusClass}">${status}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Calcular estatísticas de frequência por aluno
+        function calcularEstatisticasFrequencia(inscricoes, presencas) {
+            return inscricoes.map(inscricao => {
+                let totalAulas = 0;
+                let totalPresencas = 0;
+
+                // Contar presenças para este aluno
+                presencas.forEach(aula => {
+                    const presencasAula = aula.presencas || {};
+
+                    // Verificar se o aluno está na lista de presenças desta aula
+                    const alunoPresente = Object.entries(presencasAula).some(
+                        ([nome, presente]) => nome === inscricao.nome
+                    );
+
+                    if (alunoPresente) {
+                        totalAulas++;
+                        if (presencasAula[inscricao.nome] === true) {
+                            totalPresencas++;
+                        }
+                    }
+                });
+
+                const percentualFrequencia = totalAulas > 0 ? (totalPresencas / totalAulas) * 100 : 0;
+
+                return {
+                    ...inscricao,
+                    presencas: totalPresencas,
+                    faltas: totalAulas - totalPresencas,
+                    totalAulas: totalAulas,
+                    percentualFrequencia: percentualFrequencia
+                };
+            });
+        }
+
+        // Função auxiliar para gerar cores aleatórias para gráficos
+        function gerarCoresAleatorias(quantidade) {
+            const cores = [];
+            for (let i = 0; i < quantidade; i++) {
+                const r = Math.floor(Math.random() * 200);
+                const g = Math.floor(Math.random() * 200);
+                const b = Math.floor(Math.random() * 200);
+                cores.push(`rgba(${r}, ${g}, ${b}, 0.7)`);
+            }
+            return cores;
+        }
+
+        // Inicializar a página quando o documento estiver pronto
+        document.addEventListener('DOMContentLoaded', function () {
+            // A inicialização real acontecerá após a verificação de autenticação
+            console.log('Página de monitoramento carregada. Verificando autenticação...');
+        });
+    </script>
+</body>
+
+</html>
