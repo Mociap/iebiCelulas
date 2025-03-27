@@ -79,7 +79,7 @@
                 <p>Visualize e gerencie as inscrições para a Escola Ministerial.</p>
                 <div class="btn-primary">Acessar</div>
             </a> -->
-            
+
             <!-- Monitoramento das aulas -->
             <a href="monitoramento-turmas.html" class="card" data-permissao="frequencia">
                 <i class="fas fa-chart-bar card-icon"></i>
@@ -88,7 +88,7 @@
                 <div class="btn-primary">Acessar</div>
             </a>
 
-                        <!-- Card do Dashboard
+            <!-- Card do Dashboard
                         <a href="dashboardEM.html" class="card" data-permissao="dashboard">
                             <i class="fas fa-tachometer-alt card-icon"></i>
                             <h2>Turmas</h2>
@@ -103,7 +103,7 @@
                 <p>Gerencie todas as inscrições da Escola Ministerial.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
-            
+
             <!-- Card para Administrar Turmas -->
             <a href="admin-turmas.html" class="card" data-permissao="admTurmas">
                 <i class="fas fa-chalkboard-teacher card-icon"></i>
@@ -111,7 +111,7 @@
                 <p>Gerencie as turmas da Escola Ministerial.</p>
                 <div class="btn-primary">Acessar</div>
             </a>
-            
+
         </div>
     </div>
     <div id="splash-screen" class="splash-screen">
@@ -123,24 +123,120 @@
 
     <script src="../hierarquias.js"></script>
     <script type="module">
-        // Import Firebase modules and initialize the app here
-        // Add user authentication and permission checks
-        // Implement logout functionality
-        // Add splash screen logic
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+
+        // Firebase configuration
+        const configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(configuracaoFirebase);
+        const bancoDeDados = getFirestore(app);
+        const autenticacao = getAuth(app);
+
+        // Mostrar tela de carregamento
+        const splashScreen = document.getElementById('splash-screen');
+        splashScreen.style.opacity = 1;
+        splashScreen.style.visibility = 'visible';
+
+        // Verificar autenticação do usuário
+        onAuthStateChanged(autenticacao, async (usuario) => {
+            if (usuario) {
+                try {
+                    // Buscar função do usuário na coleção 'cursosEstrutura'
+                    await buscarFuncaoUsuario(usuario.email);
+
+                    // Verificar permissões e ajustar interface
+                    verificarPermissoes();
+                } catch (erro) {
+                    console.error("Erro ao carregar dados do usuário:", erro);
+                } finally {
+                    // Esconder tela de carregamento
+                    splashScreen.style.opacity = 0;
+                    splashScreen.style.visibility = 'hidden';
+                }
+            } else {
+                // Usuário não autenticado, redirecionar para login
+                window.location.href = '../formlogin.html';
+            }
+        });
+
+        // Função para buscar a função do usuário na coleção 'cursosEstrutura'
+        async function buscarFuncaoUsuario(email) {
+            try {
+                // Primeiro, obter o nome do usuário a partir do email
+                const membrosRef = collection(bancoDeDados, "membros");
+                const qMembros = query(membrosRef, where("email", "==", email));
+                const querySnapshotMembros = await getDocs(qMembros);
+
+                if (querySnapshotMembros.empty) {
+                    console.log("Usuário não encontrado na coleção 'membros'");
+                    return;
+                }
+
+                const nomeUsuario = querySnapshotMembros.docs[0].data().nome;
+
+                // Agora, buscar a função na coleção 'cursosEstrutura'
+                const cursosEstruturaRef = collection(bancoDeDados, "cursosEstrutura");
+                const qCursos = query(cursosEstruturaRef, where("nome", "==", nomeUsuario));
+                const querySnapshotCursos = await getDocs(qCursos);
+
+                if (querySnapshotCursos.empty) {
+                    console.log("Usuário não encontrado na coleção 'cursosEstrutura'");
+                    exibirFuncaoUsuario('Aluno'); // Função padrão se não encontrar
+                    return;
+                }
+
+                const funcaoEM = querySnapshotCursos.docs[0].data().funcao;
+                console.log("Função encontrada:", funcaoEM);
+
+                // Armazenar no localStorage para uso em outras partes da aplicação
+                localStorage.setItem('funcaoEM', funcaoEM);
+
+                // Exibir a função na interface
+                exibirFuncaoUsuario(funcaoEM);
+
+            } catch (erro) {
+                console.error("Erro ao buscar função do usuário:", erro);
+                exibirFuncaoUsuario('Aluno'); // Função padrão em caso de erro
+            }
+        }
+
+        // Função para verificar permissões e ajustar a interface
+        function verificarPermissoes() {
+            const funcaoEM = localStorage.getItem('funcaoEM') || 'Aluno';
+            const cards = document.querySelectorAll('.card[data-permissao]');
+
+            cards.forEach(card => {
+                const permissaoNecessaria = card.getAttribute('data-permissao');
+                if (!temPermissao(funcaoEM, permissaoNecessaria)) {
+                    card.style.display = 'none';
+                }
+            });
+        }
     </script>
 
 
     <script>
-        // Função para exibir a função do usuário
-        function exibirFuncaoUsuario() {
-            const funcaoEM = localStorage.getItem('funcaoEM') || 'Aluno';
+        // Função para exibir a função do usuário na interface
+        function exibirFuncaoUsuario(funcaoEM) {
             const funcaoTexto = document.getElementById('funcao-texto');
 
             if (funcaoTexto) {
                 funcaoTexto.textContent = funcaoEM;
             }
 
-            // Opcionalmente, alterar a cor da borda baseada na função
+            // Alterar a cor da borda baseada na função
             const funcaoBadge = document.getElementById('funcao-display');
             if (funcaoBadge) {
                 // Definir cores diferentes para diferentes funções
