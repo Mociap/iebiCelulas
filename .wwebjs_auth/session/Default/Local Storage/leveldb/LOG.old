@@ -1,0 +1,4 @@
+2025/04/01-23:49:01.197 2cc0 Creating DB C:\Users\mozer\OneDrive\IEBI\Sistemas\iebiCelulas\.wwebjs_auth\session\Default\Local Storage\leveldb since it was missing.
+2025/04/01-23:49:01.215 2cc0 Reusing MANIFEST C:\Users\mozer\OneDrive\IEBI\Sistemas\iebiCelulas\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/04/01-23:49:01.350 2cc0 Recovering log #3
+2025/04/01-23:49:01.351 2cc0 Reusing old log C:\Users\mozer\OneDrive\IEBI\Sistemas\iebiCelulas\.wwebjs_auth\session\Default\Local Storage\leveldb/000003.log 

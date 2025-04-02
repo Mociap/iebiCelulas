@@ -1,0 +1,4 @@
+2025/04/01-23:49:01.315 3e64 Creating DB C:\Users\mozer\OneDrive\IEBI\Sistemas\iebiCelulas\.wwebjs_auth\session\Default\shared_proto_db\metadata since it was missing.
+2025/04/01-23:49:01.343 3e64 Reusing MANIFEST C:\Users\mozer\OneDrive\IEBI\Sistemas\iebiCelulas\.wwebjs_auth\session\Default\shared_proto_db\metadata/MANIFEST-000001
+2025/04/01-23:49:01.343 3e64 Recovering log #3
+2025/04/01-23:49:01.344 3e64 Reusing old log C:\Users\mozer\OneDrive\IEBI\Sistemas\iebiCelulas\.wwebjs_auth\session\Default\shared_proto_db\metadata/000003.log 
