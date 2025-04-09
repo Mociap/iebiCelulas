@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Organograma das Células</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="./assets/3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -204,14 +204,14 @@
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
-        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <img src="./assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista de Intermares">
     </div>
     <div class="container">
         <h2 class="text-center mb-4">Organograma das Células</h2>
         <div class="divider"></div>
         <div class="form-group">
-            <label for="rede">Rede</label>
-            <select class="form-control" id="rede"></select>
+            <label for="coordenador">Coordenador</label>
+            <select class="form-control" id="coordenador"></select>
         </div>
         <div class="form-group">
             <label for="supervisor">Supervisor</label>
@@ -304,40 +304,45 @@
             return Object.values(supervisores).reduce((total, lideres) => total + lideres.length, 0);
         }
 
-        // Carregar redes
-        function carregarRedes() {
+        // Alterar as referências de variáveis
+        var selectCoordenadores = document.getElementById('coordenador');
+        var selectSupervisores = document.getElementById('supervisor');
+        var organogramaContainer = document.getElementById('organogramaContainer');
+
+        // Substituir a função carregarRedes por carregarCoordenadores
+        function carregarCoordenadores() {
             bancoDeDados.collection('estruturacelula').get().then((querySnapshot) => {
-                const redes = new Set();
+                const coordenadores = new Set();
                 querySnapshot.forEach((doc) => {
-                    redes.add(doc.data().rede);
+                    coordenadores.add(doc.data().coordenador);
                 });
 
-                selectRedes.innerHTML = '<option value="">Selecione uma rede</option>';
-                selectRedes.innerHTML += '<option value="TODOS">TODOS</option>';
-                redes.forEach((rede) => {
+                selectCoordenadores.innerHTML = '<option value="">Selecione um coordenador</option>';
+                selectCoordenadores.innerHTML += '<option value="TODOS">TODOS</option>';
+                coordenadores.forEach((coordenador) => {
                     const option = document.createElement('option');
-                    option.value = rede;
-                    option.textContent = rede;
-                    selectRedes.appendChild(option);
+                    option.value = coordenador;
+                    option.textContent = coordenador;
+                    selectCoordenadores.appendChild(option);
                 });
             });
         }
 
-        // Carregar supervisores
+        // Modificar a função carregarSupervisores para filtrar por coordenador
         function carregarSupervisores() {
-            const redeEscolhida = selectRedes.value;
+            const coordenadorEscolhido = selectCoordenadores.value;
             selectSupervisores.innerHTML = '<option value="">Selecione um supervisor</option>';
             selectSupervisores.innerHTML += '<option value="TODOS">TODOS</option>';
             organogramaContainer.innerHTML = '';
 
-            if (redeEscolhida === 'TODOS') {
+            if (coordenadorEscolhido === 'TODOS') {
                 selectSupervisores.disabled = true;
                 selectSupervisores.value = 'TODOS';
                 carregarLideres();
-            } else if (redeEscolhida) {
+            } else if (coordenadorEscolhido) {
                 selectSupervisores.disabled = false;
                 bancoDeDados.collection('estruturacelula')
-                    .where('rede', '==', redeEscolhida)
+                    .where('coordenador', '==', coordenadorEscolhido)
                     .get()
                     .then((querySnapshot) => {
                         const supervisores = new Set();
@@ -361,16 +366,16 @@
             return lideres.length;
         }
 
-        // Carregar líderes e exibir organograma
+        // Modificar a função carregarLideres para usar coordenador em vez de rede
         function carregarLideres() {
-            const redeEscolhida = selectRedes.value;
+            const coordenadorEscolhido = selectCoordenadores.value;
             const supervisorEscolhido = selectSupervisores.value;
             organogramaContainer.innerHTML = '';
 
             let query = bancoDeDados.collection('estruturacelula');
 
-            if (redeEscolhida !== 'TODOS') {
-                query = query.where('rede', '==', redeEscolhida);
+            if (coordenadorEscolhido !== 'TODOS') {
+                query = query.where('coordenador', '==', coordenadorEscolhido);
                 if (supervisorEscolhido && supervisorEscolhido !== 'TODOS') {
                     query = query.where('supervisor', '==', supervisorEscolhido);
                 }
@@ -379,30 +384,32 @@
             query.get().then((querySnapshot) => {
                 let html = '<div class="organograma">';
                 
-                if (redeEscolhida === 'TODOS') {
-                    // Agrupar por rede
-                    const redes = {};
+                if (coordenadorEscolhido === 'TODOS') {
+                    // Agrupar por coordenador
+                    const coordenadores = {};
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
-                        if (!redes[data.rede]) {
-                            redes[data.rede] = {};
+                        if (!coordenadores[data.coordenador]) {
+                            coordenadores[data.coordenador] = {};
                         }
-                        if (!redes[data.rede][data.supervisor]) {
-                            redes[data.rede][data.supervisor] = [];
+                        if (!coordenadores[data.coordenador][data.supervisor]) {
+                            coordenadores[data.coordenador][data.supervisor] = [];
                         }
-                        redes[data.rede][data.supervisor].push(data);
+                        coordenadores[data.coordenador][data.supervisor].push(data);
                     });
 
-                    // Criar nós para cada rede, supervisor e líder
-                    Object.keys(redes).sort(ordenarRedes).forEach((rede) => {
-                        const supervisores = redes[rede];
-                        const corBase = alterarCorRede(rede);
-                        const corClara = gerarCorClara(rede);
+                    // Criar nós para cada coordenador, supervisor e líder
+                    Object.keys(coordenadores).forEach((coordenador) => {
+                        const supervisores = coordenadores[coordenador];
+                        // Usar a cor da rede associada ao coordenador (se disponível)
+                        // Aqui você pode adicionar lógica para determinar a cor com base no coordenador
+                        const corBase = '#1abc9c'; // Cor padrão para coordenador
+                        const corClara = '#e0f2f1'; // Versão clara da cor padrão
 
                         html += `
                             <div class="rede-group">
                                 <div class="node rede" style="background-color: ${corBase};">
-                                    ${rede}
+                                    ${coordenador}
                                     <div class="rede-info">
                                         Células: ${contarCelulasPorRede(supervisores)}
                                     </div>
@@ -442,9 +449,9 @@
                         html += '</div></div></div>';
                     });
                 } else {
-                    // Lógica para uma rede específica
-                    const corBase = alterarCorRede(redeEscolhida);
-                    const corClara = gerarCorClara(redeEscolhida);
+                    // Lógica para um coordenador específico
+                    const corBase = '#1abc9c'; // Cor padrão para coordenador
+                    const corClara = '#e0f2f1'; // Versão clara da cor padrão
                     
                     const supervisores = {};
                     let totalCelulas = 0;
@@ -459,7 +466,7 @@
 
                     html += `
                         <div class="node rede" style="background-color: ${corBase};">
-                            ${redeEscolhida}
+                            ${coordenadorEscolhido}
                             <div class="rede-info">
                                 Células: ${totalCelulas}
                             </div>
@@ -535,10 +542,10 @@
         }
 
         // Inicializar a página
-        carregarRedes();
+        carregarCoordenadores();
 
         // Adicionar event listeners
-        selectRedes.addEventListener('change', carregarSupervisores);
+        selectCoordenadores.addEventListener('change', carregarSupervisores);
         selectSupervisores.addEventListener('change', carregarLideres);
     </script>
 </body>
