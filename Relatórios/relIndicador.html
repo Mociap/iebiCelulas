@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
+<!-- Ultima Atualização Função Todos Coordenador -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indicadores - Igreja Evangélica Batista Intermares</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <title>Indicadores - Igreja Evangélica Batista de Intermares</title>
+    <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -173,9 +173,9 @@
         <div class="divider"></div>
         <form>
             <div class="form-row">
-                <label>Rede:</label>
-                <select class="form-control" id="rede">
-                    <option value="">Selecione uma rede</option>
+                <label>Coordenador:</label>
+                <select class="form-control" id="coordenador">
+                    <option value="">Selecione um coordenador</option>
                 </select>
             </div>
             <div class="form-row">
@@ -276,61 +276,89 @@
         }
 
         // Função para obter dados mensais
-        async function obterDadosMensais(lider, mesInicio, mesFim) {
-            const snapshot = await db.collection('reuniao')
-                .where('lider', '==', lider)
-                .where('data', '>=', mesInicio)
-                .where('data', '<=', mesFim)
-                .get();
-
-            let totalMembros = 0;
-            let totalVisitantes = 0;
-            let totalMembrosPresentes = 0;
-            let totalOfertaMes = 0;
-            let totalColheitaAmor = 0;
-            let quantidadeReunioes = 0;
-
-            snapshot.forEach(doc => {
-                const dados = doc.data();
-                totalMembros += Number(dados.qtdMembros) || 0;
-                totalVisitantes += Number(dados.qtdVisitantes) || 0;
-                totalMembrosPresentes += Number(dados.membroPresentes) || 0;
-                totalOfertaMes += Number(dados.oferta) || 0;
-                totalColheitaAmor += Number(dados.qtdAlimento) || 0;
-                quantidadeReunioes++;
+        async function obterDadosMensais(mesInicio, mesFim) {
+            const lider = document.getElementById('lider').value;
+            
+            console.log("Obtendo dados mensais com filtro de líder:", {
+                lider,
+                mesInicio: mesInicio.toISOString(),
+                mesFim: mesFim.toISOString()
             });
+            
+            try {
+                // Construir a consulta base com filtro de data
+                let query = db.collection('reuniao')
+                    .where('data', '>=', mesInicio)
+                    .where('data', '<=', mesFim);
+                
+                // Aplicar apenas o filtro de líder, se estiver definido
+                if (lider) {
+                    query = query.where('lider', '==', lider);
+                }
 
-            const mediaMembros = quantidadeReunioes > 0 ? totalMembros / quantidadeReunioes : 0;
-            const mediaVisitantes = quantidadeReunioes > 0 ? totalVisitantes / quantidadeReunioes : 0;
-            const mediaMembrosPresentes = quantidadeReunioes > 0 ? totalMembrosPresentes / quantidadeReunioes : 0;
-            const frequencia = mediaMembros > 0 ? (mediaMembrosPresentes / mediaMembros) * 100 : 0;
+                const snapshot = await query.get();
+                console.log(`Consulta retornou ${snapshot.size} documentos`);
 
-            console.log("Dados mensais obtidos:", {
-                mediaMembros,
-                mediaVisitantes,
-                mediaMembrosPresentes,
-                frequencia,
-                totalOfertaMes,
-                totalColheitaAmor
-            });
+                let totalMembros = 0;
+                let totalVisitantes = 0;
+                let totalMembrosPresentes = 0;
+                let totalOfertaMes = 0;
+                let totalColheitaAmor = 0;
+                let quantidadeReunioes = 0;
 
-            return {
-                mediaMembros,
-                mediaVisitantes,
-                mediaMembrosPresentes,
-                frequencia,
-                totalOfertaMes,
-                totalColheitaAmor
-            };
+                snapshot.forEach(doc => {
+                    const dados = doc.data();
+                    console.log("Processando documento:", doc.id, dados);
+                    
+                    totalMembros += Number(dados.qtdMembros) || 0;
+                    totalVisitantes += Number(dados.qtdVisitantes) || 0;
+                    totalMembrosPresentes += Number(dados.membroPresentes) || 0;
+                    totalOfertaMes += Number(dados.oferta) || 0;
+                    totalColheitaAmor += Number(dados.qtdAlimento) || 0;
+                    quantidadeReunioes++;
+                });
+
+                const mediaMembros = quantidadeReunioes > 0 ? totalMembros / quantidadeReunioes : 0;
+                const mediaVisitantes = quantidadeReunioes > 0 ? totalVisitantes / quantidadeReunioes : 0;
+                const mediaMembrosPresentes = quantidadeReunioes > 0 ? totalMembrosPresentes / quantidadeReunioes : 0;
+                const frequencia = mediaMembros > 0 ? (mediaMembrosPresentes / mediaMembros) * 100 : 0;
+
+                const resultado = {
+                    mediaMembros,
+                    mediaVisitantes,
+                    mediaMembrosPresentes,
+                    frequencia,
+                    totalOfertaMes,
+                    totalColheitaAmor,
+                    quantidadeReunioes
+                };
+                
+                console.log("Dados mensais calculados:", resultado);
+                return resultado;
+            } catch (error) {
+                console.error("Erro ao obter dados mensais:", error);
+                return {
+                    mediaMembros: 0,
+                    mediaVisitantes: 0,
+                    mediaMembrosPresentes: 0,
+                    frequencia: 0,
+                    totalOfertaMes: 0,
+                    totalColheitaAmor: 0,
+                    quantidadeReunioes: 0
+                };
+            }
         }
 
         // Função para gerar a tabela de resumo
         async function gerarTabelaResumo() {
             console.log("Iniciando geração da tabela de resumo");
+            
+            // Verificar se algum filtro está selecionado
+            const coordenador = document.getElementById('coordenador').value;
+            const supervisor = document.getElementById('supervisor').value;
             const lider = document.getElementById('lider').value;
-            console.log("Líder selecionado para gerar tabela:", lider);
-
-            if (!lider) return;
+            
+            if (!coordenador) return; // Precisamos de pelo menos um coordenador selecionado
 
             const tabelaResumo = document.getElementById('tabelaResumo');
             const thead = tabelaResumo.getElementsByTagName('thead')[0];
@@ -363,7 +391,7 @@
                 const [mesNumero, ano] = mes.split('/');
                 const mesInicio = new Date(ano, mesNumero - 1, 1);
                 const mesFim = new Date(ano, mesNumero, 0);
-                const dados = await obterDadosMensais(lider, mesInicio, mesFim);
+                const dados = await obterDadosMensais(mesInicio, mesFim);
                 dadosMensais.push(dados);
             }
 
@@ -452,8 +480,8 @@
 
         // Função para gerar os gráficos
         async function gerarGraficos() {
-            const lider = document.getElementById('lider').value;
-            if (!lider) return;
+            const coordenador = document.getElementById('coordenador').value;
+            if (!coordenador) return; // Precisamos de pelo menos um coordenador selecionado
 
             const dataAtual = new Date();
             const meses = [];
@@ -468,7 +496,7 @@
                 const mesInicio = new Date(ano, mesNumero - 1, 1);
                 const mesFim = new Date(ano, mesNumero, 0);
 
-                const dados = await obterDadosMensais(lider, mesInicio, mesFim);
+                const dados = await obterDadosMensais(mesInicio, mesFim);
                 dadosMensais.push(dados);
             }
 
@@ -542,195 +570,218 @@
         //aqui está ok
         // versão 3
 
-        // Função para preencher as opções de rede
-        function preencherRedes() {
-            const redeSelect = document.getElementById('rede');
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
-
-            if (!lideres || Object.keys(lideres).length === 0) {
-                const rede = localStorage.getItem('rede');
-                redeSelect.innerHTML = '';
-                if (rede) {
-                    let option = document.createElement('option');
-                    option.value = rede;
-                    option.textContent = rede;
-                    redeSelect.appendChild(option);
-                }
-            } else {
-                redeSelect.innerHTML = '';
-                let redes = Object.keys(lideres);
-                redes.sort();
-                redes.forEach((rede) => {
-                    let option = document.createElement('option');
-                    option.value = rede;
-                    option.textContent = rede;
-                    redeSelect.appendChild(option);
+        // Substituir a função preencherRedes por preencherCoordenadores
+        function preencherCoordenadores() {
+            const coordenadorSelect = document.getElementById('coordenador');
+            coordenadorSelect.innerHTML = '<option value="">Selecione um coordenador</option>';
+            coordenadorSelect.innerHTML += '<option value="TODOS">TODOS</option>';
+            
+            // Buscar coordenadores do Firestore
+            db.collection('estruturacelula').get().then((querySnapshot) => {
+                const coordenadores = new Set();
+                querySnapshot.forEach((doc) => {
+                    coordenadores.add(doc.data().coordenador);
                 });
-            }
 
-            if (redeSelect.options.length > 0) {
-                redeSelect.value = redeSelect.options[0].value;
-                alterarCorRede(redeSelect.value);
-                carregarSupervisores(redeSelect.value);
-            }
+                // Converter Set para Array e ordenar alfabeticamente
+                const coordenadoresOrdenados = Array.from(coordenadores).sort((a, b) => {
+                    return a.localeCompare(b, 'pt-BR');
+                });
+
+                // Adicionar coordenadores ordenados
+                coordenadoresOrdenados.forEach((coordenador) => {
+                    const option = document.createElement('option');
+                    option.value = coordenador;
+                    option.textContent = coordenador;
+                    coordenadorSelect.appendChild(option);
+                });
+
+                // Verificar se há um coordenador salvo no localStorage
+                const coordenadorSalvo = localStorage.getItem('coordenador');
+                if (coordenadorSalvo && Array.from(coordenadorSelect.options).some(opt => opt.value === coordenadorSalvo)) {
+                    coordenadorSelect.value = coordenadorSalvo;
+                }
+
+                // Carregar supervisores com base no coordenador selecionado
+                carregarSupervisores();
+            }).catch(error => {
+                console.error("Erro ao carregar coordenadores:", error);
+            });
         }
 
-        function carregarSupervisores(rede) {
+        // Modificar a função carregarSupervisores para filtrar por coordenador
+        function carregarSupervisores() {
+            const coordenadorEscolhido = document.getElementById('coordenador').value;
             const supervisorSelect = document.getElementById('supervisor');
-            supervisorSelect.innerHTML = '';
+            supervisorSelect.innerHTML = '<option value="">Selecione um supervisor</option>';
+            // Removida a opção "TODOS"
 
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
+            if (coordenadorEscolhido === 'TODOS') {
+                supervisorSelect.disabled = true;
+                supervisorSelect.value = '';
+                carregarLideres();
+            } else if (coordenadorEscolhido) {
+                supervisorSelect.disabled = false;
+                
+                // Buscar supervisores do Firestore filtrados por coordenador
+                db.collection('estruturacelula')
+                    .where('coordenador', '==', coordenadorEscolhido)
+                    .get()
+                    .then((querySnapshot) => {
+                        const supervisores = new Set();
+                        querySnapshot.forEach((doc) => {
+                            supervisores.add(doc.data().supervisor);
+                        });
 
-            if (!lideres || !lideres[rede]) {
-                const supervisor = localStorage.getItem('supervisor');
-                if (supervisor) {
-                    let option = document.createElement('option');
-                    option.value = supervisor;
-                    option.textContent = supervisor;
-                    supervisorSelect.appendChild(option);
-                }
+                        // Converter Set para Array e ordenar alfabeticamente
+                        const supervisoresOrdenados = Array.from(supervisores).sort((a, b) => {
+                            return a.localeCompare(b, 'pt-BR');
+                        });
+
+                        // Adicionar supervisores ordenados
+                        supervisoresOrdenados.forEach((supervisor) => {
+                            const option = document.createElement('option');
+                            option.value = supervisor;
+                            option.textContent = supervisor;
+                            supervisorSelect.appendChild(option);
+                        });
+
+                        // Verificar se há um supervisor salvo no localStorage
+                        const supervisorSalvo = localStorage.getItem('supervisor');
+                        if (supervisorSalvo && Array.from(supervisorSelect.options).some(opt => opt.value === supervisorSalvo)) {
+                            supervisorSelect.value = supervisorSalvo;
+                        } else if (supervisorSelect.options.length > 1) {
+                            // Se não houver supervisor salvo, selecionar o primeiro da lista
+                            supervisorSelect.selectedIndex = 1;
+                        }
+
+                        // Carregar líderes com base no supervisor selecionado
+                        carregarLideres();
+                    })
+                    .catch(error => {
+                        console.error("Erro ao carregar supervisores:", error);
+                    });
             } else {
-                let supervisoresUnicos = new Set();
-                lideres[rede].forEach(lider => supervisoresUnicos.add(lider.supervisor));
-                supervisoresUnicos.forEach(supervisor => {
-                    let option = document.createElement('option');
-                    option.value = supervisor;
-                    option.textContent = supervisor;
-                    supervisorSelect.appendChild(option);
-                });
-            }
-
-            if (supervisorSelect.options.length > 0) {
-                supervisorSelect.value = supervisorSelect.options[0].value;
-                carregarLideres(rede, supervisorSelect.value);
-            }
-        }
-
-        function carregarLideres(rede, supervisor) {
-            const liderSelect = document.getElementById('lider');
-            liderSelect.innerHTML = '';
-
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
-
-            if (!lideres || !lideres[rede]) {
-                const lidercelula = localStorage.getItem('lidercelula');
-                if (lidercelula) {
-                    let option = document.createElement('option');
-                    option.value = lidercelula;
-                    option.textContent = lidercelula;
-                    liderSelect.appendChild(option);
-                }
-            } else {
-                let lideresUnicos = new Set();
-                lideres[rede].forEach(lider => {
-                    if (lider.supervisor === supervisor) {
-                        lideresUnicos.add(lider.conclider);
-                    }
-                });
-                lideresUnicos.forEach((lider) => {
-                    let option = document.createElement('option');
-                    option.value = lider;
-                    option.textContent = lider;
-                    liderSelect.appendChild(option);
-                });
-            }
-
-            if (liderSelect.options.length > 0) {
-                liderSelect.value = liderSelect.options[0].value;
+                supervisorSelect.disabled = true;
+                // Mesmo sem coordenador, atualizamos a tabela e os gráficos
                 gerarTabelaResumo();
                 gerarGraficos();
             }
         }
 
+        // Modificar a função carregarLideres para usar coordenador em vez de rede
+        function carregarLideres() {
+            const coordenadorEscolhido = document.getElementById('coordenador').value;
+            const supervisorEscolhido = document.getElementById('supervisor').value;
+            const liderSelect = document.getElementById('lider');
+            liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
+            // Removida a opção "TODOS"
 
-        // Event listeners para os selects
-        document.getElementById('rede').addEventListener('change', async function () {
-            mostrarSplashScreen();
-            const rede = this.value;
-            alterarCorRede(rede);
-            carregarSupervisores(rede);
+            console.log("Carregando líderes com filtros:", {
+                coordenador: coordenadorEscolhido,
+                supervisor: supervisorEscolhido
+            });
 
-            // Seleciona o primeiro supervisor
-            const supervisorSelect = document.getElementById('supervisor');
-            if (supervisorSelect.options.length > 0) {
-                supervisorSelect.selectedIndex = 0;
-                const supervisor = supervisorSelect.value;
+            if (!supervisorEscolhido) {
+                liderSelect.disabled = true;
+                liderSelect.value = '';
+                // Ainda assim, geramos a tabela e os gráficos
+                gerarTabelaResumo();
+                gerarGraficos();
+                return;
+            }
 
-                // Carrega líderes para a rede e supervisor selecionados
-                carregarLideres(rede, supervisor);
+            liderSelect.disabled = false;
+            
+            // Construir a consulta base
+            let query = db.collection('estruturacelula');
+            
+            // Adicionar filtros
+            if (coordenadorEscolhido && coordenadorEscolhido !== 'TODOS') {
+                query = query.where('coordenador', '==', coordenadorEscolhido);
+            }
+            
+            if (supervisorEscolhido) {
+                query = query.where('supervisor', '==', supervisorEscolhido);
+            }
+            
+            // Executar a consulta
+            query.get().then((querySnapshot) => {
+                console.log(`Consulta de líderes retornou ${querySnapshot.size} documentos`);
+                
+                const lideres = new Set();
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    console.log("Documento de estrutura:", doc.id, data);
+                    if (data.conclider) {
+                        lideres.add(data.conclider);
+                    }
+                });
 
-                // Seleciona o primeiro líder
-                const liderSelect = document.getElementById('lider');
-                if (liderSelect.options.length > 0) {
-                    liderSelect.selectedIndex = 0;
+                // Converter Set para Array e ordenar alfabeticamente
+                const lideresOrdenados = Array.from(lideres).sort((a, b) => {
+                    return a.localeCompare(b, 'pt-BR');
+                });
 
-                    // Gera tabela e gráficos
-                    await gerarTabelaResumo();
-                    await gerarGraficos();
-                    esconderSplashScreen();
-                } else {
-                    limparTabelaEGraficos();
+                console.log("Líderes encontrados:", lideresOrdenados);
+
+                // Adicionar líderes ordenados
+                lideresOrdenados.forEach((lider) => {
+                    const option = document.createElement('option');
+                    option.value = lider;
+                    option.textContent = lider;
+                    liderSelect.appendChild(option);
+                });
+
+                // Verificar se há um líder salvo no localStorage
+                const liderSalvo = localStorage.getItem('lidercelula');
+                if (liderSalvo && Array.from(liderSelect.options).some(opt => opt.value === liderSalvo)) {
+                    liderSelect.value = liderSalvo;
+                } else if (liderSelect.options.length > 1) {
+                    // Se não houver líder salvo, selecionar o primeiro da lista
+                    liderSelect.selectedIndex = 1;
                 }
-            } else {
-                limparTabelaEGraficos();
+
+                // Gerar tabela e gráficos
+                gerarTabelaResumo();
+                gerarGraficos();
+            }).catch(error => {
+                console.error("Erro ao carregar líderes:", error);
+                // Mesmo com erro, tentamos gerar a tabela e os gráficos
+                gerarTabelaResumo();
+                gerarGraficos();
+            });
+        }
+
+        // Adicione esta função para verificar a estrutura dos documentos
+        async function verificarEstruturaDados() {
+            try {
+                const snapshot = await db.collection('reuniao').limit(1).get();
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    console.log("Estrutura de um documento de reunião:", doc.id, doc.data());
+                } else {
+                    console.log("Nenhum documento encontrado na coleção 'reuniao'");
+                }
+            } catch (error) {
+                console.error("Erro ao verificar estrutura de dados:", error);
             }
+        }
+
+        // Modificar os event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarEstruturaDados();
+            // Inicializar a página
+            preencherCoordenadores();
+            
+            // Adicionar event listeners
+            document.getElementById('coordenador').addEventListener('change', carregarSupervisores);
+            document.getElementById('supervisor').addEventListener('change', carregarLideres);
+            document.getElementById('lider').addEventListener('change', function() {
+                gerarTabelaResumo();
+                gerarGraficos();
+            });
         });
-
-
-        document.getElementById('supervisor').addEventListener('change', async function () {
-            mostrarSplashScreen();
-            const rede = document.getElementById('rede').value;
-            const supervisor = this.value;
-
-            carregarLideres(rede, supervisor);
-
-            // Seleciona o primeiro líder
-            const liderSelect = document.getElementById('lider');
-            if (liderSelect.options.length > 0) {
-                liderSelect.selectedIndex = 0;
-
-                // Gera tabela e gráficos
-                await gerarTabelaResumo();
-                await gerarGraficos();
-                esconderSplashScreen();
-            } else {
-                limparTabelaEGraficos();
-            }
-        });
-
-
-        document.getElementById('lider').addEventListener('change', async function () {
-            if (this.value) {
-                mostrarSplashScreen();
-                await gerarTabelaResumo();
-                await gerarGraficos();
-                esconderSplashScreen();
-            } else {
-                limparTabelaEGraficos();
-            }
-        });
-
-        // Inicialização da página
-        window.onload = async function () {
-            mostrarSplashScreen();
-            console.log("Página carregada");
-            logLocalStorageContent();
-            await preencherRedes();
-            console.log("Redes preenchidas");
-
-            // Select the first leader by default
-            const liderSelect = document.getElementById('lider');
-            if (liderSelect.options.length > 0) {
-                liderSelect.selectedIndex = 0;
-            }
-
-            // Generate table and graphs
-            await gerarTabelaResumo();
-            await gerarGraficos();
-
-            console.log("Tabela e gráficos gerados");
-            esconderSplashScreen();
-        };
 
 
 

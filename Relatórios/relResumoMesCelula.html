@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resumo de Reunião - Igreja Evangélica Batista Intermares</title>
+    <title>Resumo de Reunião - Igreja Evangélica Batista de Intermares</title>
     <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
@@ -445,17 +445,17 @@
             tableBody.innerHTML = '<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando dados...</td></tr>';
 
             try {
-                const supervisor = document.getElementById('supervisor').value;
+                // Removemos a referência ao supervisor aqui
                 const lider = document.getElementById('lider').value;
                 const mesAno = `${mes}/${ano}`;
 
+                // Construímos a consulta base sem filtrar por supervisor
                 let query = db.collection('reuniao')
                     .where('mesAno', '==', mesAno)
-                    .orderBy('supervisor')
                     .orderBy('lider')
                     .orderBy('data');
 
-                if (supervisor) query = query.where('supervisor', '==', supervisor);
+                // Aplicamos apenas o filtro de líder, se especificado
                 if (lider) query = query.where('lider', '==', lider);
 
                 const snapshot = await query.get();
