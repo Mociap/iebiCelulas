@@ -244,7 +244,12 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">Frequência Detalhada por Aluno</div>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Frequência Detalhada por Aluno</span>
+                        <button id="btnExportarFrequencia" class="btn btn-sm btn-success">
+                            <i class="fas fa-file-excel mr-1"></i> Exportar Excel
+                        </button>
+                    </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-striped" id="tabelaFrequencia">
@@ -273,12 +278,15 @@
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Scripts necessários -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -356,13 +364,19 @@
         // Adicione este código na seção de scripts, antes da função inicializarPagina()
 
         // Função para criar tabela detalhada de presença
-        function criarTabelaPresencaDetalhada(inscricoes, presencas) {
-            const container = document.createElement('div');
-            container.className = 'row mt-4';
-            container.innerHTML = `
+// Função para criar tabela detalhada de presença
+function criarTabelaPresencaDetalhada(inscricoes, presencas) {
+    const container = document.createElement('div');
+    container.className = 'row mt-4';
+    container.innerHTML = `
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Tabela Detalhada de Presença por Disciplina</div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Tabela Detalhada de Presença por Disciplina</span>
+                    <button id="btnExportarPresencaDetalhada" class="btn btn-sm btn-success">
+                        <i class="fas fa-file-excel mr-1"></i> Exportar Excel
+                    </button>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped" id="tabelaPresencaDetalhada">
@@ -388,12 +402,18 @@
         </div>
     `;
 
-            // Adicionar a tabela ao final da página
-            document.querySelector('.container-fluid').appendChild(container);
+    // Adicionar a tabela ao final da página
+    document.querySelector('.container-fluid').appendChild(container);
 
-            // Preencher a tabela com os dados
-            preencherTabelaPresencaDetalhada(inscricoes, presencas);
-        }
+    // Preencher a tabela com os dados
+    preencherTabelaPresencaDetalhada(inscricoes, presencas);
+    
+// Configurar o botão de exportação para esta tabela
+document.getElementById('btnExportarPresencaDetalhada').addEventListener('click', function() {
+    exportarParaExcelFormatado('tabelaPresencaDetalhada', 'Presenca_Detalhada');
+});
+
+}
 
         // Função para preencher a tabela detalhada de presença
         function preencherTabelaPresencaDetalhada(inscricoes, presencas) {
@@ -541,6 +561,7 @@
             carregarFiltros();
             carregarDados();
             configurarEventListeners();
+            configurarBotoesExportacao();
         }
 
         // Carregar filtros
@@ -1503,6 +1524,195 @@
             // A inicialização real acontecerá após a verificação de autenticação
             console.log('Página de monitoramento carregada. Verificando autenticação...');
         });
+
+        // Função para exportar tabela para Excel
+// function exportarParaExcel(idTabela, nomeArquivo) {
+//     const tabela = document.getElementById(idTabela);
+    
+//     // Criar uma cópia da tabela para manipulação
+//     const tabelaClone = tabela.cloneNode(true);
+    
+//     // Converter a tabela HTML para uma planilha
+//     const wb = XLSX.utils.table_to_book(tabelaClone, {sheet: "Dados"});
+    
+//     // Exportar como arquivo Excel
+//     XLSX.writeFile(wb, `${nomeArquivo}.xlsx`);
+// }
+
+// // Configurar os event listeners para os botões de exportação
+// function configurarBotoesExportacao() {
+//     // Botão para exportar tabela de frequência
+//     document.getElementById('btnExportarFrequencia').addEventListener('click', function() {
+//         exportarParaExcel('tabelaFrequencia', 'Frequencia_Alunos');
+//     });
+    
+//     // Verificar periodicamente se a tabela detalhada já foi criada
+//     const verificarTabelaDetalhada = setInterval(function() {
+//         const btnExportarDetalhada = document.getElementById('btnExportarPresencaDetalhada');
+//         if (btnExportarDetalhada) {
+//             btnExportarDetalhada.addEventListener('click', function() {
+//                 exportarParaExcel('tabelaPresencaDetalhada', 'Presenca_Detalhada');
+//             });
+//             clearInterval(verificarTabelaDetalhada);
+//         }
+//     }, 1000);
+// }
+
+// Função aprimorada para exportar tabela para Excel com formatação
+function exportarParaExcelFormatado(idTabela, nomeArquivo) {
+    const tabela = document.getElementById(idTabela);
+    
+    // Obter dados da tabela
+    const dados = [];
+    const cabecalhos = [];
+    
+    // Extrair cabeçalhos
+    const thElements = tabela.querySelectorAll('thead th');
+    thElements.forEach(th => {
+        cabecalhos.push(th.textContent);
+    });
+    
+    dados.push(cabecalhos);
+    
+    // Extrair dados das linhas
+    const linhas = tabela.querySelectorAll('tbody tr');
+    linhas.forEach(linha => {
+        if (!linha.querySelector('.loader')) { // Ignorar linha de carregamento
+            const dadosLinha = [];
+            const celulas = linha.querySelectorAll('td');
+            celulas.forEach(celula => {
+                dadosLinha.push(celula.textContent.trim());
+            });
+            dados.push(dadosLinha);
+        }
+    });
+    
+    // Criar workbook e worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(dados);
+    
+    // Definir larguras de colunas baseadas no conteúdo
+    const largurasColunas = definirLargurasColunas(dados);
+    ws['!cols'] = largurasColunas.map(largura => ({ width: largura }));
+    
+    // Adicionar estilos
+    aplicarEstilos(ws, dados.length, cabecalhos.length);
+    
+    // Adicionar worksheet ao workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Dados");
+    
+    // Exportar como arquivo Excel
+    XLSX.writeFile(wb, `${nomeArquivo}.xlsx`);
+}
+
+// Função para definir larguras de colunas baseadas no conteúdo
+function definirLargurasColunas(dados) {
+    const larguras = [];
+    
+    // Inicializar com larguras baseadas nos cabeçalhos
+    for (let i = 0; i < dados[0].length; i++) {
+        larguras[i] = dados[0][i].length + 2; // Cabeçalho + margem
+    }
+    
+    // Ajustar baseado no conteúdo das células
+    for (let i = 1; i < dados.length; i++) {
+        for (let j = 0; j < dados[i].length; j++) {
+            const comprimento = dados[i][j].length;
+            if (comprimento > larguras[j]) {
+                larguras[j] = comprimento + 2;
+            }
+        }
+    }
+    
+    // Limitar largura máxima
+    return larguras.map(largura => Math.min(largura, 30));
+}
+
+// Função para aplicar estilos ao worksheet
+function aplicarEstilos(ws, numLinhas, numColunas) {
+    if (!ws['!rows']) ws['!rows'] = [];
+    
+    // Estilo para cabeçalhos
+    const estilosCabecalho = {
+        fill: { fgColor: { rgb: "4F81BD" } },
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        alignment: { horizontal: "center", vertical: "center" }
+    };
+    
+    // Estilo para linhas alternadas
+    const estiloLinhasPares = {
+        fill: { fgColor: { rgb: "E9EDF4" } }
+    };
+    
+    // Estilo para células com status
+    const estiloStatusRegular = { font: { color: { rgb: "008000" } } }; // Verde
+    const estiloStatusAtencao = { font: { color: { rgb: "FFA500" } } }; // Laranja
+    const estiloStatusCritico = { font: { color: { rgb: "FF0000" } } }; // Vermelho
+    
+    // Aplicar estilos aos cabeçalhos
+    for (let col = 0; col < numColunas; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!ws[cellRef]) ws[cellRef] = {};
+        ws[cellRef].s = estilosCabecalho;
+    }
+    
+    // Altura da linha de cabeçalho
+    ws['!rows'][0] = { hpt: 25 }; // Altura em pontos
+    
+    // Aplicar estilos às linhas de dados
+    for (let row = 1; row < numLinhas; row++) {
+        // Linhas alternadas
+        const estiloLinha = row % 2 === 0 ? estiloLinhasPares : {};
+        
+        for (let col = 0; col < numColunas; col++) {
+            const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!ws[cellRef]) ws[cellRef] = {};
+            
+            // Aplicar estilo base da linha
+            ws[cellRef].s = { ...estiloLinha };
+            
+            // Aplicar estilo específico para coluna de status (assumindo que é a última coluna)
+            if (col === numColunas - 1) {
+                const valorCelula = ws[cellRef].v;
+                if (valorCelula === 'Regular') {
+                    ws[cellRef].s = { ...ws[cellRef].s, ...estiloStatusRegular };
+                } else if (valorCelula === 'Atenção') {
+                    ws[cellRef].s = { ...ws[cellRef].s, ...estiloStatusAtencao };
+                } else if (valorCelula === 'Crítico') {
+                    ws[cellRef].s = { ...ws[cellRef].s, ...estiloStatusCritico };
+                }
+            }
+            
+            // Centralizar colunas numéricas
+            if (col >= 3 && col <= 5) { // Colunas de Presenças, Faltas e % Frequência
+                ws[cellRef].s = { 
+                    ...ws[cellRef].s, 
+                    alignment: { horizontal: "center" } 
+                };
+            }
+        }
+    }
+}
+
+// Configurar os event listeners para os botões de exportação
+function configurarBotoesExportacao() {
+    // Botão para exportar tabela de frequência
+    document.getElementById('btnExportarFrequencia').addEventListener('click', function() {
+        exportarParaExcelFormatado('tabelaFrequencia', 'Frequencia_Alunos');
+    });
+    
+    // Verificar periodicamente se a tabela detalhada já foi criada
+    const verificarTabelaDetalhada = setInterval(function() {
+        const btnExportarDetalhada = document.getElementById('btnExportarPresencaDetalhada');
+        if (btnExportarDetalhada) {
+            btnExportarDetalhada.addEventListener('click', function() {
+                exportarParaExcelFormatado('tabelaPresencaDetalhada', 'Presenca_Detalhada');
+            });
+            clearInterval(verificarTabelaDetalhada);
+        }
+    }, 1000);
+}
+
     </script>
 </body>
 
