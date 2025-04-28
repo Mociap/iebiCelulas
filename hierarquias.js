@@ -115,7 +115,9 @@ const hierarquias = {
             // Escola Ministerial frmEM
             'inscricoes',
             'chamada',
-            'frequencia'
+            'frequencia',
+            'admIncricoes',
+            'admTurmas'
         ]
     },
     PROFESSOR: {
