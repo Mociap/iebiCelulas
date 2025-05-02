@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -317,29 +318,6 @@
         let todasDisciplinas = [];
         let chartFrequencia, chartDistribuicao;
 
-        // Verificar permissões do usuário
-        firebase.auth().onAuthStateChanged(function (user) {
-            if (user) {
-                // Buscar função do usuário
-                db.collection('usuarios').doc(user.uid).get()
-                    .then(doc => {
-                        if (doc.exists) {
-                            const funcao = doc.data().funcao;
-                            // Verificar se tem permissão para acessar relatórios
-                            if (temPermissao(funcao, 'relatorioMembros') &&
-                                getNivelHierarquico(funcao) >= 3) {
-                                inicializarPagina();
-                            } else {
-                                alert('Você não tem permissão para acessar esta página.');
-                                window.location.href = 'frmEM.html';
-                            }
-                        }
-                    });
-            } else {
-                window.location.href = '../login.html';
-            }
-        });
-
         // Função para converter data string DD/MM/AAAA para objeto Date
         function converterStringParaData(dataString) {
             const [dia, mes, ano] = dataString.split('/');
@@ -558,10 +536,12 @@ document.getElementById('btnExportarPresencaDetalhada').addEventListener('click'
 
         // Inicializar a página
         function inicializarPagina() {
-            carregarFiltros();
+            console.log("Iniciando carregamento da página");
+    carregarFiltros();
             carregarDados();
             configurarEventListeners();
             configurarBotoesExportacao();
+            console.log("Carregamento concluído");
         }
 
         // Carregar filtros
@@ -1520,10 +1500,33 @@ document.getElementById('btnExportarPresencaDetalhada').addEventListener('click'
         }
 
         // Inicializar a página quando o documento estiver pronto
-        document.addEventListener('DOMContentLoaded', function () {
-            // A inicialização real acontecerá após a verificação de autenticação
-            console.log('Página de monitoramento carregada. Verificando autenticação...');
-        });
+// Inicializar a página diretamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Assumindo que o usuário já está autenticado
+    const user = firebase.auth().currentUser;
+    
+    if (user) {
+        // Apenas verificar permissões, não autenticar novamente
+        db.collection('usuarios').doc(user.uid).get()
+            .then(doc => {
+                if (doc.exists) {
+                    const funcao = doc.data().funcao;
+                    // Verificar se tem permissão para acessar relatórios
+                    if (temPermissao(funcao, 'relatorioMembros') &&
+                        getNivelHierarquico(funcao) >= 3) {
+                        inicializarPagina();
+                    } else {
+                        alert('Você não tem permissão para acessar esta página.');
+                        window.location.href = 'frmEM.html';
+                    }
+                }
+            });
+    } else {
+        // Caso o usuário não esteja autenticado por algum motivo
+        console.log("Usuário não autenticado");
+        inicializarPagina(); // Ou redirecionar para login se necessário
+    }
+});
 
         // Função para exportar tabela para Excel
 // function exportarParaExcel(idTabela, nomeArquivo) {

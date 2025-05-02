@@ -101,6 +101,8 @@ const hierarquias = {
     COORDENADOR: {
         nivel: 3,
         permissoes: [
+            'relatorioMembros',
+
             // Escola Ministerial frmEM
             'inscricoes',
             'chamada',
@@ -112,6 +114,8 @@ const hierarquias = {
     SUPERVISOR: {
         nivel: 2,
         permissoes: [
+            'relatorioMembros',
+
             // Escola Ministerial frmEM
             'inscricoes',
             'chamada',
@@ -123,6 +127,8 @@ const hierarquias = {
     PROFESSOR: {
         nivel: 1,
         permissoes: [
+            'relatorioMembros',
+            
             // Escola Ministerial frmEM
             'inscricoes',
             'chamada',
