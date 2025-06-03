@@ -6,6 +6,10 @@
     <title>Dashboard iebiCelulas</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    
     <style>
         body {
             background-color: #f8f9fa;
@@ -139,6 +143,146 @@
             right: 20px;
             z-index: 9999;
         }
+
+        /* Estilos específicos para o modal de reunião */
+        .modal-body {
+            background-color: #2c2c2c;
+            color: #ffffff;
+        }
+
+        .modal-content {
+            background-color: #2c2c2c;
+            color: #ffffff;
+        }
+
+        .modal-header {
+            background-color: #2c2c2c;
+            color: #ffffff;
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-footer {
+            background-color: #2c2c2c;
+            border-top: 1px solid #444;
+        }
+
+                .drop {
+            background-color: #fff !important;
+            border: 1px solid #555;
+            color: #3c3c3c !important;
+        }
+
+        .form-control {
+            background-color: #3c3c3c !important;
+            border: 1px solid #555;
+            color: #fff !important;
+        }
+
+        .form-control:focus {
+            background-color: #fff !important;
+            color: #4c4c4c !important;
+            box-shadow: 0 0 0 0.2rem rgba(153, 25, 204, 0.25);
+            border-color: #9919cc;
+        }
+
+        .form-control:disabled {
+            background-color: #3c3c3c !important;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        select.form-control option {
+            background-color: #fff;
+            color: #2c2c2c;
+        }
+
+        label {
+            color: #cfcccc;
+            font-weight: bold;
+        }
+
+        .form-group-switch {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-left: 10px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #9919cc;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .btn-primary {
+            background-color: #9919cc;
+            border-color: #9919cc;
+        }
+
+        .btn-primary:hover {
+            background-color: #7a1499;
+            border-color: #7a1499;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .close {
+            color: #ffffff;
+            opacity: 0.8;
+        }
+
+        .close:hover {
+            color: #ffffff;
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -236,8 +380,15 @@
                 <div class="row mt-4">
                     <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header">
-                                <i class="fas fa-chart-line"></i> Atividade Recente
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-chart-line"></i> Atividade Recente
+                                </div>
+                                <div class="form-group mb-0" style="min-width: 200px;">
+                                    <select class="drop drop-sm" id="filtroLiderAtividade">
+                                        <option value=""><strong>Todos os Líderes</strong></option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div id="atividadeRecente">Carregando...</div>
@@ -278,7 +429,7 @@
                                     <label for="redeValorFiltro">Filtrar por valor:</label>
                                     <input class="form-control" id="redeValorFiltro" list="redeValorFiltroOptions" autocomplete="off">
                                     <datalist id="redeValorFiltroOptions"></datalist>
-                                </div>
+                                                                    </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -377,7 +528,7 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                                                        <label for="membrosCampoFiltro">Filtrar por campo:</label>
+                                    <label for="membrosCampoFiltro">Filtrar por campo:</label>
                                     <select class="form-control" id="membrosCampoFiltro"></select>
                                 </div>
                             </div>
@@ -488,7 +639,97 @@
                 </div>
                 <div class="modal-body">
                     <form id="itemForm">
-                        <div id="formFields"></div>
+                        <div id="formFields">
+                            <!-- Campos específicos para reunião -->
+                            <div id="reuniaoFields" style="display: none;">
+                                <div class="form-group-switch reuniao-realizada-switch">
+                                    <label class="switch-label" for="modalReuniaoRealizada">Reunião Realizada</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="modalReuniaoRealizada" checked />
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+
+                                <div id="modalCamposReuniao">
+                                    <div class="form-group">
+                                        <label for="modalData">Data da Reunião</label>
+                                        <input type="text" class="form-control" id="modalData" placeholder="Selecione a data..." required readonly />
+                                    </div>
+
+                                    <div class="form-group" style="display: none">
+                                        <label for="modalAno">Ano</label>
+                                        <input type="number" class="form-control" id="modalAno" readonly />
+                                    </div>
+
+                                    <div class="form-group" style="display: none">
+                                        <label for="modalMesAno">Mês/Ano</label>
+                                        <input type="text" class="form-control" id="modalMesAno" readonly />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="modalIgreja">Igreja</label>
+                                        <select class="form-control" id="modalIgreja" required></select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="modalSupervisor">Supervisor</label>
+                                        <select class="form-control" id="modalSupervisor" required disabled></select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="modalLider">Líder</label>
+                                        <select class="form-control" id="modalLider" required disabled></select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="modalCelula">Célula</label>
+                                        <input type="text" class="form-control" id="modalCelula" readonly />
+                                    </div>
+
+                                    <div class="form-group campo-reuniao">
+                                        <label>Presença</label>
+                                        <div id="modalPresencaContainer"></div>
+                                    </div>
+
+                                    <div class="form-group campo-reuniao">
+                                        <label for="modalQtdVisitantes">Quantidade de Visitantes</label>
+                                        <input type="number" class="form-control" id="modalQtdVisitantes" required />
+                                    </div>
+
+                                    <div class="form-group campo-reuniao">
+                                        <label for="modalOferta">Oferta</label>
+                                        <input type="text" class="form-control" id="modalOferta" required />
+                                    </div>
+
+                                    <div class="form-group campo-reuniao">
+                                        <label>Colheita do Amor</label>
+                                        <select class="form-control" id="modalTipoAlimento" required>
+                                            <option value="" disabled selected>
+                                                Selecione um alimento.
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group campo-reuniao">
+                                        <label>Quant Unidades</label>
+                                        <input type="number" class="form-control" id="modalQtdAlimento" placeholder="Quantidade" min="0" step="1" required disabled />
+                                    </div>
+                                </div>
+
+                                <div class="form-group campo-reuniao">
+                                    <label for="modalQtdMembros">Quantidade de Membros</label>
+                                    <input type="number" class="form-control" id="modalQtdMembros" readonly />
+                                </div>
+
+                                <div class="form-group campo-reuniao">
+                                    <label for="modalMembroPresentes">Membros Presentes</label>
+                                    <input type="number" class="form-control" id="modalMembroPresentes" readonly />
+                                </div>
+                            </div>
+
+                            <!-- Campos genéricos para outras coleções -->
+                            <div id="genericFields"></div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -521,7 +762,7 @@
     </div>
 
     <!-- Importar scripts -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     
@@ -553,6 +794,7 @@
         let currentCollection = null;
         let itemToDelete = null;
         let editingItemId = null;
+        let modalFlatpickr = null;
         
         // Hierarquias e permissões
         const hierarquias = {
@@ -687,6 +929,9 @@
             // Carregar contadores
             carregarContadores();
             
+            // Carregar filtro de líderes
+            carregarFiltroLideres();
+            
             // Carregar atividade recente
             carregarAtividadeRecente();
             
@@ -743,18 +988,32 @@
         }
         
         // Função para carregar atividade recente
-        function carregarAtividadeRecente() {
-                        const atividadeContainer = document.getElementById('atividadeRecente');
+        function carregarAtividadeRecente(liderFiltro = '') {
+            const atividadeContainer = document.getElementById('atividadeRecente');
             atividadeContainer.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div> Carregando...</div>';
             
-            // Buscar as últimas 5 reuniões
-            db.collection('reuniao')
-                .orderBy('data', 'desc')
-                .limit(5)
+            // Calcular data limite (30 dias atrás)
+            const dataLimite = new Date();
+            dataLimite.setDate(dataLimite.getDate() - 30);
+            
+            // Construir query base
+            let query = db.collection('reuniao')
+                .where('data', '>=', dataLimite);
+            
+            // Adicionar filtro de líder se especificado
+            if (liderFiltro && liderFiltro !== '') {
+                query = query.where('lider', '==', liderFiltro);
+            }
+            
+            // Executar query
+            query.orderBy('data', 'desc')
                 .get()
                 .then(snapshot => {
                     if (snapshot.empty) {
-                        atividadeContainer.innerHTML = '<p class="text-muted">Nenhuma atividade recente encontrada.</p>';
+                        const mensagem = liderFiltro ? 
+                            `Nenhuma atividade do líder "${liderFiltro}" nos últimos 30 dias.` : 
+                            'Nenhuma atividade nos últimos 30 dias.';
+                        atividadeContainer.innerHTML = `<p class="text-muted">${mensagem}</p>`;
                         return;
                     }
                     
@@ -762,17 +1021,37 @@
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         const dataFormatada = new Date(data.data.seconds * 1000).toLocaleDateString('pt-BR');
+                        const diasAtras = Math.floor((new Date() - new Date(data.data.seconds * 1000)) / (1000 * 60 * 60 * 24));
+                        
                         html += `
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
+                                <div class="flex-grow-1">
                                     <strong>${data.tipo || 'Reunião'}</strong>
-                                    <p class="mb-0 text-muted">${data.descricao || 'Sem descrição'}</p>
+                                    <p class="mb-0 text-muted">Líder: ${data.lider || 'Não informado'}</p>
                                 </div>
-                                <span class="badge badge-primary badge-pill">${dataFormatada}</span>
+                                <div class="text-right mr-3">
+                                    <span class="badge badge-primary badge-pill">${dataFormatada}</span>
+                                    <div class="small text-muted">${diasAtras === 0 ? 'Hoje' : diasAtras === 1 ? 'Ontem' : `${diasAtras} dias atrás`}</div>
+                                </div>
+                                <div class="btn-group-vertical" role="group">
+                                    <button class="btn btn-sm btn-outline-info mb-1" onclick="editarReuniaoAtividade('${doc.id}')" title="Editar reunião">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="excluirReuniaoAtividade('${doc.id}')" title="Excluir reunião">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </li>
                         `;
                     });
                     html += '</ul>';
+                    
+                    // Adicionar contador no final
+                    const textoContador = liderFiltro ? 
+                        `Total: ${snapshot.size} reuniões do líder "${liderFiltro}" nos últimos 30 dias` :
+                        `Total: ${snapshot.size} reuniões nos últimos 30 dias`;
+                    html += `<div class="text-center mt-2"><small class="text-muted">${textoContador}</small></div>`;
+                    
                     atividadeContainer.innerHTML = html;
                 })
                 .catch(error => {
@@ -780,7 +1059,85 @@
                     atividadeContainer.innerHTML = '<p class="text-danger">Erro ao carregar atividades recentes.</p>';
                 });
         }
-        
+
+        // Função para carregar lista de líderes no filtro
+        function carregarFiltroLideres() {
+            const selectLider = document.getElementById('filtroLiderAtividade');
+            
+            // Calcular data limite (30 dias atrás)
+            const dataLimite = new Date();
+            dataLimite.setDate(dataLimite.getDate() - 30);
+            
+            // Buscar líderes únicos das reuniões dos últimos 30 dias
+            db.collection('reuniao')
+                .where('data', '>=', dataLimite)
+                .get()
+                .then(snapshot => {
+                    const lideresUnicos = new Set();
+                    
+                    snapshot.forEach(doc => {
+                        const lider = doc.data().lider;
+                        if (lider && lider.trim() !== '') {
+                            lideresUnicos.add(lider);
+                        }
+                    });
+                    
+                    // Limpar select e adicionar opção padrão
+                    selectLider.innerHTML = '<option value=""><strong>Todos os Líderes</strong></option>';
+                    
+                    // Adicionar líderes ordenados
+                    const lideresOrdenados = Array.from(lideresUnicos).sort();
+                    lideresOrdenados.forEach(lider => {
+                        const option = document.createElement('option');
+                        option.value = lider;
+                        option.textContent = lider;
+                        selectLider.appendChild(option);
+                    });
+                    
+                    // Adicionar evento de mudança
+                    selectLider.addEventListener('change', function() {
+                        carregarAtividadeRecente(this.value);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar líderes:", error);
+                });
+        }
+
+        // Função para editar reunião a partir do card de atividade recente
+        function editarReuniaoAtividade(reuniaoId) {
+            // Mudar para a seção de reuniões
+            showSection('reuniao');
+            
+            // Aguardar um momento para a seção carregar e então editar o item
+            setTimeout(() => {
+                editarItem('reuniao', reuniaoId);
+            }, 500);
+        }
+
+        // Função para excluir reunião a partir do card de atividade recente
+                function excluirReuniaoAtividade(reuniaoId) {
+            // Confirmar exclusão
+            if (confirm('Tem certeza que deseja excluir esta reunião? Esta ação não pode ser desfeita.')) {
+                db.collection('reuniao').doc(reuniaoId).delete()
+                    .then(() => {
+                        mostrarAlerta('Reunião excluída com sucesso!', 'success');
+                        // Recarregar filtro de líderes e atividade recente
+                        carregarFiltroLideres();
+                        const liderSelecionado = document.getElementById('filtroLiderAtividade').value;
+                        carregarAtividadeRecente(liderSelecionado);
+                        // Se estiver na seção de reuniões, recarregar também
+                        if (currentCollection === 'reuniao') {
+                            carregarDados('reuniao');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao excluir reunião:', error);
+                        mostrarAlerta('Erro ao excluir reunião. Tente novamente.', 'danger');
+                    });
+            }
+        }
+
         // Função para carregar próximas reuniões
         function carregarProximasReunioes() {
             const reunioesContainer = document.getElementById('proximasReunioes');
@@ -1064,11 +1421,488 @@
         
         // Função para adicionar novo item
         function adicionarItem(colecao) {
+            currentCollection = colecao;
+            editingItemId = null;
+            
             // Resetar formulário
-            document.getElementById('formFields').innerHTML = '';
+            document.getElementById('genericFields').innerHTML = '';
+            document.getElementById('reuniaoFields').style.display = 'none';
             document.getElementById('itemModalLabel').textContent = 'Adicionar Novo Item';
             
-            // Obter campos da coleção
+            if (colecao === 'reuniao') {
+                // Mostrar campos específicos de reunião
+                document.getElementById('reuniaoFields').style.display = 'block';
+                inicializarModalReuniao();
+            } else {
+                // Mostrar campos genéricos
+                document.getElementById('reuniaoFields').style.display = 'none';
+                carregarCamposGenericos(colecao);
+            }
+            
+            // Configurar botão de salvar
+            const saveBtn = document.getElementById('saveItemBtn');
+            saveBtn.onclick = function() {
+                if (colecao === 'reuniao') {
+                    salvarReuniaoModal();
+                } else {
+                    salvarNovoItem(colecao);
+                }
+            };
+            
+            // Abrir modal
+            $('#itemModal').modal('show');
+        }
+
+        // Função para inicializar modal de reunião
+        function inicializarModalReuniao() {
+            // Inicializar Flatpickr
+            if (modalFlatpickr) {
+                modalFlatpickr.destroy();
+                            }
+            
+            modalFlatpickr = flatpickr("#modalData", {
+                dateFormat: "d/m/Y",
+                locale: "pt",
+                disableMobile: "true",
+                placeholder: "Selecione a data...",
+                allowInput: false,
+                maxDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    var dataEscolhida = selectedDates[0];
+                    if (dataEscolhida > new Date()) {
+                        alert("Data inválida. Por favor, selecione uma data até o dia atual.");
+                        instance.clear();
+                    } else {
+                        document.getElementById('modalAno').value = dataEscolhida.getFullYear();
+                        var mes = String(dataEscolhida.getMonth() + 1).padStart(2, "0");
+                        var ano = dataEscolhida.getFullYear();
+                        document.getElementById('modalMesAno').value = mes + "/" + ano;
+                    }
+                }
+            });
+
+            // Carregar igrejas
+            carregarIgrejasModal();
+            
+            // Carregar lista de alimentos
+            carregarListaAlimentosModal();
+            
+            // Configurar eventos
+            configurarEventosModalReuniao();
+            
+            // Limpar campos
+            limparCamposModalReuniao();
+        }
+
+        // Função para carregar igrejas no modal
+        function carregarIgrejasModal() {
+            const selectIgrejas = document.getElementById("modalIgreja");
+            selectIgrejas.innerHTML = '';
+            
+            // Adicionar opção default
+            const optionPadrao = document.createElement("option");
+            optionPadrao.value = "";
+            optionPadrao.text = "Selecione uma igreja";
+            optionPadrao.disabled = true;
+            optionPadrao.selected = true;
+            selectIgrejas.add(optionPadrao);
+
+            db.collection("igreja").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const option = document.createElement("option");
+                    option.value = doc.data().nomeigreja;
+                    option.text = doc.data().nomeigreja;
+                    selectIgrejas.add(option);
+                });
+            });
+        }
+
+        // Função para carregar supervisores no modal
+        function carregarSupervisoresModal(igrejaSelecionada) {
+            const selectSupervisor = document.getElementById("modalSupervisor");
+
+            if (igrejaSelecionada) {
+                selectSupervisor.disabled = false;
+                selectSupervisor.innerHTML = '';
+
+                const optionPadrao = document.createElement("option");
+                optionPadrao.value = "";
+                optionPadrao.text = "Selecione um supervisor";
+                optionPadrao.disabled = true;
+                optionPadrao.selected = true;
+                selectSupervisor.add(optionPadrao);
+
+                db.collection("estruturacelula")
+                    .where("nomeigreja", "==", igrejaSelecionada)
+                    .get()
+                    .then((querySnapshot) => {
+                        const supervisores = new Set();
+                        querySnapshot.forEach((doc) => {
+                            supervisores.add(doc.data().supervisor);
+                        });
+
+                        Array.from(supervisores).sort().forEach((supervisor) => {
+                            const option = document.createElement("option");
+                            option.value = supervisor;
+                            option.text = supervisor;
+                            selectSupervisor.add(option);
+                        });
+                    });
+            } else {
+                selectSupervisor.disabled = true;
+                selectSupervisor.innerHTML = '';
+            }
+        }
+
+        // Função para carregar líderes no modal
+        function carregarLideresModal(supervisor) {
+            const selectLideres = document.getElementById("modalLider");
+            const igrejaSelecionada = document.getElementById("modalIgreja").value;
+
+            selectLideres.innerHTML = "";
+            document.getElementById("modalCelula").value = "";
+            document.getElementById("modalPresencaContainer").innerHTML = "";
+
+            if (supervisor && igrejaSelecionada) {
+                selectLideres.disabled = false;
+                
+                const optionPadrao = document.createElement("option");
+                optionPadrao.value = "";
+                optionPadrao.text = "Selecione um líder";
+                optionPadrao.disabled = true;
+                optionPadrao.selected = true;
+                selectLideres.add(optionPadrao);
+
+                db.collection("estruturacelula")
+                    .where("supervisor", "==", supervisor)
+                    .where("nomeigreja", "==", igrejaSelecionada)
+                    .get()
+                    .then((querySnapshot) => {
+                        const lideres = new Set();
+                        querySnapshot.forEach((doc) => {
+                            lideres.add(doc.data().conclider);
+                        });
+
+                        Array.from(lideres).sort().forEach((lider) => {
+                            const option = document.createElement("option");
+                            option.value = lider;
+                            option.text = lider;
+                            selectLideres.add(option);
+                        });
+                    });
+            } else {
+                selectLideres.disabled = true;
+            }
+        }
+
+        // Função para carregar célula no modal
+        function carregarCelulaModal(lider) {
+            if (lider) {
+                db.collection("estruturacelula")
+                    .where("conclider", "==", lider)
+                    .get()
+                    .then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            document.getElementById("modalCelula").value = doc.data().nomecelula;
+                            carregarMembrosModal(lider);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao carregar célula:", error);
+                    });
+            } else {
+                document.getElementById("modalCelula").value = "";
+                document.getElementById("modalMembroPresentes").value = "0";
+            }
+        }
+
+        // Função para carregar membros no modal
+        function carregarMembrosModal(lider) {
+            const presencaContainer = document.getElementById("modalPresencaContainer");
+            presencaContainer.innerHTML = "";
+            const qtdMembrosInput = document.getElementById("modalQtdMembros");
+            qtdMembrosInput.value = "";
+
+            if (lider) {
+                db.collection("membros")
+                    .where("lidercelula", "==", lider)
+                    .get()
+                    .then((querySnapshot) => {
+                        var membros = [];
+                        querySnapshot.forEach((doc) => {
+                            membros.push({ id: doc.id, nome: doc.data().nome });
+                        });
+
+                        membros.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                        var qtdMembros = membros.length;
+                        membros.forEach((membro) => {
+                            const div = document.createElement("div");
+                            div.classList.add("form-check");
+
+                            const input = document.createElement("input");
+                            input.type = "checkbox";
+                            input.classList.add("form-check-input");
+                            input.id = `modal-membro-${membro.id}`;
+                            input.value = membro.nome;
+                            input.addEventListener("change", atualizarMembroPresentesModal);
+
+                            const label = document.createElement("label");
+                            label.classList.add("form-check-label");
+                            label.htmlFor = `modal-membro-${membro.id}`;
+                            label.textContent = membro.nome;
+
+                            div.appendChild(input);
+                            div.appendChild(label);
+                            presencaContainer.appendChild(div);
+                        });
+
+                        qtdMembrosInput.value = qtdMembros;
+                        document.getElementById("modalMembroPresentes").value = "0";
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao carregar membros:", error);
+                    });
+            }
+        }
+
+        // Função para atualizar membros presentes no modal
+        function atualizarMembroPresentesModal() {
+            const membrosPresentesInput = document.getElementById("modalMembroPresentes");
+            const checkboxes = Array.from(
+                document.querySelectorAll('#modalPresencaContainer input[type="checkbox"]:checked')
+            );
+            membrosPresentesInput.value = checkboxes.length;
+        }
+
+        // Função para carregar lista de alimentos no modal
+        function carregarListaAlimentosModal() {
+            const selectAlimentos = document.getElementById("modalTipoAlimento");
+            selectAlimentos.innerHTML = '<option value="" disabled selected>Selecione um alimento.</option>';
+
+            db.collection("listaAlimentos")
+                .orderBy("nomeAlimento")
+                .get()
+                .then((snapshot) => {
+                    snapshot.forEach((doc) => {
+                        const option = document.createElement("option");
+                        option.value = doc.data().nomeAlimento;
+                        option.text = doc.data().nomeAlimento;
+                        selectAlimentos.add(option);
+                    });
+                })
+                .catch((error) => console.log("Erro ao carregar alimentos:", error));
+        }
+
+        // Função para configurar eventos do modal de reunião
+        function configurarEventosModalReuniao() {
+            // Evento de mudança da igreja
+            document.getElementById("modalIgreja").addEventListener("change", function () {
+                const igrejaSelecionada = this.value;
+                carregarSupervisoresModal(igrejaSelecionada);
+                
+                // Limpar campos dependentes
+                document.getElementById("modalLider").innerHTML = '';
+                document.getElementById("modalLider").disabled = true;
+                document.getElementById("modalCelula").value = '';
+                document.getElementById("modalPresencaContainer").innerHTML = '';
+            });
+
+            // Evento de mudança do supervisor
+            document.getElementById("modalSupervisor").addEventListener("change", function () {
+                const supervisorSelecionado = this.value;
+                carregarLideresModal(supervisorSelecionado);
+            });
+
+            // Evento de mudança do líder
+            document.getElementById("modalLider").addEventListener("change", function () {
+                carregarCelulaModal(this.value);
+            });
+
+            // Evento de mudança do tipo de alimento
+            document.getElementById("modalTipoAlimento").addEventListener("change", function () {
+                const qtdAlimentoInput = document.getElementById("modalQtdAlimento");
+                qtdAlimentoInput.disabled = !this.value;
+                if (!this.value) {
+                    qtdAlimentoInput.value = "";
+                }
+            });
+
+            // Formatação da oferta
+            document.getElementById("modalOferta").addEventListener("input", function (e) {
+                var value = e.target.value.replace(/\D/g, "");
+                value = (value / 100).toFixed(2) + "";
+                value = value.replace(".", ",");
+                value = value.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+                value = value.replace(/(\d)(\d{3}),/g, "$1.$2,");
+                e.target.value = "R$ " + value;
+            });
+
+            // Evento do switch de reunião realizada
+            document.getElementById("modalReuniaoRealizada").addEventListener("change", toggleCamposReuniaoModal);
+
+            // Validação de quantidade de alimento
+            document.getElementById("modalQtdAlimento").addEventListener("input", function (e) {
+                this.value = Math.floor(this.value);
+                if (this.value < 0) this.value = "";
+            });
+        }
+
+        // Função para alternar campos de reunião no modal
+        function toggleCamposReuniaoModal() {
+            const reuniaoRealizadaSwitch = document.getElementById("modalReuniaoRealizada");
+            const camposReuniao = document.querySelectorAll("#modalCamposReuniao .campo-reuniao");
+
+            if (reuniaoRealizadaSwitch.checked) {
+                camposReuniao.forEach(function (campo) {
+                    campo.style.display = "block";
+                    const inputs = campo.querySelectorAll("input, select, textarea");
+                    inputs.forEach(function (input) {
+                        if (input.id !== "modalMembroPresentes" && input.id !== "modalQtdMembros") {
+                            input.required = true;
+                        }
+                    });
+                });
+            } else {
+                camposReuniao.forEach(function (campo) {
+                    campo.style.display = "none";
+                    const inputs = campo.querySelectorAll("input, select, textarea");
+                    inputs.forEach(function (input) {
+                        input.required = false;
+                    });
+                });
+                
+                // Limpar campos específicos
+                document.getElementById("modalQtdVisitantes").value = "";
+                document.getElementById("modalOferta").value = "";
+                document.getElementById("modalMembroPresentes").value = "0";
+            }
+        }
+
+        // Função para limpar campos do modal de reunião
+        function limparCamposModalReuniao() {
+            document.getElementById("modalReuniaoRealizada").checked = true;
+            document.getElementById("modalData").value = "";
+            document.getElementById("modalAno").value = "";
+            document.getElementById("modalMesAno").value = "";
+            document.getElementById("modalIgreja").value = "";
+            document.getElementById("modalSupervisor").innerHTML = "";
+            document.getElementById("modalSupervisor").disabled = true;
+            document.getElementById("modalLider").innerHTML = "";
+            document.getElementById("modalLider").disabled = true;
+            document.getElementById("modalCelula").value = "";
+            document.getElementById("modalPresencaContainer").innerHTML = "";
+            document.getElementById("modalQtdVisitantes").value = "";
+            document.getElementById("modalOferta").value = "";
+            document.getElementById("modalTipoAlimento").value = "";
+            document.getElementById("modalQtdAlimento").value = "";
+            document.getElementById("modalQtdAlimento").disabled = true;
+            document.getElementById("modalQtdMembros").value = "";
+            document.getElementById("modalMembroPresentes").value = "0";
+            
+            toggleCamposReuniaoModal();
+        }
+
+        // Função para salvar reunião do modal
+        function salvarReuniaoModal() {
+            const data = document.getElementById("modalData").value;
+            const celula = document.getElementById("modalCelula").value;
+            const reuniaoRealizada = document.getElementById("modalReuniaoRealizada").checked;
+
+            if (!data || !celula) {
+                mostrarAlerta("Por favor, preencha todos os campos obrigatórios.", "warning");
+                return;
+            }
+
+            // Converter a data do formato dd/mm/yyyy para yyyy-mm-dd
+            const [dia, mes, ano] = data.split("/");
+            const dataFormatada = `${ano}-${mes}-${dia}`;
+
+            // Verificar se já existe um registro com a mesma data e célula (apenas para novos registros)
+            if (!editingItemId) {
+                db.collection("reuniao")
+                    .where("data", "==", firebase.firestore.Timestamp.fromDate(new Date(dataFormatada)))
+                    .where("celula", "==", celula)
+                    .get()
+                                        .then((querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            mostrarAlerta("Já existe um registro para esta data e célula. Por favor, verifique os dados.", "warning");
+                        } else {
+                            enviarDadosReuniaoModal(reuniaoRealizada, dataFormatada);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao verificar registros existentes: ", error);
+                        mostrarAlerta("Ocorreu um erro ao verificar os registros. Por favor, tente novamente.", "danger");
+                    });
+            } else {
+                // Para edição, não verificar duplicatas
+                enviarDadosReuniaoModal(reuniaoRealizada, dataFormatada);
+            }
+        }
+
+        // Função para enviar dados da reunião do modal
+        function enviarDadosReuniaoModal(reuniaoRealizada, dataFormatada) {
+            const dataInput = document.getElementById("modalData").value;
+            const [dia, mes, ano] = dataInput.split("/").map(Number);
+
+            const dadosReuniao = {
+                reuniaoRealizada: reuniaoRealizada,
+                data: firebase.firestore.Timestamp.fromDate(new Date(ano, mes - 1, dia, 21, 0, 0)),
+                igreja: document.getElementById("modalIgreja").value,
+                supervisor: document.getElementById("modalSupervisor").value,
+                lider: document.getElementById("modalLider").value,
+                celula: document.getElementById("modalCelula").value,
+            };
+
+            if (reuniaoRealizada) {
+                dadosReuniao.ano = parseInt(document.getElementById("modalAno").value);
+                dadosReuniao.mesAno = document.getElementById("modalMesAno").value;
+                dadosReuniao.presenca = Array.from(
+                    document.querySelectorAll('#modalPresencaContainer input[type="checkbox"]:checked')
+                ).map(function (checkbox) {
+                    return checkbox.value;
+                });
+                dadosReuniao.qtdVisitantes = parseInt(document.getElementById("modalQtdVisitantes").value) || 0;
+                dadosReuniao.oferta = parseFloat(
+                    document.getElementById("modalOferta").value.replace(/[^\d,]/g, "").replace(",", ".")
+                ) || 0;
+                dadosReuniao.tipoAlimento = document.getElementById("modalTipoAlimento").value;
+                dadosReuniao.qtdAlimento = parseInt(document.getElementById("modalQtdAlimento").value) || 0;
+                dadosReuniao.qtdMembros = parseInt(document.getElementById("modalQtdMembros").value) || 0;
+                dadosReuniao.membroPresentes = parseInt(document.getElementById("modalMembroPresentes").value) || 0;
+            }
+
+            // Salvar ou atualizar no Firestore
+            let operacao;
+            if (editingItemId) {
+                operacao = db.collection("reuniao").doc(editingItemId).update(dadosReuniao);
+            } else {
+                operacao = db.collection("reuniao").add(dadosReuniao);
+            }
+
+            operacao
+                .then(() => {
+                    const mensagem = editingItemId ? "Reunião atualizada com sucesso!" : "Reunião adicionada com sucesso!";
+                    mostrarAlerta(mensagem, "success");
+                    $('#itemModal').modal('hide');
+                    
+                    // Recarregar dados
+                    carregarDados('reuniao');
+                    
+                    // Recarregar dashboard se necessário
+                    if (document.getElementById('dashboard').classList.contains('active')) {
+                        carregarDashboard();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erro ao salvar reunião:", error);
+                    mostrarAlerta("Erro ao salvar reunião. Tente novamente.", "danger");
+                });
+        }
+        
+        // Função para carregar campos genéricos
+        function carregarCamposGenericos(colecao) {
             db.collection(colecao).limit(1).get()
                 .then(querySnapshot => {
                     if (!querySnapshot.empty) {
@@ -1079,21 +1913,12 @@
                             formHtml += `
                                 <div class="form-group">
                                     <label for="${campo}">${campo}</label>
-                                                                        <input type="text" class="form-control" id="${campo}" name="${campo}">
+                                    <input type="text" class="form-control" id="${campo}" name="${campo}">
                                 </div>
                             `;
                         });
                         
-                        document.getElementById('formFields').innerHTML = formHtml;
-                        
-                        // Configurar botão de salvar
-                        const saveBtn = document.getElementById('saveItemBtn');
-                        saveBtn.onclick = function() {
-                            salvarNovoItem(colecao);
-                        };
-                        
-                        // Abrir modal
-                        $('#itemModal').modal('show');
+                        document.getElementById('genericFields').innerHTML = formHtml;
                     } else {
                         mostrarAlerta('Não foi possível obter a estrutura da coleção.', 'warning');
                     }
@@ -1104,10 +1929,10 @@
                 });
         }
         
-        // Função para salvar novo item
+        // Função para salvar novo item genérico
         function salvarNovoItem(colecao) {
             // Coletar dados do formulário
-            const formFields = document.getElementById('formFields').querySelectorAll('input, select, textarea');
+            const formFields = document.getElementById('genericFields').querySelectorAll('input, select, textarea');
             const dados = {};
             
             formFields.forEach(field => {
@@ -1115,24 +1940,36 @@
             });
             
             // Salvar no Firestore
-            db.collection(colecao).add(dados)
+            let operacao;
+            if (editingItemId) {
+                operacao = db.collection(colecao).doc(editingItemId).update(dados);
+            } else {
+                operacao = db.collection(colecao).add(dados);
+            }
+            
+            operacao
                 .then(() => {
-                    mostrarAlerta('Item adicionado com sucesso!', 'success');
+                    const mensagem = editingItemId ? 'Item atualizado com sucesso!' : 'Item adicionado com sucesso!';
+                    mostrarAlerta(mensagem, 'success');
                     $('#itemModal').modal('hide');
                     
                     // Recarregar dados
                     carregarDados(colecao);
                 })
                 .catch(error => {
-                    console.error('Erro ao adicionar item:', error);
-                    mostrarAlerta('Erro ao adicionar item. Tente novamente.', 'danger');
+                    console.error('Erro ao salvar item:', error);
+                    mostrarAlerta('Erro ao salvar item. Tente novamente.', 'danger');
                 });
         }
         
         // Função para editar item
         function editarItem(colecao, id) {
+            currentCollection = colecao;
+            editingItemId = id;
+            
             // Resetar formulário
-            document.getElementById('formFields').innerHTML = '';
+            document.getElementById('genericFields').innerHTML = '';
+            document.getElementById('reuniaoFields').style.display = 'none';
             document.getElementById('itemModalLabel').textContent = 'Editar Item';
             
             // Buscar dados do item
@@ -1140,32 +1977,26 @@
                 .then(doc => {
                     if (doc.exists) {
                         const dados = doc.data();
-                        const campos = Object.keys(dados);
-                        let formHtml = '';
                         
-                        campos.forEach(campo => {
-                            let valor = dados[campo];
-                            
-                            // Verificar se é um timestamp
-                            if (valor && typeof valor === 'object' && valor.seconds) {
-                                const data = new Date(valor.seconds * 1000);
-                                valor = data.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-                            }
-                            
-                            formHtml += `
-                                <div class="form-group">
-                                    <label for="${campo}">${campo}</label>
-                                    <input type="text" class="form-control" id="${campo}" name="${campo}" value="${valor || ''}">
-                                </div>
-                            `;
-                        });
-                        
-                        document.getElementById('formFields').innerHTML = formHtml;
+                        if (colecao === 'reuniao') {
+                            // Mostrar campos específicos de reunião
+                            document.getElementById('reuniaoFields').style.display = 'block';
+                            inicializarModalReuniao();
+                            preencherDadosReuniaoModal(dados);
+                        } else {
+                            // Mostrar campos genéricos
+                            document.getElementById('reuniaoFields').style.display = 'none';
+                            carregarCamposGenericosEdicao(colecao, dados);
+                        }
                         
                         // Configurar botão de salvar
                         const saveBtn = document.getElementById('saveItemBtn');
                         saveBtn.onclick = function() {
-                            atualizarItem(colecao, id);
+                            if (colecao === 'reuniao') {
+                                salvarReuniaoModal();
+                            } else {
+                                salvarNovoItem(colecao);
+                            }
                         };
                         
                         // Abrir modal
@@ -1179,30 +2010,108 @@
                     mostrarAlerta('Erro ao buscar dados do item.', 'danger');
                 });
         }
-        
-        // Função para atualizar item
-        function atualizarItem(colecao, id) {
-            // Coletar dados do formulário
-            const formFields = document.getElementById('formFields').querySelectorAll('input, select, textarea');
-            const dados = {};
+
+        // Função para preencher dados da reunião no modal
+        function preencherDadosReuniaoModal(dados) {
+            // Aguardar um pouco para garantir que os campos foram carregados
+            setTimeout(() => {
+                // Preencher campos básicos
+                document.getElementById('modalReuniaoRealizada').checked = dados.reuniaoRealizada !== false;
+                
+                if (dados.data && dados.data.seconds) {
+                    const data = new Date(dados.data.seconds * 1000);
+                    const dataFormatada = data.toLocaleDateString('pt-BR');
+                    document.getElementById('modalData').value = dataFormatada;
+                    document.getElementById('modalAno').value = data.getFullYear();
+                    const mes = String(data.getMonth() + 1).padStart(2, "0");
+                    document.getElementById('modalMesAno').value = mes + "/" + data.getFullYear();
+                }
+                
+                // Preencher igreja
+                if (dados.igreja) {
+                    document.getElementById('modalIgreja').value = dados.igreja;
+                    
+                    // Carregar supervisores e depois preencher
+                    carregarSupervisoresModal(dados.igreja);
+                    
+                    setTimeout(() => {
+                        if (dados.supervisor) {
+                            document.getElementById('modalSupervisor').value = dados.supervisor;
+                            
+                            // Carregar líderes e depois preencher
+                            carregarLideresModal(dados.supervisor);
+                            
+                            setTimeout(() => {
+                                if (dados.lider) {
+                                    document.getElementById('modalLider').value = dados.lider;
+                                    carregarCelulaModal(dados.lider);
+                                    
+                                    // Aguardar carregamento dos membros e depois marcar presenças
+                                    setTimeout(() => {
+                                        if (dados.presenca && Array.isArray(dados.presenca)) {
+                                            dados.presenca.forEach(nomePresente => {
+                                                const checkbox = document.querySelector(`#modalPresencaContainer input[value="${nomePresente}"]`);
+                                                if (checkbox) {
+                                                    checkbox.checked = true;
+                                                }
+                                            });
+                                            atualizarMembroPresentesModal();
+                                        }
+                                    }, 1000);
+                                }
+                            }, 500);
+                        }
+                    }, 500);
+                }
+                
+                // Preencher outros campos
+                if (dados.qtdVisitantes !== undefined) {
+                    document.getElementById('modalQtdVisitantes').value = dados.qtdVisitantes;
+                }
+                
+                if (dados.oferta !== undefined) {
+                    // Formatar oferta
+                    const ofertaFormatada = "R$ " + dados.oferta.toFixed(2).replace(".", ",");
+                    document.getElementById('modalOferta').value = ofertaFormatada;
+                }
+                
+                if (dados.tipoAlimento) {
+                    document.getElementById('modalTipoAlimento').value = dados.tipoAlimento;
+                    document.getElementById('modalQtdAlimento').disabled = false;
+                }
+                
+                if (dados.qtdAlimento !== undefined) {
+                    document.getElementById('modalQtdAlimento').value = dados.qtdAlimento;
+                }
+                
+                // Atualizar campos de acordo com o switch
+                toggleCamposReuniaoModal();
+            }, 100);
+        }
+
+        // Função para carregar campos genéricos para edição
+        function carregarCamposGenericosEdicao(colecao, dados) {
+            const campos = Object.keys(dados);
+            let formHtml = '';
             
-            formFields.forEach(field => {
-                dados[field.name] = field.value;
+            campos.forEach(campo => {
+                let valor = dados[campo];
+                
+                // Verificar se é um timestamp
+                if (valor && typeof valor === 'object' && valor.seconds) {
+                    const data = new Date(valor.seconds * 1000);
+                    valor = data.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                }
+                
+                formHtml += `
+                    <div class="form-group">
+                        <label for="${campo}">${campo}</label>
+                        <input type="text" class="form-control" id="${campo}" name="${campo}" value="${valor || ''}">
+                    </div>
+                `;
             });
             
-            // Atualizar no Firestore
-            db.collection(colecao).doc(id).update(dados)
-                .then(() => {
-                    mostrarAlerta('Item atualizado com sucesso!', 'success');
-                    $('#itemModal').modal('hide');
-                    
-                    // Recarregar dados
-                    carregarDados(colecao);
-                })
-                .catch(error => {
-                    console.error('Erro ao atualizar item:', error);
-                    mostrarAlerta('Erro ao atualizar item. Tente novamente.', 'danger');
-                });
+            document.getElementById('genericFields').innerHTML = formHtml;
         }
         
         // Função para confirmar exclusão
@@ -1228,6 +2137,11 @@
                     
                     // Recarregar dados
                     carregarDados(colecao);
+                    
+                    // Recarregar dashboard se necessário
+                    if (document.getElementById('dashboard').classList.contains('active')) {
+                        carregarDashboard();
+                    }
                 })
                 .catch(error => {
                     console.error('Erro ao excluir item:', error);
@@ -1271,7 +2185,7 @@
                     window.location.href = 'login.html';
                 })
                 .catch(error => {
-                    console.error('Erro ao fazer logout:', error);
+                                        console.error('Erro ao fazer logout:', error);
                     mostrarAlerta('Erro ao fazer logout. Tente novamente.', 'danger');
                 });
         }
@@ -1290,6 +2204,185 @@
                     }
                 });
             });
+        });
+    </script>
+
+    <!-- Adicionar Flatpickr para seleção de datas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
+    <!-- Adicionar campos específicos para reunião no modal -->
+    <style>
+        .campo-reuniao {
+            margin-bottom: 15px;
+        }
+        
+        .form-group-switch {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-left: 10px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #007bff;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .form-check {
+            margin-bottom: 5px;
+        }
+
+        .form-check-input {
+            margin-right: 8px;
+        }
+
+        #modalPresencaContainer {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+
+    <!-- Atualizar o modal para incluir campos de reunião -->
+    <script>
+        // Atualizar o HTML do modal para incluir campos específicos de reunião
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalBody = document.querySelector('#itemModal .modal-body');
+            modalBody.innerHTML = `
+                <form id="itemForm">
+                    <!-- Campos genéricos -->
+                    <div id="genericFields"></div>
+                    
+                    <!-- Campos específicos para reunião -->
+                    <div id="reuniaoFields" style="display: none;">
+                        <div class="form-group-switch reuniao-realizada-switch">
+                            <label class="switch-label" for="modalReuniaoRealizada">Reunião Realizada</label>
+                            <label class="switch">
+                                <input type="checkbox" id="modalReuniaoRealizada" checked />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div id="modalCamposReuniao">
+                            <div class="form-group">
+                                <label for="modalData">Data da Reunião</label>
+                                <input type="text" class="form-control" id="modalData" placeholder="Selecione a data..." required readonly />
+                            </div>
+
+                            <div class="form-group" style="display: none">
+                                <label for="modalAno">Ano</label>
+                                <input type="number" class="form-control" id="modalAno" readonly />
+                            </div>
+
+                            <div class="form-group" style="display: none">
+                                <label for="modalMesAno">Mês/Ano</label>
+                                <input type="text" class="form-control" id="modalMesAno" readonly />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modalIgreja">Igreja</label>
+                                <select class="form-control" id="modalIgreja" required></select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modalSupervisor">Supervisor</label>
+                                <select class="form-control" id="modalSupervisor" required disabled></select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modalLider">Líder</label>
+                                <select class="form-control" id="modalLider" required disabled></select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modalCelula">Célula</label>
+                                <input type="text" class="form-control" id="modalCelula" readonly />
+                            </div>
+
+                            <div class="form-group campo-reuniao">
+                                <label>Presença</label>
+                                <div id="modalPresencaContainer"></div>
+                            </div>
+
+                            <div class="form-group campo-reuniao">
+                                <label for="modalQtdVisitantes">Quantidade de Visitantes</label>
+                                <input type="number" class="form-control" id="modalQtdVisitantes" required />
+                            </div>
+
+                            <div class="form-group campo-reuniao">
+                                <label for="modalOferta">Oferta</label>
+                                <input type="text" class="form-control" id="modalOferta" required />
+                            </div>
+
+                            <div class="form-group campo-reuniao">
+                                <label>Colheita do Amor</label>
+                                <select class="form-control" id="modalTipoAlimento" required>
+                                    <option value="" disabled selected>Selecione um alimento.</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group campo-reuniao">
+                                <label>Quant Unidades</label>
+                                <input type="number" class="form-control" id="modalQtdAlimento" placeholder="Quantidade" min="0" step="1" required disabled />
+                            </div>
+                        </div>
+
+                        <div class="form-group campo-reuniao">
+                            <label for="modalQtdMembros">Quantidade de Membros</label>
+                            <input type="number" class="form-control" id="modalQtdMembros" readonly />
+                        </div>
+
+                        <div class="form-group campo-reuniao">
+                            <label for="modalMembroPresentes">Membros Presentes</label>
+                            <input type="number" class="form-control" id="modalMembroPresentes" readonly />
+                        </div>
+                    </div>
+                </form>
+            `;
         });
     </script>
 </body>
