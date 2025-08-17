@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+  <link rel="stylesheet" href="../css/botao-voltar.css">
 
   <style>
     body {
@@ -183,38 +184,13 @@
     }
 
     .back-button {
-      position: fixed;
-      top: 20px;
-      left: 20px;
       background-color: #9919cc;
-      color: #ffffff;
-      padding: 10px;
-      border-radius: 50%;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      transition: all 0.3s ease;
-      z-index: 1001;
     }
 
     .back-button:hover {
       background-color: #9919cc;
-      transform: translateY(-3px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
-
-    .back-button i {
-      margin-right: 0;
-    }
-
-    .back-button span {
-      font-weight: 600;
-    }
-
-    .form-control[readonly] {
+   .form-control[readonly] {
       background-color: #3c3c3c;
       opacity: 0.7;
       cursor: not-allowed;
@@ -234,98 +210,98 @@
   <div class="container">
     <h2 class="text-center mb-4">Dados da Reunião</h2>
     <div class="divider"></div>
-      <form id="reuniaoForm">
-        <div class="form-group-switch reuniao-realizada-switch">
-          <label class="switch-label" for="reuniaoRealizada">Reunião Realizada</label>
-          <label class="switch">
-            <input type="checkbox" id="reuniaoRealizada" checked />
-            <span class="slider round"></span>
-          </label>
+    <form id="reuniaoForm">
+      <div class="form-group-switch reuniao-realizada-switch">
+        <label class="switch-label" for="reuniaoRealizada">Reunião Realizada</label>
+        <label class="switch">
+          <input type="checkbox" id="reuniaoRealizada" checked />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div id="camposReuniao">
+        <div class="form-group">
+          <label for="data">Data da Reunião</label>
+          <input type="text" class="form-control" id="data" placeholder="Selecione a data..." required readonly />
         </div>
 
-        <div id="camposReuniao">
-          <div class="form-group">
-            <label for="data">Data da Reunião</label>
-            <input type="text" class="form-control" id="data" placeholder="Selecione a data..." required readonly />
-          </div>
+        <div class="form-group" style="display: none">
+          <label for="ano">Ano</label>
+          <input type="number" class="form-control" id="ano" readonly />
+        </div>
 
-          <div class="form-group" style="display: none">
-            <label for="ano">Ano</label>
-            <input type="number" class="form-control" id="ano" readonly />
-          </div>
+        <div class="form-group" style="display: none">
+          <label for="mesAno">Mês/Ano</label>
+          <input type="text" class="form-control" id="mesAno" readonly />
+        </div>
 
-          <div class="form-group" style="display: none">
-            <label for="mesAno">Mês/Ano</label>
-            <input type="text" class="form-control" id="mesAno" readonly />
-          </div>
+        <div class="form-group">
+          <label for="igreja">Igreja</label>
+          <select class="form-control" id="igreja" required></select>
+        </div>
 
-          <div class="form-group">
-            <label for="igreja">Igreja</label>
-            <select class="form-control" id="igreja" required></select>
-          </div>
+        <div class="form-group">
+          <label for="supervisor">Supervisor</label>
+          <select class="form-control" id="supervisor" required disabled></select>
+        </div>
 
-          <div class="form-group">
-            <label for="supervisor">Supervisor</label>
-            <select class="form-control" id="supervisor" required disabled></select>
-          </div>
+        <div class="form-group">
+          <label for="lider">Líder</label>
+          <select class="form-control" id="lider" required disabled onchange="carregarCelula(this.value)"></select>
+        </div>
 
-          <div class="form-group">
-            <label for="lider">Líder</label>
-            <select class="form-control" id="lider" required disabled onchange="carregarCelula(this.value)"></select>
-          </div>
-
-          <div class="form-group">
-            <label for="celula">Célula</label>
-            <input type="text" class="form-control" id="celula" readonly />
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label>Presença</label>
-            <div id="presencaContainer"></div>
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label for="qtdVisitantes">Quantidade de Visitantes</label>
-            <input type="number" class="form-control" id="qtdVisitantes" required />
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label for="oferta">Oferta</label>
-            <input type="text" class="form-control" id="oferta" required />
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label>Colheita do Amor</label>
-            <select class="form-control" id="tipoAlimento" required>
-              <option value="" disabled selected>
-                Selecione um alimento.
-              </option>
-            </select>
-          </div>
-
-          <div class="form-group campo-reuniao">
-            <label>Quant Unidades</label>
-            <input type="number" class="form-control" id="qtdAlimento" placeholder="Quantidade" min="0" step="1"
-              onkeypress="return event.charCode >= 48 && event.charCode <= 57" required disabled />
-          </div>
-
+        <div class="form-group">
+          <label for="celula">Célula</label>
+          <input type="text" class="form-control" id="celula" readonly />
         </div>
 
         <div class="form-group campo-reuniao">
-          <label for="qtdMembros">Quantidade de Membros</label>
-          <input type="number" class="form-control" id="qtdMembros" readonly />
+          <label>Presença</label>
+          <div id="presencaContainer"></div>
         </div>
 
         <div class="form-group campo-reuniao">
-          <label for="membroPresentes">Membros Presentes</label>
-          <input type="number" class="form-control" id="membroPresentes" readonly />
+          <label for="qtdVisitantes">Quantidade de Visitantes</label>
+          <input type="number" class="form-control" id="qtdVisitantes" required />
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">
-          Enviar
-        </button>
-      </form>
-    </div>
+        <div class="form-group campo-reuniao">
+          <label for="oferta">Oferta</label>
+          <input type="text" class="form-control" id="oferta" required />
+        </div>
+
+        <div class="form-group campo-reuniao">
+          <label>Colheita do Amor</label>
+          <select class="form-control" id="tipoAlimento" required>
+            <option value="" disabled selected>
+              Selecione um alimento.
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group campo-reuniao">
+          <label>Quant Unidades</label>
+          <input type="number" class="form-control" id="qtdAlimento" placeholder="Quantidade" min="0" step="1"
+            onkeypress="return event.charCode >= 48 && event.charCode <= 57" required disabled />
+        </div>
+
+      </div>
+
+      <div class="form-group campo-reuniao">
+        <label for="qtdMembros">Quantidade de Membros</label>
+        <input type="number" class="form-control" id="qtdMembros" readonly />
+      </div>
+
+      <div class="form-group campo-reuniao">
+        <label for="membroPresentes">Membros Presentes</label>
+        <input type="number" class="form-control" id="membroPresentes" readonly />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="enviarBtn">
+        Enviar
+      </button>
+    </form>
+  </div>
   </div>
 
   <!-- Importar Firebase -->

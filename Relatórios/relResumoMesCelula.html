@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +9,15 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="../css/botao-voltar.css">
+
     <style>
         body {
             background-color: #f8f9fa;
             font-family: 'Montserrat', sans-serif;
             color: #333;
         }
+
         .container {
             max-width: 900px;
             margin-top: 50px;
@@ -23,6 +27,7 @@
             background-color: #fff;
             font-size: 14px;
         }
+
         .header {
             background-color: #000;
             padding: 20px;
@@ -30,99 +35,97 @@
             margin-bottom: 30px;
             border-radius: 10px 10px 0 0;
         }
+
         .header img {
             max-width: 200px;
         }
+
         .divider {
             width: 75%;
             height: 2px;
             background-color: #000;
             margin: 30px auto;
         }
+
         .form-row {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
             font-size: 14px;
         }
+
         .form-row label {
             width: 100px;
             margin-right: 10px;
             font-weight: bold;
             font-size: 14px;
         }
+
         .form-row select {
             flex: 1;
             font-size: 14px;
         }
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background-color: #3498db;;
-            color: #ffffff;
-            padding: 10px;
-            border-radius: 30px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-        .back-button:hover {
-            background-color: #9b59b6;;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
+
         .table {
             margin-top: 20px;
         }
+
         .table th:not(:first-child),
         .table td:not(:first-child) {
             text-align: center;
         }
+
         .header-cell {
-            width: 150px; /* Ajuste para primeira coluna */
+            width: 150px;
+            /* Ajuste para primeira coluna */
             background-color: brown !important;
             color: white !important;
             position: sticky;
             left: 0;
             z-index: 1;
         }
+
         .table-cell {
             vertical-align: middle !important;
             text-align: center !important;
-            min-width: 120px; /* Largura mínima para células de dados */
+            min-width: 120px;
+            /* Largura mínima para células de dados */
         }
+
         #reunioesTable {
             font-size: 14px;
-            display: none; /* Esconde a tabela inicialmente */
-            overflow-x: auto; /* Permite rolagem horizontal */
+            display: none;
+            /* Esconde a tabela inicialmente */
+            overflow-x: auto;
+            /* Permite rolagem horizontal */
         }
+
         #mes {
             width: 1300% !important;
         }
+
         .btn-loading {
             cursor: not-allowed;
             opacity: 0.7;
         }
+
         .no-results {
             text-align: center;
             padding: 20px;
             color: #666;
             font-style: italic;
         }
+
         .table-info {
             background-color: #e3f2fd !important;
         }
+
         .table-dark {
             background-color: brown !important;
             color: white !important;
             border-color: brown !important;
         }
+
         .table-dark td {
             background-color: brown !important;
             color: white !important;
@@ -130,6 +133,7 @@
         }
     </style>
 </head>
+
 <body>
     <a href="../frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
@@ -223,17 +227,17 @@
         async function carregarOpcoes(selectId, collection, field, whereClause = null, selectedValue = null) {
             const select = document.getElementById(selectId);
             select.innerHTML = `<option value="">Selecione uma opção</option>`;
-            
+
             let query = db.collection(collection);
             if (whereClause) {
                 query = query.where(whereClause.field, whereClause.operator, whereClause.value);
             }
-            
+
             const snapshot = await query.get();
             const options = new Set();
-            
+
             snapshot.forEach(doc => options.add(doc.data()[field]));
-            
+
             options.forEach(option => {
                 const optionElement = createElement('option', { value: option }, option);
                 if (selectedValue && option === selectedValue) {
@@ -300,7 +304,7 @@
                 .get()
                 .then(snapshot => {
                     const coordenadores = new Set();
-                    
+
                     snapshot.forEach(doc => {
                         const coordenador = doc.data().coordenador;
                         if (coordenador) {
@@ -324,13 +328,13 @@
         function carregarSupervisores(coordenador) {
             console.log('=== CARREGANDO SUPERVISORES ===');
             console.log('Coordenador selecionado:', coordenador);
-            
+
             const supervisorSelect = document.getElementById('supervisor');
             const liderSelect = document.getElementById('lider');
-            
+
             supervisorSelect.innerHTML = '<option value="">Selecione um supervisor</option>';
             liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
-            
+
             if (!coordenador) return;
 
             db.collection('estruturacelula')
@@ -359,10 +363,10 @@
             console.log('=== CARREGANDO LÍDERES ===');
             console.log('Coordenador:', coordenador);
             console.log('Supervisor:', supervisor);
-            
+
             const liderSelect = document.getElementById('lider');
             liderSelect.innerHTML = '<option value="">Selecione um líder</option>';
-            
+
             if (!supervisor) return;
 
             db.collection('estruturacelula')
@@ -389,14 +393,14 @@
         }
 
         // Modificar window.onload para incluir a verificação inicial
-        window.onload = function() {
+        window.onload = function () {
             console.log('=== INÍCIO DO CARREGAMENTO DA PÁGINA ===');
             const userInfo = recuperarInformacoesUsuario();
-            
+
             // Verifica se o usuário está autenticado e tem função definida
             if (!userInfo.funcao) {
                 alert('Usuário sem permissões definidas. Por favor, faça login novamente.');
-                window.location.href = 'login.html';
+                window.location.href = '../formlogin.html';
                 return;
             }
 
@@ -517,7 +521,7 @@
                 // Gerar linhas da tabela transposta
                 Object.entries(dados).forEach(([titulo, valores]) => {
                     const row = document.createElement('tr');
-    
+
                     // Primeira coluna com o título
                     const headerCell = document.createElement('th');
                     headerCell.textContent = titulo;
@@ -550,12 +554,12 @@
                 btnPesquisar.classList.remove('btn-loading');
             }
         }
-        
+
         // Adicionar apenas o event listener do botão:
         document.getElementById('btnPesquisar').addEventListener('click', carregarReunioes);
 
         // Modificar os event listeners dos dropdowns para apenas atualizar as opções dependentes
-        document.getElementById('coordenador').addEventListener('change', function() {
+        document.getElementById('coordenador').addEventListener('change', function () {
             document.getElementById('reunioesTable').style.display = 'none';
             const coordenador = this.value;
             alterarCorCoordenador(coordenador);
@@ -564,7 +568,7 @@
             tableBody.innerHTML = '';
         });
 
-        document.getElementById('supervisor').addEventListener('change', function() {
+        document.getElementById('supervisor').addEventListener('change', function () {
             document.getElementById('reunioesTable').style.display = 'none';
             const coordenador = document.getElementById('coordenador').value;
             const supervisor = this.value;
@@ -573,19 +577,19 @@
             tableBody.innerHTML = '';
         });
 
-        document.getElementById('lider').addEventListener('change', function() {
+        document.getElementById('lider').addEventListener('change', function () {
             document.getElementById('reunioesTable').style.display = 'none';
             const tableBody = document.querySelector('#reunioesTable tbody');
             tableBody.innerHTML = '';
         });
 
-        document.getElementById('mes').addEventListener('change', function() {
+        document.getElementById('mes').addEventListener('change', function () {
             document.getElementById('reunioesTable').style.display = 'none';
             const tableBody = document.querySelector('#reunioesTable tbody');
             tableBody.innerHTML = '';
         });
 
-        document.getElementById('ano').addEventListener('change', function() {
+        document.getElementById('ano').addEventListener('change', function () {
             document.getElementById('reunioesTable').style.display = 'none';
             const tableBody = document.querySelector('#reunioesTable tbody');
             tableBody.innerHTML = '';
@@ -593,4 +597,5 @@
 
     </script>
 </body>
+
 </html>

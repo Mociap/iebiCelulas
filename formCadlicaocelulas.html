@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <link rel="stylesheet" href="../css/botao-voltar.css">
+
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -19,6 +22,7 @@
             margin: 0;
             padding: 0;
         }
+
         .container {
             max-width: 500px;
             margin: 20px auto;
@@ -27,6 +31,7 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
+
         .header {
             background-color: #2c2c2c;
             padding: 20px 0;
@@ -34,68 +39,64 @@
             position: relative;
             z-index: 1000;
         }
+
         .header img {
             max-width: 180px;
         }
+
         .divider {
             width: 75%;
             height: 2px;
             background-color: #9919cc;
             margin: 30px auto;
         }
+
         .btn-primary {
             background-color: #9919cc;
             border-color: #9919cc;
             transition: background-color 0.3s ease;
         }
+
         .btn-primary:hover {
             background-color: #9919cc;
             border-color: #9919cc;
         }
+
         .form-control {
             background-color: #3c3c3c;
             border: none;
             color: #ffffff;
         }
+
         .form-control:focus {
             background-color: #4c4c4c;
             color: #ffffff;
             box-shadow: none;
         }
+
         label {
             color: #cfcccc;
             font-weight: bold;
         }
+
         .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
             background-color: #9919cc;
-            color: #ffffff;
-            padding: 10px;
-            border-radius: 50%;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            transition: all 0.3s ease;
-            z-index: 1001;
         }
+
         .back-button:hover {
             background-color: #9919cc;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
+
         .form-control[readonly] {
             background-color: #3c3c3c;
             opacity: 0.7;
             /*cursor: not-allowed;*/
         }
+
         .custom-file-label::after {
             content: "Procurar";
         }
+
         input[type="file"] {
             background-color: #3c3c3c;
             border: none;
@@ -123,6 +124,7 @@
         }
     </style>
 </head>
+
 <body>
     <a href="index.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
@@ -183,7 +185,7 @@
             placeholder: "Selecione a data...",
             allowInput: false,
             maxDate: "today",
-            onChange: function(selectedDates, dateStr, instance) {
+            onChange: function (selectedDates, dateStr, instance) {
                 var dataEscolhida = selectedDates[0];
                 if (dataEscolhida > new Date()) {
                     alert("Data inválida. Por favor, selecione uma data até o dia atual.");
@@ -193,7 +195,7 @@
         });
 
         // Adicionar evento de envio do formulário
-        document.getElementById('licaoForm').addEventListener('submit', function(e) {
+        document.getElementById('licaoForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             var data = document.getElementById('data').value;
@@ -213,35 +215,36 @@
 
             if (pdfFile) {
                 var storageRef = firebase.storage().ref('pdfs/' + pdfFile.name);
-                storageRef.put(pdfFile).then(function(snapshot) {
+                storageRef.put(pdfFile).then(function (snapshot) {
                     return snapshot.ref.getDownloadURL();
-                }).then(function(downloadURL) {
+                }).then(function (downloadURL) {
                     dadosLicao.pdfUrl = downloadURL;
                     return bancoDeDados.collection('licoes').add(dadosLicao);
-                }).then(function() {
+                }).then(function () {
                     alert('Lição de célula e PDF enviados com sucesso!');
                     document.getElementById('licaoForm').reset();
-                }).catch(function(error) {
+                }).catch(function (error) {
                     alert('Erro ao enviar lição: ' + error.message);
                 });
             } else {
                 bancoDeDados.collection('licoes').add(dadosLicao)
-                .then(function() {
-                    alert('Lição de célula enviada com sucesso!');
-                    document.getElementById('licaoForm').reset();
-                })
-                .catch(function(error) {
-                    alert('Erro ao enviar lição: ' + error.message);
-                });
+                    .then(function () {
+                        alert('Lição de célula enviada com sucesso!');
+                        document.getElementById('licaoForm').reset();
+                    })
+                    .catch(function (error) {
+                        alert('Erro ao enviar lição: ' + error.message);
+                    });
             }
         });
 
         // Atualizar o nome do arquivo selecionado
-        document.getElementById('pdfFile').addEventListener('change', function(e) {
+        document.getElementById('pdfFile').addEventListener('change', function (e) {
             var fileName = e.target.files[0].name;
             var nextSibling = e.target.nextElementSibling;
             nextSibling.innerText = fileName;
         });
     </script>
 </body>
+
 </html>

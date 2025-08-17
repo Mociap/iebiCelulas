@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+  <link rel="stylesheet" href="../css/botao-voltar.css">
+
 
   <style>
     body {
@@ -183,38 +185,13 @@
     }
 
     .back-button {
-      position: fixed;
-      top: 20px;
-      left: 20px;
       background-color: #9919cc;
-      color: #ffffff;
-      padding: 10px;
-      border-radius: 50%;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      transition: all 0.3s ease;
-      z-index: 1001;
     }
 
     .back-button:hover {
       background-color: #9919cc;
-      transform: translateY(-3px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
-
-    .back-button i {
-      margin-right: 0;
-    }
-
-    .back-button span {
-      font-weight: 600;
-    }
-
-    .form-control[readonly] {
+ .form-control[readonly] {
       background-color: #3c3c3c;
       opacity: 0.7;
       cursor: not-allowed;
@@ -261,17 +238,17 @@
         <div class="form-group">
           <label for="igreja">Igreja</label>
           <input type="text" class="form-control" id="igreja" readonly>
-      </div>
-      
-      <div class="form-group">
+        </div>
+
+        <div class="form-group">
           <label for="supervisor">Supervisor</label>
           <input type="text" class="form-control" id="supervisor" readonly>
-      </div>
-      
-      <div class="form-group">
+        </div>
+
+        <div class="form-group">
           <label for="lider">Líder</label>
           <input type="text" class="form-control" id="lider" readonly>
-      </div>
+        </div>
 
         <div class="form-group">
           <label for="celula">Célula</label>
@@ -305,7 +282,7 @@
         <div class="form-group campo-reuniao">
           <label>Quant Unidades</label>
           <input type="number" class="form-control" id="qtdAlimento" placeholder="Quantidade" min="1" step="1"
-            onkeypress="return event.charCode >= 48 && event.charCode <= 57" required  />
+            onkeypress="return event.charCode >= 48 && event.charCode <= 57" required />
         </div>
 
       </div>
@@ -322,16 +299,16 @@
 
       <div class="row">
         <div class="col-md-6">
-            <button type="button" class="btn btn-primary btn-block" id="btnAtualizar">
-                <i class="fas fa-sync-alt mr-2"></i>Atualizar
-            </button>
+          <button type="button" class="btn btn-primary btn-block" id="btnAtualizar">
+            <i class="fas fa-sync-alt mr-2"></i>Atualizar
+          </button>
         </div>
         <div class="col-md-6">
-            <button type="button" class="btn btn-danger btn-block" id="btnExcluir">
-                <i class="fas fa-trash-alt mr-2"></i>Excluir
-            </button>
+          <button type="button" class="btn btn-danger btn-block" id="btnExcluir">
+            <i class="fas fa-trash-alt mr-2"></i>Excluir
+          </button>
         </div>
-    </div>
+      </div>
     </form>
   </div>
   </div>
@@ -351,7 +328,7 @@
       messagingSenderId: "1068164821081",
       appId: "1:1068164821081:web:2d3e0030d5311d94f30148",
     };
-    
+
     firebase.initializeApp(configuracaoFirebase);
     var bancoDeDados = firebase.firestore();
 
@@ -364,11 +341,11 @@
       bancoDeDados.collection('reuniao').doc(reuniaoId).get()
         .then(doc => {
           if (doc.exists) {
-            const dados = doc.data();  
+            const dados = doc.data();
 
             // Preenchimento dos campos
             document.getElementById('data').value = dados.data.toDate().toLocaleDateString('pt-BR');
-            document.getElementById('igreja').value= dados.igreja;
+            document.getElementById('igreja').value = dados.igreja;
             document.getElementById('supervisor').value = dados.supervisor;
             document.getElementById('lider').value = dados.lider;
             document.getElementById('celula').value = dados.celula;
@@ -434,7 +411,7 @@
       e.target.value = "R$ " + value;
     });
 
-   
+
     // Função para carregar a lista de membros com base no líder selecionado
     function carregarMembros(lider) {
       presencaContainer.innerHTML = ""; // Limpar o container primeiro
@@ -604,52 +581,52 @@
     // Chamar a função inicialmente para garantir o estado correto
     toggleCamposReuniao();
 
-document.getElementById('btnAtualizar').addEventListener('click', function() {
-    const dataInput = document.getElementById('data').value;
-    const [dia, mes, ano] = dataInput.split("/").map(Number);
+    document.getElementById('btnAtualizar').addEventListener('click', function () {
+      const dataInput = document.getElementById('data').value;
+      const [dia, mes, ano] = dataInput.split("/").map(Number);
 
-    const dadosAtualizados = {
+      const dadosAtualizados = {
         data: firebase.firestore.Timestamp.fromDate(new Date(ano, mes - 1, dia, 21, 0, 0))
-    };
+      };
 
-    if (document.getElementById('reuniaoRealizada').checked) {
-      //  dadosAtualizados.presenca = Array.from(
-      //      document.querySelectorAll('input[type="checkbox"]:checked')
-      //  )
-      //      .filter(checkbox => checkbox.id !== 'reuniaoRealizada')
-      //      .map(checkbox => checkbox.value);
+      if (document.getElementById('reuniaoRealizada').checked) {
+        //  dadosAtualizados.presenca = Array.from(
+        //      document.querySelectorAll('input[type="checkbox"]:checked')
+        //  )
+        //      .filter(checkbox => checkbox.id !== 'reuniaoRealizada')
+        //      .map(checkbox => checkbox.value);
         dadosAtualizados.qtdVisitantes = parseInt(document.getElementById('qtdVisitantes').value);
         dadosAtualizados.oferta = parseFloat(document.getElementById('oferta').value.replace(/[^\d,]/g, '').replace(',', '.'));
         dadosAtualizados.tipoAlimento = document.getElementById('tipoAlimento').value;
         dadosAtualizados.qtdAlimento = parseInt(document.getElementById('qtdAlimento').value);
         //dadosAtualizados.qtdMembros = parseInt(document.getElementById('qtdMembros').value);
         //dadosAtualizados.membroPresentes = parseInt(document.getElementById('membroPresentes').value);
-    }
+      }
 
-    bancoDeDados.collection('reuniao').doc(reuniaoId).update(dadosAtualizados)
+      bancoDeDados.collection('reuniao').doc(reuniaoId).update(dadosAtualizados)
         .then(() => {
-            alert('Reunião atualizada com sucesso!');
-            window.location.href = './Relatórios/relDadosResuniao.html';
+          alert('Reunião atualizada com sucesso!');
+          window.location.href = './Relatórios/relDadosResuniao.html';
         })
         .catch(error => {
-            alert('Erro ao atualizar reunião: ' + error.message);
+          alert('Erro ao atualizar reunião: ' + error.message);
         });
-});
+    });
 
-document.getElementById('btnExcluir').addEventListener('click', function() {
-    if (confirm('Tem certeza que deseja excluir esta reunião?')) {
+    document.getElementById('btnExcluir').addEventListener('click', function () {
+      if (confirm('Tem certeza que deseja excluir esta reunião?')) {
         bancoDeDados.collection('reuniao').doc(reuniaoId).delete()
-            .then(() => {
-                alert('Reunião excluída com sucesso!');
-                window.location.href = './Relatórios/relDadosResuniao.html';
-            })
-            .catch(error => {
-                alert('Erro ao excluir reunião: ' + error.message);
-            });
-    }
-});
+          .then(() => {
+            alert('Reunião excluída com sucesso!');
+            window.location.href = './Relatórios/relDadosResuniao.html';
+          })
+          .catch(error => {
+            alert('Erro ao excluir reunião: ' + error.message);
+          });
+      }
+    });
 
-  
+
   </script>
 </body>
 

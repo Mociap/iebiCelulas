@@ -1,714 +1,626 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Formulário de Cadastro de Membros</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
 
-    
-    <style>
-      body {
-        font-family: "Nunito", sans-serif;
-        background-color: #1a1a1a;
-        color: #ffffff;
-        margin: 0;
-        padding: 0px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formulário de Cadastro de Membros</title>
+  <link rel="shortcut icon" href="./3.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="../css/botao-voltar.css">
 
-      .container {
-        max-width: 500px;
-        margin: 20px auto;
-        background-color: #2c2c2c;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-      }
 
-      .header {
-        background-color: #2c2c2c;
-        padding: 20px 0;
-        text-align: center;
-        position: relative;
-        z-index: 1000;
-      }
+  <style>
+    body {
+      font-family: "Nunito", sans-serif;
+      background-color: #1a1a1a;
+      color: #ffffff;
+      margin: 0;
+      padding: 0px;
+    }
 
-      .header img {
-        max-width: 180px;
-      }
+    .container {
+      max-width: 500px;
+      margin: 20px auto;
+      background-color: #2c2c2c;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
 
-      .divider {
-        width: 75%;
-        height: 2px;
-        background-color: #3498db;
-        margin: 30px auto;
-      }
+    .header {
+      background-color: #2c2c2c;
+      padding: 20px 0;
+      text-align: center;
+      position: relative;
+      z-index: 1000;
+    }
 
-      .btn-primary {
-        background-color: #3498db;
-        border-color: #3498db;
-        transition: background-color 0.3s ease;
-      }
+    .header img {
+      max-width: 180px;
+    }
 
-      .btn-primary:hover {
-        background-color: #2980b9;
-        border-color: #2980b9;
-      }
+    .divider {
+      width: 75%;
+      height: 2px;
+      background-color: #3498db;
+      margin: 30px auto;
+    }
 
-      .form-control {
-        background-color: #3c3c3c;
-        border: none;
-        color: #ffffff;
-      }
+    .btn-primary {
+      background-color: #3498db;
+      border-color: #3498db;
+      transition: background-color 0.3s ease;
+    }
 
-      .form-control:focus {
-        background-color: #4c4c4c;
-        color: #ffffff;
-        box-shadow: none;
-      }
+    .btn-primary:hover {
+      background-color: #2980b9;
+      border-color: #2980b9;
+    }
 
-      label {
-        color: #cfcccc;
-        /* Cor azul clara, consistente com a paleta existente */
-        font-weight: bold;
-      }
+    .form-control {
+      background-color: #3c3c3c;
+      border: none;
+      color: #ffffff;
+    }
 
-      .choice-chip {
-        display: inline-flex;
-        align-items: center;
-        padding: 8px 12px;
-        border-radius: 16px;
-        background-color: #3c3c3c;
-        margin-right: 8px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
+    .form-control:focus {
+      background-color: #4c4c4c;
+      color: #ffffff;
+      box-shadow: none;
+    }
 
-      .choice-chip.selected {
-        background-color: #3498db;
-        color: #fff;
-      }
+    label {
+      color: #cfcccc;
+      /* Cor azul clara, consistente com a paleta existente */
+      font-weight: bold;
+    }
 
-      .choice-chip i {
-        margin-right: 8px;
-      }
+    .choice-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 16px;
+      background-color: #3c3c3c;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
 
-      .back-button {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        background-color: #3498db;
-        color: #ffffff;
-        padding: 10px;
-        border-radius: 30px;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        transition: all 0.3s ease;
-        z-index: 1001;
-      }
+    .choice-chip.selected {
+      background-color: #3498db;
+      color: #fff;
+    }
 
-      .back-button:hover {
-        background-color: #2980b9;
-        transform: translateY(-3px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
+    .choice-chip i {
+      margin-right: 8px;
+    }
 
-      .back-button i {
-        margin-right: 0px;
-      }
-        .form-control:disabled {
-          background-color: #3c3c3c;
-          color: #ffffff;
-          border: none;
-          cursor: not-allowed;
-        }
-      .form-control:disabled::placeholder {
-        color: #666666;
-      }
+    .form-control:disabled {
+      background-color: #3c3c3c;
+      color: #ffffff;
+      border: none;
+      cursor: not-allowed;
+    }
 
-      .form-control:enabled {
-        background-color: #3c3c3c;
-        color: #ffffff;
-        border: none;
-      }
+    .form-control:disabled::placeholder {
+      color: #666666;
+    }
 
-      .form-control[readonly] {
-        cursor: not-allowed;
-        background-color: #3c3c3c;
-        color: #ffffff;
-      }
-      .form-control:enabled:focus {
-        background-color: #4c4c4c;
-        color: #ffffff;
-        box-shadow: none;
-      }
-    </style>
-    
-    
-  </head>
+    .form-control:enabled {
+      background-color: #3c3c3c;
+      color: #ffffff;
+      border: none;
+    }
 
-  <body>
-    <a href="index.html" class="back-button">
-      <i class="fas fa-arrow-left"></i>
-    </a>
-    <div class="header">
-      <img
-        src="./LogoBranco.png"
-        alt="Logo da Igreja Evangélica Batista Intermares"
-      />
-    </div>
-    <div class="container">
-      <h2 class="text-center mb-4 font-weight-bold">Cadastro de Membros</h2>
-      <div class="divider"></div>
-      <form id="memberForm">
-        <div class="form-group">
-          <label for="nome">Nome Conforme RG</label>
-          <input
-            type="text"
-            class="form-control"
-            id="nome"
-            required
-            onkeyup="this.value = this.value.toUpperCase();"
-          />
-          <small id="nomeError" style="color: rgb(255, 159, 159); display: none"
-            >Nome já cadastrado</small
-          >
-        </div>
-        <div class="form-group">
-          <label for="dtnasc">Data de Nascimento</label>
-          <input
-            type="date"
-            class="form-control"
-            id="dtnasc"
-            required
-            onchange="verificarDataNascimento()"
-            placeholder="DD/MM/AAAA"
-          />
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" class="form-control" id="email" />
-          <small
-            id="emailError"
-            style="color: rgb(255, 159, 159); display: none"
-            >Email já cadastrado</small
-          >
-        </div>
-        <div class="form-group">
-          <label for="cep">CEP</label>
-          <input
-            type="text"
-            class="form-control"
-            id="cep"
-            maxlength="9"
-            placeholder="99999-999"
-            onkeyup="this.value = this.value.toUpperCase();"
-          />
-          <small id="cepError" style="color: rgb(255, 159, 159); display: none"
-            >CEP inválido</small
-          >
-        </div>
-        <div class="form-group">
-          <label for="bairro">Bairro</label>
-          <input
-            type="text"
-            class="form-control"
-            id="bairro"
-            required
-            readonly
-            onkeyup="this.value = this.value.toUpperCase();"
-          />
-        </div>
-        <div class="form-group">
-          <label for="cidade">Cidade</label>
-          <input
-            type="text"
-            class="form-control"
-            id="cidade"
-            required
-            readonly
-            onkeyup="this.value = this.value.toUpperCase();"
-          />
-        </div>
-        <div class="form-group">
-          <label for="uf">UF</label>
-          <input
-            type="text"
-            class="form-control"
-            id="uf"
-            required
-            maxlength="2"
-            readonly
-            onkeyup="this.value = this.value.toUpperCase();"
-          />
-        </div>
-        <div class="form-group">
-          <label>Sexo</label>
-          <div class="choice-chips">
-            <div class="choice-chip" data-value="MASCULINO">
-              <i class="fas fa-male"></i>
-              Masculino
-            </div>
-            <div class="choice-chip" data-value="FEMININO">
-              <i class="fas fa-female"></i>
-              Feminino
-            </div>
+    .form-control[readonly] {
+      cursor: not-allowed;
+      background-color: #3c3c3c;
+      color: #ffffff;
+    }
+
+    .form-control:enabled:focus {
+      background-color: #4c4c4c;
+      color: #ffffff;
+      box-shadow: none;
+    }
+  </style>
+
+</head>
+
+<body>
+  <a href="index.html" class="back-button">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  <div class="header">
+    <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares" />
+  </div>
+  <div class="container">
+    <h2 class="text-center mb-4 font-weight-bold">Cadastro de Membros</h2>
+    <div class="divider"></div>
+    <form id="memberForm">
+      <div class="form-group">
+        <label for="nome">Nome Conforme RG</label>
+        <input type="text" class="form-control" id="nome" required onkeyup="this.value = this.value.toUpperCase();" />
+        <small id="nomeError" style="color: rgb(255, 159, 159); display: none">Nome já cadastrado</small>
+      </div>
+      <div class="form-group">
+        <label for="dtnasc">Data de Nascimento</label>
+        <input type="date" class="form-control" id="dtnasc" required onchange="verificarDataNascimento()"
+          placeholder="DD/MM/AAAA" />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" class="form-control" id="email" />
+        <small id="emailError" style="color: rgb(255, 159, 159); display: none">Email já cadastrado</small>
+      </div>
+      <div class="form-group">
+        <label for="cep">CEP</label>
+        <input type="text" class="form-control" id="cep" maxlength="9" placeholder="99999-999"
+          onkeyup="this.value = this.value.toUpperCase();" />
+        <small id="cepError" style="color: rgb(255, 159, 159); display: none">CEP inválido</small>
+      </div>
+      <div class="form-group">
+        <label for="bairro">Bairro</label>
+        <input type="text" class="form-control" id="bairro" required readonly
+          onkeyup="this.value = this.value.toUpperCase();" />
+      </div>
+      <div class="form-group">
+        <label for="cidade">Cidade</label>
+        <input type="text" class="form-control" id="cidade" required readonly
+          onkeyup="this.value = this.value.toUpperCase();" />
+      </div>
+      <div class="form-group">
+        <label for="uf">UF</label>
+        <input type="text" class="form-control" id="uf" required maxlength="2" readonly
+          onkeyup="this.value = this.value.toUpperCase();" />
+      </div>
+      <div class="form-group">
+        <label>Sexo</label>
+        <div class="choice-chips">
+          <div class="choice-chip" data-value="MASCULINO">
+            <i class="fas fa-male"></i>
+            Masculino
           </div>
-          <input type="hidden" id="sexo" name="sexo" required />
-        </div>
-        <div class="form-group">
-          <label>Estado Civil</label>
-          <div class="choice-chips">
-            <div class="choice-chip" data-value="SOLTEIRO">
-              <i class="fas fa-user"></i>
-              Solteiro
-            </div>
-            <div class="choice-chip" data-value="CASADO">
-              <i class="fas fa-heart"></i>
-              Casado
-            </div>
+          <div class="choice-chip" data-value="FEMININO">
+            <i class="fas fa-female"></i>
+            Feminino
           </div>
-          <input type="hidden" id="estadoCivil" name="estadoCivil" required />
         </div>
-        <div class="form-group">
-          <label for="celular">Número do Celular</label>
-          <input type="text" class="form-control" id="celular" required />
-        </div>
-        <div class="form-group">
-          <label for="igreja">Igreja em que Congrega</label>
-          <select class="form-control" id="igreja" required></select>
-        </div>
-        <div class="form-group">
-          <label for="lidercelula">Nome do Líder</label>
-          <select
-            class="form-control"
-            id="lidercelula"
-            required
-            onkeyup="this.value = this.value.toUpperCase();"
-          ></select>
-        </div>
-        <div class="form-group">
-            <label for="nomedacelula">Nome da Célula</label>
-            <input type="text" class="form-control" id="nomedacelula" required readonly onkeyup="this.value = this.value.toUpperCase();" />
-        </div>        
-        <div class="form-group">
-          <label>Arrolamento na Igreja</label>
-          <div class="choice-chips">
-            <div class="choice-chip" data-value="SOU MEMBRO">
-              <i class="fas fa-check-circle"></i>
-              Sou Membro
-            </div>
-            <div class="choice-chip" data-value="NÃO SOU MEMBRO">
-              <i class="fas fa-times-circle"></i>
-              Não Sou Membro
-            </div>
+        <input type="hidden" id="sexo" name="sexo" required />
+      </div>
+      <div class="form-group">
+        <label>Estado Civil</label>
+        <div class="choice-chips">
+          <div class="choice-chip" data-value="SOLTEIRO">
+            <i class="fas fa-user"></i>
+            Solteiro
           </div>
-          <input type="hidden" id="arrolamento" name="arrolamento" required />
+          <div class="choice-chip" data-value="CASADO">
+            <i class="fas fa-heart"></i>
+            Casado
+          </div>
         </div>
-        <button
-          type="submit"
-          class="btn btn-primary btn-block"
-          id="cadastrarBtn"
-        >
-          Cadastrar
-        </button>
-      </form>
-    </div>
+        <input type="hidden" id="estadoCivil" name="estadoCivil" required />
+      </div>
+      <div class="form-group">
+        <label for="celular">Número do Celular</label>
+        <input type="text" class="form-control" id="celular" required />
+      </div>
+      <div class="form-group">
+        <label for="igreja">Igreja em que Congrega</label>
+        <select class="form-control" id="igreja" required></select>
+      </div>
+      <div class="form-group">
+        <label for="lidercelula">Nome do Líder</label>
+        <select class="form-control" id="lidercelula" required
+          onkeyup="this.value = this.value.toUpperCase();"></select>
+      </div>
+      <div class="form-group">
+        <label for="nomedacelula">Nome da Célula</label>
+        <input type="text" class="form-control" id="nomedacelula" required readonly
+          onkeyup="this.value = this.value.toUpperCase();" />
+      </div>
+      <div class="form-group">
+        <label>Arrolamento na Igreja</label>
+        <div class="choice-chips">
+          <div class="choice-chip" data-value="SOU MEMBRO">
+            <i class="fas fa-check-circle"></i>
+            Sou Membro
+          </div>
+          <div class="choice-chip" data-value="NÃO SOU MEMBRO">
+            <i class="fas fa-times-circle"></i>
+            Não Sou Membro
+          </div>
+        </div>
+        <input type="hidden" id="arrolamento" name="arrolamento" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="cadastrarBtn">
+        Cadastrar
+      </button>
+    </form>
+  </div>
 
-    <!-- Importar Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Importar Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    <!-- Importar Vanilla Masker -->
-    <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
+  <!-- Importar Vanilla Masker -->
+  <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
 
-    <script>
-      // Configuração do Firebase
-      var configuracaoFirebase = {
-        apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
-        authDomain: "dbiebi.firebaseapp.com",
-        databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
-        projectId: "dbiebi",
-        storageBucket: "dbiebi.appspot.com",
-        messagingSenderId: "1068164821081",
-        appId: "1:1068164821081:web:2d3e0030d5311d94f30148",
-      };
-      firebase.initializeApp(configuracaoFirebase);
-      var bancoDeDados = firebase.firestore();
-        // Referência ao formulário
-        var formulario = document.getElementById("memberForm");
-        var inputNomedaCelula = document.getElementById("nomedacelula");
-        var inputLiderCelula = document.getElementById("lidercelula");
-        var inputCelular = document.getElementById("celular");
-        var selectIgrejas = document.getElementById("igreja");
-        var inputNome = document.getElementById("nome");
-        var email = document.getElementById("email").value;
-        var nomeError = document.getElementById("nomeError");
-        var cadastrarBtn = document.getElementById("cadastrarBtn");
-        var inputCep = document.getElementById("cep");
-        var inputBairro = document.getElementById("bairro");
-        var inputCidade = document.getElementById("cidade");
-        var inputUf = document.getElementById("uf");
-        var cepError = document.getElementById("cepError");
+  <script>
+    // Configuração do Firebase
+    var configuracaoFirebase = {
+      apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+      authDomain: "dbiebi.firebaseapp.com",
+      databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+      projectId: "dbiebi",
+      storageBucket: "dbiebi.appspot.com",
+      messagingSenderId: "1068164821081",
+      appId: "1:1068164821081:web:2d3e0030d5311d94f30148",
+    };
+    firebase.initializeApp(configuracaoFirebase);
+    var bancoDeDados = firebase.firestore();
+    // Referência ao formulário
+    var formulario = document.getElementById("memberForm");
+    var inputNomedaCelula = document.getElementById("nomedacelula");
+    var inputLiderCelula = document.getElementById("lidercelula");
+    var inputCelular = document.getElementById("celular");
+    var selectIgrejas = document.getElementById("igreja");
+    var inputNome = document.getElementById("nome");
+    var email = document.getElementById("email").value;
+    var nomeError = document.getElementById("nomeError");
+    var cadastrarBtn = document.getElementById("cadastrarBtn");
+    var inputCep = document.getElementById("cep");
+    var inputBairro = document.getElementById("bairro");
+    var inputCidade = document.getElementById("cidade");
+    var inputUf = document.getElementById("uf");
+    var cepError = document.getElementById("cepError");
 
-        // Máscara para o campo "Número do Celular"
-        VMasker(inputCelular).maskPattern("(99) 99999-9999");
+    // Máscara para o campo "Número do Celular"
+    VMasker(inputCelular).maskPattern("(99) 99999-9999");
 
-        // Máscara para o campo CEP
-        VMasker(inputCep).maskPattern("99999-999");
+    // Máscara para o campo CEP
+    VMasker(inputCep).maskPattern("99999-999");
 
-        // Add this after the existing VMasker declarations
-        //VMasker(document.getElementById("dtnasc")).maskPattern("99/99/9999");
+    // Add this after the existing VMasker declarations
+    //VMasker(document.getElementById("dtnasc")).maskPattern("99/99/9999");
 
-        // Função para requerer CEP pelo Nascimento
-        function verificarDataNascimento() {
-          var dataNascimento = new Date(document.getElementById("dtnasc").value);
-          var dataLimite = new Date();
-          dataLimite.setFullYear(dataLimite.getFullYear() - 12);
+    // Função para requerer CEP pelo Nascimento
+    function verificarDataNascimento() {
+      var dataNascimento = new Date(document.getElementById("dtnasc").value);
+      var dataLimite = new Date();
+      dataLimite.setFullYear(dataLimite.getFullYear() - 12);
 
-          var cepInput = document.getElementById("cep");
-          var celularInput = document.getElementById("celular");
+      var cepInput = document.getElementById("cep");
+      var celularInput = document.getElementById("celular");
 
-          if (dataNascimento <= dataLimite) {
-            cepInput.setAttribute("required", "required");
-            celularInput.setAttribute("required", "required");
-          } else {
-            cepInput.removeAttribute("required");
-            celularInput.removeAttribute("required");
-          }
-        }
+      if (dataNascimento <= dataLimite) {
+        cepInput.setAttribute("required", "required");
+        celularInput.setAttribute("required", "required");
+      } else {
+        cepInput.removeAttribute("required");
+        celularInput.removeAttribute("required");
+      }
+    }
 
-        // Função para buscar endereço pelo CEP
-        function buscarEnderecoPorCep(cep) {
-          var url = `https://viacep.com.br/ws/${cep}/json/`;
+    // Função para buscar endereço pelo CEP
+    function buscarEnderecoPorCep(cep) {
+      var url = `https://viacep.com.br/ws/${cep}/json/`;
 
-          fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.erro) {
-                // CEP não encontrado
-                inputBairro.value = "";
-                inputCidade.value = "";
-                inputUf.value = "";
-                cepError.style.display = "block"; // Exibir mensagem de erro
-              } else {
-                // Preencher os campos com os dados retornados
-                inputBairro.value = data.bairro.toUpperCase();
-                inputCidade.value = data.localidade.toUpperCase();
-                inputUf.value = data.uf.toUpperCase();
-                cepError.style.display = "none"; // Ocultar mensagem de erro
-              }
-            })
-            .catch((error) => {
-              console.error("Erro ao buscar endereço:", error);
-              cepError.style.display = "block"; // Exibir mensagem de erro
-            });
-        }
-
-        // Adicionar evento de blur (sair do campo) no campo CEP
-        inputCep.addEventListener("blur", function () {
-          var cep = inputCep.value.replace(/\D/g, ""); // Remover caracteres não numéricos
-          if (cep.length === 8) {
-            buscarEnderecoPorCep(cep);
-          } else {
-            cepError.style.display = "block"; // Exibir mensagem de erro
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.erro) {
+            // CEP não encontrado
             inputBairro.value = "";
             inputCidade.value = "";
             inputUf.value = "";
-          }
-        });
-
-        // Preencher o dropdown de igrejas
-        bancoDeDados
-          .collection("igreja")
-          .get()
-          .then((querySnapshot) => {
-            // Adicionar opção default
-            const optionPadrao = document.createElement("option");
-            optionPadrao.value = "";
-            optionPadrao.text = "Selecione uma igreja";
-            optionPadrao.disabled = true;
-            optionPadrao.selected = true;
-            selectIgrejas.add(optionPadrao);
-
-            // Continua com o código existente
-            querySnapshot.forEach((doc) => {
-              const option = document.createElement("option");
-            option.value = doc.data().nomeigreja;
-            option.text = doc.data().nomeigreja;
-            selectIgrejas.add(option);
-          });
-        });
-
-      // Atualizar o evento de change do líder
-      document.getElementById("lidercelula").addEventListener("change", function() {
-          const liderSelecionado = this.value;
-          const inputCelula = document.getElementById("nomedacelula");
-
-          const opcoesEspeciais = [
-              "SOU PASTOR DE REDE",
-              "SOU COORDENADOR DE REDE",
-              "SOU SUPERVISOR DE REDE"
-          ];
-
-          if (opcoesEspeciais.includes(liderSelecionado)) {
-              inputCelula.value = "";
-              return;
-          }
-
-          if (liderSelecionado) {
-              bancoDeDados.collection("estruturacelula")
-                  .where("conclider", "==", liderSelecionado)
-                  .get()
-                  .then((querySnapshot) => {
-                      querySnapshot.forEach((doc) => {
-                          inputCelula.value = doc.data().nomecelula.toUpperCase();
-                      });
-                  });
+            cepError.style.display = "block"; // Exibir mensagem de erro
           } else {
-              inputCelula.value = "";
+            // Preencher os campos com os dados retornados
+            inputBairro.value = data.bairro.toUpperCase();
+            inputCidade.value = data.localidade.toUpperCase();
+            inputUf.value = data.uf.toUpperCase();
+            cepError.style.display = "none"; // Ocultar mensagem de erro
           }
-      });
-      
-      // Atualizar o evento de change do líder
-document.getElementById("lidercelula").addEventListener("change", function() {
-    const liderSelecionado = this.value;
-    const inputCelula = document.getElementById("nomedacelula");
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar endereço:", error);
+          cepError.style.display = "block"; // Exibir mensagem de erro
+        });
+    }
 
-    const opcoesEspeciais = [
+    // Adicionar evento de blur (sair do campo) no campo CEP
+    inputCep.addEventListener("blur", function () {
+      var cep = inputCep.value.replace(/\D/g, ""); // Remover caracteres não numéricos
+      if (cep.length === 8) {
+        buscarEnderecoPorCep(cep);
+      } else {
+        cepError.style.display = "block"; // Exibir mensagem de erro
+        inputBairro.value = "";
+        inputCidade.value = "";
+        inputUf.value = "";
+      }
+    });
+
+    // Preencher o dropdown de igrejas
+    bancoDeDados
+      .collection("igreja")
+      .get()
+      .then((querySnapshot) => {
+        // Adicionar opção default
+        const optionPadrao = document.createElement("option");
+        optionPadrao.value = "";
+        optionPadrao.text = "Selecione uma igreja";
+        optionPadrao.disabled = true;
+        optionPadrao.selected = true;
+        selectIgrejas.add(optionPadrao);
+
+        // Continua com o código existente
+        querySnapshot.forEach((doc) => {
+          const option = document.createElement("option");
+          option.value = doc.data().nomeigreja;
+          option.text = doc.data().nomeigreja;
+          selectIgrejas.add(option);
+        });
+      });
+
+    // Atualizar o evento de change do líder
+    document.getElementById("lidercelula").addEventListener("change", function () {
+      const liderSelecionado = this.value;
+      const inputCelula = document.getElementById("nomedacelula");
+
+      const opcoesEspeciais = [
         "SOU PASTOR DE REDE",
         "SOU COORDENADOR DE REDE",
         "SOU SUPERVISOR DE REDE"
-    ];
+      ];
 
-    if (opcoesEspeciais.includes(liderSelecionado)) {
+      if (opcoesEspeciais.includes(liderSelecionado)) {
         inputCelula.value = "";
         return;
-    }
+      }
 
-    if (liderSelecionado) {
+      if (liderSelecionado) {
         bancoDeDados.collection("estruturacelula")
-            .where("conclider", "==", liderSelecionado)
-            .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    inputCelula.value = doc.data().nomecelula.toUpperCase();
-                });
+          .where("conclider", "==", liderSelecionado)
+          .get()
+          .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              inputCelula.value = doc.data().nomecelula.toUpperCase();
             });
-    } else {
+          });
+      } else {
         inputCelula.value = "";
-    }
-});
+      }
+    });
 
-      // Primeiro, vamos obter a referência do select de líderes
+    // Atualizar o evento de change do líder
+    document.getElementById("lidercelula").addEventListener("change", function () {
+      const liderSelecionado = this.value;
+      const inputCelula = document.getElementById("nomedacelula");
+
+      const opcoesEspeciais = [
+        "SOU PASTOR DE REDE",
+        "SOU COORDENADOR DE REDE",
+        "SOU SUPERVISOR DE REDE"
+      ];
+
+      if (opcoesEspeciais.includes(liderSelecionado)) {
+        inputCelula.value = "";
+        return;
+      }
+
+      if (liderSelecionado) {
+        bancoDeDados.collection("estruturacelula")
+          .where("conclider", "==", liderSelecionado)
+          .get()
+          .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              inputCelula.value = doc.data().nomecelula.toUpperCase();
+            });
+          });
+      } else {
+        inputCelula.value = "";
+      }
+    });
+
+    // Primeiro, vamos obter a referência do select de líderes
+    const selectLider = document.getElementById("lidercelula");
+    // Primeiro, vamos desabilitar o campo líder inicialmente
+    document.getElementById("lidercelula").disabled = true;
+
+    // Atualizar a função de carregar líderes
+    function carregarLideres(igrejaSelecionada) {
       const selectLider = document.getElementById("lidercelula");
-        // Primeiro, vamos desabilitar o campo líder inicialmente
-        document.getElementById("lidercelula").disabled = true;
 
-        // Atualizar a função de carregar líderes
-        function carregarLideres(igrejaSelecionada) {
-            const selectLider = document.getElementById("lidercelula");
-    
-            if (igrejaSelecionada) {
-                // Habilita o campo quando uma igreja for selecionada
-                selectLider.disabled = false;
-                // Limpa as opções existentes
-                selectLider.innerHTML = '';
+      if (igrejaSelecionada) {
+        // Habilita o campo quando uma igreja for selecionada
+        selectLider.disabled = false;
+        // Limpa as opções existentes
+        selectLider.innerHTML = '';
 
-                // Adiciona mensagem de instrução
-                const optionPadraoLider = document.createElement("option");
-                optionPadraoLider.value = "";
-                optionPadraoLider.text = "Selecione seu Líder";
-                optionPadraoLider.disabled = true;
-                optionPadraoLider.selected = true;
-                selectLider.add(optionPadraoLider);
+        // Adiciona mensagem de instrução
+        const optionPadraoLider = document.createElement("option");
+        optionPadraoLider.value = "";
+        optionPadraoLider.text = "Selecione seu Líder";
+        optionPadraoLider.disabled = true;
+        optionPadraoLider.selected = true;
+        selectLider.add(optionPadraoLider);
 
-                // Adicionar opções especiais
-                const opcoesEspeciais = [
-                    "SOU PASTOR DE REDE",
-                    "SOU COORDENADOR DE REDE",
-                    "SOU SUPERVISOR DE REDE"
-                ];
+        // Adicionar opções especiais
+        const opcoesEspeciais = [
+          "SOU PASTOR DE REDE",
+          "SOU COORDENADOR DE REDE",
+          "SOU SUPERVISOR DE REDE"
+        ];
 
-                opcoesEspeciais.forEach(opcao => {
-                    const option = document.createElement("option");
-                    option.value = opcao;
-                    option.text = opcao;
-                    selectLider.add(option);
-                });
-
-                // Carregar líderes do Firestore filtrados por igreja
-                bancoDeDados.collection("estruturacelula")
-                    .where("nomeigreja", "==", igrejaSelecionada)
-                    .orderBy("conclider")
-                    .get()
-                    .then((querySnapshot) => {
-                        const lideres = new Set();
-                        querySnapshot.forEach((doc) => {
-                            const lider = doc.data().conclider.toUpperCase();
-                            if (lider && !opcoesEspeciais.includes(lider)) {
-                                lideres.add(lider);
-                            }
-                        });
-
-                        lideres.forEach((lider) => {
-                            const option = document.createElement("option");
-                            option.value = lider;
-                            option.text = lider;
-                            selectLider.add(option);
-                        });
-                    });
-            } else {
-                // Mantém o campo bloqueado se nenhuma igreja estiver selecionada
-                selectLider.disabled = true;
-            }
-        }
-      // Adicionar evento de mudança no select de igrejas
-      document.getElementById("igreja").addEventListener("change", function() {
-          const igrejaSelecionada = this.value;
-          carregarLideres(igrejaSelecionada);
-      });
-      // Função para verificar se o nome já está cadastrado
-      function verificarNomeExistente(nome) {
-        return bancoDeDados
-          .collection("membros")
-          .where("nome", "==", nome)
-          .get()
-          .then(function (querySnapshot) {
-            return !querySnapshot.empty;
-          })
-          .catch(function (error) {
-            console.error("Erro ao verificar nome existente:", error);
-            return false;
-          });
-      }
-
-      // Função para verificar se o email já está cadastrado
-      function verificarEmailExistente(email) {
-        return bancoDeDados
-          .collection("membros")
-          .where("email", "==", email)
-          .get()
-          .then(function (querySnapshot) {
-            return !querySnapshot.empty;
-          })
-          .catch(function (error) {
-            console.error("Erro ao verificar email existente:", error);
-            return false;
-          });
-      }
-
-      // Adicionar evento de blur (sair do campo) no campo "Nome"
-      inputNome.addEventListener("blur", function () {
-        var nome = inputNome.value.toUpperCase();
-        this.value = this.value.trim();
-        var nome = this.value.toUpperCase();
-
-        verificarNomeExistente(nome).then(function (nomeExistente) {
-          if (nomeExistente) {
-            // Nome já cadastrado
-            nomeError.style.display = "block";
-            cadastrarBtn.disabled = true;
-          } else {
-            // Nome não cadastrado
-            nomeError.style.display = "none";
-            cadastrarBtn.disabled = false;
-          }
+        opcoesEspeciais.forEach(opcao => {
+          const option = document.createElement("option");
+          option.value = opcao;
+          option.text = opcao;
+          selectLider.add(option);
         });
-      });
-      
-      document.getElementById("email").addEventListener("blur", function () {
-        var email = this.value.trim();
 
-        if (email) {
-          // Only validate if email is not empty
-          verificarEmailExistente(email).then(function (emailExistente) {
-            if (emailExistente) {
-              document.getElementById("emailError").style.display = "block";
-              cadastrarBtn.disabled = true;
-            } else {
-              document.getElementById("emailError").style.display = "none";
-              cadastrarBtn.disabled = false;
-            }
+        // Carregar líderes do Firestore filtrados por igreja
+        bancoDeDados.collection("estruturacelula")
+          .where("nomeigreja", "==", igrejaSelecionada)
+          .orderBy("conclider")
+          .get()
+          .then((querySnapshot) => {
+            const lideres = new Set();
+            querySnapshot.forEach((doc) => {
+              const lider = doc.data().conclider.toUpperCase();
+              if (lider && !opcoesEspeciais.includes(lider)) {
+                lideres.add(lider);
+              }
+            });
+
+            lideres.forEach((lider) => {
+              const option = document.createElement("option");
+              option.value = lider;
+              option.text = lider;
+              selectLider.add(option);
+            });
           });
+      } else {
+        // Mantém o campo bloqueado se nenhuma igreja estiver selecionada
+        selectLider.disabled = true;
+      }
+    }
+    // Adicionar evento de mudança no select de igrejas
+    document.getElementById("igreja").addEventListener("change", function () {
+      const igrejaSelecionada = this.value;
+      carregarLideres(igrejaSelecionada);
+    });
+    // Função para verificar se o nome já está cadastrado
+    function verificarNomeExistente(nome) {
+      return bancoDeDados
+        .collection("membros")
+        .where("nome", "==", nome)
+        .get()
+        .then(function (querySnapshot) {
+          return !querySnapshot.empty;
+        })
+        .catch(function (error) {
+          console.error("Erro ao verificar nome existente:", error);
+          return false;
+        });
+    }
+
+    // Função para verificar se o email já está cadastrado
+    function verificarEmailExistente(email) {
+      return bancoDeDados
+        .collection("membros")
+        .where("email", "==", email)
+        .get()
+        .then(function (querySnapshot) {
+          return !querySnapshot.empty;
+        })
+        .catch(function (error) {
+          console.error("Erro ao verificar email existente:", error);
+          return false;
+        });
+    }
+
+    // Adicionar evento de blur (sair do campo) no campo "Nome"
+    inputNome.addEventListener("blur", function () {
+      var nome = inputNome.value.toUpperCase();
+      this.value = this.value.trim();
+      var nome = this.value.toUpperCase();
+
+      verificarNomeExistente(nome).then(function (nomeExistente) {
+        if (nomeExistente) {
+          // Nome já cadastrado
+          nomeError.style.display = "block";
+          cadastrarBtn.disabled = true;
         } else {
-          document.getElementById("emailError").style.display = "none";
+          // Nome não cadastrado
+          nomeError.style.display = "none";
           cadastrarBtn.disabled = false;
         }
       });
+    });
 
-      // Adicionar evento de envio do formulário
-      formulario.addEventListener("submit", function (e) {
-    e.preventDefault();
-    
-    var nome = document.getElementById("nome").value.trim().toUpperCase();
-    var email = document.getElementById("email").value.trim();
+    document.getElementById("email").addEventListener("blur", function () {
+      var email = this.value.trim();
 
-    Promise.all([
+      if (email) {
+        // Only validate if email is not empty
+        verificarEmailExistente(email).then(function (emailExistente) {
+          if (emailExistente) {
+            document.getElementById("emailError").style.display = "block";
+            cadastrarBtn.disabled = true;
+          } else {
+            document.getElementById("emailError").style.display = "none";
+            cadastrarBtn.disabled = false;
+          }
+        });
+      } else {
+        document.getElementById("emailError").style.display = "none";
+        cadastrarBtn.disabled = false;
+      }
+    });
+
+    // Adicionar evento de envio do formulário
+    formulario.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      var nome = document.getElementById("nome").value.trim().toUpperCase();
+      var email = document.getElementById("email").value.trim();
+
+      Promise.all([
         verificarNomeExistente(nome),
         email ? verificarEmailExistente(email) : Promise.resolve(false)
-    ])
-    .then(([nomeExistente, emailExistente]) => {
-        if (nomeExistente) {
+      ])
+        .then(([nomeExistente, emailExistente]) => {
+          if (nomeExistente) {
             alert("Este nome já está cadastrado. Por favor, use um nome diferente.");
             return;
-        }
-        if (emailExistente) {
+          }
+          if (emailExistente) {
             alert("Este email já está cadastrado. Por favor, use um email diferente.");
             return;
-        }
-        cadastrarMembro(nome, email);
-    })
-    .catch(error => {
-        console.log("Erro na verificação:", error);
-        alert("Ocorreu um erro na verificação. Por favor, tente novamente.");
+          }
+          cadastrarMembro(nome, email);
+        })
+        .catch(error => {
+          console.log("Erro na verificação:", error);
+          alert("Ocorreu um erro na verificação. Por favor, tente novamente.");
+        });
     });
-});
 
-function cadastrarMembro(nome, email) {
-    var dataNascimento = document.getElementById("dtnasc").value;
-    var cep = document.getElementById("cep").value.toUpperCase();
-    var bairro = document.getElementById("bairro").value.toUpperCase();
-    var cidade = document.getElementById("cidade").value.toUpperCase();
-    var uf = document.getElementById("uf").value.toUpperCase();
-    var sexo = document.getElementById("sexo").value;
-    var estadoCivil = document.getElementById("estadoCivil").value;
-    var celular = document.getElementById("celular").value;
-    var igreja = document.getElementById("igreja").value;
-    var nomedacelula = document.getElementById("nomedacelula").value.toUpperCase();
-    var lidercelula = document.getElementById("lidercelula").value.toUpperCase();
-    var arrolamento = document.getElementById("arrolamento").value;
+    function cadastrarMembro(nome, email) {
+      var dataNascimento = document.getElementById("dtnasc").value;
+      var cep = document.getElementById("cep").value.toUpperCase();
+      var bairro = document.getElementById("bairro").value.toUpperCase();
+      var cidade = document.getElementById("cidade").value.toUpperCase();
+      var uf = document.getElementById("uf").value.toUpperCase();
+      var sexo = document.getElementById("sexo").value;
+      var estadoCivil = document.getElementById("estadoCivil").value;
+      var celular = document.getElementById("celular").value;
+      var igreja = document.getElementById("igreja").value;
+      var nomedacelula = document.getElementById("nomedacelula").value.toUpperCase();
+      var lidercelula = document.getElementById("lidercelula").value.toUpperCase();
+      var arrolamento = document.getElementById("arrolamento").value;
 
-    var dataNascimentoFormatada = new Date(dataNascimento);
-    var dia = dataNascimentoFormatada.getDate().toString().padStart(2, "0");
-    var mes = (dataNascimentoFormatada.getMonth() + 1).toString().padStart(2, "0");
-    var ano = dataNascimentoFormatada.getFullYear();
-    var dataNascFormatada = `${dia}/${mes}/${ano}`;
+      var dataNascimentoFormatada = new Date(dataNascimento);
+      var dia = dataNascimentoFormatada.getDate().toString().padStart(2, "0");
+      var mes = (dataNascimentoFormatada.getMonth() + 1).toString().padStart(2, "0");
+      var ano = dataNascimentoFormatada.getFullYear();
+      var dataNascFormatada = `${dia}/${mes}/${ano}`;
 
-    const timelineInicial = [{
-        data: new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}),
+      const timelineInicial = [{
+        data: new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }),
         acao: "Criação do perfil",
         alteracoes: "Perfil criado"
-    }];
+      }];
 
-    bancoDeDados.collection("membros").add({
+      bancoDeDados.collection("membros").add({
         nome: nome,
         email: email,
         dtnasc: dataNascFormatada,
@@ -724,35 +636,36 @@ function cadastrarMembro(nome, email) {
         lidercelula: lidercelula,
         arrolamento: arrolamento,
         timeline: timelineInicial
-    })
-    .then(function() {
-        window.location.href = "agradecimento.html";
-    })
-    .catch(function(error) {
-        console.error("Erro ao cadastrar membro:", error);
-        alert("Erro ao cadastrar membro: " + error.message);
-    });
-}
-
-
-      // Função para alternar a seleção dos ChoiceChips
-      function toggleChoiceChip(chip) {
-        var chips = chip.parentNode.getElementsByClassName("choice-chip");
-        for (var i = 0; i < chips.length; i++) {
-          chips[i].classList.remove("selected");
-        }
-        chip.classList.add("selected");
-        var inputField = chip.parentNode.nextElementSibling;
-        inputField.value = chip.dataset.value;
-      }
-
-      // Adicionar evento de clique aos ChoiceChips
-      var choiceChips = document.getElementsByClassName("choice-chip");
-      for (var i = 0; i < choiceChips.length; i++) {
-        choiceChips[i].addEventListener("click", function () {
-          toggleChoiceChip(this);
+      })
+        .then(function () {
+          window.location.href = "agradecimento.html";
+        })
+        .catch(function (error) {
+          console.error("Erro ao cadastrar membro:", error);
+          alert("Erro ao cadastrar membro: " + error.message);
         });
+    }
+
+
+    // Função para alternar a seleção dos ChoiceChips
+    function toggleChoiceChip(chip) {
+      var chips = chip.parentNode.getElementsByClassName("choice-chip");
+      for (var i = 0; i < chips.length; i++) {
+        chips[i].classList.remove("selected");
       }
-    </script>
-  </body>
+      chip.classList.add("selected");
+      var inputField = chip.parentNode.nextElementSibling;
+      inputField.value = chip.dataset.value;
+    }
+
+    // Adicionar evento de clique aos ChoiceChips
+    var choiceChips = document.getElementsByClassName("choice-chip");
+    for (var i = 0; i < choiceChips.length; i++) {
+      choiceChips[i].addEventListener("click", function () {
+        toggleChoiceChip(this);
+      });
+    }
+  </script>
+</body>
+
 </html>

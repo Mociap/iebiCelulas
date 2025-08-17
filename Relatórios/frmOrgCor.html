@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="../css/botao-voltar.css">
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -15,6 +18,7 @@
             color: #333;
             padding-top: 0;
         }
+
         .container {
             max-width: 800px;
             margin-top: 20px;
@@ -24,6 +28,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             font-size: 12px;
         }
+
         .header {
             background-color: #000;
             padding: 20px;
@@ -31,15 +36,18 @@
             margin-bottom: 30px;
             border-radius: 10px 10px 0 0;
         }
+
         .header img {
             max-width: 200px;
         }
+
         .divider {
             width: 75%;
             height: 2px;
             background-color: #000;
             margin: 30px auto;
         }
+
         #organogramaContainer {
             margin-top: 40px;
             padding: 20px;
@@ -48,6 +56,7 @@
             overflow-x: auto;
             font-size: 12px;
         }
+
         .organograma {
             display: flex;
             flex-direction: column;
@@ -55,6 +64,7 @@
             width: 100%;
             font-size: 12px;
         }
+
         .node {
             width: 220px;
             height: 80px;
@@ -62,7 +72,7 @@
             border-radius: 10px;
             margin: 10px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: relative;
             transition: all 0.3s ease;
             display: flex;
@@ -71,16 +81,19 @@
             align-items: center;
             overflow: hidden;
             color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
+
         .node:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
+
         .node.lider {
             color: black;
             text-shadow: none;
         }
+
         .node.rede {
             width: 100%;
             max-width: none;
@@ -91,12 +104,14 @@
             font-weight: bold;
             text-align: center;
         }
+
         .content-wrapper {
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
+
         .supervisores-container {
             display: flex;
             justify-content: center;
@@ -105,6 +120,7 @@
             width: 100%;
             font-size: 12px;
         }
+
         .supervisor-group {
             display: flex;
             flex-direction: column;
@@ -112,11 +128,13 @@
             margin: 0 15px;
             font-size: 12px;
         }
+
         .supervisor-info {
             font-size: 0.8em;
             margin-top: 5px;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
+
         .connector-vertical {
             width: 2px;
             background-color: #bdc3c7;
@@ -124,6 +142,7 @@
             margin: 0 auto;
             margin-top: 10px;
         }
+
         .connector-horizontal {
             height: 2px;
             background-color: #bdc3c7;
@@ -131,59 +150,50 @@
             position: absolute;
             top: -15px;
         }
+
         .lider-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             font-size: 12px;
         }
+
         .lider-info {
             font-size: 0.8em;
-            color: rgba(0,0,0,0.8);
+            color: rgba(0, 0, 0, 0.8);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100%;
             font-size: 12px;
         }
+
         .rede-group {
             margin-bottom: 50px;
             width: 100%;
             font-size: 12px;
         }
+
         .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background-color: #1abc9c;
-            color: #fff;
-            padding: 10px;
-            border-radius: 50%;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            transition: all 0.3s ease;
-            z-index: 1001;
+            background-color: #1abc9c !important;
+
         }
+
         .back-button:hover {
-            background-color: #1abc9c;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background-color: #1abc9c !important;
+
         }
-        .back-button i {
-            margin-right: 0;
-        }
+
         .form-control {
             font-size: 12px;
         }
+
         .rede-info {
             font-size: 0.8em;
             margin-top: 5px;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
+
         .supervisor-image {
             width: 50px;
             height: 50px;
@@ -196,9 +206,9 @@
             height: auto;
             padding: 15px;
         }
-        
     </style>
 </head>
+
 <body>
     <a href="../frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
@@ -298,7 +308,7 @@
             http.send();
             return http.status != 404;
         }
-        
+
         // Função para contar células rede
         function contarCelulasPorRede(supervisores) {
             return Object.values(supervisores).reduce((total, lideres) => total + lideres.length, 0);
@@ -378,7 +388,7 @@
 
             query.get().then((querySnapshot) => {
                 let html = '<div class="organograma">';
-                
+
                 if (redeEscolhida === 'TODOS') {
                     // Agrupar por rede
                     const redes = {};
@@ -445,7 +455,7 @@
                     // Lógica para uma rede específica
                     const corBase = alterarCorRede(redeEscolhida);
                     const corClara = gerarCorClara(redeEscolhida);
-                    
+
                     const supervisores = {};
                     let totalCelulas = 0;
                     querySnapshot.forEach((doc) => {
@@ -542,4 +552,5 @@
         selectSupervisores.addEventListener('change', carregarLideres);
     </script>
 </body>
+
 </html>
