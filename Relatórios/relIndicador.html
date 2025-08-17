@@ -471,7 +471,7 @@
             const meses = [];
             const dadosMensais = [];
 
-            for (let i = 0; i < 9; i++) {
+            for (let i = 8; i >= 0; i--) {
                 const mes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - i, 1);
                 const mesFormatado = `${mes.getMonth() + 1}/${mes.getFullYear()}`;
                 meses.push(mesFormatado);
