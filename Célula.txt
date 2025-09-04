@@ -1,17 +1,3 @@
-Prompt:
-
-"Estou desenvolvendo um projeto para uma igreja utilizando o modelo de Células. 
-A estrutura das Células segue uma organização hierárquica e matricial, onde os líderes têm diferentes 
-responsabilidades conforme seu nível de liderança. A célula é composta por um Líder de Célula, que é 
-responsável pelo cuidado e direção do grupo; Líderes em Treinamento, que estão sendo preparados para 
-futuramente multiplicar a célula; Anfitriões, que abrem suas casas para as reuniões e acolhem os membros; 
-Secretários, que cuidam da parte administrativa e de registros; e Membros, que são os participantes que 
-contribuem para o crescimento do grupo.
-
-Além disso, a igreja também tem uma estrutura mais ampla de supervisão, com Supervisores de Setor 
-(responsáveis por várias células), Coordenadores de Área (que supervisionam setores), e Pastores de Rede e 
-Pastor Presidente (que lideram a igreja e as redes de células).
-
-A intenção é desenhar um banco de dados para gerenciar essa estrutura hierárquica, com dados sobre as 
-células, líderes, membros, e suas respectivas funções. O banco de dados será no Firebase Firestore, e 
-preciso de orientação para modelar as coleções e subcoleções de forma eficiente."
+Resumo por Célula
+    - Líderes: relResumoMesCelula.html
+    - Supervisores: 

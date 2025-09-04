@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa de Satisfação - Horário do Culto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #CD853F 100%); */
+            /* min-height: 100vh; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 25px !important;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            padding-top: 0px !important;
+        }
+
+        .logo {
+            width: 180px;
+            height: 160px;
+            margin: 0 auto;
+            margin-top: -10px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 !important;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        h1 {
+            color: #8B4513;
+            margin-bottom: 0px;
+            font-size: 32px !important;
+            font-weight: 600;
+            margin-top: -20px !important;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        .question {
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .question h3 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .option-btn {
+            padding: 15px 15px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            min-width: 120px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .option-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .option-btn:active {
+            transform: translateY(-1px) scale(0.98);
+            transition: all 0.1s ease;
+        }
+
+        .option-btn.selected {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            animation: pulse 0.6s ease-in-out;
+            z-index: 10;
+            position: relative;
+        }
+
+        .option-btn.unselected {
+            opacity: 0.4;
+            filter: grayscale(70%) brightness(0.8);
+            transform: scale(0.95);
+            transition: all 0.3s ease;
+        }
+
+        .option-btn.unselected:hover {
+            opacity: 0.7;
+            filter: grayscale(50%) brightness(0.9);
+            transform: scale(0.98);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+
+        .option-btn.clicked {
+            animation: clickEffect 0.3s ease-in-out;
+        }
+
+        @keyframes clickEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1.05); }
+        }
+
+        .btn-sim {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn-nao {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+        }
+
+        .btn-10 {
+            background: linear-gradient(135deg, #228B22, #32CD32);
+        }
+
+        .btn-18 {
+            background: linear-gradient(135deg, #FF8C00, #FF7F50);
+        }
+
+        .btn-1830 {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .new-survey-btn {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(139, 69, 19, 0.3);
+        }
+
+        .new-survey-btn:hover {
+            background: linear-gradient(135deg, #A0522D, #CD853F);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(139, 69, 19, 0.4);
+        }
+
+        .new-survey-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(139, 69, 19, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .options {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .option-btn {
+                width: 100%;
+                max-width: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="../assets/Logo.png" alt="IEBI Logo">
+        </div>
+        <h1>Pesquisa Horário do Culto de Domingo</h1>
+        <p class="subtitle">Sua opinião é muito importante para nós!</p>
+
+        <form id="pesquisaForm">
+            <div class="question">
+                <h3>1. Você está satisfeito com o horário de início atual do culto?</h3>
+                <div class="options">
+                    <button type="button" class="option-btn btn-sim" data-question="satisfacao" data-value="sim">
+                        ✓ Sim
+                    </button>
+                    <button type="button" class="option-btn btn-nao" data-question="satisfacao" data-value="nao">
+                        ✗ Não
+                    </button>
+                </div>
+            </div>
+
+            <div class="question">
+                <h3>2. Se o horário de início fosse alterado, qual das opções você escolheria?</h3>
+                <div class="options">
+                    <button type="button" class="option-btn btn-10" data-question="horario" data-value="10:00">
+                        10:00
+                    </button>
+                    <button type="button" class="option-btn btn-18" data-question="horario" data-value="18:00">
+                        18:00
+                    </button>
+                    <button type="button" class="option-btn btn-1830" data-question="horario" data-value="18:30">
+                        18:30
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                Enviar Pesquisa
+            </button>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            <strong>Obrigado!</strong> Sua resposta foi enviada com sucesso. <br>
+            <button type="button" class="new-survey-btn" id="newSurveyBtn">
+                Nova Pesquisa
+            </button>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <strong>Erro!</strong> Ocorreu um problema ao enviar sua resposta. Tente novamente.
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC31C1X13eqVAOq_o5K2evI8q3GOfnpOpo",
+            authDomain: "iebi-2e84e.firebaseapp.com",
+            projectId: "iebi-2e84e",
+            storageBucket: "iebi-2e84e.firebasestorage.app",
+            messagingSenderId: "634456198202",
+            appId: "1:634456198202:web:8b4de1b4def23a49303903"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Form handling
+        let respostas = {};
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const form = document.getElementById('pesquisaForm');
+
+        // Handle option selection
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const question = this.dataset.question;
+                const value = this.dataset.value;
+
+                // Add click effect
+                this.classList.add('clicked');
+                setTimeout(() => {
+                    this.classList.remove('clicked');
+                }, 300);
+
+                // Remove selected and unselected classes from all buttons in the same question
+                document.querySelectorAll(`[data-question="${question}"]`).forEach(b => {
+                    b.classList.remove('selected', 'unselected');
+                });
+
+                // Add selected class to clicked button
+                this.classList.add('selected');
+
+                // Add unselected class to other buttons in the same question
+                document.querySelectorAll(`[data-question="${question}"]`).forEach(b => {
+                    if (b !== this) {
+                        b.classList.add('unselected');
+                    }
+                });
+
+                // Store the answer
+                respostas[question] = value;
+
+                // Check if both questions are answered
+                if (respostas.satisfacao && respostas.horario) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    submitBtn.textContent = '✓ Enviar Pesquisa';
+                }
+            });
+
+            // Add hover sound effect (visual feedback)
+            btn.addEventListener('mouseenter', function() {
+                this.style.filter = 'brightness(1.1)';
+            });
+
+            btn.addEventListener('mouseleave', function() {
+                this.style.filter = 'brightness(1)';
+            });
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!respostas.satisfacao || !respostas.horario) {
+                alert('Por favor, responda todas as perguntas.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+
+            try {
+                // Add document to Firestore within pesqCultoDomingo subcollection
+                await addDoc(collection(db, 'Eventos', 'pesqCultoDomingo', 'respostas'), {
+                    satisfacao_horario_atual: respostas.satisfacao,
+                    preferencia_novo_horario: respostas.horario,
+                    timestamp: serverTimestamp(),
+                    data_resposta: new Date().toISOString(),
+                    ip_address: 'anonimo',
+                    user_agent: navigator.userAgent
+                });
+
+                // Show success message
+                form.style.display = 'none';
+                successMessage.style.display = 'block';
+
+            } catch (error) {
+                console.error('Erro ao enviar dados:', error);
+                errorMessage.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Pesquisa';
+            }
+        });
+
+        // Handle new survey button
+        document.getElementById('newSurveyBtn').addEventListener('click', function() {
+            // Reset form data
+            respostas = {};
+            
+            // Reset all buttons
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected', 'unselected', 'clicked');
+            });
+            
+            // Reset submit button
+            submitBtn.disabled = true;
+            submitBtn.style.background = '#6c757d';
+            submitBtn.textContent = 'Enviar Pesquisa';
+            
+            // Hide messages and show form
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            form.style.display = 'block';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
