@@ -283,6 +283,98 @@
             color: #ffffff;
             opacity: 1;
         }
+
+        /* Estilos para a seção de Atividade Recente */
+        .activity-container {
+            min-height: 300px;
+        }
+
+        .activity-container .list-group-item {
+            border: none;
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .activity-container .list-group-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .activity-container .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .activity-item-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .activity-item-date {
+            color: #6c757d;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .activity-item-details {
+            color: #495057;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .activity-item-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+            font-size: 0.85em;
+        }
+
+        .activity-meta-item {
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .activity-meta-item i {
+            color: #007bff;
+        }
+
+        .activity-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .activity-actions .btn {
+            font-size: 0.8em;
+            padding: 4px 12px;
+        }
+
+        .card-header.bg-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+            border: none;
+        }
+
+        .form-select.bg-light {
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #495057 !important;
+        }
+
+        .form-select.bg-light:focus {
+            background-color: #ffffff !important;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -378,30 +470,21 @@
                 </div>
                 
                 <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-chart-line"></i> Atividade Recente
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    <h5 class="mb-0">Atividade Recente</h5>
                                 </div>
-                                <div class="form-group mb-0" style="min-width: 200px;">
-                                    <select class="drop drop-sm" id="filtroLiderAtividade">
+                                <div class="form-group mb-0" style="min-width: 250px;">
+                                    <select class="form-select form-select-sm bg-light" id="filtroLiderAtividade">
                                         <option value=""><strong>Todos os Líderes</strong></option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div id="atividadeRecente">Carregando...</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <i class="fas fa-tasks"></i> Próximas Reuniões
-                            </div>
-                            <div class="card-body">
-                                <div id="proximasReunioes">Carregando...</div>
+                            <div class="card-body p-4">
+                                <div id="atividadeRecente" class="activity-container">Carregando...</div>
                             </div>
                         </div>
                     </div>
@@ -934,9 +1017,6 @@
             
             // Carregar atividade recente
             carregarAtividadeRecente();
-            
-            // Carregar próximas reuniões
-            carregarProximasReunioes();
         }
         
         // Função para carregar contadores
@@ -1106,13 +1186,8 @@
 
         // Função para editar reunião a partir do card de atividade recente
         function editarReuniaoAtividade(reuniaoId) {
-            // Mudar para a seção de reuniões
-            showSection('reuniao');
-            
-            // Aguardar um momento para a seção carregar e então editar o item
-            setTimeout(() => {
-                editarItem('reuniao', reuniaoId);
-            }, 500);
+            // Abrir diretamente o modal de edição da reunião
+            editarItem('reuniao', reuniaoId);
         }
 
         // Função para excluir reunião a partir do card de atividade recente
@@ -1138,52 +1213,7 @@
             }
         }
 
-        // Função para carregar próximas reuniões
-        function carregarProximasReunioes() {
-            const reunioesContainer = document.getElementById('proximasReunioes');
-            reunioesContainer.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div> Carregando...</div>';
-            
-            // Data atual
-            const dataAtual = new Date();
-            
-            // Buscar as próximas 5 reuniões
-            db.collection('reuniao')
-                .where('data', '>=', dataAtual)
-                .orderBy('data', 'asc')
-                .limit(5)
-                .get()
-                .then(snapshot => {
-                    if (snapshot.empty) {
-                        reunioesContainer.innerHTML = '<p class="text-muted">Nenhuma reunião agendada.</p>';
-                        return;
-                    }
-                    
-                    let html = '<ul class="list-group list-group-flush">';
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const dataFormatada = new Date(data.data.seconds * 1000).toLocaleDateString('pt-BR');
-                        const horaFormatada = new Date(data.data.seconds * 1000).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-                        html += `
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>${data.tipo || 'Reunião'}</strong>
-                                    <p class="mb-0 text-muted">${data.local || 'Local não informado'}</p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="badge badge-success badge-pill">${dataFormatada}</span>
-                                    <div class="small">${horaFormatada}</div>
-                                </div>
-                            </li>
-                        `;
-                    });
-                    html += '</ul>';
-                    reunioesContainer.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error("Erro ao carregar próximas reuniões:", error);
-                    reunioesContainer.innerHTML = '<p class="text-danger">Erro ao carregar próximas reuniões.</p>';
-                });
-        }
+
         
         // Função para carregar dados de uma coleção
         function carregarDados(colecao) {

@@ -159,7 +159,9 @@
             const userEmail = localStorage.getItem('emailUsuario');
             const userFuncao = localStorage.getItem('funcaoUsuario');
 
-            document.getElementById('userName').textContent = userName || 'Não disponível';
+            // Extrair apenas o primeiro nome
+            const firstName = userName ? userName.split(' ')[0] : 'Não disponível';
+            document.getElementById('userName').textContent = firstName;
             document.getElementById('userEmail').textContent = userEmail || 'Não disponível';
             document.getElementById('userFuncao').textContent = userFuncao || 'Não disponível';
 
