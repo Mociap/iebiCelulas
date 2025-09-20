@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Membros - iebiCelulas</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: bold;
+        }
+        
+
+        
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-title {
+            font-weight: 600;
+            color: #343a40;
+        }
+        
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .filter-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos específicos para a tabela de membros */
+        .membros-table-enhanced {
+            font-size: 0.85rem;
+        }
+
+        .membros-table-enhanced th {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+            border: none;
+            padding: 10px 6px;
+            font-size: 0.8rem;
+        }
+
+        .membros-table-enhanced td {
+            vertical-align: middle;
+            padding: 8px 6px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .membros-table-enhanced tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        .membros-table-enhanced .btn {
+            padding: 3px 6px;
+            font-size: 0.7rem;
+            margin: 0 1px;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Estilos para choice chips */
+        .choice-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+
+        .choice-chip {
+            padding: 8px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: white;
+            color: #6c757d;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .choice-chip:hover {
+            border-color: #007bff;
+            color: #007bff;
+            transform: translateY(-2px);
+        }
+
+        .choice-chip.selected {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+
+        .choice-chip i {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row bg-primary text-white py-3 mb-4">
+            <div class="col-md-6">
+                <h4 class="mb-0">iebiCelulas - Administração de Membros</h4>
+            </div>
+            <div class="col-md-6 text-end">
+                <span id="userName">Usuário</span> | <span id="userRole">Função</span>
+                <button class="btn btn-outline-light btn-sm ms-3" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="container-fluid">
+            <!-- Alerta para notificações -->
+            <div class="alert-container" id="alertContainer"></div>
+            
+            <!-- Seção Membros -->
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">
+                    <i class="fas fa-users text-primary mr-3"></i>
+                    Gerenciar Membros
+                </h2>
+                <p class="text-muted">Visualize, edite e exclua informações dos membros</p>
+            </div>
+            
+            <!-- Card de Filtros -->
+            <div class="card filter-card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="membrosCampoFiltro" class="font-weight-bold">
+                                    <i class="fas fa-search mr-1"></i>
+                                    Filtrar por campo:
+                                </label>
+                                <select class="form-control" id="membrosCampoFiltro"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="membrosValorFiltro" class="font-weight-bold">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    Filtrar por valor:
+                                </label>
+                                <input class="form-control" id="membrosValorFiltro" 
+                                       list="membrosValorFiltroOptions" autocomplete="off"
+                                       placeholder="Digite para filtrar...">
+                                <datalist id="membrosValorFiltroOptions"></datalist>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="font-weight-bold">&nbsp;</label>
+                                <button class="btn btn-primary btn-block shadow-sm" onclick="abrirModalMembro()">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Adicionar Novo Membro
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading Spinner -->
+            <div class="loading-spinner text-center py-5" id="membrosLoading">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="sr-only">Carregando...</span>
+                </div>
+                <p class="mt-3 text-muted">Carregando dados dos membros...</p>
+            </div>
+            
+            <!-- Card da Tabela -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users mr-2"></i>
+                        Membros das Células
+                    </h5>
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Use os botões de ação para editar ou excluir registros
+                    </small>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 membros-table-enhanced" id="membrosTabelaDados">
+                            <thead class="thead-light">
+                                <tr></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar/editar membros -->
+    <div class="modal fade" id="membroModal" tabindex="-1" role="dialog" aria-labelledby="membroModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="membroModalLabel">Adicionar Novo Membro</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="membroForm">
+                        <!-- Nome Conforme RG -->
+                        <div class="form-group">
+                            <label for="modalNome">Nome Conforme RG</label>
+                            <input type="text" class="form-control" id="modalNome" required style="text-transform: uppercase;">
+                            <small id="modalNomeError" style="color: rgb(255, 159, 159); display: none">Nome já cadastrado</small>
+                        </div>
+                        
+                        <!-- Data de Nascimento -->
+                        <div class="form-group">
+                            <label for="modalDtnasc">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="modalDtnasc" required>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="modalEmail">Email</label>
+                            <input type="email" class="form-control" id="modalEmail">
+                            <small id="modalEmailError" style="color: rgb(255, 159, 159); display: none">Email já cadastrado</small>
+                        </div>
+                        
+                        <!-- CEP -->
+                        <div class="form-group">
+                            <label for="modalCep">CEP</label>
+                            <input type="text" class="form-control" id="modalCep" maxlength="9" placeholder="99999-999" style="text-transform: uppercase;">
+                            <small id="modalCepError" style="color: rgb(255, 159, 159); display: none">CEP inválido</small>
+                        </div>
+                        
+                        <!-- Bairro -->
+                        <div class="form-group">
+                            <label for="modalBairro">Bairro</label>
+                            <input type="text" class="form-control" id="modalBairro" required readonly style="text-transform: uppercase;">
+                        </div>
+                        
+                        <!-- Cidade -->
+                        <div class="form-group">
+                            <label for="modalCidade">Cidade</label>
+                            <input type="text" class="form-control" id="modalCidade" required readonly style="text-transform: uppercase;">
+                        </div>
+                        
+                        <!-- UF -->
+                        <div class="form-group">
+                            <label for="modalUf">UF</label>
+                            <input type="text" class="form-control" id="modalUf" required maxlength="2" readonly style="text-transform: uppercase;">
+                        </div>
+                        
+                        <!-- Sexo -->
+                        <div class="form-group">
+                            <label>Sexo</label>
+                            <div class="choice-chips">
+                                <div class="choice-chip" data-value="MASCULINO">
+                                    <i class="fas fa-male"></i>
+                                    Masculino
+                                </div>
+                                <div class="choice-chip" data-value="FEMININO">
+                                    <i class="fas fa-female"></i>
+                                    Feminino
+                                </div>
+                            </div>
+                            <input type="hidden" id="modalSexo" name="sexo" required>
+                        </div>
+                        
+                        <!-- Estado Civil -->
+                        <div class="form-group">
+                            <label>Estado Civil</label>
+                            <div class="choice-chips">
+                                <div class="choice-chip" data-value="SOLTEIRO">
+                                    <i class="fas fa-user"></i>
+                                    Solteiro
+                                </div>
+                                <div class="choice-chip" data-value="CASADO">
+                                    <i class="fas fa-heart"></i>
+                                    Casado
+                                </div>
+                            </div>
+                            <input type="hidden" id="modalEstadoCivil" name="estadoCivil" required>
+                        </div>
+                        
+                        <!-- Número do Celular -->
+                        <div class="form-group">
+                            <label for="modalCelular">Número do Celular</label>
+                            <input type="text" class="form-control" id="modalCelular" required placeholder="(99) 99999-9999">
+                        </div>
+                        
+                        <!-- Igreja em que Congrega -->
+                        <div class="form-group">
+                            <label for="modalIgrejaMembro">Igreja em que Congrega</label>
+                            <select class="form-control" id="modalIgrejaMembro" required></select>
+                        </div>
+                        
+                        <!-- Nome do Líder -->
+                        <div class="form-group">
+                            <label for="modalLidercelula">Nome do Líder</label>
+                            <select class="form-control" id="modalLidercelula" required disabled style="text-transform: uppercase;"></select>
+                        </div>
+                        
+                        <!-- Nome da Célula -->
+                        <div class="form-group">
+                            <label for="modalNomedacelula">Nome da Célula</label>
+                            <input type="text" class="form-control" id="modalNomedacelula" required readonly style="text-transform: uppercase;">
+                        </div>
+                        
+                        <!-- Arrolamento na Igreja -->
+                        <div class="form-group">
+                            <label>Arrolamento na Igreja</label>
+                            <div class="choice-chips">
+                                <div class="choice-chip" data-value="SOU MEMBRO">
+                                    <i class="fas fa-check-circle"></i>
+                                    Sou Membro
+                                </div>
+                                <div class="choice-chip" data-value="NÃO SOU MEMBRO">
+                                    <i class="fas fa-times-circle"></i>
+                                    Não Sou Membro
+                                </div>
+                            </div>
+                            <input type="hidden" id="modalArrolamento" name="arrolamento" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="salvarMembro">
+                        <i class="fas fa-save mr-1"></i>
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNIaO0le5Mn4UDxWX32YDoY_b4xNZikDg",
+            authDomain: "iebicelulas.firebaseapp.com",
+            projectId: "iebicelulas",
+            storageBucket: "iebicelulas.appspot.com",
+            messagingSenderId: "71775149511",
+            appId: "1:71775149511:web:bb2ce1a1872c9c7b7c7bb5"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let dadosMembros = [];
+        let editandoId = null;
+
+        // Função para logout
+        function logout() {
+            auth.signOut().then(() => {
+                // window.location.href = '../formlogin.html';
+            }).catch((error) => {
+                console.error('Erro ao fazer logout:', error);
+            });
+        }
+
+        // Função para carregar dados dos membros
+        async function carregarDados() {
+            try {
+                document.getElementById('membrosLoading').style.display = 'block';
+                
+                const snapshot = await db.collection('membros').get();
+                dadosMembros = [];
+                
+                snapshot.forEach(doc => {
+                    dadosMembros.push({ id: doc.id, ...doc.data() });
+                });
+
+                criarTabela();
+                carregarCamposFiltro();
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados dos membros:', error);
+                mostrarAlerta('Erro ao carregar dados dos membros', 'danger');
+            } finally {
+                document.getElementById('membrosLoading').style.display = 'none';
+            }
+        }
+
+        // Função para criar tabela
+        function criarTabela() {
+            const tabela = document.getElementById('membrosTabelaDados');
+            const thead = tabela.querySelector('thead tr');
+            const tbody = tabela.querySelector('tbody');
+            
+            if (dadosMembros.length === 0) {
+                thead.innerHTML = '<th>Nenhum dado encontrado</th>';
+                tbody.innerHTML = '<tr><td class="text-center">Nenhum registro encontrado</td></tr>';
+                return;
+            }
+
+            // Criar cabeçalho
+            const campos = Object.keys(dadosMembros[0]).filter(campo => campo !== 'id');
+            thead.innerHTML = campos.map(campo => `<th>${campo}</th>`).join('') + '<th>Ações</th>';
+
+            // Criar corpo da tabela
+            tbody.innerHTML = dadosMembros.map(item => {
+                const valores = campos.map(campo => `<td>${item[campo] || ''}</td>`).join('');
+                const acoes = `
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editarMembro('${item.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="excluirMembro('${item.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                return `<tr>${valores}${acoes}</tr>`;
+            }).join('');
+        }
+
+        // Função para carregar campos de filtro
+        function carregarCamposFiltro() {
+            const select = document.getElementById('membrosCampoFiltro');
+            
+            if (dadosMembros.length === 0) {
+                select.innerHTML = '<option value="">Nenhum campo disponível</option>';
+                return;
+            }
+
+            const campos = Object.keys(dadosMembros[0]).filter(campo => campo !== 'id');
+            select.innerHTML = '<option value="">Selecione um campo...</option>' +
+                campos.map(campo => `<option value="${campo}">${campo}</option>`).join('');
+        }
+
+        // Função para abrir modal de membro
+        function abrirModalMembro(dados = null) {
+            editandoId = dados ? dados.id : null;
+            
+            // Limpar seleções anteriores
+            document.querySelectorAll('#membroModal .choice-chip').forEach(chip => {
+                chip.classList.remove('selected');
+            });
+
+            if (dados) {
+                document.getElementById('membroModalLabel').textContent = 'Editar Membro';
+                preencherFormulario(dados);
+            } else {
+                document.getElementById('membroModalLabel').textContent = 'Adicionar Novo Membro';
+                limparFormulario();
+            }
+
+            carregarIgrejas();
+            $('#membroModal').modal('show');
+        }
+
+        // Função para editar membro
+        function editarMembro(id) {
+            const membro = dadosMembros.find(m => m.id === id);
+            abrirModalMembro(membro);
+        }
+
+        // Função para limpar formulário
+        function limparFormulario() {
+            document.getElementById('membroForm').reset();
+            document.querySelectorAll('#membroModal .choice-chip').forEach(chip => {
+                chip.classList.remove('selected');
+            });
+        }
+
+        // Função para preencher formulário
+        function preencherFormulario(dados) {
+            Object.keys(dados).forEach(campo => {
+                const elemento = document.getElementById('modal' + campo.charAt(0).toUpperCase() + campo.slice(1));
+                if (elemento) {
+                    elemento.value = dados[campo] || '';
+                }
+            });
+
+            // Selecionar choice chips
+            if (dados.sexo) {
+                const sexoChip = document.querySelector(`#membroModal .choice-chip[data-value="${dados.sexo}"]`);
+                if (sexoChip) sexoChip.classList.add('selected');
+            }
+
+            if (dados.estadocivil) {
+                const estadoCivilChip = document.querySelector(`#membroModal .choice-chip[data-value="${dados.estadocivil}"]`);
+                if (estadoCivilChip) estadoCivilChip.classList.add('selected');
+            }
+
+            if (dados.arrolamento) {
+                const arrolamentoChip = document.querySelector(`#membroModal .choice-chip[data-value="${dados.arrolamento}"]`);
+                if (arrolamentoChip) arrolamentoChip.classList.add('selected');
+            }
+        }
+
+        // Função para carregar igrejas
+        async function carregarIgrejas() {
+            try {
+                const snapshot = await db.collection('estruturacelula').get();
+                const igrejas = new Set();
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.nomeigreja) {
+                        igrejas.add(data.nomeigreja);
+                    }
+                });
+
+                const select = document.getElementById('modalIgrejaMembro');
+                select.innerHTML = '<option value="">Selecione uma igreja</option>' +
+                    Array.from(igrejas).sort().map(igreja => 
+                        `<option value="${igreja}">${igreja}</option>`
+                    ).join('');
+                    
+            } catch (error) {
+                console.error('Erro ao carregar igrejas:', error);
+            }
+        }
+
+        // Função para salvar membro
+        async function salvarMembro() {
+            try {
+                const dados = {
+                    nome: document.getElementById('modalNome').value,
+                    dtnasc: document.getElementById('modalDtnasc').value,
+                    email: document.getElementById('modalEmail').value,
+                    cep: document.getElementById('modalCep').value,
+                    bairro: document.getElementById('modalBairro').value,
+                    cidade: document.getElementById('modalCidade').value,
+                    uf: document.getElementById('modalUf').value,
+                    sexo: document.getElementById('modalSexo').value,
+                    estadocivil: document.getElementById('modalEstadoCivil').value,
+                    celular: document.getElementById('modalCelular').value,
+                    igrejamembro: document.getElementById('modalIgrejaMembro').value,
+                    lidercelula: document.getElementById('modalLidercelula').value,
+                    nomedacelula: document.getElementById('modalNomedacelula').value,
+                    arrolamento: document.getElementById('modalArrolamento').value
+                };
+
+                if (editandoId) {
+                    await db.collection('membros').doc(editandoId).update(dados);
+                    mostrarAlerta('Membro atualizado com sucesso!', 'success');
+                } else {
+                    await db.collection('membros').add(dados);
+                    mostrarAlerta('Membro adicionado com sucesso!', 'success');
+                }
+
+                $('#membroModal').modal('hide');
+                carregarDados();
+                
+            } catch (error) {
+                console.error('Erro ao salvar membro:', error);
+                mostrarAlerta('Erro ao salvar membro', 'danger');
+            }
+        }
+
+        // Função para excluir membro
+        async function excluirMembro(id) {
+            if (confirm('Tem certeza que deseja excluir este membro?')) {
+                try {
+                    await db.collection('membros').doc(id).delete();
+                    mostrarAlerta('Membro excluído com sucesso!', 'success');
+                    carregarDados();
+                } catch (error) {
+                    console.error('Erro ao excluir membro:', error);
+                    mostrarAlerta('Erro ao excluir membro', 'danger');
+                }
+            }
+        }
+
+        // Função para mostrar alerta
+        function mostrarAlerta(mensagem, tipo) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${mensagem}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Event listeners
+        document.getElementById('salvarMembro').addEventListener('click', salvarMembro);
+
+        // Choice chips
+        document.querySelectorAll('#membroModal .choice-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                const group = this.parentElement;
+                const hiddenInput = group.nextElementSibling;
+                
+                // Remove seleção anterior do grupo
+                group.querySelectorAll('.choice-chip').forEach(c => c.classList.remove('selected'));
+                
+                // Adiciona seleção atual
+                this.classList.add('selected');
+                hiddenInput.value = this.dataset.value;
+            });
+        });
+
+        // Filtros
+        document.getElementById('membrosCampoFiltro').addEventListener('change', function() {
+            const campo = this.value;
+            const valorInput = document.getElementById('membrosValorFiltro');
+            const datalist = document.getElementById('membrosValorFiltroOptions');
+            
+            if (campo && dadosMembros.length > 0) {
+                const valores = [...new Set(dadosMembros.map(item => item[campo]).filter(v => v))];
+                datalist.innerHTML = valores.map(valor => `<option value="${valor}">`).join('');
+                valorInput.disabled = false;
+            } else {
+                datalist.innerHTML = '';
+                valorInput.disabled = true;
+                valorInput.value = '';
+            }
+        });
+
+        document.getElementById('membrosValorFiltro').addEventListener('input', function() {
+            const campo = document.getElementById('membrosCampoFiltro').value;
+            const valor = this.value.toLowerCase();
+            
+            if (campo && valor) {
+                const dadosFiltrados = dadosMembros.filter(item => 
+                    (item[campo] || '').toLowerCase().includes(valor)
+                );
+                const dadosOriginais = dadosMembros;
+                dadosMembros = dadosFiltrados;
+                criarTabela();
+                dadosMembros = dadosOriginais;
+            } else {
+                criarTabela();
+            }
+        });
+
+        // Verificar autenticação e inicializar página
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                // Usuário está logado, carregar dados
+                carregarDados();
+            } else {
+                // Usuário não está logado, redirecionar para login
+                window.location.href = '../formlogin.html';
+            }
+        });
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // A verificação de autenticação será feita no onAuthStateChanged
+        });
+    </script>
+    <script src="../auth-check.js"></script>
+</body>
+</html>

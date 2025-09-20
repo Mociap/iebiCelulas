@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/botao-voltar.css">
+
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -259,23 +261,6 @@
             max-width: 180px;
         }
 
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background-color: #3498db;
-            color: #ffffff;
-            padding: 10px;
-            border-radius: 30px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            z-index: 1001;
-        }
-
         .node:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
@@ -311,17 +296,17 @@
         const db = firebase.firestore();
 
         if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-}
+            navigator.serviceWorker.register('./sw.js');
+        }
 
         function getImagePath(nome, tipo) {
             if (!nome || !tipo) {
-        return './assets/default.png';
-    }
+                return './assets/default.png';
+            }
             const nomeArquivo = nome.replace('/', '-');
             const path = `./assets/${tipo}/${nomeArquivo}.jpeg`;
-    console.log('Tentando carregar imagem:', path);
-    return path;
+            console.log('Tentando carregar imagem:', path);
+            return path;
         }
 
 
@@ -336,22 +321,22 @@
 
             if (tipo) {
                 console.log('Criando elemento de imagem para:', tipo);
-       
+
                 const img = document.createElement('img');
                 const imagePath = getImagePath(nome, tipo);
-        console.log('Caminho da imagem:', imagePath);
-       
+                console.log('Caminho da imagem:', imagePath);
+
                 img.src = getImagePath(nome, tipo);
                 img.className = 'profile-image';
                 img.onerror = function () {
                     console.log('Erro ao carregar imagem:', imagePath);
-            console.log('Tentando carregar imagem padrão:', './assets/default.png');
-           
+                    console.log('Tentando carregar imagem padrão:', './assets/default.png');
+
                     this.src = `./assets/default.png`;
                 };
-                img.onload = function() {
-            console.log('Imagem carregada com sucesso:', imagePath);
-        };
+                img.onload = function () {
+                    console.log('Imagem carregada com sucesso:', imagePath);
+                };
                 node.appendChild(img);
             }
 

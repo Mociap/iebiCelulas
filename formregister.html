@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Igreja Evangélica Batista</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="./assets/favico.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -126,7 +126,7 @@
 </head>
 <body>
     <div class="register-container">
-        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Intermares" class="logo-title">
+        <img src="./assets/LogoBranco.png" alt="Logo da IEBI" class="logo-title">
         <form id="registerForm">
             <div class="form-group">
                 <label for="name">Nome Completo (Conforme RG)</label>
@@ -268,7 +268,7 @@
                 } else {
                     console.log('Usuário não encontrado na coleção "membros"');
                     alert('Usuário não encontrado. Por favor, cadastre-se primeiro em uma célula antes de criar uma conta.');
-                    window.location.href = 'formCadMembros.html';
+                    window.location.href = '/Tela1_Index/formCadMembros.html';
                 }
             }).catch(erro => {
                 console.error('Erro ao verificar o nome:', erro);

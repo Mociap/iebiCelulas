@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estrutura da Célula</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../assets/favico.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./css/botao-voltar.css">
+    <link rel="stylesheet" href="../css/botao-voltar.css">
     
     <style>
         body {
@@ -165,11 +165,11 @@
 </head>
 
 <body>
-    <a href="frmRelatorios.html" class="back-button">
+    <a href="../Tela1_Index/frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
-        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <img src="../assets/LogoBranco.png" alt="Logo da IEBI">
     </div>
     <div class="container">
         <h2 class="text-center mb-4 font-weight-bold">Estrutura da Célula</h2>
@@ -205,7 +205,7 @@
         var bancoDeDados = firebase.firestore();
 
         function abrirEdicao(lider, nomecelula) {
-            window.location.href = `frmCadCelula.html?lider=${encodeURIComponent(lider)}&nomecelula=${encodeURIComponent(nomecelula)}`;
+            window.location.href = `../Tela1_Index/frmCadCelula.html?lider=${encodeURIComponent(lider)}&nomecelula=${encodeURIComponent(nomecelula)}`;
         }
 
         // Adicione este código após a inicialização do Firebase
@@ -293,14 +293,14 @@
                                 const cardElement = document.createElement('div');
                                 cardElement.className = 'card mb-2 leader-card';
                                 cardElement.innerHTML = `
-        <div class="card-body">
-            <h6 class="mb-1"><i class="fas fa-user"></i><b> Líder:</b> ${celula.lider}</h6>
-            <p class="mb-1" style="padding-left: 40px;"><b> Célula:</b> ${celula.nome}</p>
-            <p class="mb-1" style="padding-left: 40px;"><i class="far fa-calendar-alt"></i><b> Dia:</b> ${celula.dia || 'Não definido'}</p>
-            <p class="mb-1" style="padding-left: 40px;"><i class="far fa-clock"></i><b> Horário:</b> ${celula.horario || 'Não definido'}</p>
-            <p class="mb-0" style="padding-left: 40px;"><i class="fas fa-map-marker"></i><b> Local:</b> ${celula.local || 'Não definido'}</p>
-        </div>
-    `;
+                                    <div class="card-body">
+                                        <h6 class="mb-1"><i class="fas fa-user"></i><b> Líder:</b> ${celula.lider}</h6>
+                                        <p class="mb-1" style="padding-left: 40px;"><b> Célula:</b> ${celula.nome}</p>
+                                        <p class="mb-1" style="padding-left: 40px;"><i class="far fa-calendar-alt"></i><b> Dia:</b> ${celula.dia || 'Não definido'}</p>
+                                        <p class="mb-1" style="padding-left: 40px;"><i class="far fa-clock"></i><b> Horário:</b> ${celula.horario || 'Não definido'}</p>
+                                        <p class="mb-0" style="padding-left: 40px;"><i class="fas fa-map-marker"></i><b> Local:</b> ${celula.local || 'Não definido'}</p>
+                                    </div>
+                                    `;
                                 cardElement.addEventListener('click', () => abrirEdicao(celula.lider, celula.nome));
                                 supervisorBody.appendChild(cardElement);
                             });

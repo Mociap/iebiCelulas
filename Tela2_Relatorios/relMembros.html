@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Membros por Célula - Igreja Evangélica Batista Itapevi</title>
-    <link rel="shortcut icon" href="./3.ico" type="image/x-icon">
+    <title>Membros por Célula - IEBI</title>
+    <link rel="shortcut icon" href="../assets/favico.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <link rel="stylesheet" href="./css/botao-voltar.css">
+    <link rel="stylesheet" href="../css/botao-voltar.css">
 
     <style>
         body {
@@ -82,7 +82,6 @@
         }
 
         .back-button {
-
             background-color: #f1c40f;
         }
 
@@ -139,26 +138,26 @@
 </head>
 
 <body>
-    <a href="frmRelatorios.html" class="back-button">
+    <a href="../Tela1_Index/frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
-        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <img src="../assets/LogoBranco.png" alt="Logo da IEBI">
     </div>
     <div class="container">
         <h2 class="text-center mb-4 font-weight-bold">Membros por Célula</h2>
         <div class="divider"></div>
         <form id="relatorioForm">
-            <div class="form-group">
-                <label for="rede">Rede:</label>
+            <div class="form-group d-flex align-items-center">
+                <label for="rede" class="mb-0 mr-2">Coordenador:</label>
                 <select class="form-control" id="rede"
                     onchange="alterarCorRede(this.value); carregarSupervisores(this.value)">
                     <option value="">Selecione uma rede</option>
                     <!-- Opções serão preenchidas via JavaScript -->
                 </select>
             </div>
-            <div class="form-group">
-                <label for="supervisor">Supervisor:</label>
+            <div class="form-group d-flex align-items-center">
+                <label for="supervisor" class="mb-0 mr-2">Supervisor:</label>
                 <select class="form-control" id="supervisor" onchange="gerarTabela()">
                     <option value="Todos">Todos</option>
                     <!-- Opções serão preenchidas via JavaScript -->
@@ -215,31 +214,36 @@
         // Initialize Firestore
         var db = firebase.firestore();
 
-        // Função para preencher o dropdown de redes
-        function preencherRedes() {
-            const redeSelect = document.getElementById('rede');
-            db.collection("rede").orderBy("nomerede").get().then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    let rede = doc.data();
+        // Função para preencher o dropdown de Coordenadores
+        function preencherCoordenadores() {
+            const coordSelect = document.getElementById('rede'); // manteremos o mesmo id por enquanto
+            const coordenadores = JSON.parse(localStorage.getItem('coordenadores'));
+
+            // Para cada pastor no objeto coordenadores
+            for (const pastor in coordenadores) {
+                // Converter Set para Array e ordenar
+                const coordenadoresArray = coordenadores[pastor];
+                coordenadoresArray.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+                coordenadoresArray.forEach(coordenador => {
                     let option = document.createElement('option');
-                    option.value = rede.nomerede;
-                    option.textContent = rede.nomerede;
-                    redeSelect.appendChild(option);
+                    option.value = coordenador;
+                    option.textContent = coordenador;
+                    coordSelect.appendChild(option);
                 });
-            }).catch((error) => {
-                console.log("Erro ao buscar redes:", error);
-            });
+            }
         }
 
+
         // Função para carregar supervisores com base na rede selecionada
-        function carregarSupervisores(rede) {
+        function carregarSupervisores(coordenador) {
             document.getElementById('splash-screen').classList.add('show');
             const supervisorSelect = document.getElementById('supervisor');
             supervisorSelect.innerHTML = '<option value="Todos">Todos</option>';
 
-            if (rede) {
+            if (coordenador) {
                 db.collection("estruturacelula")
-                    .where("rede", "==", rede)
+                    .where("coordenador", "==", coordenador)
                     .get()
                     .then((querySnapshot) => {
                         const supervisores = new Set();
@@ -288,10 +292,10 @@
         // Função para gerar a tabela de membros
         async function gerarTabela() {
             document.getElementById('splash-screen').classList.add('show');
-            const rede = document.getElementById('rede').value;
+            const coordenador = document.getElementById('rede').value;
             const supervisor = document.getElementById('supervisor').value;
 
-            if (!rede) {
+            if (!coordenador) {
                 document.getElementById('splash-screen').classList.remove('show');
                 return;
             }
@@ -300,125 +304,119 @@
                 const tableBody = document.querySelector('#membrosTable tbody');
                 tableBody.innerHTML = '';
 
-                try {
-                    // Buscar células da rede selecionada
-                    let query = db.collection("estruturacelula").where("rede", "==", rede);
+                // Buscar células do coordenador selecionado
+                let query = db.collection("estruturacelula").where("coordenador", "==", coordenador);
 
-                    // Se um supervisor específico foi selecionado (diferente de "Todos"), adicione à query
-                    if (supervisor && supervisor !== "Todos") {
-                        query = query.where("supervisor", "==", supervisor);
-                    }
-
-                    const celulasSnapshot = await query.get();
-
-                    let celulas = [];
-
-                    for (const celulaDoc of celulasSnapshot.docs) {
-                        const celulaData = celulaDoc.data();
-                        const nomeLideres = celulaData.conclider;
-                        const supervisorCelula = celulaData.supervisor;
-
-                        // Buscar membros da célula
-                        const membrosSnapshot = await db.collection("membros")
-                            .where("rede", "==", rede)
-                            .where("lidercelula", "==", nomeLideres)
-                            .get();
-
-                        const membros = membrosSnapshot.docs.map(doc => doc.data().nome);
-                        membros.sort((a, b) => a.localeCompare(b, 'pt-BR'));
-                        const totalMembros = membros.length;
-
-                        celulas.push({
-                            rede: rede,
-                            supervisor: supervisorCelula,
-                            nomeLideres: nomeLideres,
-                            totalMembros: totalMembros,
-                            membros: membros
-                        });
-                    }
-
-                    // Ordenar as células
-                    celulas.sort((a, b) => {
-                        if (a.rede !== b.rede) return a.rede.localeCompare(b.rede, 'pt-BR');
-                        if (a.supervisor !== b.supervisor) return a.supervisor.localeCompare(b.supervisor, 'pt-BR');
-                        return a.nomeLideres.localeCompare(b.nomeLideres, 'pt-BR');
-                    });
-
-                    // Preencher a tabela com os dados ordenados
-                    celulas.forEach(celula => {
-                        const row = tableBody.insertRow();
-                        row.insertCell(0).textContent = celula.rede;
-                        row.insertCell(1).textContent = celula.supervisor;
-                        row.insertCell(2).textContent = celula.nomeLideres;
-                        row.insertCell(3).textContent = celula.totalMembros;
-
-                        if (celula.totalMembros > 0) {
-                            const membrosCell = row.insertCell(4);
-                            membrosCell.className = 'membros-lista';
-                            membrosCell.textContent = celula.membros.map(membro => `- ${membro}`).join('\n');
-                        } else {
-                            row.insertCell(4).textContent = 'Nenhum membro';
-                        }
-                    });
-
-                    document.getElementById('membrosTableContainer').style.display = 'block';
-
-                } catch (error) {
-                    console.error("Erro ao gerar tabela:", error);
+                // Se um supervisor específico foi selecionado
+                if (supervisor && supervisor !== "Todos") {
+                    query = query.where("supervisor", "==", supervisor);
                 }
 
-                setTimeout(() => {
-                    document.getElementById('splash-screen').classList.remove('show');
-                }, 1000);
+                const celulasSnapshot = await query.get();
+                let celulas = [];
+
+                for (const celulaDoc of celulasSnapshot.docs) {
+                    const celulaData = celulaDoc.data();
+                    const nomeLideres = celulaData.conclider;
+                    const supervisorCelula = celulaData.supervisor;
+                    const redeCelula = celulaData.rede;
+
+                    // Buscar membros da célula
+                    const membrosSnapshot = await db.collection("membros")
+                        .where("nomedacelula", "==", celulaData.nomecelula)
+                        .get();
+
+                    const membros = membrosSnapshot.docs.map(doc => doc.data().nome);
+                    membros.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+                    const totalMembros = membros.length;
+
+                    celulas.push({
+                        rede: redeCelula,
+                        coordenador: coordenador,
+                        supervisor: supervisorCelula,
+                        nomeLideres: nomeLideres,
+                        totalMembros: totalMembros,
+                        membros: membros
+                    });
+                }
+
+                // Ordenar as células
+                celulas.sort((a, b) => {
+                    if (a.supervisor !== b.supervisor) return a.supervisor.localeCompare(b.supervisor, 'pt-BR');
+                    return a.nomeLideres.localeCompare(b.nomeLideres, 'pt-BR');
+                });
+
+                // Atualizar cabeçalho da tabela
+                const headerRow = document.querySelector('#membrosTable thead tr');
+                headerRow.innerHTML = `
+                    <th>Rede</th>
+                    <th>Coordenador</th>
+                    <th>Supervisor</th>
+                    <th>Líderes</th>
+                    <th>Total de Membros</th>
+                    <th>Membros</th>
+                `;
+
+                // Preencher a tabela
+                celulas.forEach(celula => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = celula.rede;
+                    row.insertCell(1).textContent = celula.coordenador;
+                    row.insertCell(2).textContent = celula.supervisor;
+                    row.insertCell(3).textContent = celula.nomeLideres;
+                    row.insertCell(4).textContent = celula.totalMembros;
+
+                    if (celula.totalMembros > 0) {
+                        const membrosCell = row.insertCell(5);
+                        membrosCell.className = 'membros-lista';
+                        membrosCell.textContent = celula.membros.map(membro => `- ${membro}`).join('\n');
+                    } else {
+                        row.insertCell(5).textContent = 'Nenhum membro';
+                    }
+                });
+
+                document.getElementById('membrosTableContainer').style.display = 'block';
+
             } catch (error) {
                 console.error("Erro ao gerar tabela:", error);
+            } finally {
                 document.getElementById('splash-screen').classList.remove('show');
             }
         }
-
-
         // Função para exportar para Excel
         function exportToExcel() {
             const table = document.getElementById('membrosTable');
             const rows = Array.from(table.rows);
 
             let data = [];
+            data.push(['Rede', 'Coordenador', 'Supervisor', 'Nome da Célula', 'Total de Membros', 'Membro']);
 
-            // Cabeçalho
-            data.push(['Rede', 'Supervisor', 'Nome da Célula', 'Total de Membros', 'Membro']);
-
-            // Processar cada linha da tabela
             for (let i = 1; i < rows.length; i++) {
                 const cells = rows[i].cells;
                 const rede = cells[0].textContent;
-                const supervisor = cells[1].textContent;
-                const nomecelula = cells[2].textContent;
-                const totalMembros = cells[3].textContent;
-                const membros = cells[4].textContent.split('\n').map(m => m.trim().substring(2));
+                const coordenador = cells[1].textContent;
+                const supervisor = cells[2].textContent;
+                const nomecelula = cells[3].textContent;
+                const totalMembros = cells[4].textContent;
+                const membros = cells[5].textContent.split('\n').map(m => m.trim().substring(2));
 
-                // Adicionar uma linha para cada membro
                 membros.forEach((membro, index) => {
                     if (index === 0) {
-                        // Primeira linha da célula: incluir todas as informações
-                        data.push([rede, supervisor, nomecelula, totalMembros, membro]);
+                        data.push([rede, coordenador, supervisor, nomecelula, totalMembros, membro]);
                     } else {
-                        // Linhas subsequentes: deixar as primeiras colunas vazias
-                        data.push(['', '', '', '', membro]);
+                        data.push(['', '', '', '', '', membro]);
                     }
                 });
             }
 
-            // Criar planilha
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Membros por Célula");
-
-            // Gerar arquivo Excel
             XLSX.writeFile(wb, "membros_por_celula.xlsx");
         }
 
-        // Preencher as redes quando a página carregar
-        window.onload = preencherRedes;
+        // Preencher as coordenadores quando a página carregar
+        window.onload = preencherCoordenadores;
     </script>
 </body>
 

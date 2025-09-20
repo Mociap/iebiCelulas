@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="./css/botao-voltar.css">
+    
     <style>
         body {
             background-color: #f8f9fa;
@@ -76,34 +78,14 @@
         }
 
         .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
             background-color: #f1c40f;
-            color: #ffffff;
-            padding: 10px;
-            border-radius: 30px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            transition: all 0.3s ease;
-            z-index: 1001;
         }
 
         .back-button:hover {
             background-color: #f1c40f;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .back-button i {
-            margin-right: 0px;
-        }
-
-        #orgTable th,
+       #orgTable th,
         #orgTable td {
             vertical-align: middle;
         }
