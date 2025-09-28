@@ -756,7 +756,7 @@
                 document.getElementById('userRole').textContent = 'Administrador';
                 carregarDados('estruturacelula');
             } else {
-                window.location.href = '../formlogin.html';
+                // window.location.href = '../formlogin.html';
             }
         });
 
@@ -776,7 +776,7 @@
         // Função para logout
         window.logout = function() {
             auth.signOut().then(() => {
-                window.location.href = '../formlogin.html';
+                // window.location.href = '../formlogin.html';
             });
         };
 

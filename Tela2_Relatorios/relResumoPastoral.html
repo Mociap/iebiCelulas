@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="./css/botao-voltar.css">
+    <link rel="stylesheet" href="../css/botao-voltar.css">
 
     <style>
         body {
@@ -53,6 +53,14 @@
             background-color: #f8f9fa;
             border-radius: 10px;
             overflow-x: auto;
+        }
+
+        .back-button {
+            background-color: #db7734;
+        }
+
+        .back-button:hover {
+            background-color: #db7734;
         }
 
         .card-body .table {
@@ -110,13 +118,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 
@@ -129,13 +132,13 @@
             <p>Aguarde, carregando dados...</p>
         </div>
     </div>
-
-    <a href="frmRelatorios.html" class="back-button">
+    
+    <a href="..//Tela1_Index/frmRelatorios.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
 
     <div class="header">
-        <img src="./LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
+        <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
     </div>
 
     <div class="container container-fluid">
@@ -191,9 +194,36 @@
                                                     <th class="text-center align-middle">Qtd Células</th>
                                                     <th class="text-center align-middle">Qtd Líderes</th>
                                                     <th class="text-center align-middle">Qtd Membros</th>
+                                                    <th class="text-center align-middle">Qtd Reuniões</th>
+                                                    <th class="text-center align-middle">Total Oferta</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="tabelaResumo">
+                                                <!-- Os dados serão inseridos aqui via JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h4 class="mb-3 table-title text-center">Detalhes por Líderes</h4>
+                                        <table class="table table-striped table-bordered table-sm">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th class="text-center align-middle">Supervisor</th>
+                                                    <th class="text-center align-middle">Líderes</th>
+                                                    <th class="text-center align-middle">Qtd Membros</th>
+                                                    <th class="text-center align-middle">Qtd Reuniões</th>
+                                                    <th class="text-center align-middle">Total Oferta</th>
+                                                    <th class="text-center align-middle">Alimento</th>
+                                                    <th class="text-center align-middle">Kg Alimentos</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tabelaLideres">
                                                 <!-- Os dados serão inseridos aqui via JavaScript -->
                                             </tbody>
                                         </table>
@@ -479,15 +509,19 @@
         });
 
         function contarCelulasPorCoordenador() {
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
+            const lideresData = JSON.parse(localStorage.getItem('lideres'));
+            if (!lideresData || !lideresData['AUGUSTO / IVETE']) {
+                return {};
+            }
+            
+            const lideres = lideresData['AUGUSTO / IVETE'];
             const contagem = {};
 
-            for (const rede in lideres) {
-                lideres[rede].forEach(lider => {
-                    const coordenador = lider.coordenador || 'Não atribuído';
-                    contagem[coordenador] = (contagem[coordenador] || 0) + 1;
-                });
-            }
+            lideres.forEach(lider => {
+                const coordenador = lider.coordenador || 'Não atribuído';
+                contagem[coordenador] = (contagem[coordenador] || 0) + 1;
+            });
+            
             return contagem;
         }
 
@@ -530,8 +564,11 @@
                     try {
                         const nomecelulas = await obterNomeCelulas(lider.conclider);
                         const membrosCount = await contarMembros(nomecelulas);
+                        const reunioesCount = await contarReunioes(lider.conclider);
+                        const totalOferta = await somarOfertas(lider.conclider);
+                        const dadosAlimentos = await somarAlimentos(lider.conclider);
                         const coordenador = await obterCoordenador(lider.conclider);
-                        return { ...lider, nomecelulas, membrosCount, coordenador };
+                        return { ...lider, nomecelulas, membrosCount, reunioesCount, totalOferta, dadosAlimentos, coordenador };
                     } catch (erro) {
                         console.error(`Erro ao processar líder ${lider.conclider}:`, erro);
                         return lider;
@@ -570,6 +607,159 @@
             return querySnapshot.size;
         }
 
+
+
+        async function contarReunioes(conclider) {
+            if (!conclider) return 0;
+            
+            try {
+                const lideres = conclider.split(' / ');
+                const anoAtual = new Date().getFullYear();
+                const reunioesRef = collection(bancoDeDados, "reuniao");
+                
+                // Buscar todas as reuniões dos líderes
+                const q = query(reunioesRef, where("lider", "in", lideres));
+                const querySnapshot = await getDocs(q);
+                
+                // Filtrar por ano atual
+                let count = 0;
+                querySnapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    // Verificar se o ano corresponde (como string ou número)
+                    if (data.ano == anoAtual || data.ano == anoAtual.toString()) {
+                        count++;
+                    }
+                });
+                
+                return count;
+            } catch (error) {
+                console.error('Erro na função contarReunioes:', error);
+                return 0;
+            }
+        }
+
+        async function somarOfertas(conclider) {
+            if (!conclider) return 0;
+            
+            try {
+                const lideres = conclider.split(' / ');
+                const anoAtual = new Date().getFullYear();
+                const reunioesRef = collection(bancoDeDados, "reuniao");
+                
+                // Buscar todas as reuniões dos líderes
+                const q = query(reunioesRef, where("lider", "in", lideres));
+                const querySnapshot = await getDocs(q);
+                
+                // Somar ofertas do ano atual
+                let totalOferta = 0;
+                querySnapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    // Verificar se o ano corresponde (como string ou número)
+                    if (data.ano == anoAtual || data.ano == anoAtual.toString()) {
+                        // Somar a oferta se existir e for um número válido
+                        const oferta = parseFloat(data.oferta) || 0;
+                        totalOferta += oferta;
+                    }
+                });
+                
+                return totalOferta;
+            } catch (error) {
+                console.error('Erro na função somarOfertas:', error);
+                return 0;
+            }
+        }
+
+        async function somarAlimentos(conclider) {
+            if (!conclider) return { tiposAlimento: [], totalKg: 0 };
+            
+            try {
+                const lideres = conclider.split(' / ');
+                const anoAtual = new Date().getFullYear();
+                const reunioesRef = collection(bancoDeDados, "reuniao");
+                
+                // Buscar todas as reuniões dos líderes
+                const q = query(reunioesRef, where("lider", "in", lideres));
+                const querySnapshot = await getDocs(q);
+                
+                // Somar alimentos do ano atual
+                let totalKg = 0;
+                const tiposAlimentoSet = new Set();
+                
+                querySnapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    // Verificar se o ano corresponde (como string ou número)
+                    if (data.ano == anoAtual || data.ano == anoAtual.toString()) {
+                        // Adicionar tipo de alimento se existir
+                        if (data.tipoAlimento && data.tipoAlimento.trim() !== '') {
+                            tiposAlimentoSet.add(data.tipoAlimento.trim());
+                        }
+                        
+                        // Somar quantidade de alimento se existir e for um número válido
+                        const qtdAlimento = parseFloat(data.qtdAlimento) || 0;
+                        totalKg += qtdAlimento;
+                    }
+                });
+                
+                return {
+                    tiposAlimento: Array.from(tiposAlimentoSet),
+                    totalKg: totalKg
+                };
+            } catch (error) {
+                console.error('Erro na função somarAlimentos:', error);
+                return { tiposAlimento: [], totalKg: 0 };
+            }
+        }
+
+        function preencherTabelaLideres(lideres) {
+            const tbody = document.querySelector('#tabelaLideres');
+            tbody.innerHTML = '';
+
+            // Iterar por cada rede/supervisor
+            for (const supervisor in lideres) {
+                const lideresDoSupervisor = lideres[supervisor];
+                
+                // Para cada líder do supervisor
+                lideresDoSupervisor.forEach((lider, index) => {
+                    const row = tbody.insertRow();
+                    
+                    // Supervisor (apenas na primeira linha do supervisor)
+                    const cellSupervisor = row.insertCell(0);
+                    if (index === 0) {
+                        cellSupervisor.textContent = supervisor;
+                        cellSupervisor.rowSpan = lideresDoSupervisor.length;
+                    } else {
+                        cellSupervisor.style.display = 'none';
+                    }
+                    
+                    // Líderes
+                    const cellLider = row.insertCell(1);
+                    cellLider.textContent = lider.conclider || '';
+                    
+                    // Qtd Membros
+                    const cellMembros = row.insertCell(2);
+                    cellMembros.textContent = lider.membrosCount || 0;
+                    
+                    // Qtd Reuniões
+                    const cellReunioes = row.insertCell(3);
+                    cellReunioes.textContent = lider.reunioesCount || 0;
+                    
+                    // Total Oferta
+                    const cellOferta = row.insertCell(4);
+                    cellOferta.textContent = formatarMoeda(lider.totalOferta || 0);
+                    
+                    // Alimento (tipos)
+                    const cellAlimento = row.insertCell(5);
+                    const tiposAlimento = lider.dadosAlimentos?.tiposAlimento || [];
+                    cellAlimento.textContent = tiposAlimento.length > 0 ? tiposAlimento.join(', ') : '-';
+                    
+                    // Kg Alimentos
+                    const cellKgAlimentos = row.insertCell(6);
+                    const totalKg = lider.dadosAlimentos?.totalKg || 0;
+                    cellKgAlimentos.textContent = totalKg > 0 ? `${totalKg.toFixed(2)} kg` : '0 kg';
+                });
+            }
+        }
+
         // Chame esta função após o carregamento da página
         document.addEventListener('DOMContentLoaded', async function () {
             //Atualizar Localstorage
@@ -601,47 +791,69 @@
 
             console.log('DOM carregado, iniciando preenchimento das tabelas');
             preencherTabelaResumo();
+            preencherTabelaLideres(lideresAtualizados);
             console.log('Preenchimento das tabelas concluído');
         });
+        
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor || 0);
+        }
+        
         function preencherTabelaResumo() {
-            const lideres = JSON.parse(localStorage.getItem('lideres'))['AUGUSTO / IVETE'] || [];
+            const lideresData = JSON.parse(localStorage.getItem('lideres'));
+            if (!lideresData || !lideresData['AUGUSTO / IVETE']) {
+                console.log('Dados não encontrados no localStorage');
+                return;
+            }
+            const lideres = lideresData['AUGUSTO / IVETE'];
             const tabelaBody = document.getElementById('tabelaResumo');
 
             let dadosTabela = [];
             let totalCelulas = 0;
             let totalLideres = 0;
             let totalMembros = 0;
+            let totalReunioes = 0;
+            let totalOfertas = 0;
 
             // Agrupa por supervisor
             const supervisoresMap = new Map();
-
+            
             lideres.forEach(lider => {
                 const supervisor = lider.supervisor;
                 const coordenador = lider.coordenador;
-
+                
                 if (!supervisoresMap.has(supervisor)) {
                     supervisoresMap.set(supervisor, {
                         coordenador,
                         supervisor,
                         qtdCelulas: 0,
                         qtdLideres: 0,
-                        qtdMembros: 0
+                        qtdMembros: 0,
+                        qtdReunioes: 0,
+                        qtdOfertas: 0
                     });
                 }
-
+                
                 const dados = supervisoresMap.get(supervisor);
                 dados.qtdCelulas++;
                 dados.qtdLideres += lider.conclider ? lider.conclider.split('/').length : 0;
                 dados.qtdMembros += lider.membrosCount || 0;
+                dados.qtdReunioes += lider.reunioesCount || 0;
+                dados.qtdOfertas += lider.totalOferta || 0;
             });
 
             dadosTabela = Array.from(supervisoresMap.values());
-
+            
             // Calcula totais
             dadosTabela.forEach(dados => {
                 totalCelulas += dados.qtdCelulas;
                 totalLideres += dados.qtdLideres;
                 totalMembros += dados.qtdMembros;
+                totalReunioes += dados.qtdReunioes;
+                totalOfertas += dados.qtdOfertas;
             });
 
             // Ordena e renderiza a tabela
@@ -654,7 +866,7 @@
 
             tabelaBody.innerHTML = '';
 
-            dadosTabela.forEach(({ coordenador, supervisor, qtdCelulas, qtdLideres, qtdMembros }) => {
+            dadosTabela.forEach(({ coordenador, supervisor, qtdCelulas, qtdLideres, qtdMembros, qtdReunioes, qtdOfertas }) => {
                 const row = `
                     <tr>
                         <td class="align-middle">${coordenador}</td>
@@ -662,6 +874,8 @@
                         <td class="text-center align-middle">${qtdCelulas}</td>
                         <td class="text-center align-middle">${qtdLideres}</td>
                         <td class="text-center align-middle">${qtdMembros}</td>
+                        <td class="text-center align-middle">${qtdReunioes}</td>
+                        <td class="text-center align-middle">${formatarMoeda(qtdOfertas)}</td>
                     </tr>
                 `;
                 tabelaBody.innerHTML += row;
@@ -674,11 +888,13 @@
                 <td class="text-center align-middle font-weight-bold">${totalCelulas}</td>
                 <td class="text-center align-middle font-weight-bold">${totalLideres}</td>
                 <td class="text-center align-middle font-weight-bold">${totalMembros}</td>
+                <td class="text-center align-middle font-weight-bold">${totalReunioes}</td>
+                <td class="text-center align-middle font-weight-bold">${formatarMoeda(totalOfertas)}</td>
             `;
-            // Após preencher a tabela, remova o splash screen
-            document.getElementById('splash-screen').classList.remove('show');
-        }
-
+        // Após preencher a tabela, remova o splash screen
+    document.getElementById('splash-screen').classList.remove('show');
+        } 
+        
         const coresRedes = {
             'VERMELHA': '#FF0101',
             'VERDE': '#008000',

@@ -165,7 +165,7 @@
 </head>
 
 <body>
-    <a href="../Tela1_Index/frmRelatorios.html" class="back-button">
+    <a href="../Cadastros/frmCadCelula.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="header">
@@ -205,7 +205,7 @@
         var bancoDeDados = firebase.firestore();
 
         function abrirEdicao(lider, nomecelula) {
-            window.location.href = `../Tela1_Index/frmCadCelula.html?lider=${encodeURIComponent(lider)}&nomecelula=${encodeURIComponent(nomecelula)}`;
+            window.location.href = `../Cadastros/frmCadCelula.html?lider=${encodeURIComponent(lider)}&nomecelula=${encodeURIComponent(nomecelula)}`;
         }
 
         // Adicione este código após a inicialização do Firebase
@@ -243,6 +243,13 @@
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    
+                    // Verificar se os campos obrigatórios existem
+                    if (!data.Pastor || !data.coordenador || !data.supervisor) {
+                        console.warn('Documento com campos obrigatórios faltando:', doc.id, data);
+                        return; // Pular este documento
+                    }
+                    
                     const pastorKey = data.Pastor.replace(/[^a-zA-Z0-9]/g, '');
                     const coordenadorKey = data.coordenador.replace(/[^a-zA-Z0-9]/g, '');
                     const supervisorKey = data.supervisor.replace(/[^a-zA-Z0-9]/g, '');
