@@ -196,6 +196,8 @@
                                                     <th class="text-center align-middle">Qtd Membros</th>
                                                     <th class="text-center align-middle">Qtd Reuniões</th>
                                                     <th class="text-center align-middle">Total Oferta</th>
+                                                    <th class="text-center align-middle">Alimento</th>
+                                                    <th class="text-center align-middle">Kg Alimentos</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="tabelaResumo">
@@ -817,6 +819,8 @@
             let totalMembros = 0;
             let totalReunioes = 0;
             let totalOfertas = 0;
+            let totalTiposAlimentos = new Set();
+            let totalQtdAlimentos = 0;
 
             // Agrupa por supervisor
             const supervisoresMap = new Map();
@@ -833,7 +837,9 @@
                         qtdLideres: 0,
                         qtdMembros: 0,
                         qtdReunioes: 0,
-                        qtdOfertas: 0
+                        qtdOfertas: 0,
+                        tiposAlimentos: new Set(),
+                        qtdAlimentos: 0
                     });
                 }
                 
@@ -843,6 +849,14 @@
                 dados.qtdMembros += lider.membrosCount || 0;
                 dados.qtdReunioes += lider.reunioesCount || 0;
                 dados.qtdOfertas += lider.totalOferta || 0;
+                
+                // Adiciona dados de alimentos
+                if (lider.dadosAlimentos) {
+                    if (lider.dadosAlimentos.tiposAlimentos) {
+                        lider.dadosAlimentos.tiposAlimentos.forEach(tipo => dados.tiposAlimentos.add(tipo));
+                    }
+                    dados.qtdAlimentos += lider.dadosAlimentos.qtdAlimentos || 0;
+                }
             });
 
             dadosTabela = Array.from(supervisoresMap.values());
@@ -854,6 +868,8 @@
                 totalMembros += dados.qtdMembros;
                 totalReunioes += dados.qtdReunioes;
                 totalOfertas += dados.qtdOfertas;
+                dados.tiposAlimentos.forEach(tipo => totalTiposAlimentos.add(tipo));
+                totalQtdAlimentos += dados.qtdAlimentos;
             });
 
             // Ordena e renderiza a tabela
@@ -866,7 +882,8 @@
 
             tabelaBody.innerHTML = '';
 
-            dadosTabela.forEach(({ coordenador, supervisor, qtdCelulas, qtdLideres, qtdMembros, qtdReunioes, qtdOfertas }) => {
+            dadosTabela.forEach(({ coordenador, supervisor, qtdCelulas, qtdLideres, qtdMembros, qtdReunioes, qtdOfertas, tiposAlimentos, qtdAlimentos }) => {
+                const tiposAlimentosTexto = Array.from(tiposAlimentos).join(', ') || 'Nenhum';
                 const row = `
                     <tr>
                         <td class="align-middle">${coordenador}</td>
@@ -876,6 +893,8 @@
                         <td class="text-center align-middle">${qtdMembros}</td>
                         <td class="text-center align-middle">${qtdReunioes}</td>
                         <td class="text-center align-middle">${formatarMoeda(qtdOfertas)}</td>
+                        <td class="text-center align-middle">${tiposAlimentosTexto}</td>
+                        <td class="text-center align-middle">${qtdAlimentos.toFixed(2)} kg</td>
                     </tr>
                 `;
                 tabelaBody.innerHTML += row;
@@ -883,6 +902,7 @@
 
             const linhaTotalGeral = tabelaBody.insertRow();
             linhaTotalGeral.className = 'thead-dark text-white bg-dark';
+            const totalTiposAlimentosTexto = Array.from(totalTiposAlimentos).join(', ') || 'Nenhum';
             linhaTotalGeral.innerHTML = `
                 <td colspan="2" class="text-center align-middle font-weight-bold">Total Geral:</td>
                 <td class="text-center align-middle font-weight-bold">${totalCelulas}</td>
@@ -890,6 +910,8 @@
                 <td class="text-center align-middle font-weight-bold">${totalMembros}</td>
                 <td class="text-center align-middle font-weight-bold">${totalReunioes}</td>
                 <td class="text-center align-middle font-weight-bold">${formatarMoeda(totalOfertas)}</td>
+                <td class="text-center align-middle font-weight-bold">${totalTiposAlimentosTexto}</td>
+                <td class="text-center align-middle font-weight-bold">${totalQtdAlimentos.toFixed(2)} kg</td>
             `;
         // Após preencher a tabela, remova o splash screen
     document.getElementById('splash-screen').classList.remove('show');
