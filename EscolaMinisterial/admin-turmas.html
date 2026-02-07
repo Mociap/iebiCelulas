@@ -363,7 +363,7 @@
                 }
 
                 // Ordenar por nome da turma
-                turmas.sort((a, b) => a.nomeTurma.localeCompare(b.nomeTurma));
+                turmas.sort((a, b) => b.nomeTurma.localeCompare(a.nomeTurma));
 
                 turmas.forEach(turma => {
                     const tr = document.createElement('tr');

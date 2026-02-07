@@ -387,10 +387,13 @@
             db.collection('cursosTurmas')
                 .get()
                 .then(snapshot => {
-                    const turmas = new Set();
+                    let turmas = [];
                     snapshot.forEach(doc => {
-                        turmas.add(doc.data().nomeTurma);
+                        turmas.push(doc.data().nomeTurma);
                     });
+                    
+                    // Remover duplicatas e ordenar de Z a A
+                    turmas = [...new Set(turmas)].sort((a, b) => b.localeCompare(a));
 
                     const selectTurma = document.getElementById('filtroTurma');
                     turmas.forEach(turma => {
@@ -399,6 +402,13 @@
                         option.textContent = turma;
                         selectTurma.appendChild(option);
                     });
+
+                    // Selecionar automaticamente a primeira turma (última em ordem alfabética)
+                    if (turmas.length > 0) {
+                        selectTurma.value = turmas[0];
+                        // Disparar o evento de mudança para carregar os dados filtrados
+                        aplicarFiltros();
+                    }
                 });
 
             // Carregar disciplinas para filtro

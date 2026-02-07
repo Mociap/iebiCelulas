@@ -1232,8 +1232,8 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="modalSupervisor">Supervisor</label>
-                                            <input type="text" class="form-control" id="modalSupervisor" readonly>
+                                            <label for="modalSupervisorDisplay">Supervisor</label>
+                                            <input type="text" class="form-control" id="modalSupervisorDisplay" readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -1429,10 +1429,10 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover" id="reuniaoAtividadeTabela">
                                 <thead class="table-dark">
                                     <tr>
                                         <th>Tipo</th>
+                                        <th>Igreja</th>
                                         <th>Líder</th>
                                         <th>Data</th>
                                         <th>Dias Atrás</th>
@@ -1884,13 +1884,19 @@
             });
             
             // Mostrar a seção selecionada
-            document.getElementById(sectionId).classList.add('active');
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
             
             // Atualizar links ativos no menu
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.classList.remove('active');
             });
-            document.querySelector(`.nav-link[href="#${sectionId}"]`).classList.add('active');
+            const targetLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
             
             // Carregar dados se for uma coleção
             if (sectionId !== 'dashboard') {
@@ -2151,6 +2157,11 @@
             const tabelaBody = document.getElementById('reuniaoAtividadeCorpo');
             const contadorElement = document.getElementById('reuniaoContador');
             
+            if (!tabelaBody) {
+                console.error('Elemento reuniaoAtividadeCorpo não encontrado');
+                return;
+            }
+            
             // Mostrar loading
             tabelaBody.innerHTML = '<tr><td colspan="5" class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div> Carregando...</td></tr>';
             
@@ -2190,6 +2201,7 @@
                         html += `
                             <tr>
                                 <td><span class="badge bg-primary">Reunião</span></td>
+                                <td>${dados.igreja || 'N/A'}</td>
                                 <td>${dados.lider || 'N/A'}</td>
                                 <td>${dataFormatada}</td>
                                 <td>${diffDays} dia${diffDays !== 1 ? 's' : ''} atrás</td>
@@ -3736,7 +3748,7 @@
             document.getElementById('modalCoordenador').value = '';
             document.getElementById('modalCoordenador1').value = '';
             document.getElementById('modalCoordenador2').value = '';
-            document.getElementById('modalSupervisor').value = '';
+            document.getElementById('modalSupervisorDisplay').value = '';
             document.getElementById('modalSupervisor1').value = '';
             document.getElementById('modalSupervisor2').value = '';
             document.getElementById('modalConclider').value = '';
@@ -4036,7 +4048,7 @@
         function atualizarCampoSupervisorModal() {
             var supervisor1 = document.getElementById('modalSupervisor1').value.trim();
             var supervisor2 = document.getElementById('modalSupervisor2').value.trim();
-            var campoSupervisor = document.getElementById('modalSupervisor');
+            var campoSupervisor = document.getElementById('modalSupervisorDisplay');
 
             var nomeSupervisor1 = supervisor1.split(' ')[0];
             var nomeSupervisor2 = supervisor2.split(' ')[0];
@@ -4082,7 +4094,7 @@
             document.getElementById('modalCoordenador').value = dados.coordenador || '';
             document.getElementById('modalCoordenador1').value = dados.coordenador1 || '';
             document.getElementById('modalCoordenador2').value = dados.coordenador2 || '';
-            document.getElementById('modalSupervisor').value = dados.supervisor || '';
+            document.getElementById('modalSupervisorDisplay').value = dados.supervisor || '';
             document.getElementById('modalSupervisor1').value = dados.supervisor1 || '';
             document.getElementById('modalSupervisor2').value = dados.supervisor2 || '';
             document.getElementById('modalConclider').value = dados.conclider || '';
@@ -4113,7 +4125,7 @@
                 coordenador: document.getElementById('modalCoordenador').value,
                 coordenador1: document.getElementById('modalCoordenador1').value.toUpperCase(),
                 coordenador2: document.getElementById('modalCoordenador2').value.toUpperCase(),
-                supervisor: document.getElementById('modalSupervisor').value,
+                supervisor: document.getElementById('modalSupervisorDisplay').value,
                 supervisor1: document.getElementById('modalSupervisor1').value.toUpperCase(),
                 supervisor2: document.getElementById('modalSupervisor2').value.toUpperCase(),
                 conclider: document.getElementById('modalConclider').value,
