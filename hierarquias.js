@@ -84,11 +84,19 @@ const hierarquias = {
             'inscricoes'
         ]
     },
+
+        Líder: {
+    },
+
+        LÍDER: {
+    },
+    
     Membro: {
         nivel: 0,
         permissoes: [
             'organograma',
             'indicadores',
+            'relatorioMembros',
             'dadosReunioes',
 
             // Escola Ministerial frmEM

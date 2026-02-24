@@ -9,11 +9,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <link rel="stylesheet" href="../css/botao-voltar.css">
     
     <style>
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .header img {
+            max-width: 200px;
         }
         
 
@@ -175,19 +188,15 @@
     </style>
 </head>
 <body>
+    <a href="../Tela1_Index/frmRelatorios.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    
+    <div class="header">
+        <img src="../assets/LogoBranco.png" alt="Logo da IEBI">
+    </div>
+
     <div class="container-fluid">
-        <!-- Header -->
-        <div class="row bg-primary text-white py-3 mb-4">
-            <div class="col-md-6">
-                <h4 class="mb-0">iebiCelulas - Administração de Membros</h4>
-            </div>
-            <div class="col-md-6 text-end">
-                <span id="userName">Usuário</span> | <span id="userRole">Função</span>
-                <button class="btn btn-outline-light btn-sm ms-3" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </button>
-            </div>
-        </div>
 
         <!-- Conteúdo Principal -->
         <div class="container-fluid">
@@ -239,7 +248,7 @@
                         </div>
                     </div>
                     <div class="row mt-3">
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <div class="d-flex">
                                 <button class="btn btn-primary shadow-sm mr-2" onclick="abrirModalMembro()">
                                     <i class="fas fa-plus mr-2"></i>
@@ -251,6 +260,14 @@
                                 <button id="btnCopiarMembros" class="btn btn-secondary">
                                     <i class="fas fa-copy mr-1"></i> Copiar
                                 </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="filtroBusca" placeholder="Buscar membro por nome, email ou celular...">
                             </div>
                         </div>
                     </div>
@@ -270,7 +287,7 @@
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="fas fa-users mr-2"></i>
-                        Membros das Células
+                        <span id="tituloTabelaMembros">Qtd de Membros: 0</span>
                     </h5>
                     <small class="text-muted">
                         <i class="fas fa-info-circle mr-1"></i>
@@ -460,7 +477,9 @@
         };
 
         // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
         const auth = firebase.auth();
 
@@ -470,6 +489,7 @@
         let igrejaSelecionadaEdicao = null;
         let liderSelecionadoEdicao = null;
         let mapaLiderParaCelula = {};
+        let mapaEstruturaCelulas = {}; // Variável global para armazenar estrutura
 
         // Função para logout
         function logout() {
@@ -492,23 +512,52 @@
                 });
                 
                 const estruturaSnapshot = await db.collection('estruturacelula').get();
-                const mapaCelulas = {};
+                mapaEstruturaCelulas = {}; // Limpa e repopula a global
                 
                 estruturaSnapshot.forEach(doc => {
                     const data = doc.data();
-                    const chave = (data.nomecelula || '').toUpperCase();
-                    if (chave && !mapaCelulas[chave]) {
-                        mapaCelulas[chave] = {
+                    
+                    // Mapeia por nome da célula
+                    const chaveCelula = (data.nomecelula || '').toUpperCase().trim();
+                    if (chaveCelula && !mapaEstruturaCelulas[chaveCelula]) {
+                        mapaEstruturaCelulas[chaveCelula] = {
                             coordenador: data.coordenador || '',
                             supervisor: data.supervisor || '',
                             rede: data.rede || ''
                         };
                     }
+                    
+                    // Mapeia por nome dos líderes (lider1, lider2, lider3, conclider)
+                    const lideres = [data.nomelider1, data.nomelider2, data.nomelider3, data.conclider];
+                    lideres.forEach(lider => {
+                        if (lider) {
+                            const chaveLider = lider.toUpperCase().trim();
+                            // Se já existe, não sobrescreve (prioridade para o primeiro encontro ou lógica específica se necessário)
+                            if (!mapaEstruturaCelulas[chaveLider]) {
+                                mapaEstruturaCelulas[chaveLider] = {
+                                    coordenador: data.coordenador || '',
+                                    supervisor: data.supervisor || '',
+                                    rede: data.rede || ''
+                                };
+                            }
+                        }
+                    });
                 });
                 
                 dadosMembros = dadosMembros.map(membro => {
-                    const chaveCelula = (membro.nomedacelula || '').toUpperCase();
-                    const infoCelula = mapaCelulas[chaveCelula] || {};
+                    // Tenta buscar primeiro pelo nome do líder
+                    const chaveLider = (membro.lidercelula || '').toUpperCase().trim();
+                    let infoCelula = mapaEstruturaCelulas[chaveLider];
+
+                    // Se não achar pelo líder, tenta pelo nome da célula
+                    if (!infoCelula) {
+                        const chaveCelula = (membro.nomedacelula || '').toUpperCase().trim();
+                        infoCelula = mapaEstruturaCelulas[chaveCelula];
+                    }
+
+                    // Se ainda não achou, objeto vazio
+                    infoCelula = infoCelula || {};
+
                     return {
                         ...membro,
                         coordenador: infoCelula.coordenador || '',
@@ -534,6 +583,11 @@
             const tbody = tabela.querySelector('tbody');
             const origem = lista && Array.isArray(lista) ? lista : dadosMembros;
             const subtotalEl = document.getElementById('membrosSubtotal');
+            const tituloTabelaEl = document.getElementById('tituloTabelaMembros');
+            
+            if (tituloTabelaEl) {
+                tituloTabelaEl.textContent = `Qtd de Membros: ${origem ? origem.length : 0}`;
+            }
             
             if (!origem || origem.length === 0) {
                 thead.innerHTML = '<th>Nenhum dado encontrado</th>';
@@ -635,6 +689,19 @@
 
         function inicializarFiltrosMembros() {
             preencherCoordenadoresMembros();
+
+            // Adicionar event listeners para os filtros
+            document.getElementById('filtroCoordenador').addEventListener('change', function() {
+                carregarSupervisoresMembros();
+            });
+
+            document.getElementById('filtroSupervisao').addEventListener('change', function() {
+                carregarCelulasMembros();
+            });
+
+            document.getElementById('filtroCelula').addEventListener('change', function() {
+                aplicarFiltrosMembros();
+            });
         }
 
         function preencherCoordenadoresMembros() {
@@ -642,16 +709,19 @@
             const selectSupervisao = document.getElementById('filtroSupervisao');
             const selectCelula = document.getElementById('filtroCelula');
 
-            selectCoordenador.innerHTML = '<option value="">Todos os Coordenadores</option>';
+            // Limpa supervisões e células imediatamente
             selectSupervisao.innerHTML = '<option value="">Todas as Supervisões</option>';
             selectCelula.innerHTML = '<option value="">Todas as Células</option>';
 
             db.collection('estruturacelula').get().then(querySnapshot => {
+                // Limpa coordenadores dentro do callback para evitar duplicação em race conditions
+                selectCoordenador.innerHTML = '<option value="">Todos os Coordenadores</option>';
+                
                 const coordenadores = new Set();
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.coordenador) {
-                        coordenadores.add(data.coordenador);
+                        coordenadores.add(data.coordenador.trim());
                     }
                 });
 
@@ -669,11 +739,7 @@
         function carregarSupervisoresMembros() {
             const coordenadorEscolhido = document.getElementById('filtroCoordenador').value;
             const selectSupervisao = document.getElementById('filtroSupervisao');
-            const selectCelula = document.getElementById('filtroCelula');
-
-            selectSupervisao.innerHTML = '<option value="">Todas as Supervisões</option>';
-            selectCelula.innerHTML = '<option value="">Todas as Células</option>';
-
+            
             let query = db.collection('estruturacelula');
 
             if (coordenadorEscolhido) {
@@ -681,26 +747,29 @@
             }
 
             query.get().then(querySnapshot => {
+                // Limpa supervisões dentro do callback para evitar duplicação
+                selectSupervisao.innerHTML = '<option value="">Todas as Supervisões</option>';
+
                 const supervisores = new Set();
 
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.supervisor) {
-                        supervisores.add(data.supervisor);
+                        supervisores.add(data.supervisor.trim());
                     }
                 });
 
-                const supervisoresOrdenados = Array.from(supervisores).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+                const supervisoresArray = Array.from(supervisores).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
-                supervisoresOrdenados.forEach(supervisor => {
+                supervisoresArray.forEach(supervisor => {
                     const option = document.createElement('option');
                     option.value = supervisor;
                     option.textContent = supervisor;
                     selectSupervisao.appendChild(option);
                 });
 
-                carregarCelulasMembros();
-                aplicarFiltrosMembros();
+                // Após carregar supervisores, atualiza células e aplica filtros
+                carregarCelulasMembros(); 
             });
         }
 
@@ -708,8 +777,6 @@
             const coordenadorEscolhido = document.getElementById('filtroCoordenador').value;
             const supervisorEscolhido = document.getElementById('filtroSupervisao').value;
             const selectCelula = document.getElementById('filtroCelula');
-
-            selectCelula.innerHTML = '<option value="">Todas as Células</option>';
 
             let query = db.collection('estruturacelula');
 
@@ -722,18 +789,21 @@
             }
 
             query.get().then(querySnapshot => {
+                // Limpa células dentro do callback para evitar duplicação
+                selectCelula.innerHTML = '<option value="">Todas as Células</option>';
+
                 const celulas = new Set();
 
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.nomecelula) {
-                        celulas.add(data.nomecelula);
+                        celulas.add(data.nomecelula.trim());
                     }
                 });
 
-                const celulasOrdenadas = Array.from(celulas).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+                const celulasArray = Array.from(celulas).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
-                celulasOrdenadas.forEach(celula => {
+                celulasArray.forEach(celula => {
                     const option = document.createElement('option');
                     option.value = celula;
                     option.textContent = celula;
@@ -748,6 +818,7 @@
             const coordenador = document.getElementById('filtroCoordenador').value;
             const supervisao = document.getElementById('filtroSupervisao').value;
             const celula = document.getElementById('filtroCelula').value;
+            const busca = (document.getElementById('filtroBusca').value || '').toLowerCase().trim();
 
             let filtrados = dadosMembros.slice();
 
@@ -761,6 +832,20 @@
 
             if (celula) {
                 filtrados = filtrados.filter(item => (item.nomedacelula || '') === celula);
+            }
+
+            if (busca) {
+                filtrados = filtrados.filter(item => {
+                    const nome = (item.nome || '').toLowerCase();
+                    const email = (item.email || '').toLowerCase();
+                    const celular = (item.celular || '').toLowerCase();
+                    const celulaNome = (item.nomedacelula || '').toLowerCase();
+                    
+                    return nome.includes(busca) || 
+                           email.includes(busca) || 
+                           celular.includes(busca) || 
+                           celulaNome.includes(busca);
+                });
             }
 
             criarTabela(filtrados);
@@ -931,24 +1016,27 @@
                 snapshot.forEach(doc => {
                     const d = doc.data();
                     const nomeCelula = d.nomecelula || d.nomecelula1 || d.nomecelula2 || '';
-                    const registrar = (nome) => {
-                        if (!nome) return;
-                        lideres.add(nome);
-                        const chave = String(nome).toUpperCase();
+                    
+                    // Ajuste solicitado: usar apenas o campo principal 'conclider'
+                    // e não concatenar ou usar lider1, lider2, lider3 individualmente
+                    if (d.conclider) {
+                        lideres.add(d.conclider);
+                        const chave = String(d.conclider).toUpperCase();
+                        // Se já existir, mantém (ou atualiza se preferir, aqui mantemos o primeiro encontrado)
                         if (!mapaLiderParaCelula[chave] && nomeCelula) {
                             mapaLiderParaCelula[chave] = nomeCelula;
                         }
-                    };
-                    registrar(d.nomelider1);
-                    registrar(d.nomelider2);
-                    registrar(d.nomelider3);
-                    registrar(d.conclider);
+                    }
                 });
 
                 const select = document.getElementById('modalLidercelula');
                 if (!select) return;
 
                 select.innerHTML = '<option value="">Selecione um líder</option>' +
+                    '<option value="SEM CÉLULA">SEM CÉLULA</option>' +
+                    '<option value="SUPERVISOR">SUPERVISOR</option>' +
+                    '<option value="COORDENADOR">COORDENADOR</option>' +
+                    '<option value="PASTOR">PASTOR</option>' +
                     Array.from(lideres)
                         .filter(nome => nome && String(nome).trim() !== '')
                         .sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'))
@@ -987,45 +1075,88 @@
                 selectLider.addEventListener('change', function() {
                     const valor = this.value || '';
                     const chave = valor.toUpperCase();
-                    const nomeCelula = mapaLiderParaCelula[chave] || '';
                     const campoCelula = document.getElementById('modalNomedacelula');
-                    if (campoCelula && nomeCelula) {
+                    
+                    if (!campoCelula) return;
+
+                    const opcoesEspeciais = ['SEM CÉLULA', 'SUPERVISOR', 'COORDENADOR', 'PASTOR'];
+                    
+                    if (opcoesEspeciais.includes(chave)) {
+                        campoCelula.value = chave;
+                    } else {
+                        const nomeCelula = mapaLiderParaCelula[chave] || '';
                         campoCelula.value = nomeCelula;
                     }
                 });
             }
         });
 
+        // Função auxiliar para atualizar vínculos de estrutura de um membro
+        function atualizarVinculosMembro(membro) {
+            if (!membro) return;
+
+            // Tenta buscar primeiro pelo nome do líder
+            const chaveLider = (membro.lidercelula || '').toUpperCase().trim();
+            let infoCelula = mapaEstruturaCelulas[chaveLider];
+
+            // Se não achar pelo líder, tenta pelo nome da célula
+            if (!infoCelula) {
+                const chaveCelula = (membro.nomedacelula || '').toUpperCase().trim();
+                infoCelula = mapaEstruturaCelulas[chaveCelula];
+            }
+
+            // Se ainda não achou, objeto vazio
+            infoCelula = infoCelula || {};
+
+            membro.coordenador = infoCelula.coordenador || '';
+            membro.supervisor = infoCelula.supervisor || '';
+            membro.rede = infoCelula.rede || '';
+        }
+
         // Função para salvar membro
         async function salvarMembro() {
             try {
                 const dados = {
-                    nome: document.getElementById('modalNome').value,
+                    nome: (document.getElementById('modalNome').value || '').toUpperCase(),
                     dtnasc: document.getElementById('modalDtnasc').value,
-                    email: document.getElementById('modalEmail').value,
+                    email: (document.getElementById('modalEmail').value || '').toLowerCase(),
                     cep: document.getElementById('modalCep').value,
-                    bairro: document.getElementById('modalBairro').value,
-                    cidade: document.getElementById('modalCidade').value,
-                    uf: document.getElementById('modalUf').value,
+                    bairro: (document.getElementById('modalBairro').value || '').toUpperCase(),
+                    cidade: (document.getElementById('modalCidade').value || '').toUpperCase(),
+                    uf: (document.getElementById('modalUf').value || '').toUpperCase(),
                     sexo: document.getElementById('modalSexo').value,
-                    estadocivil: document.getElementById('modalEstadoCivil').value,
+                    estadocivil: (document.getElementById('modalEstadoCivil').value || '').toUpperCase(),
                     celular: document.getElementById('modalCelular').value,
                     igrejamembro: document.getElementById('modalIgrejaMembro').value,
                     lidercelula: document.getElementById('modalLidercelula').value,
-                    nomedacelula: document.getElementById('modalNomedacelula').value,
+                    nomedacelula: (document.getElementById('modalNomedacelula').value || '').toUpperCase(),
                     arrolamento: document.getElementById('modalArrolamento').value
                 };
 
                 if (editandoId) {
                     await db.collection('membros').doc(editandoId).update(dados);
                     mostrarAlerta('Membro atualizado com sucesso!', 'success');
+                    
+                    // Atualizar localmente
+                    const index = dadosMembros.findIndex(m => m.id === editandoId);
+                    if (index !== -1) {
+                        dadosMembros[index] = { ...dadosMembros[index], ...dados };
+                    }
                 } else {
-                    await db.collection('membros').add(dados);
+                    const docRef = await db.collection('membros').add(dados);
                     mostrarAlerta('Membro adicionado com sucesso!', 'success');
+                    // Adicionar novo membro localmente
+                    dadosMembros.push({ id: docRef.id, ...dados });
                 }
 
+                // Recalcular vínculos de estrutura para o membro atualizado/adicionado
+                const membroAlvo = editandoId ? dadosMembros.find(m => m.id === editandoId) : dadosMembros[dadosMembros.length - 1];
+                atualizarVinculosMembro(membroAlvo);
+
                 $('#membroModal').modal('hide');
-                carregarDados();
+                
+                // Apenas reaplica os filtros e redesenha a tabela, mantendo o estado atual
+                aplicarFiltrosMembros();
                 
             } catch (error) {
                 console.error('Erro ao salvar membro:', error);
@@ -1039,7 +1170,13 @@
                 try {
                     await db.collection('membros').doc(id).delete();
                     mostrarAlerta('Membro excluído com sucesso!', 'success');
-                    carregarDados();
+                    
+                    // Remover localmente
+                    dadosMembros = dadosMembros.filter(m => m.id !== id);
+                    
+                    // Apenas reaplica os filtros e redesenha a tabela
+                    aplicarFiltrosMembros();
+                    
                 } catch (error) {
                     console.error('Erro ao excluir membro:', error);
                     mostrarAlerta('Erro ao excluir membro', 'danger');
@@ -1084,6 +1221,7 @@
         document.getElementById('filtroCoordenador').addEventListener('change', carregarSupervisoresMembros);
         document.getElementById('filtroSupervisao').addEventListener('change', carregarCelulasMembros);
         document.getElementById('filtroCelula').addEventListener('change', aplicarFiltrosMembros);
+        document.getElementById('filtroBusca').addEventListener('input', aplicarFiltrosMembros);
 
         // Verificar autenticação e inicializar página
         auth.onAuthStateChanged(function(user) {
@@ -1226,7 +1364,9 @@
             });
         }
         document.getElementById('btnCopiarMembros').addEventListener('click', copiarMembrosComoImagem);
+
+        // Inicializar dados diretamente
+        carregarDados();
     </script>
-    <script src="../auth-check.js"></script>
 </body>
 </html>
