@@ -46,6 +46,11 @@ h1 {
   transition: all 0.3s ease, background-color 0.3s ease;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%; /* Garante altura consistente se estiver em grid/flex container */
 }
 .card::before {
   content: "";

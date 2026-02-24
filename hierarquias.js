@@ -89,7 +89,6 @@ const hierarquias = {
         permissoes: [
             'organograma',
             'indicadores',
-            'relatorioMembros',
             'dadosReunioes',
 
             // Escola Ministerial frmEM
