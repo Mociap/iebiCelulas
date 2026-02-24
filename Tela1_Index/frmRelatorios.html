@@ -113,8 +113,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 
         const configuracaoFirebase = {
@@ -131,12 +131,86 @@
         const bancoDeDados = getFirestore(app);
         const auth = getAuth(app);
 
+        // Monitorar estado da autenticação
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log("Usuário autenticado:", user.uid);
+                await carregarDadosUsuario(user.uid, user.email);
+            } else {
+                console.log("Usuário não autenticado. Redirecionando...");
+                // window.location.href = '../index.html'; // Comentado para evitar loop em dev, descomentar em prod
+            }
+        });
+
+        async function carregarDadosUsuario(uid, email) {
+            try {
+                // Tenta buscar pelo UID primeiro (padrão novo)
+                let userDoc = await getDoc(doc(bancoDeDados, "usuarios", uid));
+                let userData = null;
+
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                } else {
+                    // Fallback: busca por email (compatibilidade com registros antigos)
+                    const q = query(collection(bancoDeDados, "usuarios"), where("email", "==", email));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        userData = querySnapshot.docs[0].data();
+                    }
+                }
+
+                if (userData) {
+                    const nome = userData.nome || 'Usuário';
+                    const funcao = userData.funcao || 'Membro'; // Define padrão se não tiver função
+                    
+                    // Atualizar UI
+                    document.getElementById('userName').textContent = nome.split(' ')[0];
+                    document.getElementById('userEmail').textContent = email;
+                    document.getElementById('userFuncao').textContent = funcao;
+
+                    // Atualizar LocalStorage para persistência de sessão e compatibilidade
+                    localStorage.setItem('nomeUsuario', nome);
+                    localStorage.setItem('emailUsuario', email);
+                    localStorage.setItem('funcaoUsuario', funcao);
+                    
+                    aplicarPermissoes(funcao);
+                } else {
+                    console.error("Dados do usuário não encontrados no Firestore.");
+                    document.getElementById('userFuncao').textContent = "Sem cadastro";
+                }
+            } catch (error) {
+                console.error("Erro ao buscar dados do usuário:", error);
+            }
+        }
+
+        function aplicarPermissoes(funcaoUsuario) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const permissao = card.getAttribute('data-permissao');
+                if (!temPermissao(funcaoUsuario, permissao)) {
+                    card.style.display = 'none';
+                } else {
+                    card.style.display = 'flex'; // Garante que apareça se tiver permissão
+                }
+            });
+
+            const linkListDivs = document.querySelectorAll('.link-list');
+            linkListDivs.forEach(div => {
+                const permissao = div.getAttribute('data-permissao');
+                if (!temPermissao(funcaoUsuario, permissao)) {
+                    div.style.display = 'none';
+                } else {
+                    div.style.display = 'block';
+                }
+            });
+        }
+
         function verificarTempoSessao() {
             const tempoLogin = localStorage.getItem('tempoLogin');
             const tempoAtual = new Date().getTime();
             const tempoLimite = 30 * 60 * 1000; // 30 minutos
 
-            if (tempoAtual - tempoLogin > tempoLimite) {
+            if (tempoLogin && (tempoAtual - tempoLogin > tempoLimite)) {
                 realizarLogout();
             }
         }
@@ -152,52 +226,12 @@
 
 
         setInterval(verificarTempoSessao, 60000); // Verifica a cada minuto
-        verificarTempoSessao(); // Verifica imediatamente ao carregar a página
+        // verificarTempoSessao(); // Removido verificação imediata agressiva para permitir fluxo do Auth
 
         window.onload = function () {
-            const userName = localStorage.getItem('nomeUsuario');
-            const userEmail = localStorage.getItem('emailUsuario');
-            const userFuncao = localStorage.getItem('funcaoUsuario');
-
-            // Extrair apenas o primeiro nome
-            const firstName = userName ? userName.split(' ')[0] : 'Não disponível';
-            document.getElementById('userName').textContent = firstName;
-            document.getElementById('userEmail').textContent = userEmail || 'Não disponível';
-            document.getElementById('userFuncao').textContent = userFuncao || 'Não disponível';
-
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                const permissao = card.getAttribute('data-permissao');
-                if (!temPermissao(userFuncao, permissao)) {
-                    card.style.display = 'none';
-                }
-            });
-
-
-            const linkListDivs = document.querySelectorAll('.link-list');
-            linkListDivs.forEach(div => {
-                const permissao = div.getAttribute('data-permissao');
-                if (!temPermissao(userFuncao, permissao)) {
-                    div.style.display = 'none';
-                }
-            });
-
-            // Obtém todas as chaves do localStorage
-            const chaves = Object.keys(localStorage);
-
-            // Verifica se há chaves no localStorage
-            if (chaves.length > 0) {
-                console.log("Dados armazenados no localStorage:");
-
-                // Percorre as chaves e exibe os valores correspondentes
-                chaves.forEach(function (chave) {
-                    const valor = localStorage.getItem(chave);
-                    console.log(`${chave}: ${valor}`);
-                });
-            } else {
-                console.log("Não há dados armazenados no localStorage.");
-            }
-
+            // Inicialização visual básica enquanto o Auth carrega
+            document.getElementById('userName').textContent = 'Carregando...';
+            
             document.getElementById('logoutLink').addEventListener('click', function (e) {
                 e.preventDefault();
                 console.log('Botão de logout clicado');

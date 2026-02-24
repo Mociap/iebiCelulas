@@ -56,38 +56,51 @@
 
         /* Estilos específicos para a tabela de membros */
         .membros-table-enhanced {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
         }
 
         .membros-table-enhanced th {
-            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
-            color: white;
-            font-weight: 600;
-            text-align: center;
-            vertical-align: middle;
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%) !important;
+            color: white !important;
+            font-weight: 700;
+            text-align: center !important;
+            vertical-align: middle !important;
             border: none;
             padding: 10px 6px;
-            font-size: 0.8rem;
+            font-size: 0.95rem;
         }
 
-        .membros-table-enhanced td {
-            vertical-align: middle;
-            padding: 8px 6px;
-            border-bottom: 1px solid #e9ecef;
-            text-align: center;
-            font-size: 0.8rem;
+        .membros-table-enhanced thead.thead-light th {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%) !important;
+            color: white !important;
+            font-weight: 700 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        .membros-table-enhanced td,
+        .membros-table-enhanced th {
+            vertical-align: middle !important;
+            text-align: center !important;
+            font-size: 0.95rem;
         }
 
         .membros-table-enhanced tbody tr:hover {
             background-color: #f8f9fa;
-            transform: scale(1.01);
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease;
         }
 
         .membros-table-enhanced .btn {
             padding: 3px 6px;
             font-size: 0.7rem;
             margin: 0 1px;
+        }
+
+        .membros-actions {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
         }
 
         .loading-spinner {
@@ -196,31 +209,47 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="membrosCampoFiltro" class="font-weight-bold">
-                                    <i class="fas fa-search mr-1"></i>
-                                    Filtrar por campo:
+                                <label for="filtroCoordenador" class="font-weight-bold">
+                                    Coordenador
                                 </label>
-                                <select class="form-control" id="membrosCampoFiltro"></select>
+                                <select class="form-control" id="filtroCoordenador">
+                                    <option value="">Todos os Coordenadores</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="membrosValorFiltro" class="font-weight-bold">
-                                    <i class="fas fa-edit mr-1"></i>
-                                    Filtrar por valor:
+                                <label for="filtroSupervisao" class="font-weight-bold">
+                                    Supervisão
                                 </label>
-                                <input class="form-control" id="membrosValorFiltro" 
-                                       list="membrosValorFiltroOptions" autocomplete="off"
-                                       placeholder="Digite para filtrar...">
-                                <datalist id="membrosValorFiltroOptions"></datalist>
+                                <select class="form-control" id="filtroSupervisao">
+                                    <option value="">Todas as Supervisões</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label class="font-weight-bold">&nbsp;</label>
-                                <button class="btn btn-primary btn-block shadow-sm" onclick="abrirModalMembro()">
+                                <label for="filtroCelula" class="font-weight-bold">
+                                    Célula
+                                </label>
+                                <select class="form-control" id="filtroCelula">
+                                    <option value="">Todas as Células</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <button class="btn btn-primary shadow-sm mr-2" onclick="abrirModalMembro()">
                                     <i class="fas fa-plus mr-2"></i>
                                     Adicionar Novo Membro
+                                </button>
+                                <button id="btnExportarMembros" class="btn btn-success mr-2">
+                                    <i class="fas fa-file-excel mr-1"></i> Exportar Excel
+                                </button>
+                                <button id="btnCopiarMembros" class="btn btn-secondary">
+                                    <i class="fas fa-copy mr-1"></i> Copiar
                                 </button>
                             </div>
                         </div>
@@ -256,6 +285,9 @@
                             </thead>
                             <tbody></tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-end p-2">
+                        <span id="membrosSubtotal" class="font-weight-bold">Subtotal: 0 membros</span>
                     </div>
                 </div>
             </div>
@@ -304,19 +336,19 @@
                         <!-- Bairro -->
                         <div class="form-group">
                             <label for="modalBairro">Bairro</label>
-                            <input type="text" class="form-control" id="modalBairro" required readonly style="text-transform: uppercase;">
+                            <input type="text" class="form-control" id="modalBairro" required style="text-transform: uppercase;">
                         </div>
                         
                         <!-- Cidade -->
                         <div class="form-group">
                             <label for="modalCidade">Cidade</label>
-                            <input type="text" class="form-control" id="modalCidade" required readonly style="text-transform: uppercase;">
+                            <input type="text" class="form-control" id="modalCidade" required style="text-transform: uppercase;">
                         </div>
                         
                         <!-- UF -->
                         <div class="form-group">
                             <label for="modalUf">UF</label>
-                            <input type="text" class="form-control" id="modalUf" required maxlength="2" readonly style="text-transform: uppercase;">
+                            <input type="text" class="form-control" id="modalUf" required maxlength="2" style="text-transform: uppercase;">
                         </div>
                         
                         <!-- Sexo -->
@@ -366,7 +398,7 @@
                         <!-- Nome do Líder -->
                         <div class="form-group">
                             <label for="modalLidercelula">Nome do Líder</label>
-                            <select class="form-control" id="modalLidercelula" required disabled style="text-transform: uppercase;"></select>
+                            <select class="form-control" id="modalLidercelula" required style="text-transform: uppercase;"></select>
                         </div>
                         
                         <!-- Nome da Célula -->
@@ -412,16 +444,19 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
-        // Configuração do Firebase
+        // Configuração do Firebase (alinhada ao projeto dbiebi, como relIndicador.html)
         const firebaseConfig = {
-            apiKey: "AIzaSyBNIaO0le5Mn4UDxWX32YDoY_b4xNZikDg",
-            authDomain: "iebicelulas.firebaseapp.com",
-            projectId: "iebicelulas",
-            storageBucket: "iebicelulas.appspot.com",
-            messagingSenderId: "71775149511",
-            appId: "1:71775149511:web:bb2ce1a1872c9c7b7c7bb5"
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
         };
 
         // Inicializar Firebase
@@ -431,6 +466,10 @@
 
         let dadosMembros = [];
         let editandoId = null;
+        let ultimaListaRenderizada = [];
+        let igrejaSelecionadaEdicao = null;
+        let liderSelecionadoEdicao = null;
+        let mapaLiderParaCelula = {};
 
         // Função para logout
         function logout() {
@@ -441,7 +480,6 @@
             });
         }
 
-        // Função para carregar dados dos membros
         async function carregarDados() {
             try {
                 document.getElementById('membrosLoading').style.display = 'block';
@@ -452,9 +490,35 @@
                 snapshot.forEach(doc => {
                     dadosMembros.push({ id: doc.id, ...doc.data() });
                 });
+                
+                const estruturaSnapshot = await db.collection('estruturacelula').get();
+                const mapaCelulas = {};
+                
+                estruturaSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const chave = (data.nomecelula || '').toUpperCase();
+                    if (chave && !mapaCelulas[chave]) {
+                        mapaCelulas[chave] = {
+                            coordenador: data.coordenador || '',
+                            supervisor: data.supervisor || '',
+                            rede: data.rede || ''
+                        };
+                    }
+                });
+                
+                dadosMembros = dadosMembros.map(membro => {
+                    const chaveCelula = (membro.nomedacelula || '').toUpperCase();
+                    const infoCelula = mapaCelulas[chaveCelula] || {};
+                    return {
+                        ...membro,
+                        coordenador: infoCelula.coordenador || '',
+                        supervisor: infoCelula.supervisor || '',
+                        rede: infoCelula.rede || ''
+                    };
+                });
 
                 criarTabela();
-                carregarCamposFiltro();
+                inicializarFiltrosMembros();
                 
             } catch (error) {
                 console.error('Erro ao carregar dados dos membros:', error);
@@ -464,51 +528,242 @@
             }
         }
 
-        // Função para criar tabela
-        function criarTabela() {
+        function criarTabela(lista) {
             const tabela = document.getElementById('membrosTabelaDados');
             const thead = tabela.querySelector('thead tr');
             const tbody = tabela.querySelector('tbody');
+            const origem = lista && Array.isArray(lista) ? lista : dadosMembros;
+            const subtotalEl = document.getElementById('membrosSubtotal');
             
-            if (dadosMembros.length === 0) {
+            if (!origem || origem.length === 0) {
                 thead.innerHTML = '<th>Nenhum dado encontrado</th>';
                 tbody.innerHTML = '<tr><td class="text-center">Nenhum registro encontrado</td></tr>';
+                if (subtotalEl) subtotalEl.textContent = 'Subtotal: 0 membros';
                 return;
             }
 
-            // Criar cabeçalho
-            const campos = Object.keys(dadosMembros[0]).filter(campo => campo !== 'id');
-            thead.innerHTML = campos.map(campo => `<th>${campo}</th>`).join('') + '<th>Ações</th>';
+            // Ordem e títulos das colunas conforme solicitado
+            const colunas = [
+                'igreja', 'rede', 'coordenador', 'supervisor',
+                'lidercelula', 'nomedacelula', 'nome', 'dtnasc',
+                'celular', 'bairro', 'cidade',
+                'sexo', 'arrolamento'
+            ];
+            const titulos = {
+                igreja: 'Igreja',
+                rede: 'Rede',
+                coordenador: 'Coordenador',
+                supervisor: 'Supervisor',
+                lidercelula: 'Lider Celula',
+                nomedacelula: 'Nome Celula',
+                nome: 'Nome',
+                dtnasc: 'Dt Nasc',
+                celular: 'Celular',
+                bairro: 'Bairro',
+                cidade: 'Cidade',
+                sexo: 'Sexo',
+                arrolamento: 'Arrolamento'
+            };
 
-            // Criar corpo da tabela
-            tbody.innerHTML = dadosMembros.map(item => {
-                const valores = campos.map(campo => `<td>${item[campo] || ''}</td>`).join('');
+            thead.innerHTML = colunas.map(c => `<th>${titulos[c]}</th>`).join('') + '<th>Ações</th>';
+
+            const dadosOrdenados = origem.slice().sort((a, b) => {
+                for (let i = 0; i < colunas.length; i++) {
+                    const col = colunas[i];
+                    let va;
+                    let vb;
+                    if (col === 'igreja') {
+                        va = a.igrejamembro || a.igreja || '';
+                        vb = b.igrejamembro || b.igreja || '';
+                    } else if (col === 'dtnasc') {
+                        const av = a.dtnasc;
+                        const bv = b.dtnasc;
+                        const an = av && typeof av === 'object' && av.seconds ? av.seconds : (av ? Date.parse(av) / 1000 : 0);
+                        const bn = bv && typeof bv === 'object' && bv.seconds ? bv.seconds : (bv ? Date.parse(bv) / 1000 : 0);
+                        if (an !== bn) return an - bn;
+                        continue;
+                    } else {
+                        va = a[col] || '';
+                        vb = b[col] || '';
+                    }
+                    const sa = String(va);
+                    const sb = String(vb);
+                    const cmp = sa.localeCompare(sb, 'pt-BR', { sensitivity: 'base' });
+                    if (cmp !== 0) return cmp;
+                }
+                return 0;
+            });
+
+            ultimaListaRenderizada = dadosOrdenados;
+            tbody.innerHTML = dadosOrdenados.map(item => {
+                const valores = colunas.map(col => {
+                    let valor;
+                    switch (col) {
+                        case 'igreja':
+                            valor = item.igrejamembro || item.igreja || '';
+                            break;
+                        case 'dtnasc':
+                            const v = item.dtnasc;
+                            if (v && typeof v === 'object' && v.seconds) {
+                                const data = new Date(v.seconds * 1000);
+                                valor = data.toLocaleDateString('pt-BR');
+                            } else {
+                                valor = v || '';
+                            }
+                            break;
+                        default:
+                            valor = item[col] || '';
+                    }
+                    return `<td>${valor}</td>`;
+                }).join('');
                 const acoes = `
                     <td>
-                        <button class="btn btn-sm btn-warning" onclick="editarMembro('${item.id}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="excluirMembro('${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="membros-actions">
+                            <button class="btn btn-sm btn-warning" onclick="editarMembro('${item.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="excluirMembro('${item.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 return `<tr>${valores}${acoes}</tr>`;
             }).join('');
+            if (subtotalEl) subtotalEl.textContent = `Subtotal: ${dadosOrdenados.length} membros`;
         }
 
-        // Função para carregar campos de filtro
-        function carregarCamposFiltro() {
-            const select = document.getElementById('membrosCampoFiltro');
-            
-            if (dadosMembros.length === 0) {
-                select.innerHTML = '<option value="">Nenhum campo disponível</option>';
-                return;
+        function inicializarFiltrosMembros() {
+            preencherCoordenadoresMembros();
+        }
+
+        function preencherCoordenadoresMembros() {
+            const selectCoordenador = document.getElementById('filtroCoordenador');
+            const selectSupervisao = document.getElementById('filtroSupervisao');
+            const selectCelula = document.getElementById('filtroCelula');
+
+            selectCoordenador.innerHTML = '<option value="">Todos os Coordenadores</option>';
+            selectSupervisao.innerHTML = '<option value="">Todas as Supervisões</option>';
+            selectCelula.innerHTML = '<option value="">Todas as Células</option>';
+
+            db.collection('estruturacelula').get().then(querySnapshot => {
+                const coordenadores = new Set();
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.coordenador) {
+                        coordenadores.add(data.coordenador);
+                    }
+                });
+
+                const coordenadoresOrdenados = Array.from(coordenadores).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+                coordenadoresOrdenados.forEach(coordenador => {
+                    const option = document.createElement('option');
+                    option.value = coordenador;
+                    option.textContent = coordenador;
+                    selectCoordenador.appendChild(option);
+                });
+            });
+        }
+
+        function carregarSupervisoresMembros() {
+            const coordenadorEscolhido = document.getElementById('filtroCoordenador').value;
+            const selectSupervisao = document.getElementById('filtroSupervisao');
+            const selectCelula = document.getElementById('filtroCelula');
+
+            selectSupervisao.innerHTML = '<option value="">Todas as Supervisões</option>';
+            selectCelula.innerHTML = '<option value="">Todas as Células</option>';
+
+            let query = db.collection('estruturacelula');
+
+            if (coordenadorEscolhido) {
+                query = query.where('coordenador', '==', coordenadorEscolhido);
             }
 
-            const campos = Object.keys(dadosMembros[0]).filter(campo => campo !== 'id');
-            select.innerHTML = '<option value="">Selecione um campo...</option>' +
-                campos.map(campo => `<option value="${campo}">${campo}</option>`).join('');
+            query.get().then(querySnapshot => {
+                const supervisores = new Set();
+
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.supervisor) {
+                        supervisores.add(data.supervisor);
+                    }
+                });
+
+                const supervisoresOrdenados = Array.from(supervisores).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+                supervisoresOrdenados.forEach(supervisor => {
+                    const option = document.createElement('option');
+                    option.value = supervisor;
+                    option.textContent = supervisor;
+                    selectSupervisao.appendChild(option);
+                });
+
+                carregarCelulasMembros();
+                aplicarFiltrosMembros();
+            });
+        }
+
+        function carregarCelulasMembros() {
+            const coordenadorEscolhido = document.getElementById('filtroCoordenador').value;
+            const supervisorEscolhido = document.getElementById('filtroSupervisao').value;
+            const selectCelula = document.getElementById('filtroCelula');
+
+            selectCelula.innerHTML = '<option value="">Todas as Células</option>';
+
+            let query = db.collection('estruturacelula');
+
+            if (coordenadorEscolhido) {
+                query = query.where('coordenador', '==', coordenadorEscolhido);
+            }
+
+            if (supervisorEscolhido) {
+                query = query.where('supervisor', '==', supervisorEscolhido);
+            }
+
+            query.get().then(querySnapshot => {
+                const celulas = new Set();
+
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.nomecelula) {
+                        celulas.add(data.nomecelula);
+                    }
+                });
+
+                const celulasOrdenadas = Array.from(celulas).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+                celulasOrdenadas.forEach(celula => {
+                    const option = document.createElement('option');
+                    option.value = celula;
+                    option.textContent = celula;
+                    selectCelula.appendChild(option);
+                });
+
+                aplicarFiltrosMembros();
+            });
+        }
+
+        function aplicarFiltrosMembros() {
+            const coordenador = document.getElementById('filtroCoordenador').value;
+            const supervisao = document.getElementById('filtroSupervisao').value;
+            const celula = document.getElementById('filtroCelula').value;
+
+            let filtrados = dadosMembros.slice();
+
+            if (coordenador) {
+                filtrados = filtrados.filter(item => (item.coordenador || '') === coordenador);
+            }
+
+            if (supervisao) {
+                filtrados = filtrados.filter(item => (item.supervisor || '') === supervisao);
+            }
+
+            if (celula) {
+                filtrados = filtrados.filter(item => (item.nomedacelula || '') === celula);
+            }
+
+            criarTabela(filtrados);
         }
 
         // Função para abrir modal de membro
@@ -523,12 +778,17 @@
             if (dados) {
                 document.getElementById('membroModalLabel').textContent = 'Editar Membro';
                 preencherFormulario(dados);
+                igrejaSelecionadaEdicao = dados.igrejamembro || dados.igreja || '';
+                liderSelecionadoEdicao = dados.lidercelula || '';
             } else {
                 document.getElementById('membroModalLabel').textContent = 'Adicionar Novo Membro';
                 limparFormulario();
+                igrejaSelecionadaEdicao = null;
+                liderSelecionadoEdicao = null;
             }
 
             carregarIgrejas();
+            carregarLideres();
             $('#membroModal').modal('show');
         }
 
@@ -551,24 +811,74 @@
             Object.keys(dados).forEach(campo => {
                 const elemento = document.getElementById('modal' + campo.charAt(0).toUpperCase() + campo.slice(1));
                 if (elemento) {
-                    elemento.value = dados[campo] || '';
+                    if (campo === 'dtnasc') {
+                        let v = dados[campo];
+                        let out = '';
+                        if (v) {
+                            if (typeof v === 'string') {
+                                // Aceita 'YYYY-MM-DD' diretamente; converte 'DD/MM/YYYY' se necessário
+                                if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+                                    out = v;
+                                } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) {
+                                    const [d, m, y] = v.split('/');
+                                    out = `${y}-${m}-${d}`;
+                                } else {
+                                    const dt = new Date(v);
+                                    if (!isNaN(dt.getTime())) {
+                                        out = dt.toISOString().slice(0, 10);
+                                    }
+                                }
+                            } else if (typeof v === 'object') {
+                                if (typeof v.toDate === 'function') {
+                                    const dt = v.toDate();
+                                    out = dt.toISOString().slice(0, 10);
+                                } else if ('seconds' in v) {
+                                    const dt = new Date(v.seconds * 1000);
+                                    out = dt.toISOString().slice(0, 10);
+                                }
+                            }
+                        }
+                        elemento.value = out;
+                    } else {
+                        elemento.value = dados[campo] || '';
+                    }
                 }
             });
 
-            // Selecionar choice chips
-            if (dados.sexo) {
-                const sexoChip = document.querySelector(`#membroModal .choice-chip[data-value="${dados.sexo}"]`);
-                if (sexoChip) sexoChip.classList.add('selected');
+            const sexoValor = dados.sexo || '';
+            if (sexoValor) {
+                const chipsSexo = document.querySelectorAll('#membroModal .choice-chip');
+                chipsSexo.forEach(ch => {
+                    if (ch.dataset.value && ch.dataset.value.toUpperCase() === String(sexoValor).toUpperCase()) {
+                        ch.classList.add('selected');
+                        const hidden = document.getElementById('modalSexo');
+                        if (hidden) hidden.value = ch.dataset.value;
+                    }
+                });
             }
 
-            if (dados.estadocivil) {
-                const estadoCivilChip = document.querySelector(`#membroModal .choice-chip[data-value="${dados.estadocivil}"]`);
-                if (estadoCivilChip) estadoCivilChip.classList.add('selected');
+            const estadoCivilValor = dados.estadocivil || dados.estadoCivil || '';
+            if (estadoCivilValor) {
+                const chipsEstado = document.querySelectorAll('#membroModal .choice-chip');
+                chipsEstado.forEach(ch => {
+                    if (ch.dataset.value && ch.dataset.value.toUpperCase() === String(estadoCivilValor).toUpperCase()) {
+                        ch.classList.add('selected');
+                        const hiddenEc = document.getElementById('modalEstadoCivil');
+                        if (hiddenEc) hiddenEc.value = ch.dataset.value;
+                    }
+                });
             }
 
-            if (dados.arrolamento) {
-                const arrolamentoChip = document.querySelector(`#membroModal .choice-chip[data-value="${dados.arrolamento}"]`);
-                if (arrolamentoChip) arrolamentoChip.classList.add('selected');
+            const arrolamentoValor = dados.arrolamento || '';
+            if (arrolamentoValor) {
+                const chipsArr = document.querySelectorAll('#membroModal .choice-chip');
+                chipsArr.forEach(ch => {
+                    if (ch.dataset.value && ch.dataset.value.toUpperCase() === String(arrolamentoValor).toUpperCase()) {
+                        ch.classList.add('selected');
+                        const hiddenArr = document.getElementById('modalArrolamento');
+                        if (hiddenArr) hiddenArr.value = ch.dataset.value;
+                    }
+                });
             }
         }
 
@@ -590,11 +900,101 @@
                     Array.from(igrejas).sort().map(igreja => 
                         `<option value="${igreja}">${igreja}</option>`
                     ).join('');
+                
+                if (igrejaSelecionadaEdicao) {
+                    let aplicado = false;
+                    Array.from(select.options).forEach(opt => {
+                        if (!aplicado && opt.value === igrejaSelecionadaEdicao) {
+                            select.value = igrejaSelecionadaEdicao;
+                            aplicado = true;
+                        }
+                    });
+                    if (!aplicado) {
+                        const alvo = Array.from(select.options).find(opt => 
+                            (opt.value || '').toUpperCase() === igrejaSelecionadaEdicao.toUpperCase()
+                        );
+                        if (alvo) select.value = alvo.value;
+                    }
+                }
                     
             } catch (error) {
                 console.error('Erro ao carregar igrejas:', error);
             }
         }
+
+        async function carregarLideres() {
+            try {
+                const snapshot = await db.collection('estruturacelula').get();
+                const lideres = new Set();
+                mapaLiderParaCelula = {};
+                
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    const nomeCelula = d.nomecelula || d.nomecelula1 || d.nomecelula2 || '';
+                    const registrar = (nome) => {
+                        if (!nome) return;
+                        lideres.add(nome);
+                        const chave = String(nome).toUpperCase();
+                        if (!mapaLiderParaCelula[chave] && nomeCelula) {
+                            mapaLiderParaCelula[chave] = nomeCelula;
+                        }
+                    };
+                    registrar(d.nomelider1);
+                    registrar(d.nomelider2);
+                    registrar(d.nomelider3);
+                    registrar(d.conclider);
+                });
+
+                const select = document.getElementById('modalLidercelula');
+                if (!select) return;
+
+                select.innerHTML = '<option value="">Selecione um líder</option>' +
+                    Array.from(lideres)
+                        .filter(nome => nome && String(nome).trim() !== '')
+                        .sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'))
+                        .map(nome => `<option value="${nome}">${nome}</option>`)
+                        .join('');
+
+                if (liderSelecionadoEdicao) {
+                    let aplicado = false;
+                    Array.from(select.options).forEach(opt => {
+                        if (!aplicado && opt.value === liderSelecionadoEdicao) {
+                            select.value = liderSelecionadoEdicao;
+                            aplicado = true;
+                        }
+                    });
+                    if (!aplicado) {
+                        const alvo = Array.from(select.options).find(opt =>
+                            (opt.value || '').toUpperCase() === liderSelecionadoEdicao.toUpperCase()
+                        );
+                        if (alvo) select.value = alvo.value;
+                    }
+                    const chaveSel = String(liderSelecionadoEdicao).toUpperCase();
+                    const nomeCelulaMapeado = mapaLiderParaCelula[chaveSel];
+                    const campoCelula = document.getElementById('modalNomedacelula');
+                    if (campoCelula && nomeCelulaMapeado) {
+                        campoCelula.value = nomeCelulaMapeado;
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao carregar líderes:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectLider = document.getElementById('modalLidercelula');
+            if (selectLider) {
+                selectLider.addEventListener('change', function() {
+                    const valor = this.value || '';
+                    const chave = valor.toUpperCase();
+                    const nomeCelula = mapaLiderParaCelula[chave] || '';
+                    const campoCelula = document.getElementById('modalNomedacelula');
+                    if (campoCelula && nomeCelula) {
+                        campoCelula.value = nomeCelula;
+                    }
+                });
+            }
+        });
 
         // Função para salvar membro
         async function salvarMembro() {
@@ -681,48 +1081,14 @@
             });
         });
 
-        // Filtros
-        document.getElementById('membrosCampoFiltro').addEventListener('change', function() {
-            const campo = this.value;
-            const valorInput = document.getElementById('membrosValorFiltro');
-            const datalist = document.getElementById('membrosValorFiltroOptions');
-            
-            if (campo && dadosMembros.length > 0) {
-                const valores = [...new Set(dadosMembros.map(item => item[campo]).filter(v => v))];
-                datalist.innerHTML = valores.map(valor => `<option value="${valor}">`).join('');
-                valorInput.disabled = false;
-            } else {
-                datalist.innerHTML = '';
-                valorInput.disabled = true;
-                valorInput.value = '';
-            }
-        });
-
-        document.getElementById('membrosValorFiltro').addEventListener('input', function() {
-            const campo = document.getElementById('membrosCampoFiltro').value;
-            const valor = this.value.toLowerCase();
-            
-            if (campo && valor) {
-                const dadosFiltrados = dadosMembros.filter(item => 
-                    (item[campo] || '').toLowerCase().includes(valor)
-                );
-                const dadosOriginais = dadosMembros;
-                dadosMembros = dadosFiltrados;
-                criarTabela();
-                dadosMembros = dadosOriginais;
-            } else {
-                criarTabela();
-            }
-        });
+        document.getElementById('filtroCoordenador').addEventListener('change', carregarSupervisoresMembros);
+        document.getElementById('filtroSupervisao').addEventListener('change', carregarCelulasMembros);
+        document.getElementById('filtroCelula').addEventListener('change', aplicarFiltrosMembros);
 
         // Verificar autenticação e inicializar página
         auth.onAuthStateChanged(function(user) {
             if (user) {
-                // Usuário está logado, carregar dados
                 carregarDados();
-            } else {
-                // Usuário não está logado, redirecionar para login
-                window.location.href = '../formlogin.html';
             }
         });
 
@@ -730,6 +1096,136 @@
         document.addEventListener('DOMContentLoaded', function() {
             // A verificação de autenticação será feita no onAuthStateChanged
         });
+
+        function exportarMembrosExcel() {
+            const tabela = document.getElementById('membrosTabelaDados');
+            const clone = tabela.cloneNode(true);
+            Array.from(clone.querySelectorAll('tr')).forEach(tr => {
+                if (tr && tr.cells && tr.cells.length > 0) tr.deleteCell(tr.cells.length - 1);
+            });
+            const ws = XLSX.utils.table_to_sheet(clone);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Membros');
+            XLSX.writeFile(wb, 'membros.xlsx');
+        }
+        document.getElementById('btnExportarMembros').addEventListener('click', exportarMembrosExcel);
+
+        function copiarMembrosComoImagem() {
+            const cols = [
+                { key: 'supervisor', title: 'Supervisor' },
+                { key: 'lidercelula', title: 'Lider de Célula' },
+                { key: 'nomedacelula', title: 'Nome da Célula' },
+                { key: 'nome', title: 'Nome do Membro' }
+            ];
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.left = '-10000px';
+            container.style.top = '-10000px';
+            container.style.backgroundColor = '#ffffff';
+            container.style.padding = '0';
+            container.style.border = '1px solid #e9ecef';
+            container.style.borderRadius = '6px';
+
+            // Cabeçalho no topo em estilo semelhante ao card
+            const header = document.createElement('div');
+            header.style.backgroundColor = '#f8f9fa';
+            header.style.borderBottom = '1px solid #e9ecef';
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.gap = '8px';
+            header.style.padding = '10px 12px';
+
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-users';
+            icon.style.color = '#343a40';
+            icon.style.fontSize = '16px';
+
+            const title = document.createElement('span');
+            title.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+            title.style.fontWeight = '600';
+            title.style.fontSize = '16px';
+            title.style.color = '#343a40';
+            const qtdMembros = (ultimaListaRenderizada || []).length;
+            const selectCelula = document.getElementById('filtroCelula');
+            let nomeCelula = '';
+            if (selectCelula && selectCelula.selectedIndex >= 0) {
+                nomeCelula = selectCelula.options[selectCelula.selectedIndex].text || '';
+            }
+            if (!nomeCelula) {
+                nomeCelula = 'Todas as Células';
+            }
+            const labelMembros = qtdMembros === 1 ? 'Membro' : 'Membros';
+            title.textContent = `Célula ${nomeCelula}: ${qtdMembros} ${labelMembros}`;
+
+            header.appendChild(icon);
+            header.appendChild(title);
+
+            const table = document.createElement('table');
+            table.style.borderCollapse = 'collapse';
+            table.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+            table.style.fontSize = '12px';
+            table.style.minWidth = '600px';
+            const thead = document.createElement('thead');
+            const trHead = document.createElement('tr');
+            cols.forEach(c => {
+                const th = document.createElement('th');
+                th.textContent = c.title;
+                th.style.background = 'linear-gradient(135deg, #495057 0%, #343a40 100%)';
+                th.style.color = '#ffffff';
+                th.style.fontWeight = '700';
+                th.style.textAlign = 'center';
+                th.style.verticalAlign = 'middle';
+                th.style.padding = '8px 6px';
+                th.style.border = '1px solid #e9ecef';
+                trHead.appendChild(th);
+            });
+            thead.appendChild(trHead);
+            const tbody = document.createElement('tbody');
+            (ultimaListaRenderizada || []).forEach(item => {
+                const tr = document.createElement('tr');
+                cols.forEach(c => {
+                    const td = document.createElement('td');
+                    td.textContent = item[c.key] || '';
+                    td.style.textAlign = 'center';
+                    td.style.verticalAlign = 'middle';
+                    td.style.padding = '6px 6px';
+                    td.style.border = '1px solid #e9ecef';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            container.appendChild(header);
+            container.appendChild(table);
+            document.body.appendChild(container);
+            html2canvas(container, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+                canvas.toBlob(blob => {
+                    if (navigator.clipboard && window.ClipboardItem && blob) {
+                        const item = new ClipboardItem({ 'image/png': blob });
+                        navigator.clipboard.write([item]).then(() => {
+                            mostrarAlerta('Tabela copiada como imagem para a área de transferência.', 'success');
+                            document.body.removeChild(container);
+                        }).catch(() => {
+                            const a = document.createElement('a');
+                            a.href = canvas.toDataURL('image/png');
+                            a.download = 'membros_copia.png';
+                            a.click();
+                            document.body.removeChild(container);
+                            mostrarAlerta('Não foi possível copiar. A imagem foi baixada.', 'warning');
+                        });
+                    } else {
+                        const a = document.createElement('a');
+                        a.href = canvas.toDataURL('image/png');
+                        a.download = 'membros_copia.png';
+                        a.click();
+                        document.body.removeChild(container);
+                        mostrarAlerta('Navegador sem suporte a cópia de imagem. A imagem foi baixada.', 'warning');
+                    }
+                });
+            });
+        }
+        document.getElementById('btnCopiarMembros').addEventListener('click', copiarMembrosComoImagem);
     </script>
     <script src="../auth-check.js"></script>
 </body>

@@ -209,73 +209,85 @@
                 .then(snapshot => !snapshot.empty);
         }
     
-        formulario.addEventListener('submit', function(evento) {
-            evento.preventDefault();
-            mostrarSplashScreen();
-    
-            var nome = document.getElementById('name').value.trim().toUpperCase();
-            var email = document.getElementById('email').value;
-            var senha = document.getElementById('password').value;
-            var confirmarSenha = document.getElementById('confirmPassword').value;
-    
-            if (senha !== confirmarSenha) {
-                alert('As senhas não coincidem.');
+        formulario.addEventListener('submit', async function(evento) {
+        evento.preventDefault();
+
+        var nome = document.getElementById('name').value.trim().toUpperCase();
+        var email = document.getElementById('email').value;
+        var senha = document.getElementById('password').value;
+        var confirmarSenha = document.getElementById('confirmPassword').value;
+
+        if (senha !== confirmarSenha) {
+            alert('As senhas não coincidem.');
+            return;
+        }
+
+        mostrarSplashScreen();
+
+        try {
+            console.log('Verificando nome:', nome);
+            const existe = await verificarNomeExistente(nome);
+
+            if (!existe) {
+                console.log('Usuário não encontrado na coleção "membros"');
+                alert('Usuário não encontrado. Por favor, cadastre-se primeiro em uma célula antes de criar uma conta.');
+                window.location.href = '/Tela1_Index/formCadMembros.html';
+                esconderSplashScreen();
                 return;
             }
-    
-            console.log('Verificando nome:', nome);
-            verificarNomeExistente(nome).then(existe => {
-                if (existe) {
-                    console.log('Nome encontrado na coleção "membros". Prosseguindo com o registro.');
-                    
-                    autenticacao.createUserWithEmailAndPassword(email, senha)
-                        .then(function(credencialUsuario) {
-                            var usuario = credencialUsuario.user;
-                            console.log('Usuário criado com sucesso na Autenticação:', usuario.uid);
-                        })
-                        .catch(function(erro) {
-                            console.error('Erro ao criar usuário na Autenticação:', erro);
-                            throw erro;
-                        });
 
-                        bancoDeDados.collection('usuarios').where('email', '==', email).get()
-                            .then(function(querySnapshot) {
-                                if (querySnapshot.empty) {
-                                    return bancoDeDados.collection('usuarios').add({
-                                        nome: nome,
-                                        email: email,
-                                        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-                                } else {
-                                    console.log('Usuário já existe na coleção "usuarios"');
-                                    return Promise.resolve();
-                                }
-                            })
-                            .then(function(docRef) {
-                                if (docRef) {
-                                    console.log('Documento adicionado com ID: ', docRef.id);
-                                }
-                                alert('Registro realizado com sucesso!');
-                                setTimeout(function() {
-                                    window.location.href = 'formlogin.html';
-                                }, 1000);
-                            })
-                            .catch(function(erro) {
-                                console.error('Erro ao adicionar documento:', erro);
-                                alert('Ocorreu um erro ao salvar os dados: ' + erro.message);
-                            });
+            console.log('Nome encontrado na coleção "membros". Prosseguindo com o registro.');
+            
+            // Criar usuário na autenticação
+            const credencialUsuario = await autenticacao.createUserWithEmailAndPassword(email, senha);
+            var usuario = credencialUsuario.user;
+            console.log('Usuário criado com sucesso na Autenticação:', usuario.uid);
 
-                } else {
-                    console.log('Usuário não encontrado na coleção "membros"');
-                    alert('Usuário não encontrado. Por favor, cadastre-se primeiro em uma célula antes de criar uma conta.');
-                    window.location.href = '/Tela1_Index/formCadMembros.html';
-                }
-            }).catch(erro => {
-                console.error('Erro ao verificar o nome:', erro);
-                alert('Ocorreu um erro ao verificar seu nome. Por favor, tente novamente mais tarde.');
-            });
+            // Verificar se já existe registro na coleção 'usuarios' (opcional, mas mantendo lógica original de verificação)
+            // Na verdade, como acabamos de criar o Auth, podemos salvar direto usando o UID como chave
+            // Mas vamos manter a lógica de query por email para garantir consistência com o que existia
+            
+            const usuariosSnapshot = await bancoDeDados.collection('usuarios').where('email', '==', email).get();
+            
+            if (usuariosSnapshot.empty) {
+                // Salvar dados do usuário usando o UID como ID do documento para facilitar referência futura
+                await bancoDeDados.collection('usuarios').doc(usuario.uid).set({
+                    nome: nome,
+                    email: email,
+                    uid: usuario.uid,
+                    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('Documento de usuário criado/atualizado com ID:', usuario.uid);
+            } else {
+                console.log('Usuário já existe na coleção "usuarios"');
+                // Se já existe, talvez queiramos atualizar o UID se estiver faltando?
+                // Por segurança, vamos deixar como está para não sobrescrever dados sem querer
+            }
+
+            alert('Registro realizado com sucesso!');
+            setTimeout(function() {
+                window.location.href = 'formlogin.html';
+            }, 1000);
+
+        } catch (erro) {
+            console.error('Erro no processo de registro:', erro);
+            let mensagem = 'Ocorreu um erro ao realizar o registro.';
+            
+            if (erro.code === 'auth/email-already-in-use') {
+                mensagem = 'Este e-mail já está sendo usado por outra conta.';
+            } else if (erro.code === 'auth/weak-password') {
+                mensagem = 'A senha é muito fraca. Escolha uma senha mais forte.';
+            } else if (erro.code === 'auth/invalid-email') {
+                mensagem = 'O formato do e-mail é inválido.';
+            } else if (erro.message) {
+                mensagem += ' ' + erro.message;
+            }
+            
+            alert(mensagem);
+        } finally {
             esconderSplashScreen();
-        });
+        }
+    });
     
         document.getElementById('name').addEventListener('input', function(evento) {
             this.value = this.value.toUpperCase();
