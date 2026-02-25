@@ -484,12 +484,48 @@
         const auth = firebase.auth();
 
         let dadosMembros = [];
+        let dadosEstrutura = []; // Variável global para cache de estrutura
         let editandoId = null;
         let ultimaListaRenderizada = [];
         let igrejaSelecionadaEdicao = null;
         let liderSelecionadoEdicao = null;
         let mapaLiderParaCelula = {};
         let mapaEstruturaCelulas = {}; // Variável global para armazenar estrutura
+
+        const CACHE_PREFIX = 'iebi_cache_';
+        const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 horas
+
+        function getCachedData(key) {
+            try {
+                const cached = localStorage.getItem(CACHE_PREFIX + key);
+                if (!cached) return null;
+                
+                const parsed = JSON.parse(cached);
+                const now = new Date().getTime();
+                
+                if (now - parsed.timestamp > CACHE_EXPIRY_MS) {
+                    localStorage.removeItem(CACHE_PREFIX + key);
+                    return null;
+                }
+                
+                return parsed.data;
+            } catch (e) {
+                console.error('Erro ao ler cache:', e);
+                return null;
+            }
+        }
+
+        function setCachedData(key, data) {
+            try {
+                const cacheObject = {
+                    timestamp: new Date().getTime(),
+                    data: data
+                };
+                localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(cacheObject));
+            } catch (e) {
+                console.error('Erro ao salvar cache:', e);
+            }
+        }
 
         // Função para logout
         function logout() {
@@ -504,19 +540,39 @@
             try {
                 document.getElementById('membrosLoading').style.display = 'block';
                 
-                const snapshot = await db.collection('membros').get();
-                dadosMembros = [];
+                // Tenta carregar do cache primeiro
+                const cachedMembros = getCachedData('membros');
+                if (cachedMembros) {
+                    dadosMembros = cachedMembros;
+                    console.log('Dados de membros carregados do cache');
+                } else {
+                    const snapshot = await db.collection('membros').get();
+                    dadosMembros = [];
+                    snapshot.forEach(doc => {
+                        dadosMembros.push({ id: doc.id, ...doc.data() });
+                    });
+                    setCachedData('membros', dadosMembros);
+                    console.log('Dados de membros carregados do Firebase');
+                }
                 
-                snapshot.forEach(doc => {
-                    dadosMembros.push({ id: doc.id, ...doc.data() });
-                });
-                
-                const estruturaSnapshot = await db.collection('estruturacelula').get();
+                // Carregar estrutura (cache ou firebase)
+                const cachedEstrutura = getCachedData('estruturacelula');
+                if (cachedEstrutura) {
+                    dadosEstrutura = cachedEstrutura;
+                    console.log('Dados de estrutura carregados do cache');
+                } else {
+                    const estruturaSnapshot = await db.collection('estruturacelula').get();
+                    dadosEstrutura = [];
+                    estruturaSnapshot.forEach(doc => {
+                        dadosEstrutura.push(doc.data());
+                    });
+                    setCachedData('estruturacelula', dadosEstrutura);
+                    console.log('Dados de estrutura carregados do Firebase');
+                }
+
                 mapaEstruturaCelulas = {}; // Limpa e repopula a global
                 
-                estruturaSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    
+                dadosEstrutura.forEach(data => {
                     // Mapeia por nome da célula
                     const chaveCelula = (data.nomecelula || '').toUpperCase().trim();
                     if (chaveCelula && !mapaEstruturaCelulas[chaveCelula]) {
@@ -702,6 +758,10 @@
             document.getElementById('filtroCelula').addEventListener('change', function() {
                 aplicarFiltrosMembros();
             });
+
+            document.getElementById('filtroBusca').addEventListener('input', function() {
+                aplicarFiltrosMembros();
+            });
         }
 
         function preencherCoordenadoresMembros() {
@@ -713,26 +773,22 @@
             selectSupervisao.innerHTML = '<option value="">Todas as Supervisões</option>';
             selectCelula.innerHTML = '<option value="">Todas as Células</option>';
 
-            db.collection('estruturacelula').get().then(querySnapshot => {
-                // Limpa coordenadores dentro do callback para evitar duplicação em race conditions
-                selectCoordenador.innerHTML = '<option value="">Todos os Coordenadores</option>';
-                
-                const coordenadores = new Set();
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.coordenador) {
-                        coordenadores.add(data.coordenador.trim());
-                    }
-                });
+            selectCoordenador.innerHTML = '<option value="">Todos os Coordenadores</option>';
+            
+            const coordenadores = new Set();
+            dadosEstrutura.forEach(data => {
+                if (data.coordenador) {
+                    coordenadores.add(data.coordenador.trim());
+                }
+            });
 
-                const coordenadoresOrdenados = Array.from(coordenadores).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            const coordenadoresOrdenados = Array.from(coordenadores).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
-                coordenadoresOrdenados.forEach(coordenador => {
-                    const option = document.createElement('option');
-                    option.value = coordenador;
-                    option.textContent = coordenador;
-                    selectCoordenador.appendChild(option);
-                });
+            coordenadoresOrdenados.forEach(coordenador => {
+                const option = document.createElement('option');
+                option.value = coordenador;
+                option.textContent = coordenador;
+                selectCoordenador.appendChild(option);
             });
         }
 
@@ -740,37 +796,33 @@
             const coordenadorEscolhido = document.getElementById('filtroCoordenador').value;
             const selectSupervisao = document.getElementById('filtroSupervisao');
             
-            let query = db.collection('estruturacelula');
+            // Limpa supervisões
+            selectSupervisao.innerHTML = '<option value="">Todas as Supervisões</option>';
 
+            const supervisores = new Set();
+            
+            let filtrados = dadosEstrutura;
             if (coordenadorEscolhido) {
-                query = query.where('coordenador', '==', coordenadorEscolhido);
+                filtrados = filtrados.filter(item => item.coordenador === coordenadorEscolhido);
             }
 
-            query.get().then(querySnapshot => {
-                // Limpa supervisões dentro do callback para evitar duplicação
-                selectSupervisao.innerHTML = '<option value="">Todas as Supervisões</option>';
-
-                const supervisores = new Set();
-
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.supervisor) {
-                        supervisores.add(data.supervisor.trim());
-                    }
-                });
-
-                const supervisoresArray = Array.from(supervisores).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-
-                supervisoresArray.forEach(supervisor => {
-                    const option = document.createElement('option');
-                    option.value = supervisor;
-                    option.textContent = supervisor;
-                    selectSupervisao.appendChild(option);
-                });
-
-                // Após carregar supervisores, atualiza células e aplica filtros
-                carregarCelulasMembros(); 
+            filtrados.forEach(data => {
+                if (data.supervisor) {
+                    supervisores.add(data.supervisor.trim());
+                }
             });
+
+            const supervisoresArray = Array.from(supervisores).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+            supervisoresArray.forEach(supervisor => {
+                const option = document.createElement('option');
+                option.value = supervisor;
+                option.textContent = supervisor;
+                selectSupervisao.appendChild(option);
+            });
+
+            // Após carregar supervisores, atualiza células e aplica filtros
+            carregarCelulasMembros(); 
         }
 
         function carregarCelulasMembros() {
@@ -778,40 +830,35 @@
             const supervisorEscolhido = document.getElementById('filtroSupervisao').value;
             const selectCelula = document.getElementById('filtroCelula');
 
-            let query = db.collection('estruturacelula');
+            // Limpa células
+            selectCelula.innerHTML = '<option value="">Todas as Células</option>';
 
+            const celulas = new Set();
+            
+            let filtrados = dadosEstrutura;
             if (coordenadorEscolhido) {
-                query = query.where('coordenador', '==', coordenadorEscolhido);
+                filtrados = filtrados.filter(item => item.coordenador === coordenadorEscolhido);
             }
-
             if (supervisorEscolhido) {
-                query = query.where('supervisor', '==', supervisorEscolhido);
+                filtrados = filtrados.filter(item => item.supervisor === supervisorEscolhido);
             }
 
-            query.get().then(querySnapshot => {
-                // Limpa células dentro do callback para evitar duplicação
-                selectCelula.innerHTML = '<option value="">Todas as Células</option>';
-
-                const celulas = new Set();
-
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.nomecelula) {
-                        celulas.add(data.nomecelula.trim());
-                    }
-                });
-
-                const celulasArray = Array.from(celulas).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-
-                celulasArray.forEach(celula => {
-                    const option = document.createElement('option');
-                    option.value = celula;
-                    option.textContent = celula;
-                    selectCelula.appendChild(option);
-                });
-
-                aplicarFiltrosMembros();
+            filtrados.forEach(data => {
+                if (data.nomecelula) {
+                    celulas.add(data.nomecelula.trim());
+                }
             });
+
+            const celulasArray = Array.from(celulas).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+            celulasArray.forEach(celula => {
+                const option = document.createElement('option');
+                option.value = celula;
+                option.textContent = celula;
+                selectCelula.appendChild(option);
+            });
+
+            aplicarFiltrosMembros();
         }
 
         function aplicarFiltrosMembros() {
@@ -1152,6 +1199,9 @@
                 // Recalcular vínculos de estrutura para o membro atualizado/adicionado
                 const membroAlvo = editandoId ? dadosMembros.find(m => m.id === editandoId) : dadosMembros[dadosMembros.length - 1];
                 atualizarVinculosMembro(membroAlvo);
+                
+                // Atualizar cache
+                setCachedData('membros', dadosMembros);
 
                 $('#membroModal').modal('hide');
                 
@@ -1174,6 +1224,9 @@
                     // Remover localmente
                     dadosMembros = dadosMembros.filter(m => m.id !== id);
                     
+                    // Atualizar cache
+                    setCachedData('membros', dadosMembros);
+
                     // Apenas reaplica os filtros e redesenha a tabela
                     aplicarFiltrosMembros();
                     
