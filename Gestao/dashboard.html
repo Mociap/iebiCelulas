@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - IEBI Células</title>
+    <link rel="shortcut icon" href="../assets/favico.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <style>
+        :root {
+            --sidebar-bg: #2c3e50;
+            --sidebar-width: 210px;
+            --sidebar-width-collapsed: 60px;
+            --navbar-bg: #007bff;
+            --navbar-height: 60px;
+        }
+
+        /* Escala global de 90% (equivalente a zoom do navegador) */
+        html {
+            zoom: 0.9;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+        html, body { height: 100%; }
+
+        /* Cursor de ponteiro para campos de dropdown */
+        select,
+        select.form-control,
+        select.custom-select,
+        select.form-select {
+            cursor: pointer;
+        }
+        select:disabled {
+            cursor: not-allowed;
+        }
+        .dropdown-menu .dropdown-item {
+            cursor: pointer;
+        }
+
+        #content, .wrapper { min-height: 100vh; }
+        #content, #main-content-area { background-color: #f4f6f9; }
+        #main-content-area { padding-bottom: 0; }
+        #main-content-area > *:last-child { margin-bottom: 0 !important; }
+        #main-content-area .card:last-child { margin-bottom: 0 !important; }
+
+        /* Garante que o backdrop do modal cubra toda a viewport mesmo com zoom */
+        .modal-backdrop {
+            position: fixed !important;
+            inset: 0 !important; /* top/right/bottom/left = 0 */
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: rgba(0,0,0,0.5) !important;
+            z-index: 1040 !important;
+        }
+        .modal {
+            z-index: 1050 !important;
+        }
+        /* Remoção de rodapés de páginas carregadas (preserva .modal-footer) */
+        footer:not(.modal-footer),
+        .footer:not(.modal-footer),
+        .page-footer:not(.modal-footer),
+        [role="contentinfo"] { display: none !important; }
+
+        .wrapper {
+            display: flex;
+        }
+
+        #sidebar {
+            width: var(--sidebar-width);
+            top: 0;
+            bottom: 0;
+            height: auto;
+            background: var(--sidebar-bg);
+            color: #fff;
+            position: fixed;
+            transition: width 0.15s ease-in-out;
+            z-index: 1001;
+        }
+
+        #sidebar.collapsed {
+            width: var(--sidebar-width-collapsed);
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            text-align: center;
+            height: var(--navbar-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--navbar-bg);
+        }
+
+        .sidebar-header img {
+            max-height: 40px;
+            transition: opacity 0.1s;
+        }
+
+        #sidebar.collapsed .sidebar-header .logo-full {
+            display: none;
+        }
+        #sidebar:not(.collapsed) .sidebar-header .logo-abbr {
+            display: none;
+        }
+
+        #sidebar ul.components {
+            padding: 20px 0;
+        }
+
+        #sidebar ul li a {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            transition: background 0.2s, color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 0.95rem;
+        }
+
+        #sidebar ul li a i {
+            font-size: 1.1em;
+            margin-right: 12px;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        #sidebar.collapsed ul li a .menu-text {
+            display: none;
+        }
+
+        #sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--navbar-bg);
+            text-decoration: none;
+        }
+
+        #sidebar ul li a:hover i {
+            color: var(--navbar-bg);
+        }
+
+        #sidebar ul li.active > a {
+            background: transparent;
+            color: var(--navbar-bg);
+            font-weight: 600;
+        }
+
+        #sidebar ul li.active > a i {
+            color: var(--navbar-bg);
+        }
+
+        #content {
+            width: calc(100% - var(--sidebar-width));
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.15s ease-in-out, width 0.15s ease-in-out;
+        }
+
+        .content-body {
+            padding: 20px;
+            box-sizing: border-box;
+            min-height: calc(100vh - var(--navbar-height));
+            overflow-y: auto;
+            margin-top: var(--navbar-height);
+            background-color: #f4f6f9;
+        }
+
+        .main-content-spa {
+            width: 100%;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        #content.collapsed {
+            width: calc(100% - var(--sidebar-width-collapsed));
+            margin-left: var(--sidebar-width-collapsed);
+        }
+
+        .navbar-custom {
+            background-color: var(--navbar-bg);
+            height: var(--navbar-height);
+            padding: 0 1rem;
+            color: white;
+            position: fixed;
+            width: calc(100% - var(--sidebar-width));
+            left: var(--sidebar-width);
+            transition: left 0.15s ease-in-out, width 0.15s ease-in-out;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-custom.collapsed {
+            width: calc(100% - var(--sidebar-width-collapsed));
+            left: var(--sidebar-width-collapsed);
+        }
+
+        .navbar-custom .navbar-brand-title {
+            font-weight: 600;
+            font-size: 1rem;
+            height: var(--navbar-height);
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .navbar-custom #sidebarCollapse {
+            min-width: 44px;
+            height: var(--navbar-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px !important;
+            margin: 0 !important;
+        }
+
+        .navbar-custom #sidebarCollapse i {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .navbar-custom .btn {
+            line-height: 1 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* Estilo para carregamento */
+        #loader {
+            display: none;
+            position: fixed;
+            top: var(--navbar-height);
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 123, 255, 0.2);
+            z-index: 2000;
+        }
+        #loader .progress-bar {
+            width: 0;
+            height: 100%;
+            background: #fff;
+            animation: loading 2s infinite linear;
+        }
+        @keyframes loading {
+            0% { width: 0; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        /* Remove o arredondamento das tabelas */
+        .table, .table th, .table td {
+            border-radius: 0 !important;
+        }
+        .table thead th {
+            border-radius: 0 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="loader"><div class="progress-bar"></div></div>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/LogoBranco.png" alt="Logo IEBI Completo" class="logo-full">
+                <img src="../assets/default_Branco.png" alt="Logo IEBI Abrevidado" class="logo-abbr" style="max-height: 35px;">
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="#" data-page="admPainel.html"><i class="fas fa-chart-line"></i><span class="menu-text">Painel</span></a>
+                </li>
+                <li>
+                    <a href="#" data-page="admEstruturaCelulas.html"><i class="fas fa-sitemap"></i><span class="menu-text">Estrutura Célula</span></a>
+                </li>
+                <li>
+                    <a href="#" data-page="admMembros.html"><i class="fas fa-users"></i><span class="menu-text">Membros</span></a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-custom">
+                <button type="button" id="sidebarCollapse" class="btn btn-link text-white">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+                <span class="navbar-brand-title ml-3" id="pageTitle"></span>
+                <div class="ml-auto d-flex align-items-center">
+                    <a href="#" class="text-white mr-3"><i class="fas fa-expand"></i></a>
+                    <a href="#" class="text-white mr-3"><i class="far fa-bell"></i> <span class="badge badge-danger">13</span></a>
+                    <a href="#" class="text-white"><i class="fas fa-user-circle fa-lg"></i></a>
+                </div>
+            </nav>
+
+            <div class="content-body" id="main-content-area">
+                <!-- Conteúdo será carregado aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Firebase Modular SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, getDocs, collection, query, where, doc, getDoc, updateDoc, addDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        window.db = getFirestore(app);
+        window.auth = getAuth(app);
+
+        // Exposing Firestore functions globally for loaded pages
+        window.getDocs = getDocs;
+        window.collection = collection;
+        window.query = query;
+        window.where = where;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
+        window.addDoc = addDoc;
+        window.deleteDoc = deleteDoc;
+        window.onSnapshot = onSnapshot;
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Cache para as páginas
+            const pageCache = {};
+
+            function loadPage(url) {
+                $('#loader').show();
+                
+                // Se já estiver no cache, carrega de lá para ser instantâneo
+                if (pageCache[url]) {
+                    renderContent(pageCache[url], url);
+                    return;
+                }
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function(html) {
+                        pageCache[url] = html;
+                        renderContent(html, url);
+                    },
+                    error: function() {
+                        alert('Erro ao carregar a página: ' + url);
+                        $('#loader').hide();
+                    }
+                });
+            }
+
+            function renderContent(html, url) {
+                // Extrai o conteúdo do body
+                const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+                const content = bodyMatch ? bodyMatch[1] : html;
+                
+                // Extrai o título da página
+                const titleMatch = html.match(/<title[^>]*>([\s\S]*)<\/title>/i);
+                const title = titleMatch ? titleMatch[1].replace(' - iebiCelulas', '') : 'IEBI Células';
+                $('#pageTitle').text(title);
+
+                // Injeta estilos locais da página carregada (ex.: chips de seleção)
+                // Remove estilo anterior da página
+                if (window._currentPageStyleId && document.getElementById(window._currentPageStyleId)) {
+                    document.getElementById(window._currentPageStyleId).remove();
+                }
+                const styleTags = html.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || [];
+                if (styleTags.length > 0) {
+                    const cssCombined = styleTags.map(tag => {
+                        const m = tag.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+                        return m ? m[1] : '';
+                    }).join('\n');
+                    const styleEl = document.createElement('style');
+                    const styleId = 'page-style-' + (url || '').replace(/[^a-z0-9_-]/gi, '_');
+                    styleEl.id = styleId;
+                    styleEl.textContent = cssCombined;
+                    document.head.appendChild(styleEl);
+                    window._currentPageStyleId = styleId;
+                } else {
+                    window._currentPageStyleId = null;
+                }
+
+                // Insere o conteúdo. O jQuery irá extrair e executar os scripts automaticamente.
+                $('#main-content-area').html(content);
+
+                // Garante que modais carregados sejam anexados ao body para não serem afetados por overflow
+                $('#main-content-area').find('.modal').each(function(){
+                    const $m = $(this);
+                    if (!$m.data('movedToBody')) {
+                        $m.appendTo('body');
+                        $m.data('movedToBody', true);
+                    }
+                });
+
+                $('#loader').hide();
+            }
+
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('collapsed');
+                $('#content').toggleClass('collapsed');
+                $('.navbar-custom').toggleClass('collapsed');
+            });
+
+            $('#sidebar ul li a').on('click', function (e) {
+                e.preventDefault();
+                const $li = $(this).parent();
+                if ($li.hasClass('active')) return;
+
+                $('#sidebar ul li').removeClass('active');
+                $li.addClass('active');
+                
+                var page = $(this).data('page');
+                if(page){
+                    loadPage(page);
+                }
+            });
+
+            // Carrega a página inicial
+            loadPage('admPainel.html');
+        });
+    </script>
+</body>
+</html>

@@ -553,23 +553,73 @@
             const excluirBtn = document.getElementById('excluirBtn');
 
             editarBtn.addEventListener('click', function () {
-                const lider = obterParametroURL('lider');
-                const nomecelula = obterParametroURL('nomecelula');
+                const oldLider = obterParametroURL('lider');
+                const oldNomecelula = obterParametroURL('nomecelula');
 
-                if (lider && nomecelula) {
+                if (oldLider && oldNomecelula) {
                     bancoDeDados.collection('estruturacelula')
-                        .where('conclider', '==', lider)
-                        .where('nomecelula', '==', nomecelula)
+                        .where('conclider', '==', oldLider)
+                        .where('nomecelula', '==', oldNomecelula)
                         .limit(1)
                         .get()
                         .then((querySnapshot) => {
                             if (!querySnapshot.empty) {
                                 const doc = querySnapshot.docs[0];
                                 const data = obterDadosFormulario();
+                                
+                                // Inicia um batch para garantir atomicidade se possível, 
+                                // mas como membros pode ter muitos docs, faremos sequencial ou com múltiplos batches se necessário.
+                                // Para simplificar e garantir que funcione com o SDK compat:
+                                
                                 doc.ref.update(data)
                                     .then(() => {
-                                        alert('Documento atualizado com sucesso!');
-                                        window.location.href = '../Interno/frmEstruturaCelula.html';
+                                        console.log('Estrutura da célula atualizada com sucesso!');
+                                        
+                                        // Verifica se houve mudança no líder ou no nome da célula
+                                        const liderMudou = data.conclider !== oldLider;
+                                        const nomeMudou = data.nomecelula !== oldNomecelula;
+
+                                        if (liderMudou || nomeMudou) {
+                                            console.log('Propagando alterações para a coleção membros...');
+                                            
+                                            // Busca todos os membros que pertenciam a esta célula
+                                            bancoDeDados.collection('membros')
+                                                .where('lidercelula', '==', oldLider)
+                                                .where('nomedacelula', '==', oldNomecelula)
+                                                .get()
+                                                .then((membrosSnapshot) => {
+                                                    const batch = bancoDeDados.batch();
+                                                    let contagem = 0;
+                                                    
+                                                    membrosSnapshot.forEach((membroDoc) => {
+                                                        batch.update(membroDoc.ref, {
+                                                            lidercelula: data.conclider,
+                                                            nomedacelula: data.nomecelula
+                                                        });
+                                                        contagem++;
+                                                    });
+
+                                                    if (contagem > 0) {
+                                                        return batch.commit().then(() => {
+                                                            console.log(`${contagem} membros atualizados.`);
+                                                            return contagem;
+                                                        });
+                                                    }
+                                                    return 0;
+                                                })
+                                                .then((qtd) => {
+                                                    alert(`Célula e ${qtd} membros atualizados com sucesso!`);
+                                                    window.location.href = '../Interno/frmEstruturaCelula.html';
+                                                })
+                                                .catch((error) => {
+                                                    console.error('Erro ao atualizar membros:', error);
+                                                    alert('Célula atualizada, mas houve erro ao atualizar membros: ' + error.message);
+                                                    window.location.href = '../Interno/frmEstruturaCelula.html';
+                                                });
+                                        } else {
+                                            alert('Documento atualizado com sucesso!');
+                                            window.location.href = '../Interno/frmEstruturaCelula.html';
+                                        }
                                     })
                                     .catch((error) => {
                                         console.error('Erro ao atualizar documento:', error);

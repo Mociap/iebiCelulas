@@ -5,28 +5,14 @@
 const hierarquias = {
     ADMIN: {
         nivel: 5,
-        permissoes: [
-            'resumoMensal',
-            'organograma',
-            'indicadores',
-            'relatorioMembros',
-            'dadosReunioes',
-            'relApresentacao',
-            'acessoRapido',
-
-            // Escola Ministerial frmEM
-            'inscricoes',
-            'chamada',
-            'frequencia',
-            'admIncricoes',
-            'admTurmas'
-        ]
+        permissoes: ['*'] // Acesso universal - não precisa listar permissões específicas
     },
     Pastor: {
         nivel: 4,
         permissoes: [
             'resumoMensal',
             'organograma',
+            'relResumoMesCelula',
             'indicadores',
             'relatorioMembros',
             'dadosReunioes',
@@ -45,9 +31,9 @@ const hierarquias = {
         permissoes: [
             'resumoMensal',
             'organograma',
+            'relResumoMesCelula',
             'indicadores',
             'relatorioMembros',
-            'dadosReunioes',
 
             // Escola Ministerial frmEM
             'inscricoes',
@@ -62,9 +48,9 @@ const hierarquias = {
         permissoes: [
             'resumoMensal',
             'organograma',
+            'relResumoMesCelula',
             'indicadores',
             'relatorioMembros',
-            'dadosReunioes',
 
             // Escola Ministerial frmEM
             'inscricoes',
@@ -76,9 +62,9 @@ const hierarquias = {
         nivel: 1,
         permissoes: [
             'organograma',
+            'relResumoMesCelula',
             'indicadores',
             'relatorioMembros',
-            'dadosReunioes',
 
             // Escola Ministerial frmEM
             'inscricoes'
@@ -97,7 +83,6 @@ const hierarquias = {
             'organograma',
             'indicadores',
             'relatorioMembros',
-            'dadosReunioes',
 
             // Escola Ministerial frmEM
             'inscricoes'
@@ -152,6 +137,10 @@ const hierarquias = {
 };
 
 function temPermissao(funcao, permissao) {
+    // ADMIN tem acesso universal a tudo
+    if (funcao === 'ADMIN' && hierarquias[funcao]) {
+        return true;
+    }
     return hierarquias[funcao] && hierarquias[funcao].permissoes.includes(permissao);
 }
 

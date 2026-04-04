@@ -5,137 +5,367 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administração de Turmas</title>
-    <link rel="shortcut icon" href="../assets/3.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../assets/favico.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
+        :root {
+            --primary-color: #2980b9;
+            --secondary-color: #0c2461;
+            --background-main: #f4f6f9;
+            --surface-main: #ffffff;
+            --surface-secondary: #f8f9fa;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --success-color: #27ae60;
+            --danger-color: #c0392b;
+            --warning-color: #f39c12;
+            --border-color: #e0e0e0;
+            --input-bg: #ffffff;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #1a1a1a;
-            color: #ffffff;
+            background-color: var(--background-main);
+            color: var(--text-primary);
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
         }
 
         .container-fluid {
-            background-color: #2c2c2c;
+            background-color: var(--surface-main);
+            padding: 0;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            max-width: 1400px;
+            width: 90%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .page-header {
+            font-weight: 700;
+            background-color: var(--secondary-color);
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            margin: 0;
+            text-transform: uppercase;
+            font-size: 1.8rem;
+            border-radius: 0;
+            padding: 30px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .content-wrapper {
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .card {
-            background-color: #3c3c3c;
-            border: none;
-            margin-bottom: 20px;
+            background-color: var(--surface-main);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
         }
 
         .card-header {
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
+            background-color: rgba(41, 128, 185, 0.05);
+            color: var(--primary-color);
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0 !important;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header i {
+            margin-right: 10px;
+        }
+
+        .card-body {
+            padding: 24px;
         }
 
         .form-control {
-            background-color: #4c4c4c;
-            border: none;
-            color: #ffffff;
-        }
-
-        .form-control:focus {
-            background-color: #4c4c4c;
-            color: #ffffff;
-            border-color: #3498db;
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-        }
-
-
-        .form-control::placeholder {
-            color: #ffffff !important;
-            opacity: 1;
-        }
-
-        /* Estilo específico para os campos de busca */
-        #filtroNome,
-        #filtroCelula {
-            background-color: #3c3c3c;
-            color: #ffffff !important;
-            border: 1px solid #4c4c4c;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 10px 15px;
+            height: auto;
             transition: all 0.3s ease;
         }
 
-        #filtroNome:focus,
-        #filtroCelula:focus {
-            background-color: #4c4c4c;
-            border-color: #3498db;
-            color: #ffffff !important;
+        .form-control:focus {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
         }
 
-        .table {
-            color: #ffffff;
+        .form-control::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        select.form-control {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%232c3e50' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 12px;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .btn {
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border: none;
         }
 
         .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
+            background-color: var(--primary-color);
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
         }
 
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
         }
 
         .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
+            background-color: var(--success-color);
+            box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            box-shadow: 0 4px 6px rgba(192, 57, 43, 0.2);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(192, 57, 43, 0.3);
+        }
+        
+        .btn-outline-secondary {
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            background: transparent;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: var(--surface-secondary);
+            color: var(--text-primary);
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+            overflow-y: auto;
+            overflow-x: auto;
+            max-height: 65vh;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .table {
+            margin-bottom: 0;
+            color: var(--text-primary);
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: var(--secondary-color);
+            color: #ffffff;
+            border-bottom: none;
+            padding: 10px 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+        }
+
+        .table tbody td {
+            padding: 8px 15px;
+            vertical-align: middle;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--surface-main);
+            font-size: 0.9rem;
+        }
+
+        .table .btn {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) td {
+            background-color: var(--surface-secondary);
+        }
+
+        .table tbody tr:hover td {
+            background-color: rgba(41, 128, 185, 0.05);
         }
 
         .back-button {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            background-color: #2ecc71;
-            color: #ffffff;
-            padding: 10px;
-            border-radius: 30px;
+            top: 24px;
+            left: 24px;
+            background-color: var(--surface-main);
+            color: var(--text-primary);
+            padding: 0;
+            border-radius: 50%;
             text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             transition: all 0.3s ease;
             z-index: 1001;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
         }
 
         .back-button:hover {
-            background-color: #27ae60;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-decoration: none;
-            color: #ffffff;
+            background-color: var(--primary-color);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 6px 15px rgba(41, 128, 185, 0.3);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .back-button i {
+            font-size: 1.2rem;
         }
 
         .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary-color);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 2s linear infinite;
-            margin: 20px auto;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            margin: 40px auto;
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-            100% {
-                transform: rotate(360deg);
-            }
+        /* Modal Styles */
+        .modal-content {
+            background-color: var(--surface-main);
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 24px;
+            background-color: rgba(41, 128, 185, 0.05);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 20px 24px;
+        }
+
+        .close {
+            color: var(--text-secondary);
+            text-shadow: none;
+            opacity: 0.7;
+            transition: all 0.2s;
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+            opacity: 1;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #bdc3c7;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #95a5a6;
+        }
+        
+        .sugestoes {
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background-color: var(--surface-main);
+            width: calc(100% - 30px);
+            z-index: 1000;
+        }
+
+        .sugestao-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .sugestao-item:hover {
+            background-color: var(--surface-secondary);
         }
     </style>
 </head>
@@ -146,66 +376,70 @@
     </a>
 
     <div class="container-fluid">
-        <h2 class="text-center mb-4">Painel Administrativo - Turmas Escola Ministerial</h2>
+        <h2 class="page-header">Turmas Escola Ministerial</h2>
 
-        <div class="row">
-            <div class="col-md-12">
-                <!-- Filtros de busca -->
-                <div class="card mb-3">
-                    <div class="card-header">Filtros</div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <input type="text" id="filtroNomeTurma" class="form-control"
-                                    placeholder="Buscar por nome da turma">
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" id="filtroDisciplina" class="form-control"
-                                    placeholder="Buscar por disciplina">
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" id="filtroProfessor" class="form-control"
-                                    placeholder="Buscar por professor">
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- Filtros de busca -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="fas fa-filter"></i> Filtros de Busca
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="filtroNomeTurma">Nome da Turma</label>
+                                    <input type="text" id="filtroNomeTurma" class="form-control"
+                                        placeholder="Buscar por nome da turma">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="filtroDisciplina">Disciplina</label>
+                                    <input type="text" id="filtroDisciplina" class="form-control"
+                                        placeholder="Buscar por disciplina">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="filtroProfessor">Professor</label>
+                                    <input type="text" id="filtroProfessor" class="form-control"
+                                        placeholder="Buscar por professor">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Botão para adicionar nova turma -->
-                <div class="mb-3">
-                    <button class="btn btn-success" id="btnNovaTurma">
-                        <i class="fas fa-plus"></i> Nova Turma
-                    </button>
-                </div>
+                    <!-- Botão para adicionar nova turma -->
+                    <div class="d-flex justify-content-between mb-3">
+                        <button class="btn btn-success" id="btnNovaTurma">
+                            <i class="fas fa-plus"></i> Nova Disciplina
+                        </button>
+                        <button class="btn btn-success" id="btnExportar">
+                            <i class="fas fa-file-excel"></i> Exportar para Excel
+                        </button>
+                    </div>
 
-                <!-- Tabela de turmas -->
-                <div class="table-responsive">
-                    <table class="table table-striped" id="tabelaTurmas">
-                        <thead>
-                            <tr>
-                                <th>Nome da Turma</th>
-                                <th>Disciplina</th>
-                                <th>Professor</th>
-                                <th>Período da Turma</th>
-                                <th>Período de Inscrição</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaTurmas">
-                            <tr>
-                                <td colspan="6" class="text-center">
-                                    <div class="loader"></div>
-                                    <p>Carregando turmas...</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-3">
-                    <button class="btn btn-success" id="btnExportar">
-                        <i class="fas fa-file-excel"></i> Exportar para Excel
-                    </button>
+                    <!-- Tabela de turmas -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped" id="tabelaTurmas">
+                            <thead>
+                                <tr>
+                                    <th>Nome da Turma</th>
+                                    <th>Disciplina</th>
+                                    <th>Professor</th>
+                                    <th>Período da Turma</th>
+                                    <th>Período de Inscrição</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaTurmas">
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <div class="loader"></div>
+                                        <p>Carregando turmas...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -214,10 +448,10 @@
     <!-- Modal para adicionar/editar turma -->
     <div class="modal fade" id="modalTurma" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
-            <div class="modal-content bg-dark text-white">
+            <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="tituloModal">Nova Turma</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
+                    <button type="button" class="close" data-dismiss="modal">
                         <span>×</span>
                     </button>
                 </div>
@@ -235,55 +469,45 @@
                                 <option value="">Selecione uma disciplina</option>
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group position-relative">
                             <label for="professor">Professor</label>
                             <input type="text" class="form-control" id="professor"
                                 oninput="this.value = this.value.toUpperCase(); buscarProfessores(this.value);">
                             <div id="sugestoesProfessores" class="sugestoes"></div>
                         </div>
-                        <div class="form-group">
-                            <label for="dtIni">Data de Início</label>
-                            <input type="text" class="form-control" id="dtIni" required placeholder="DD/MM/AAAA">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dtIni">Data de Início</label>
+                                    <input type="text" class="form-control" id="dtIni" required placeholder="DD/MM/AAAA">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dtFim">Data de Término</label>
+                                    <input type="text" class="form-control" id="dtFim" required placeholder="DD/MM/AAAA">
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="dtFim">Data de Término</label>
-                            <input type="text" class="form-control" id="dtFim" required placeholder="DD/MM/AAAA">
-                        </div>
-                        <div class="form-group">
-                            <label for="dtIniInsc">Início das Inscrições</label>
-                            <input type="text" class="form-control" id="dtIniInsc" required placeholder="DD/MM/AAAA">
-                        </div>
-                        <div class="form-group">
-                            <label for="dtFimInsc">Término das Inscrições</label>
-                            <input type="text" class="form-control" id="dtFimInsc" required placeholder="DD/MM/AAAA">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dtIniInsc">Início das Inscrições</label>
+                                    <input type="text" class="form-control" id="dtIniInsc" required placeholder="DD/MM/AAAA">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dtFimInsc">Término das Inscrições</label>
+                                    <input type="text" class="form-control" id="dtFimInsc" required placeholder="DD/MM/AAAA">
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="btnSalvarTurma">Salvar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmação de Exclusão -->
-    <div class="modal fade" id="modalConfirmacao" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Exclusão</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Tem certeza que deseja excluir esta turma?</p>
-                    <p id="nomeTurmaExclusao"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="btnConfirmarExclusao">Confirmar Exclusão</button>
                 </div>
             </div>
         </div>
@@ -294,6 +518,7 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -379,10 +604,10 @@
                         <td>${periodoTurma}</td>
                         <td>${periodoInscricao}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary editar-turma" data-id="${turma.id}">
+                            <button class="btn btn-sm btn-primary editar-turma" data-id="${turma.id}" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger excluir-turma" data-id="${turma.id}" data-nome="${turma.nomeTurma}">
+                            <button class="btn btn-sm btn-danger excluir-turma" data-id="${turma.id}" data-nome="${turma.nomeTurma}" title="Excluir">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -454,6 +679,10 @@
             document.getElementById('professor').value = nome;
             document.getElementById('sugestoesProfessores').innerHTML = '';
         }
+        
+        // Expor para o escopo global pois é chamado no onclick
+        window.selecionarProfessor = selecionarProfessor;
+        window.buscarProfessores = buscarProfessores;
 
         // Configurar eventos de filtro
         function configurarFiltros() {
@@ -475,7 +704,15 @@
         // Exportar para Excel
         function exportarParaExcel() {
             const tabela = document.getElementById('tabelaTurmas');
-            const wb = XLSX.utils.table_to_book(tabela, { sheet: "Turmas" });
+            // Clona a tabela para remover a coluna de ações antes de exportar
+            const tabelaClone = tabela.cloneNode(true);
+            
+            // Remove a coluna de ações do cabeçalho
+            tabelaClone.querySelectorAll('th:last-child').forEach(th => th.remove());
+            // Remove a coluna de ações do corpo
+            tabelaClone.querySelectorAll('td:last-child').forEach(td => td.remove());
+            
+            const wb = XLSX.utils.table_to_book(tabelaClone, { sheet: "Turmas" });
             XLSX.writeFile(wb, `Turmas_EM_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
@@ -507,12 +744,12 @@
 
                         $('#modalTurma').modal('show');
                     } else {
-                        alert('Turma não encontrada!');
+                        Swal.fire('Erro', 'Turma não encontrada!', 'error');
                     }
                 })
                 .catch(error => {
                     console.error("Erro ao carregar turma:", error);
-                    alert('Erro ao carregar dados da turma: ' + error.message);
+                    Swal.fire('Erro', 'Erro ao carregar dados da turma: ' + error.message, 'error');
                 });
         }
 
@@ -529,7 +766,7 @@
 
             // Validação básica
             if (!nomeTurma || !disciplinas || !dtIni || !dtFim || !dtIniInsc || !dtFimInsc) {
-                alert('Por favor, preencha todos os campos obrigatórios');
+                Swal.fire('Atenção', 'Por favor, preencha todos os campos obrigatórios', 'warning');
                 return;
             }
 
@@ -557,51 +794,69 @@
             }
 
             promise.then(() => {
-                alert(id ? 'Turma atualizada com sucesso!' : 'Turma cadastrada com sucesso!');
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: id ? 'Turma atualizada com sucesso!' : 'Turma cadastrada com sucesso!',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 $('#modalTurma').modal('hide');
                 carregarTurmas();
             }).catch(error => {
                 console.error("Erro ao salvar turma:", error);
-                alert('Erro ao salvar turma: ' + error.message);
+                Swal.fire('Erro', 'Erro ao salvar turma: ' + error.message, 'error');
             });
         }
 
-        // Abrir modal de confirmação de exclusão
-        function abrirModalExclusao(id, nome) {
-            document.getElementById('nomeTurmaExclusao').textContent = `Turma: ${nome}`;
-            document.getElementById('btnConfirmarExclusao').dataset.id = id;
-            $('#modalConfirmacao').modal('show');
+        // Confirmar exclusão da turma
+        function confirmarExclusao(id, nome) {
+            Swal.fire({
+                title: 'Tem certeza?',
+                text: `Deseja excluir a turma "${nome}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, excluir!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executarExclusao(id);
+                }
+            });
         }
 
-        // Confirmar exclusão da turma
-        function confirmarExclusao() {
-            const id = document.getElementById('btnConfirmarExclusao').dataset.id;
-
-            // Primeiro verificamos se há alunos inscritos nesta turma
+        function executarExclusao(id) {
+             // Primeiro verificamos se há alunos inscritos nesta turma
             db.collection('cursosInscricoes')
                 .where('turma', '==', id)
                 .get()
                 .then(snapshot => {
                     if (!snapshot.empty) {
-                        alert('Não é possível excluir esta turma pois existem alunos inscritos nela.');
-                        $('#modalConfirmacao').modal('hide');
+                        Swal.fire('Não permitido', 'Não é possível excluir esta turma pois existem alunos inscritos nela.', 'warning');
                         return;
                     }
 
                     // Se não houver inscritos, podemos excluir
                     db.collection('cursosTurmas').doc(id).delete()
                         .then(() => {
-                            alert('Turma excluída com sucesso!');
-                            $('#modalConfirmacao').modal('hide');
+                            Swal.fire({
+                                title: 'Excluído!',
+                                text: 'Turma excluída com sucesso.',
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
                             carregarTurmas();
                         })
                         .catch(error => {
                             console.error("Erro ao excluir turma:", error);
-                            alert('Erro ao excluir turma: ' + error.message);
+                            Swal.fire('Erro', 'Erro ao excluir turma: ' + error.message, 'error');
                         });
                 }).catch(error => {
                     console.error("Erro ao verificar inscrições:", error);
-                    alert('Erro ao verificar inscrições: ' + error.message);
+                    Swal.fire('Erro', 'Erro ao verificar inscrições: ' + error.message, 'error');
                 });
         }
 
@@ -628,7 +883,7 @@
                 btn.addEventListener('click', () => {
                     const id = btn.dataset.id;
                     const nome = btn.dataset.nome;
-                    abrirModalExclusao(id, nome);
+                    confirmarExclusao(id, nome);
                 });
             });
         }
@@ -645,7 +900,6 @@
             document.getElementById('btnNovaTurma').addEventListener('click', abrirModalNovaTurma);
             document.getElementById('btnSalvarTurma').addEventListener('click', salvarTurma);
             document.getElementById('btnExportar').addEventListener('click', exportarParaExcel);
-            document.getElementById('btnConfirmarExclusao').addEventListener('click', confirmarExclusao);
         });
 
     </script>

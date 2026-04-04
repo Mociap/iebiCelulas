@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Indicadores - IEBI Células</title>
+    <style>
+        .dashboard-container {
+            padding: 20px;
+        }
+        .stats-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        .stats-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .stats-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Cores dos Cards */
+        .bg-pastor { background-color: rgba(52, 152, 219, 0.1); color: #3498db; }
+        .bg-coord { background-color: rgba(155, 89, 182, 0.1); color: #9b59b6; }
+        .bg-super { background-color: rgba(230, 126, 34, 0.1); color: #e67e22; }
+        .bg-membros { background-color: rgba(46, 204, 113, 0.1); color: #2ecc71; }
+
+        /* Estilos do Card de Capacidade (Igual à Foto) */
+        .capacidade-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        .capacidade-header {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #444;
+        }
+        .capacidade-bar {
+            width: 5px;
+            height: 24px;
+            background-color: #ff8c00;
+            border-radius: 10px;
+        }
+        .capacidade-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-top: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .capacidade-item:hover {
+            background-color: #f9f9f9;
+        }
+        .capacidade-item.active {
+            background-color: #f0f7ff;
+        }
+        .capacidade-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+        }
+        
+        /* Lista de Detalhes */
+        .details-container {
+            display: none;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .details-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 40px;
+            border-bottom: 1px solid #f9f9f9;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .details-item:hover {
+            background-color: #f8f9fa;
+        }
+        .details-cell-name {
+            font-weight: 500;
+        }
+        .details-member-count {
+            font-weight: 700;
+            color: #007bff;
+        }
+        .details-empty {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+        .capacidade-emoji {
+            font-size: 1.4rem;
+        }
+        .capacidade-label {
+            font-weight: 700;
+            color: #333;
+        }
+        .capacidade-desc {
+            color: #777;
+            font-size: 0.9rem;
+            margin-left: 5px;
+            font-weight: 400;
+        }
+        .capacidade-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+        .val-adequada { color: #2ecc71; }
+        .val-maxima { color: #f1c40f; }
+        .val-critica { color: #e74c3c; }
+
+        /* Estilos do Card de Células Críticas */
+        .criticas-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid #eee;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .criticas-header {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #444;
+            border-bottom: 1px solid #eee;
+        }
+        .criticas-bar {
+            width: 5px;
+            height: 24px;
+            background-color: #e74c3c;
+            border-radius: 10px;
+        }
+        .criticas-body {
+            flex: 1;
+            max-height: 235px;
+            overflow-y: auto;
+        }
+        .critica-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        .critica-item-row:hover {
+            background-color: #fff5f5;
+        }
+        .critica-cell-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .critica-cell-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .critica-cell-leader {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .critica-count-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .capacidade-footer {
+            background-color: #f8f9fa;
+            padding: 12px 20px;
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #34495e;
+            margin: 30px 0 20px 0;
+            padding-left: 10px;
+            border-left: 4px solid #007bff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-section {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .filter-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #34495e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-title i { color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Filtros -->
+        <div class="filter-section">
+            <div class="filter-title">
+                <i class="fas fa-filter"></i> Filtros de Visão
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Pastor</label>
+                        <select class="form-control" id="painelFiltroPastor">
+                            <option value="">Todos os Pastores</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Coordenador</label>
+                        <select class="form-control" id="painelFiltroCoordenador">
+                            <option value="">Todos os Coordenadores</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Supervisor</label>
+                        <select class="form-control" id="painelFiltroSupervisor">
+                            <option value="">Todos os Supervisores</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Líder - Célula</label>
+                        <select class="form-control" id="painelFiltroLider">
+                            <option value="">Todos os Líderes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="section-title">Resumo Geral</div>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon bg-coord">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stats-value" id="valQtdCoordenadores">0</div>
+                    <div class="stats-label">Coordenação</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon bg-super">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="stats-value" id="valQtdSupervisores">0</div>
+                    <div class="stats-label">Supervisão</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon bg-pastor">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div class="stats-value" id="valQtdLideres">0</div>
+                    <div class="stats-label">Células</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon bg-membros">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-value" id="valQtdMembros">0</div>
+                    <div class="stats-label">Membros</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card de Capacidade e Células Críticas -->
+        <div class="row mt-2">
+            <div class="col-md-6 mb-4">
+                <div class="capacidade-card">
+                    <div class="capacidade-header">
+                        <div class="capacidade-bar"></div>
+                        Capacidade por Célula
+                    </div>
+                    
+                    <div class="capacidade-item" onclick="toggleDetails('adequada')">
+                        <div class="capacidade-info">
+                            <span class="capacidade-emoji">😃</span>
+                            <span class="capacidade-label">Adequada</span>
+                            <span class="capacidade-desc">(Até 12 participantes)</span>
+                        </div>
+                        <div class="capacidade-value val-adequada" id="valQtdAdequada">0</div>
+                    </div>
+                    <div id="details-adequada" class="details-container"></div>
+
+                    <div class="capacidade-item" onclick="toggleDetails('lotada')">
+                        <div class="capacidade-info">
+                            <span class="capacidade-emoji">😐</span>
+                            <span class="capacidade-label">Máxima</span>
+                            <span class="capacidade-desc">(Até 16 participantes)</span>
+                        </div>
+                        <div class="capacidade-value val-maxima" id="valQtdLotada">0</div>
+                    </div>
+                    <div id="details-lotada" class="details-container"></div>
+
+                    <div class="capacidade-item" onclick="toggleDetails('critica')">
+                        <div class="capacidade-info">
+                            <span class="capacidade-emoji">😡</span>
+                            <span class="capacidade-label">Crítica</span>
+                            <span class="capacidade-desc">(mais de 17 participantes)</span>
+                        </div>
+                        <div class="capacidade-value val-critica" id="valQtdCritica">0</div>
+                    </div>
+                    <div id="details-critica" class="details-container"></div>
+
+                    <div class="capacidade-footer">
+                        Clique nos itens para ver + detalhes
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Lista Células Críticas -->
+            <div class="col-md-6 mb-4">
+                <div class="criticas-card">
+                    <div class="criticas-header">
+                        <div class="criticas-bar"></div>
+                        Células Críticas (> 16 membros)
+                    </div>
+                    <div class="criticas-body" id="painelListaCriticas">
+                        <div class="details-empty">Carregando dados...</div>
+                    </div>
+                    <div class="capacidade-footer" id="painelFooterCriticas">
+                        Nenhuma célula crítica no momento
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let dadosMembros = [];
+            let dadosEstrutura = [];
+            let resumoStatus = { adequada: [], lotada: [], critica: [] };
+
+            window.toggleDetails = function(tipo) {
+                const container = document.getElementById(`details-${tipo}`);
+                const isVisible = container.style.display === 'block';
+                
+                // Fecha todos primeiro
+                document.querySelectorAll('.details-container').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('.capacidade-item').forEach(i => i.classList.remove('active'));
+
+                if (!isVisible) {
+                    const lista = resumoStatus[tipo];
+                    if (lista.length === 0) {
+                        container.innerHTML = '<div class="details-empty">Nenhuma célula nesta categoria</div>';
+                    } else {
+                        container.innerHTML = lista.map(item => `
+                            <div class="details-item">
+                                <span class="details-cell-name">${item.nome}</span>
+                                <span class="details-member-count">${item.qtd} membros</span>
+                            </div>
+                        `).join('');
+                    }
+                    container.style.display = 'block';
+                    event.currentTarget.classList.add('active');
+                }
+            };
+
+            async function inicializarPainel() {
+                try {
+                    // Busca dados das coleções
+                    const snapEstrutura = await window.getDocs(window.collection(window.db, 'estruturacelula'));
+                    dadosEstrutura = snapEstrutura.docs.map(doc => doc.data());
+
+                    const snapMembros = await window.getDocs(window.collection(window.db, 'membros'));
+                    dadosMembros = snapMembros.docs.map(doc => doc.data());
+
+                    popularFiltros();
+                    atualizarCards();
+                    
+                    // Event Listeners para os filtros
+                    document.getElementById('painelFiltroPastor').addEventListener('change', () => {
+                        resetarFiltrosAbaixo('pastor');
+                        atualizarCards();
+                    });
+                    document.getElementById('painelFiltroCoordenador').addEventListener('change', () => {
+                        resetarFiltrosAbaixo('coordenador');
+                        atualizarCards();
+                    });
+                    document.getElementById('painelFiltroSupervisor').addEventListener('change', () => {
+                        resetarFiltrosAbaixo('supervisor');
+                        atualizarCards();
+                    });
+                    document.getElementById('painelFiltroLider').addEventListener('change', atualizarCards);
+
+                } catch (error) {
+                    console.error("Erro ao inicializar painel:", error);
+                }
+            }
+
+            function resetarFiltrosAbaixo(nivel) {
+                if (nivel === 'pastor') {
+                    document.getElementById('painelFiltroCoordenador').value = "";
+                    document.getElementById('painelFiltroSupervisor').value = "";
+                    document.getElementById('painelFiltroLider').value = "";
+                } else if (nivel === 'coordenador') {
+                    document.getElementById('painelFiltroSupervisor').value = "";
+                    document.getElementById('painelFiltroLider').value = "";
+                } else if (nivel === 'supervisor') {
+                    document.getElementById('painelFiltroLider').value = "";
+                }
+                popularFiltros();
+            }
+
+            function popularFiltros() {
+                const pastorSel = document.getElementById('painelFiltroPastor').value;
+                const coordSel = document.getElementById('painelFiltroCoordenador').value;
+                const superSel = document.getElementById('painelFiltroSupervisor').value;
+
+                let filtrados = dadosEstrutura;
+
+                // Pastores (Sempre todos disponíveis ou filtrados pelo topo se houvesse)
+                const pastores = [...new Set(dadosEstrutura.map(d => d.Pastor).filter(Boolean))].sort();
+                atualizarSelect('painelFiltroPastor', pastores, pastorSel);
+
+                // Coordenadores
+                if (pastorSel) filtrados = filtrados.filter(d => d.Pastor === pastorSel);
+                const coordenadores = [...new Set(filtrados.map(d => d.coordenador).filter(Boolean))].sort();
+                atualizarSelect('painelFiltroCoordenador', coordenadores, coordSel);
+
+                // Supervisores
+                if (coordSel) filtrados = filtrados.filter(d => d.coordenador === coordSel);
+                const supervisores = [...new Set(filtrados.map(d => d.supervisor).filter(Boolean))].sort();
+                atualizarSelect('painelFiltroSupervisor', supervisores, superSel);
+
+                // Líderes
+                if (superSel) filtrados = filtrados.filter(d => d.supervisor === superSel);
+                const lideres = filtrados.map(d => ({
+                    value: d.conclider,
+                    label: `${d.conclider} - ${d.nomecelula}`
+                })).filter(d => d.value).sort((a, b) => a.label.localeCompare(b.label));
+                
+                const selectLider = document.getElementById('painelFiltroLider');
+                const valAtual = selectLider.value;
+                selectLider.innerHTML = '<option value="">Todos os Líderes</option>';
+                lideres.forEach(l => {
+                    const opt = document.createElement('option');
+                    opt.value = l.value;
+                    opt.textContent = l.label;
+                    if (l.value === valAtual) opt.selected = true;
+                    selectLider.appendChild(opt);
+                });
+            }
+
+            function atualizarSelect(id, lista, valorAtual) {
+                const select = document.getElementById(id);
+                const placeholder = select.options[0].text;
+                select.innerHTML = `<option value="">${placeholder}</option>`;
+                lista.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item;
+                    opt.textContent = item;
+                    if (item === valorAtual) opt.selected = true;
+                    select.appendChild(opt);
+                });
+            }
+
+            function atualizarCards() {
+                const pastor = document.getElementById('painelFiltroPastor').value;
+                const coord = document.getElementById('painelFiltroCoordenador').value;
+                const supervisor = document.getElementById('painelFiltroSupervisor').value;
+                const lider = document.getElementById('painelFiltroLider').value;
+
+                let estruturaFiltrada = dadosEstrutura;
+                if (pastor) estruturaFiltrada = estruturaFiltrada.filter(d => d.Pastor === pastor);
+                if (coord) estruturaFiltrada = estruturaFiltrada.filter(d => d.coordenador === coord);
+                if (supervisor) estruturaFiltrada = estruturaFiltrada.filter(d => d.supervisor === supervisor);
+                if (lider) estruturaFiltrada = estruturaFiltrada.filter(d => d.conclider === lider);
+
+                const coordsUnicos = new Set(estruturaFiltrada.map(d => d.coordenador).filter(Boolean));
+                const supersUnicos = new Set(estruturaFiltrada.map(d => d.supervisor).filter(Boolean));
+                const lideresUnicos = new Set(estruturaFiltrada.map(d => d.conclider).filter(Boolean));
+
+                // Filtragem de membros baseada na estrutura filtrada
+                let membrosFiltrados = dadosMembros;
+                if (lider) {
+                    membrosFiltrados = membrosFiltrados.filter(m => m.lidercelula === lider);
+                } else if (supervisor || coord || pastor) {
+                    const lideresValidos = new Set(estruturaFiltrada.map(d => d.conclider).filter(Boolean));
+                    membrosFiltrados = membrosFiltrados.filter(m => lideresValidos.has(m.lidercelula));
+                }
+
+                document.getElementById('valQtdCoordenadores').textContent = coordsUnicos.size;
+                document.getElementById('valQtdSupervisores').textContent = supersUnicos.size;
+                document.getElementById('valQtdLideres').textContent = lideresUnicos.size;
+                document.getElementById('valQtdMembros').textContent = membrosFiltrados.length;
+
+                // Cálculo de Status das Células
+                let adequada = 0;
+                let lotada = 0;
+                let critica = 0;
+                resumoStatus = { adequada: [], lotada: [], critica: [] };
+
+                lideresUnicos.forEach(liderNome => {
+                    const membrosDaCelula = membrosFiltrados.filter(m => m.lidercelula === liderNome).length;
+                    const infoCelula = estruturaFiltrada.find(d => d.conclider === liderNome);
+                    const nomeExibicao = infoCelula ? `${liderNome} - ${infoCelula.nomecelula}` : liderNome;
+
+                    if (membrosDaCelula <= 12) {
+                        adequada++;
+                        resumoStatus.adequada.push({ nome: nomeExibicao, qtd: membrosDaCelula });
+                    } else if (membrosDaCelula <= 16) {
+                        lotada++;
+                        resumoStatus.lotada.push({ nome: nomeExibicao, qtd: membrosDaCelula });
+                    } else {
+                        critica++;
+                        resumoStatus.critica.push({ nome: nomeExibicao, qtd: membrosDaCelula });
+                    }
+                });
+
+                // Ordena as listas por quantidade de membros (decrescente)
+                resumoStatus.adequada.sort((a, b) => b.qtd - a.qtd);
+                resumoStatus.lotada.sort((a, b) => b.qtd - a.qtd);
+                resumoStatus.critica.sort((a, b) => b.qtd - a.qtd);
+
+                document.getElementById('valQtdAdequada').textContent = adequada;
+                document.getElementById('valQtdLotada').textContent = lotada;
+                document.getElementById('valQtdCritica').textContent = critica;
+
+                // Atualiza Lista Lateral de Críticas
+                const listaCriticasEl = document.getElementById('painelListaCriticas');
+                const footerCriticasEl = document.getElementById('painelFooterCriticas');
+
+                if (resumoStatus.critica.length === 0) {
+                    listaCriticasEl.innerHTML = '<div class="details-empty">Nenhuma célula crítica no momento</div>';
+                    footerCriticasEl.textContent = 'Parabéns! Nenhuma célula crítica.';
+                } else {
+                    listaCriticasEl.innerHTML = resumoStatus.critica.map(item => {
+                        const partes = item.nome.split(' - ');
+                        const lider = partes[0];
+                        const celula = partes[1] || '';
+                        return `
+                            <div class="critica-item-row">
+                                <div class="critica-cell-info">
+                                    <span class="critica-cell-name">${celula}</span>
+                                    <span class="critica-cell-leader">Líder: ${lider}</span>
+                                </div>
+                                <div class="critica-count-badge">${item.qtd}</div>
+                            </div>
+                        `;
+                    }).join('');
+                    const labelCels = resumoStatus.critica.length === 1 ? 'célula crítica' : 'células críticas';
+                    footerCriticasEl.textContent = `${resumoStatus.critica.length} ${labelCels} identificadas`;
+                }
+
+                // Fecha detalhes ao atualizar filtros para evitar dados inconsistentes
+                document.querySelectorAll('.details-container').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('.capacidade-item').forEach(i => i.classList.remove('active'));
+            }
+
+            // Inicia se o DB já estiver pronto (SPA mode)
+            if (window.db) {
+                inicializarPainel();
+            } else {
+                // Caso contrário aguarda um pouco (fallback)
+                setTimeout(inicializarPainel, 500);
+            }
+        })();
+    </script>
+</body>
+</html>
