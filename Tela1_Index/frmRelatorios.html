@@ -134,24 +134,34 @@
         // Monitorar estado da autenticação
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log("Usuário autenticado:", user.uid);
+                console.log("Usuário autenticado no Firebase Auth:", user.uid);
                 await carregarDadosUsuario(user.uid, user.email);
             } else {
-                console.log("Usuário não autenticado. Redirecionando...");
-                // window.location.href = '../index.html'; // Comentado para evitar loop em dev, descomentar em prod
+                console.log("Usuário não autenticado no Firebase Auth. Verificando dados locais...");
+                const emailLocal = localStorage.getItem('emailUsuario');
+                if (emailLocal) {
+                    await carregarDadosUsuario(null, emailLocal);
+                } else {
+                    console.log("Usuário não autenticado. Redirecionando...");
+                    // window.location.href = '../index.html';
+                }
             }
         });
 
         async function carregarDadosUsuario(uid, email) {
             try {
-                // Tenta buscar pelo UID primeiro (padrão novo)
-                let userDoc = await getDoc(doc(bancoDeDados, "usuarios", uid));
                 let userData = null;
 
-                if (userDoc.exists()) {
-                    userData = userDoc.data();
-                } else {
-                    // Fallback: busca por email (compatibilidade com registros antigos)
+                if (uid) {
+                    // Tenta buscar pelo UID primeiro
+                    let userDoc = await getDoc(doc(bancoDeDados, "usuarios", uid));
+                    if (userDoc.exists()) {
+                        userData = userDoc.data();
+                    }
+                }
+
+                if (!userData && email) {
+                    // Fallback: busca por email na coleção 'usuarios'
                     const q = query(collection(bancoDeDados, "usuarios"), where("email", "==", email));
                     const querySnapshot = await getDocs(q);
                     if (!querySnapshot.empty) {
@@ -160,8 +170,8 @@
                 }
 
                 if (userData) {
-                    const nome = userData.nome || 'Usuário';
-                    const funcao = userData.funcao || 'Membro'; // Define padrão se não tiver função
+                    const nome = userData.nome || localStorage.getItem('nomeUsuario') || 'Usuário';
+                    const funcao = userData.funcao || localStorage.getItem('funcaoUsuario') || 'Membro';
                     
                     // Atualizar UI
                     document.getElementById('userName').textContent = nome.split(' ')[0];
@@ -175,11 +185,29 @@
                     
                     aplicarPermissoes(funcao);
                 } else {
-                    console.error("Dados do usuário não encontrados no Firestore.");
-                    document.getElementById('userFuncao').textContent = "Sem cadastro";
+                    // Tentar exibir a partir do LocalStorage se já salvo durante o login
+                    const nomeLocal = localStorage.getItem('nomeUsuario');
+                    const funcaoLocal = localStorage.getItem('funcaoUsuario');
+                    if (nomeLocal || email) {
+                        document.getElementById('userName').textContent = (nomeLocal || 'Usuário').split(' ')[0];
+                        document.getElementById('userEmail').textContent = email || localStorage.getItem('emailUsuario') || '';
+                        document.getElementById('userFuncao').textContent = funcaoLocal || 'Membro';
+                        aplicarPermissoes(funcaoLocal || 'Membro');
+                    } else {
+                        console.error("Dados do usuário não encontrados no Firestore.");
+                        document.getElementById('userFuncao').textContent = "Sem cadastro";
+                    }
                 }
             } catch (error) {
                 console.error("Erro ao buscar dados do usuário:", error);
+                const nomeLocal = localStorage.getItem('nomeUsuario');
+                const funcaoLocal = localStorage.getItem('funcaoUsuario');
+                if (nomeLocal || email) {
+                    document.getElementById('userName').textContent = (nomeLocal || 'Usuário').split(' ')[0];
+                    document.getElementById('userEmail').textContent = email || localStorage.getItem('emailUsuario') || '';
+                    document.getElementById('userFuncao').textContent = funcaoLocal || 'Membro';
+                    aplicarPermissoes(funcaoLocal || 'Membro');
+                }
             }
         }
 

@@ -115,7 +115,7 @@
         }
 
         #sidebar ul li a {
-            padding: 12px 15px;
+            padding: 8px 15px;
             display: flex;
             align-items: center;
             color: rgba(255, 255, 255, 0.8);
@@ -264,6 +264,83 @@
         .table thead th {
             border-radius: 0 !important;
         }
+
+        /* Estilos para grupos de menu */
+        .menu-group {
+            padding: 0;
+        }
+
+        .menu-group-header {
+            padding: 12px 15px 2px 15px !important;
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            user-select: none;
+        }
+
+        .menu-group-header:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--navbar-bg);
+        }
+
+        .menu-group-header i {
+            font-size: 1.1em;
+            margin-right: 12px;
+            min-width: 25px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .menu-group-header .arrow-icon {
+            margin-left: auto;
+            margin-right: 0;
+            font-size: 0.8em;
+        }
+
+        .menu-group-header.collapsed .arrow-icon {
+            transform: rotate(-90deg);
+        }
+
+        /* Marcador de grupo ativo */
+        .menu-group.active {
+            border-left: 4px solid var(--navbar-bg);
+            padding-left: 0;
+        }
+
+        .menu-group.active .menu-group-header {
+            padding-left: 11px;
+            color: var(--navbar-bg);
+        }
+
+        .menu-group.active .menu-group-header i:first-child {
+            color: var(--navbar-bg);
+        }
+
+        .menu-group-items {
+            display: flex;
+            flex-direction: column;
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .menu-group-items.collapsed {
+            max-height: 0;
+        }
+
+        .menu-group-items li a {
+            /* padding-left: 30px !important; */
+            padding: 6px 0px 5px 30px !important;
+            font-size: 0.9rem;
+        }
+
+        #sidebar.collapsed .menu-group-header .menu-text {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -277,14 +354,52 @@
             </div>
 
             <ul class="list-unstyled components">
-                <li class="active">
-                    <a href="#" data-page="admPainel.html"><i class="fas fa-chart-line"></i><span class="menu-text">Painel</span></a>
+                <!-- Grupo Célula -->
+                <li class="menu-group">
+                    <div class="menu-group-header collapsed">
+                        <i class="fas fa-church"></i>
+                        <span class="menu-text">Célula</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </div>
+                    <ul class="list-unstyled menu-group-items collapsed">
+                        <li class="active">
+                            <a href="#" data-page="admPainel.html"><i class="fas fa-chart-line"></i><span class="menu-text">Painel</span></a>
+                        </li>
+                        <li>
+                            <a href="#" data-page="admEstruturaCelulas.html"><i class="fas fa-sitemap"></i><span class="menu-text">Estrutura Célula</span></a>
+                        </li>
+                        <li>
+                            <a href="#" data-page="admMembros.html"><i class="fas fa-users"></i><span class="menu-text">Membros</span></a>
+                        </li>
+                    </ul>
                 </li>
-                <li>
-                    <a href="#" data-page="admEstruturaCelulas.html"><i class="fas fa-sitemap"></i><span class="menu-text">Estrutura Célula</span></a>
+
+                <!-- Grupo Ensino -->
+                <li class="menu-group">
+                    <div class="menu-group-header collapsed">
+                        <i class="fas fa-book"></i>
+                        <span class="menu-text">Ensino</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </div>
+                    <ul class="list-unstyled menu-group-items collapsed">
+                        <li>
+                            <a href="#" data-page="./EscMinisterial/frmCursos.html"><i class="fas fa-graduation-cap"></i><span class="menu-text">Cursos</span></a>
+                        </li>
+                    </ul>
                 </li>
-                <li>
-                    <a href="#" data-page="admMembros.html"><i class="fas fa-users"></i><span class="menu-text">Membros</span></a>
+
+                <!-- Grupo Configurações -->
+                <li class="menu-group">
+                    <div class="menu-group-header collapsed">
+                        <i class="fas fa-cog"></i>
+                        <span class="menu-text">Configurações</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </div>
+                    <ul class="list-unstyled menu-group-items collapsed">
+                        <li>
+                            <a href="#" data-page="admUsuarios.html"><i class="fas fa-user-cog"></i><span class="menu-text">Usuários</span></a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </nav>
@@ -429,13 +544,39 @@
                 $('.navbar-custom').toggleClass('collapsed');
             });
 
-            $('#sidebar ul li a').on('click', function (e) {
+            // Expandir/colapsar grupos de menu
+            $('#sidebar').on('click', '.menu-group-header', function (e) {
                 e.preventDefault();
-                const $li = $(this).parent();
-                if ($li.hasClass('active')) return;
+                const $header = $(this);
+                const $items = $header.next('.menu-group-items');
+                
+                $header.toggleClass('collapsed');
+                $items.toggleClass('collapsed');
+            });
 
-                $('#sidebar ul li').removeClass('active');
+            // Carregamento de páginas ao clicar nos itens do menu
+            $('#sidebar').on('click', 'ul.menu-group-items a', function (e) {
+                e.preventDefault();
+                const $li = $(this).closest('li');
+                const $group = $li.closest('.menu-group');
+                const $header = $group.find('.menu-group-header');
+                const $items = $group.find('.menu-group-items');
+                
+                // Remove a classe active de todos os itens
+                $('#sidebar .menu-group-items li').removeClass('active');
+                // Adiciona active ao item clicado
                 $li.addClass('active');
+                
+                // Remove a classe active de todos os grupos
+                $('#sidebar .menu-group').removeClass('active');
+                // Adiciona active ao grupo do item clicado
+                $group.addClass('active');
+                
+                // Expande o grupo se estiver colapsado
+                if ($header.hasClass('collapsed')) {
+                    $header.removeClass('collapsed');
+                    $items.removeClass('collapsed');
+                }
                 
                 var page = $(this).data('page');
                 if(page){
@@ -443,8 +584,27 @@
                 }
             });
 
+            // Função para atualizar o marcador de grupo ativo
+            function updateActiveGroup() {
+                const $activeItem = $('#sidebar .menu-group-items li.active');
+                if ($activeItem.length > 0) {
+                    const $group = $activeItem.closest('.menu-group');
+                    $('#sidebar .menu-group').removeClass('active');
+                    $group.addClass('active');
+                    
+                    // Expande o grupo
+                    const $header = $group.find('.menu-group-header');
+                    const $items = $group.find('.menu-group-items');
+                    $header.removeClass('collapsed');
+                    $items.removeClass('collapsed');
+                }
+            }
+
             // Carrega a página inicial
             loadPage('admPainel.html');
+            
+            // Atualiza o marcador de grupo ativo após carregar
+            setTimeout(updateActiveGroup, 100);
         });
     </script>
 </body>

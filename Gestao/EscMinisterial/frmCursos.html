@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursos - iebiCelulas</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .courses-container {
+            padding: 5px 0px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 0px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #007bff;
+        }
+
+        #cursosIndisponiveisSection .section-title {
+            margin-top: 35px;
+        }
+
+        .course-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.15);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .course-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+            flex: 1;
+        }
+
+        .course-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+
+        .status-disponivel {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-indisponivel {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .course-description {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0px;
+            flex-grow: 1;
+        }
+
+        .course-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .info-item i {
+            color: #007bff;
+            min-width: 20px;
+        }
+
+        .course-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-view {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: #0056b3;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-edit {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #1e7e34;
+            text-decoration: none;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .spinner-border {
+            color: #007bff;
+        }
+
+        .courses-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-novo-curso {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-novo-curso:hover {
+            background-color: #218838;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-novo-curso i {
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid courses-container">
+        <!-- Header com botão de novo curso -->
+        <div class="courses-header">
+            <h1 style="margin: 0; color: #2c3e50; font-size: 2rem; font-weight: 600;">Cursos</h1>
+            <button id="btnNovoCurso" class="btn-novo-curso">
+                <i class="fas fa-plus"></i>
+                Novo Curso
+            </button>
+        </div>
+
+        <!-- Cursos Disponíveis -->
+        <div id="cursosDisponiveisSection">
+            <h2 class="section-title">
+                <i class="fas fa-check-circle"></i>
+                Cursos Disponíveis
+            </h2>
+            <div id="cursosDisponíveisContainer" class="row">
+                <div class="col-12">
+                    <div class="loading">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="emptyDisponivel" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <p>Nenhum curso disponível no momento</p>
+            </div>
+        </div>
+
+        <!-- Cursos Indisponíveis -->
+        <div id="cursosIndisponiveisSection" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-times-circle"></i>
+                Cursos Indisponíveis
+            </h2>
+            <div id="cursosIndisponivelContainer" class="row">
+                <div class="col-12">
+                    <div class="loading">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="emptyIndisponivel" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <p>Nenhum curso indisponível no momento</p>
+            </div>
+        </div>
+
+        <!-- Modal de Novo Curso -->
+        <div id="modalNovoCurso" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; overflow-y: auto;">
+            <div style="position: relative; background: white; margin: 50px auto; padding: 30px; border-radius: 8px; max-width: 600px; box-shadow: 0 5px 25px rgba(0,0,0,0.2);">
+                <!-- Botão Fechar -->
+                <button id="fecharModalCurso" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <h2 style="margin-top: 0; color: #2c3e50; margin-bottom: 25px;">Novo Curso</h2>
+
+                <!-- Mensagem de alerta -->
+                <div id="mensagemAlerta" style="display: none; margin-bottom: 15px;"></div>
+
+                <!-- Formulário -->
+                <form id="formNovoCurso">
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="titulo">Título do Curso *</label>
+                            <input type="text" id="titulo" name="titulo" placeholder="Ex: Fundamentos da Liderança" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="descricao">Descrição *</label>
+                            <textarea id="descricao" name="descricao" placeholder="Descrição detalhada do curso" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instrutor">Instrutor *</label>
+                            <input type="text" id="instrutor" name="instrutor" placeholder="Ex: Pastor João Silva" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dataInicio">Data de Início *</label>
+                            <input type="date" id="dataInicio" name="dataInicio" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="duracao">Duração *</label>
+                            <input type="text" id="duracao" name="duracao" placeholder="Ex: 8 semanas" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vagas">Número de Vagas *</label>
+                            <input type="number" id="vagas" name="vagas" placeholder="Ex: 30" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="disponivel">Status *</label>
+                            <select id="disponivel" name="disponivel" required>
+                                <option value="">Selecione um status</option>
+                                <option value="true">Disponível</option>
+                                <option value="false">Indisponível</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" id="cancelarCurso" class="btn-secondary">Cancelar</button>
+                        <button type="submit" id="salvarCurso" class="btn-primary">Salvar Curso</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            carregarCursos();
+            
+            // Event listener para o botão de novo curso
+            $('#btnNovoCurso').on('click', function() {
+                abrirFormularioCurso();
+            });
+
+            // Fechar modal
+            $('#fecharModalCurso, #cancelarCurso').on('click', function() {
+                $('#modalNovoCurso').hide();
+                $('#formNovoCurso')[0].reset();
+            });
+
+            // Fechar modal ao clicar fora
+            $('#modalNovoCurso').on('click', function(e) {
+                if (e.target === this) {
+                    $(this).hide();
+                    $('#formNovoCurso')[0].reset();
+                }
+            });
+
+            // Salvar novo curso
+            $('#formNovoCurso').on('submit', async function(e) {
+                e.preventDefault();
+
+                // Verificar se Firebase está disponível
+                if (!window.db) {
+                    mostrarAlerta('Erro: Firebase não foi inicializado', 'error');
+                    return;
+                }
+
+                try {
+                    // Desabilitar botão de envio
+                    const $btnSalvar = $('#salvarCurso');
+                    $btnSalvar.prop('disabled', true);
+
+                    // Coletar dados do formulário
+                    const dadosCurso = {
+                        titulo: $('#titulo').val().trim(),
+                        descricao: $('#descricao').val().trim(),
+                        instrutor: $('#instrutor').val().trim(),
+                        dataInicio: $('#dataInicio').val(),
+                        duracao: $('#duracao').val().trim(),
+                        vagas: parseInt($('#vagas').val()),
+                        participantes: 0,
+                        disponivel: $('#disponivel').val() === 'true',
+                        dataCriacao: new Date().toISOString()
+                    };
+
+                    // Validação básica
+                    if (!dadosCurso.titulo || !dadosCurso.descricao || !dadosCurso.instrutor) {
+                        throw new Error('Por favor, preencha todos os campos obrigatórios');
+                    }
+
+                    if (isNaN(dadosCurso.vagas) || dadosCurso.vagas < 1) {
+                        throw new Error('Número de vagas deve ser válido');
+                    }
+
+                    // Adicionar documento na coleção 'curso'
+                    const docRef = await window.addDoc(window.collection(window.db, 'curso'), dadosCurso);
+                    
+                    // Sucesso
+                    mostrarAlerta(`Curso "${dadosCurso.titulo}" criado com sucesso!`, 'success');
+                    
+                    // Fechar modal após 1.5 segundos
+                    setTimeout(() => {
+                        $('#modalNovoCurso').hide();
+                        $('#formNovoCurso')[0].reset();
+                        carregarCursos(); // Recarregar lista de cursos
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Erro ao salvar curso:', error);
+                    mostrarAlerta(`Erro: ${error.message}`, 'error');
+                } finally {
+                    // Reabilitar botão
+                    $('#salvarCurso').prop('disabled', false);
+                }
+            });
+        });
+
+        function abrirFormularioCurso() {
+            // Limpar o formulário
+            $('#formNovoCurso')[0].reset();
+            $('#mensagemAlerta').hide();
+            
+            // Mostrar modal
+            $('#modalNovoCurso').show();
+        }
+
+        function mostrarAlerta(mensagem, tipo) {
+            const $alerta = $('#mensagemAlerta');
+            $alerta.removeClass('alert-success alert-error');
+            $alerta.addClass(tipo === 'success' ? 'alert-success' : 'alert-error');
+            $alerta.html(mensagem).show();
+        }
+
+        async function carregarCursos() {
+            try {
+                // Verifica se o db do Firebase está disponível
+                if (!window.db) {
+                    console.error('Firebase não foi inicializado');
+                    mostrarErro('Erro ao carregar banco de dados');
+                    return;
+                }
+
+                // Busca todos os cursos do Firestore
+                const cursosRef = window.collection(window.db, 'curso');
+                const querySnapshot = await window.getDocs(cursosRef);
+                
+                const cursos = [];
+                querySnapshot.forEach((doc) => {
+                    cursos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                // Se não houver cursos, mostrar mensagem vazia
+                if (cursos.length === 0) {
+                    $('#cursosDisponíveisContainer').html('');
+                    $('#emptyDisponivel').show();
+                    return;
+                }
+
+                renderizarCursos(cursos);
+            } catch (error) {
+                console.error('Erro ao carregar cursos:', error);
+                mostrarErro('Erro ao carregar cursos do banco de dados');
+            }
+        }
+
+        function mostrarErro(mensagem) {
+            $('#cursosDisponíveisContainer').html(`
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> ${mensagem}
+                    </div>
+                </div>
+            `);
+        }
+
+        function renderizarCursos(cursos) {
+            const cursosDisponíveis = cursos.filter(c => c.disponivel === true);
+            const cursosIndisponíveis = cursos.filter(c => c.disponivel === false);
+
+            // Renderizar cursos disponíveis
+            renderizarSecao(cursosDisponíveis, '#cursosDisponíveisContainer', '#emptyDisponivel', true);
+            
+            // Renderizar cursos indisponíveis
+            if (cursosIndisponíveis.length > 0) {
+                $('#cursosIndisponiveisSection').show();
+                renderizarSecao(cursosIndisponíveis, '#cursosIndisponivelContainer', '#emptyIndisponivel', false);
+            }
+        }
+
+        function renderizarSecao(cursos, containerSelector, emptySelector, disponivel) {
+            const $container = $(containerSelector);
+            $container.empty();
+
+            if (cursos.length === 0) {
+                $(emptySelector).show();
+                return;
+            }
+
+            $(emptySelector).hide();
+
+            cursos.forEach(curso => {
+                const statusClass = disponivel ? 'status-disponivel' : 'status-indisponivel';
+                const statusText = disponivel ? 'Disponível' : 'Indisponível';
+                const vagasDisponiveis = curso.vagas - curso.participantes;
+
+                const html = `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="course-card">
+                            <div class="course-header">
+                                <h3 class="course-title">${curso.titulo}</h3>
+                                <span class="course-status ${statusClass}">${statusText}</span>
+                            </div>
+                            
+                            <p class="course-description">${curso.descricao}</p>
+                            
+                            <div class="course-info">
+                                <div class="info-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>${curso.instrutor}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>${curso.dataInicio}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span>${curso.duracao}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>${curso.participantes}/${curso.vagas} inscritos</span>
+                                </div>
+                            </div>
+                            
+                            <div class="course-actions">
+                                <a href="#" class="btn btn-action btn-view">
+                                    <i class="fas fa-eye"></i> Visualizar
+                                </a>
+                                ${disponivel ? '<a href="#" class="btn btn-action btn-edit"><i class="fas fa-edit"></i> Editar</a>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $container.append(html);
+            });
+        }
+    </script>
+</body>
+</html>

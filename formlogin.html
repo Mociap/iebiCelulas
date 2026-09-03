@@ -253,33 +253,68 @@
 
         async function armazenarDadosUsuario(email) {
             try {
-                const membrosRef = collection(bancoDeDados, "membros");
-                const q = query(membrosRef, where("email", "==", email));
-                const querySnapshot = await getDocs(q);
+                let nome = null;
+                let funcao = null;
 
-                if (!querySnapshot.empty) {
-                    const documentoMembro = querySnapshot.docs[0];
-                    const dadosMembro = documentoMembro.data();
+                // Tenta consultar na coleção 'usuarios' para resgatar nome e função
+                try {
+                    const qUsuario = query(collection(bancoDeDados, "usuarios"), where("email", "==", email));
+                    const snapUsuario = await getDocs(qUsuario);
+                    if (!snapUsuario.empty) {
+                        const dadosU = snapUsuario.docs[0].data();
+                        nome = dadosU.nome;
+                        funcao = dadosU.funcao;
+                    }
+                } catch (eU) {
+                    console.warn("Erro ao buscar em 'usuarios':", eU);
+                }
 
-                    localStorage.setItem('nomeUsuario', dadosMembro.nome);
-                    localStorage.setItem('nomedacelula', dadosMembro.nomedacelula);
-                    localStorage.setItem('lidercelula', dadosMembro.lidercelula);
-                    localStorage.setItem('igreja', dadosMembro.igreja);
-                    localStorage.setItem('rede', dadosMembro.rede);
+                // Busca na coleção 'membros' (por e-mail ou nome)
+                let dadosMembro = null;
+                try {
+                    const membrosRef = collection(bancoDeDados, "membros");
+                    let q = query(membrosRef, where("email", "==", email));
+                    let querySnapshot = await getDocs(q);
 
-                    const funcaoUsuario = await determinarFuncaoUsuario(dadosMembro.nome);
-                    localStorage.setItem('funcaoUsuario', funcaoUsuario);
+                    if (querySnapshot.empty && nome) {
+                        q = query(membrosRef, where("nome", "==", nome));
+                        querySnapshot = await getDocs(q);
+                    }
+
+                    if (!querySnapshot.empty) {
+                        dadosMembro = querySnapshot.docs[0].data();
+                    }
+                } catch (eM) {
+                    console.warn("Erro ao buscar em 'membros':", eM);
+                }
+
+                if (dadosMembro) {
+                    nome = dadosMembro.nome || nome || 'Usuário';
+                    localStorage.setItem('nomeUsuario', nome);
+                    localStorage.setItem('nome', nome);
+                    localStorage.setItem('nomedacelula', dadosMembro.nomedacelula || '');
+                    localStorage.setItem('lidercelula', dadosMembro.lidercelula || '');
+                    localStorage.setItem('igreja', dadosMembro.igreja || '');
+                    localStorage.setItem('rede', dadosMembro.rede || '');
+
+                    if (!funcao) funcao = await determinarFuncaoUsuario(nome);
+                    localStorage.setItem('funcaoUsuario', funcao || 'Membro');
 
                     const supervisor = await encontrarSupervisor(dadosMembro.nomedacelula);
                     if (supervisor) {
                         localStorage.setItem('supervisor', supervisor);
                     }
 
-                    console.log("Dados do membro armazenados:", dadosMembro);
-                    console.log("Função do usuário:", funcaoUsuario);
-                    console.log("Supervisor:", supervisor);
+                    console.log("Dados do membro armazenados com sucesso:", dadosMembro);
+                    console.log("Função do usuário:", funcao);
+                } else if (nome) {
+                    localStorage.setItem('nomeUsuario', nome);
+                    localStorage.setItem('nome', nome);
+                    if (!funcao) funcao = await determinarFuncaoUsuario(nome);
+                    localStorage.setItem('funcaoUsuario', funcao || 'Membro');
+                    console.log("Dados do usuário armazenados (via coleção usuarios):", nome, funcao);
                 } else {
-                    console.log("Documento do membro não encontrado");
+                    console.log("Documento do membro/usuário não encontrado");
                 }
             } catch (erro) {
                 console.error("Erro ao armazenar dados do membro:", erro);
@@ -355,11 +390,31 @@
             const senha = document.getElementById('password').value;
 
             try {
-                console.log("Tentando autenticar usuário");
-                const credencialUsuario = await signInWithEmailAndPassword(autenticacao, email, senha);
-                console.log("Usuário autenticado com sucesso");
+                let autenticado = false;
 
-                const usuario = credencialUsuario.user;
+                // Verificação prévia na coleção 'usuarios' (email e senha)
+                try {
+                    const qUsuarios = query(collection(bancoDeDados, "usuarios"), where("email", "==", email));
+                    const queryUsuariosSnap = await getDocs(qUsuarios);
+
+                    if (!queryUsuariosSnap.empty) {
+                        const usuarioValido = queryUsuariosSnap.docs.find(d => d.data().senha === senha);
+                        if (usuarioValido) {
+                            console.log("Usuário autenticado com sucesso via coleção 'usuarios' (Processo 1)");
+                            autenticado = true;
+                        }
+                    }
+                } catch (erroColecao) {
+                    console.warn("Falha na consulta à coleção 'usuarios':", erroColecao);
+                }
+
+                // Se não autenticado via coleção 'usuarios', executa as demais validações (Firebase Auth)
+                if (!autenticado) {
+                    console.log("Tentando autenticar usuário via Firebase Auth");
+                    await signInWithEmailAndPassword(autenticacao, email, senha);
+                    console.log("Usuário autenticado com sucesso via Firebase Auth");
+                }
+
                 localStorage.setItem('tempoLogin', new Date().getTime());
                 localStorage.setItem('emailUsuario', email);
                 console.log("Tempo de login e email armazenados");

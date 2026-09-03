@@ -327,21 +327,130 @@
 
         document.getElementById('downloadExcel').addEventListener('click', function () {
             bancoDeDados.collection('estruturacelula').get().then((querySnapshot) => {
-                const data = [];
+                const excelData = [];
+                
+                // Cabeçalho da tabela
+                excelData.push([
+                    'Pastor',
+                    'Coordenador',
+                    'Rede',
+                    'Supervisor',
+                    'Líder',
+                    'Célula',
+                    'Dia da Semana',
+                    'Horário',
+                    'Local'
+                ]);
+                
+                // Coletar e ordenar dados
+                const dados = [];
                 querySnapshot.forEach((doc) => {
-                    // Pegando todos os campos do documento
-                    data.push(doc.data());
+                    const data = doc.data();
+                    
+                    if (!data.Pastor || !data.coordenador || !data.supervisor) {
+                        return;
+                    }
+                    
+                    dados.push({
+                        pastor: data.Pastor,
+                        coordenador: data.coordenador,
+                        rede: data.rede || '',
+                        supervisor: data.supervisor,
+                        lider: data.conclider || '',
+                        celula: data.nomecelula || '',
+                        dia: data.diaSemana || '',
+                        horario: data.horario || '',
+                        local: data.local || ''
+                    });
+                });
+                
+                // Ordenar por Pastor > Coordenador > Supervisor > Líder
+                dados.sort((a, b) => {
+                    if (a.pastor !== b.pastor) return a.pastor.localeCompare(b.pastor);
+                    if (a.coordenador !== b.coordenador) return a.coordenador.localeCompare(b.coordenador);
+                    if (a.supervisor !== b.supervisor) return a.supervisor.localeCompare(b.supervisor);
+                    return a.lider.localeCompare(b.lider);
+                });
+                
+                // Adicionar cada linha de dados
+                dados.forEach(item => {
+                    excelData.push([
+                        item.pastor,
+                        item.coordenador,
+                        item.rede,
+                        item.supervisor,
+                        item.lider,
+                        item.celula,
+                        item.dia,
+                        item.horario,
+                        item.local
+                    ]);
                 });
 
-                // Cria workbook e worksheet
+                // Criar workbook e worksheet
                 const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(data);
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
 
-                // Adiciona worksheet ao workbook
+                // Configurar largura das colunas
+                ws['!cols'] = [
+                    { wch: 25 },  // Pastor
+                    { wch: 25 },  // Coordenador
+                            // Cabeçalho das células
+                            excelData.push(['', '', '', 'Líder', 'Célula', 'Dia', 'Horário', 'Local']);
+                            
+                            // Ordenar células por líder
+                            const celulas = supervisores[supervisor].sort((a, b) => 
+                                a.lider.localeCompare(b.lider)
+                            );
+                            
+                            celulas.forEach(celula => {
+                                excelData.push([
+                                    '', '', '', 
+                                    celula.lider,
+                                    celula.celula,
+                                    celula.dia,
+                                    celula.horario,
+                                    celula.local
+                                ]);
+                                totalCelulas++;
+                            });
+                            
+                            excelData.push([]); // Linha vazia após cada supervisor
+                        });
+                    });
+                    
+                    excelData.push([]); // Linha vazia após cada pastor
+                });
+                
+                // Totalizador
+                excelData.push([]);
+                excelData.push(['TOTAL DE CÉLULAS:', totalCelulas]);
+
+                // Criar workbook e worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+                // Configurar largura das colunas
+                ws['!cols'] = [
+                    { wch: 3 },   // Coluna A (indentação)
+                    { wch: 3 },   // Coluna B (indentação)
+                    { wch: 15 },  // Coluna C (indentação/labels)
+                    { wch: 25 },  // Coluna D (Líder)
+                    { wch: 30 },  // Coluna E (Célula)
+                    { wch: 15 },  // Coluna F (Dia)
+                    { wch: 12 },  // Coluna G (Horário)
+                    { wch: 35 }   // Coluna H (Local)
+                ];
+
+                // Adicionar worksheet ao workbook
                 XLSX.utils.book_append_sheet(wb, ws, "Estrutura Células");
 
+                // Gerar nome do arquivo com data
+                const dataAtual = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+                const nomeArquivo = `estrutura_celulas_${dataAtual}.xlsx`;
+
                 // Gera e faz download do arquivo
-                XLSX.writeFile(wb, "estrutura_celulas.xlsx");
+                XLSX.writeFile(wb, nomeArquivo);
             });
         });
     </script>

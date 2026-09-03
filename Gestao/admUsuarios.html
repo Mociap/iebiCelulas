@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários - iebiCelulas</title>
+    <link rel="shortcut icon" href="../assets/favico.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: bold;
+        }
+
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+
+        .dashboard-title {
+            font-weight: 600;
+            color: #343a40;
+        }
+
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .filter-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .usuarios-table-enhanced {
+            font-size: 0.95rem;
+        }
+
+        .usuarios-table-enhanced th {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%) !important;
+            color: white !important;
+            font-weight: 700;
+            text-align: center !important;
+            vertical-align: middle !important;
+            border: none;
+            padding: 10px 6px;
+            font-size: 0.95rem;
+        }
+
+        .usuarios-table-enhanced td {
+            vertical-align: middle !important;
+            text-align: center !important;
+            font-size: 0.85rem !important;
+            padding: 6px 4px !important;
+        }
+
+        .usuarios-table-enhanced tbody tr:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s ease;
+        }
+
+        .usuarios-actions {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .badge-funcao {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: white;
+        }
+        .badge-ADMIN      { background-color: #dc3545; }
+        .badge-Pastor     { background-color: #6f42c1; }
+        .badge-Coordenador{ background-color: #007bff; }
+        .badge-Supervisor { background-color: #17a2b8; }
+        .badge-Lider      { background-color: #28a745; }
+        .badge-Membro     { background-color: #6c757d; }
+        .badge-PROFESSOR  { background-color: #fd7e14; }
+        .badge-Aluno      { background-color: #20c997; }
+
+        .status-ativo  { color: #28a745; font-weight: 600; }
+        .status-inativo{ color: #dc3545; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="main-content-spa">
+        <!-- Alertas -->
+        <div class="alert-container" id="alertContainerUsuarios"></div>
+
+        <!-- Cabeçalho -->
+        <div class="dashboard-header">
+            <h2 class="dashboard-title">
+                <i class="fas fa-user-cog text-primary mr-3"></i>
+                Gerenciar Usuários
+            </h2>
+            <p class="text-muted">Visualize, adicione, edite e exclua usuários do sistema</p>
+        </div>
+
+        <!-- Card de Filtros / Ações -->
+        <div class="card filter-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="filtroFuncao" class="font-weight-bold">Função</label>
+                            <select class="form-control" id="filtroFuncao">
+                                <option value="">Todas as Funções</option>
+                                <option value="ADMIN">Admin</option>
+                                <option value="Pastor">Pastor</option>
+                                <option value="Coordenador">Coordenador</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Lider">Líder</option>
+                                <option value="Membro">Membro</option>
+                                <option value="PROFESSOR">Professor</option>
+                                <option value="Aluno">Aluno</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="filtroStatus" class="font-weight-bold">Status</label>
+                            <select class="form-control" id="filtroStatus">
+                                <option value="">Todos</option>
+                                <option value="ATIVO">Ativo</option>
+                                <option value="INATIVO">Inativo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="filtroBuscaUsuario" class="font-weight-bold">Buscar</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="filtroBuscaUsuario" placeholder="Nome ou e-mail...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <button class="btn btn-primary shadow-sm mr-2" onclick="abrirModalUsuario()">
+                            <i class="fas fa-plus mr-2"></i>Adicionar Usuário
+                        </button>
+                        <button id="btnExportarUsuarios" class="btn btn-success mr-2">
+                            <i class="fas fa-file-excel mr-1"></i> Exportar Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-spinner text-center py-5" id="usuariosLoading">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="sr-only">Carregando...</span>
+            </div>
+            <p class="mt-3 text-muted">Carregando usuários...</p>
+        </div>
+
+        <!-- Tabela -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-users-cog mr-2"></i>
+                    <span id="tituloTabelaUsuarios">Usuários: 0</span>
+                </h5>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Use os botões de ação para editar ou excluir registros
+                </small>
+            </div>
+            <div class="card-body p-3">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 usuarios-table-enhanced" id="usuariosTabelaDados">
+                        <thead class="thead-light">
+                            <tr></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end p-2">
+                    <span id="usuariosSubtotal" class="font-weight-bold">Subtotal: 0 usuários</span>
+                </div>
+            </div>
+        </div>
+    </div><!-- /.main-content-spa -->
+
+    <!-- Modal Adicionar/Editar Usuário -->
+    <div class="modal fade" id="usuarioModal" tabindex="-1" role="dialog" aria-labelledby="usuarioModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="usuarioModalLabel">Adicionar Usuário</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="usuarioForm">
+                        <div class="form-group">
+                            <label for="modalUsuarioNome">Nome Completo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="modalUsuarioNome" required style="text-transform: uppercase;">
+                        </div>
+                        <div class="form-group">
+                            <label for="modalUsuarioEmail">E-mail <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="modalUsuarioEmail" required>
+                            <small id="modalUsuarioEmailError" style="color: rgb(255, 100, 100); display: none;">E-mail já cadastrado</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="modalUsuarioFuncao">Função <span class="text-danger">*</span></label>
+                            <select class="form-control" id="modalUsuarioFuncao" required>
+                                <option value="">Selecione...</option>
+                                <option value="ADMIN">Admin</option>
+                                <option value="Pastor">Pastor</option>
+                                <option value="Coordenador">Coordenador</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Lider">Líder</option>
+                                <option value="Membro">Membro</option>
+                                <option value="PROFESSOR">Professor</option>
+                                <option value="Aluno">Aluno</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="modalUsuarioStatus">Status</label>
+                            <select class="form-control" id="modalUsuarioStatus">
+                                <option value="ATIVO">Ativo</option>
+                                <option value="INATIVO">Inativo</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="salvarUsuario">
+                        <i class="fas fa-save mr-1"></i> Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmar Exclusão -->
+    <div class="modal fade" id="confirmarExclusaoUsuarioModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle mr-2"></i>Confirmar Exclusão</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir o usuário <strong id="nomeUsuarioExcluir"></strong>?</p>
+                    <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmarExclusaoUsuarioBtn">
+                        <i class="fas fa-trash mr-1"></i> Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // --- Inicialização ---
+            function inicializar() {
+                if (window.db) {
+                    setTimeout(() => initUsuarios(), 100);
+                } else {
+                    const script = document.createElement('script');
+                    script.type = 'module';
+                    script.innerHTML = `
+                        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+                        import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+                        const firebaseConfig = {
+                            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+                            authDomain: "dbiebi.firebaseapp.com",
+                            projectId: "dbiebi",
+                            storageBucket: "dbiebi.appspot.com",
+                            messagingSenderId: "1068164821081",
+                            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+                        };
+                        const app = initializeApp(firebaseConfig);
+                        window.db = getFirestore(app);
+                        window.initUsuarios();
+                    `;
+                    document.body.appendChild(script);
+                }
+            }
+
+            window.initUsuarios = async function () {
+                const { collection, getDocs, doc, deleteDoc, updateDoc, addDoc } =
+                    await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+                let dadosUsuarios = [];
+                let editandoId = null;
+                let idParaExcluir = null;
+
+                // --- Utilitários ---
+                function mostrarAlerta(mensagem, tipo = 'success') {
+                    const container = document.getElementById('alertContainerUsuarios');
+                    if (!container) return;
+                    const id = 'alerta_' + Date.now();
+                    container.innerHTML += `
+                        <div id="${id}" class="alert alert-${tipo} alert-dismissible fade show shadow" role="alert">
+                            ${mensagem}
+                            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                        </div>`;
+                    setTimeout(() => {
+                        const el = document.getElementById(id);
+                        if (el) el.remove();
+                    }, 4000);
+                }
+
+                function setLoading(show) {
+                    const el = document.getElementById('usuariosLoading');
+                    if (el) el.style.display = show ? 'block' : 'none';
+                }
+
+                // --- Carregar dados ---
+                async function carregarUsuarios() {
+                    setLoading(true);
+                    try {
+                        const snapshot = await getDocs(collection(window.db, 'usuarios'));
+                        dadosUsuarios = [];
+                        snapshot.forEach(d => dadosUsuarios.push({ id: d.id, ...d.data() }));
+                        renderTabela();
+                        aplicarFiltros();
+                    } catch (err) {
+                        console.error(err);
+                        mostrarAlerta('Erro ao carregar usuários.', 'danger');
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+
+                // --- Renderizar tabela ---
+                function renderTabela(lista) {
+                    const origem = lista && Array.isArray(lista) ? lista : dadosUsuarios;
+                    const tabela = document.getElementById('usuariosTabelaDados');
+                    if (!tabela) return;
+
+                    const thead = tabela.querySelector('thead tr');
+                    const tbody = tabela.querySelector('tbody');
+                    const tituloEl = document.getElementById('tituloTabelaUsuarios');
+                    const subtotalEl = document.getElementById('usuariosSubtotal');
+
+                    if (tituloEl) tituloEl.textContent = `Usuários: ${origem.length}`;
+
+                    if (!origem.length) {
+                        if (thead) thead.innerHTML = '<th>Nenhum dado</th>';
+                        if (tbody) tbody.innerHTML = '<tr><td class="text-center">Nenhum usuário encontrado</td></tr>';
+                        if (subtotalEl) subtotalEl.textContent = 'Subtotal: 0 usuários';
+                        return;
+                    }
+
+                    const colunas = ['nome', 'email', 'funcao', 'status', 'dataCriacao'];
+                    const titulos = { nome: 'Nome', email: 'E-mail', funcao: 'Função', status: 'Status', dataCriacao: 'Data Cadastro' };
+
+                    if (thead) thead.innerHTML = colunas.map(c => `<th>${titulos[c]}</th>`).join('') + '<th>Ações</th>';
+
+                    const ordenado = origem.slice().sort((a, b) =>
+                        (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' })
+                    );
+
+                    if (tbody) {
+                        tbody.innerHTML = ordenado.map(u => {
+                            const funcao = u.funcao || '-';
+                            const funcaoBadge = `<span class="badge badge-funcao badge-${funcao}">${funcao}</span>`;
+
+                            const statusReal = u.status || 'ATIVO';
+                            const statusHtml = statusReal === 'ATIVO'
+                                ? '<span class="status-ativo"><i class="fas fa-check-circle mr-1"></i>Ativo</span>'
+                                : '<span class="status-inativo"><i class="fas fa-times-circle mr-1"></i>Inativo</span>';
+
+                            let dataFormatada = '';
+                            if (u.dataCriacao && u.dataCriacao.toDate) {
+                                dataFormatada = u.dataCriacao.toDate().toLocaleDateString('pt-BR');
+                            } else if (u.dataCriacao) {
+                                dataFormatada = new Date(u.dataCriacao).toLocaleDateString('pt-BR');
+                            }
+
+                            return `<tr>
+                                <td>${u.nome || ''}</td>
+                                <td>${u.email || ''}</td>
+                                <td>${funcaoBadge}</td>
+                                <td>${statusHtml}</td>
+                                <td>${dataFormatada}</td>
+                                <td>
+                                    <div class="usuarios-actions">
+                                        <button class="btn btn-sm btn-warning" title="Editar" onclick="window._editarUsuario('${u.id}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" title="Excluir" onclick="window._excluirUsuario('${u.id}', '${(u.nome||'').replace(/'/g,"\\'")}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                        }).join('');
+                    }
+
+                    if (subtotalEl) subtotalEl.textContent = `Subtotal: ${ordenado.length} usuário${ordenado.length !== 1 ? 's' : ''}`;
+                }
+
+                // --- Filtros ---
+                function aplicarFiltros() {
+                    const funcao = document.getElementById('filtroFuncao').value;
+                    const status = document.getElementById('filtroStatus').value;
+                    const busca = (document.getElementById('filtroBuscaUsuario').value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+                    let lista = dadosUsuarios.slice();
+                    if (funcao) lista = lista.filter(u => (u.funcao || '') === funcao);
+                    if (status === 'ATIVO')   lista = lista.filter(u => !u.status || u.status === 'ATIVO');
+                    if (status === 'INATIVO') lista = lista.filter(u => u.status === 'INATIVO');
+                    if (busca) lista = lista.filter(u => {
+                        const n = (u.nome || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        const e = (u.email || '').toLowerCase();
+                        return n.includes(busca) || e.includes(busca);
+                    });
+                    renderTabela(lista);
+                }
+
+                document.getElementById('filtroFuncao').addEventListener('change', aplicarFiltros);
+                document.getElementById('filtroStatus').addEventListener('change', aplicarFiltros);
+                document.getElementById('filtroBuscaUsuario').addEventListener('input', aplicarFiltros);
+
+                // --- Modal ---
+                window.abrirModalUsuario = function () {
+                    editandoId = null;
+                    document.getElementById('usuarioModalLabel').textContent = 'Adicionar Usuário';
+                    document.getElementById('usuarioForm').reset();
+                    document.getElementById('modalUsuarioEmailError').style.display = 'none';
+                    $('#usuarioModal').modal('show');
+                };
+
+                window._editarUsuario = function (id) {
+                    const u = dadosUsuarios.find(x => x.id === id);
+                    if (!u) return;
+                    editandoId = id;
+                    document.getElementById('usuarioModalLabel').textContent = 'Editar Usuário';
+                    document.getElementById('modalUsuarioNome').value = u.nome || '';
+                    document.getElementById('modalUsuarioEmail').value = u.email || '';
+                    document.getElementById('modalUsuarioFuncao').value = u.funcao || '';
+                    document.getElementById('modalUsuarioStatus').value = u.status || 'ATIVO';
+                    document.getElementById('modalUsuarioEmailError').style.display = 'none';
+                    $('#usuarioModal').modal('show');
+                };
+
+                // --- Salvar ---
+                document.getElementById('salvarUsuario').addEventListener('click', async function () {
+                    const { serverTimestamp, deleteField } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+                    const nome = document.getElementById('modalUsuarioNome').value.trim();
+                    const email = document.getElementById('modalUsuarioEmail').value.trim();
+                    const funcao = document.getElementById('modalUsuarioFuncao').value;
+                    const status = document.getElementById('modalUsuarioStatus').value;
+
+                    if (!nome || !email || !funcao) {
+                        mostrarAlerta('Preencha todos os campos obrigatórios.', 'warning');
+                        return;
+                    }
+
+                    const emailDuplicado = dadosUsuarios.some(u => u.email === email && u.id !== editandoId);
+                    if (emailDuplicado) {
+                        document.getElementById('modalUsuarioEmailError').style.display = 'block';
+                        return;
+                    }
+                    document.getElementById('modalUsuarioEmailError').style.display = 'none';
+
+                    // Status: só persiste na coleção se for INATIVO;
+                    // usuários sem campo status são tratados como Ativo
+                    const dados = { nome, email, funcao };
+                    if (status === 'INATIVO') {
+                        dados.status = 'INATIVO';
+                    } else {
+                        // Se estava INATIVO e foi alterado para ATIVO, remove o campo
+                        dados.status = deleteField();
+                    }
+
+                    try {
+                        if (editandoId) {
+                            await updateDoc(doc(window.db, 'usuarios', editandoId), dados);
+                            mostrarAlerta('Usuário atualizado com sucesso!', 'success');
+                        } else {
+                            // Novo registro: adiciona dataCriacao, não grava status se Ativo
+                            const novoDoc = { nome, email, funcao, dataCriacao: serverTimestamp() };
+                            if (status === 'INATIVO') novoDoc.status = 'INATIVO';
+                            await addDoc(collection(window.db, 'usuarios'), novoDoc);
+                            mostrarAlerta('Usuário adicionado com sucesso!', 'success');
+                        }
+                        $('#usuarioModal').modal('hide');
+                        await carregarUsuarios();
+                    } catch (err) {
+                        console.error(err);
+                        mostrarAlerta('Erro ao salvar usuário.', 'danger');
+                    }
+                });
+
+                // --- Excluir ---
+                window._excluirUsuario = function (id, nome) {
+                    idParaExcluir = id;
+                    document.getElementById('nomeUsuarioExcluir').textContent = nome;
+                    $('#confirmarExclusaoUsuarioModal').modal('show');
+                };
+
+                document.getElementById('confirmarExclusaoUsuarioBtn').addEventListener('click', async function () {
+                    if (!idParaExcluir) return;
+                    try {
+                        await deleteDoc(doc(window.db, 'usuarios', idParaExcluir));
+                        mostrarAlerta('Usuário excluído com sucesso!', 'success');
+                        $('#confirmarExclusaoUsuarioModal').modal('hide');
+                        idParaExcluir = null;
+                        await carregarUsuarios();
+                    } catch (err) {
+                        console.error(err);
+                        mostrarAlerta('Erro ao excluir usuário.', 'danger');
+                    }
+                });
+
+                // --- Exportar Excel ---
+                document.getElementById('btnExportarUsuarios').addEventListener('click', function () {
+                    const tabela = document.getElementById('usuariosTabelaDados');
+                    if (!tabela || !window.XLSX) {
+                        mostrarAlerta('Exportação indisponível (XLSX não carregado).', 'warning');
+                        return;
+                    }
+                    const wb = window.XLSX.utils.table_to_book(tabela, { sheet: 'Usuários' });
+                    window.XLSX.writeFile(wb, 'usuarios.xlsx');
+                });
+
+                // --- Iniciar ---
+                await carregarUsuarios();
+            };
+
+            inicializar();
+        })();
+    </script>
+</body>
+</html>
