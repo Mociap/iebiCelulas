@@ -141,20 +141,25 @@
             margin: 0 auto 20px;
         }
 
-        #celula {
-            background-color: #3c3c3c !important;
-            color: #ffffff !important;
-            cursor: default;
+        .sugestoes {
+            background-color: #3c3c3c;
+            border-radius: 0 0 5px 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            width: 90%;
+            z-index: 1000;
         }
 
-        #celula:focus,
-        #celula:disabled,
-        #celula[readonly] {
-            background-color: #3c3c3c !important;
-            color: #ffffff !important;
-            box-shadow: none;
+        .sugestao-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #4c4c4c;
         }
 
+        .sugestao-item:hover {
+            background-color: #4c4c4c;
+        }
 
         @keyframes spin {
             0% {
@@ -165,18 +170,12 @@
                 transform: rotate(360deg);
             }
         }
-        /*teste*/
     </style>
 </head>
 
 <body>
-    <!-- <a href="frmEM.html" class="back-button"> -->
     <a href="../index.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
-    </a>
-    <div id="alerta" class="alert alert-warning mt-2" style="display: none;">
-        Nenhum nome encontrado para a célula selecionada.
-    </div>
     </a>
     <div class="header">
         <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
@@ -187,25 +186,18 @@
         <form id="inscricaoForm">
             <div class="form-group">
                 <label for="nome">Nome Completo</label>
-                <input type="text" class="form-control" id="nome" required
-                    oninput="this.value = this.value.toUpperCase(); buscarNomes(this.value);">
+                <!-- Inputs ocultos para salvar os dados da pessoa selecionada -->
+                <input type="hidden" id="id_pessoa">
+                <input type="hidden" id="nome_pessoa_cache">
+                <input type="hidden" id="contato_cache">
+                
+                <input type="text" class="form-control" id="nome" required autocomplete="off">
                 <div id="sugestoesNomes" class="sugestoes"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="celula">Célula</label>
-                <input type="text" class="form-control" id="celula" readonly>
             </div>
 
             <div class="form-group">
                 <label for="turma">Turma</label>
                 <select class="form-control" id="turma" required></select>
-            </div>
-
-            <div class="form-group">
-                <label for="disciplinas">Disciplinas</label>
-                <select class="form-control" id="disciplina" required></select>
-                <div id="disciplinasContainer"></div>
             </div>
 
             <div style="height: 20px;"></div>
@@ -218,100 +210,113 @@
         <div id="splash-screen" class="splash-screen">
             <div class="splash-content">
                 <div class="spinner"></div>
-                <p>Carregando disciplinas...</p>
+                <p>Carregando dados...</p>
             </div>
         </div>
 
     </div>
 
-    <!-- Importar Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <!-- Importar Vanilla Masker -->
     <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
 
-    <script>
-        // Configuração do Firebase
-        var configuracaoFirebase = {
-            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
-            authDomain: "dbiebi.firebaseapp.com",
-            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
-            projectId: "dbiebi",
-            storageBucket: "dbiebi.appspot.com",
-            messagingSenderId: "1068164821081",
-            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp, getCountFromServer, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC31C1X13eqVAOq_o5K2evI8q3GOfnpOpo",
+            authDomain: "iebi-2e84e.firebaseapp.com",
+            projectId: "iebi-2e84e",
+            storageBucket: "iebi-2e84e.firebasestorage.app",
+            messagingSenderId: "634456198202",
+            appId: "1:634456198202:web:8b4de1b4def23a49303903"
         };
-        firebase.initializeApp(configuracaoFirebase);
-        var bancoDeDados = firebase.firestore();
 
-        // Referências aos elementos do formulário
-        var formulario = document.getElementById('inscricaoForm');
-        var inputNome = document.getElementById('nome');
-        var disciplinasContainer = document.getElementById('disciplinasContainer');
-        var inscreverBtn = document.getElementById('inscreverBtn');
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        // Função para buscar nomes
-        function buscarNomes(texto) {
+        const formulario = document.getElementById('inscricaoForm');
+        const inputNome = document.getElementById('nome');
+        const selectTurma = document.getElementById('turma');
+        
+        let debounceTimer;
+
+        inputNome.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+            const texto = this.value;
+            
+            clearTimeout(debounceTimer);
+            if (texto.trim() === '') {
+                limparSelecaoPessoa();
+                return;
+            }
+            
+            debounceTimer = setTimeout(() => {
+                buscarNomes(texto);
+            }, 300);
+        });
+
+        function limparSelecaoPessoa() {
+            document.getElementById('id_pessoa').value = '';
+            document.getElementById('nome_pessoa_cache').value = '';
+            document.getElementById('contato_cache').value = '';
+            document.getElementById('sugestoesNomes').innerHTML = '';
+        }
+
+        async function buscarNomes(texto) {
             if (texto.length < 3) {
                 document.getElementById('sugestoesNomes').innerHTML = '';
                 return;
             }
 
-            bancoDeDados.collection('membros')
-                .where('nome', '>=', texto)
-                .where('nome', '<=', texto + '\uf8ff')
-                .limit(5)
-                .get()
-                .then((querySnapshot) => {
-                    let sugestoes = '';
-                    querySnapshot.forEach((doc) => {
-                        sugestoes += `<div class="sugestao-item" onclick="selecionarNome('${doc.data().nome}')">${doc.data().nome}</div>`;
-                    });
-                    document.getElementById('sugestoesNomes').innerHTML = sugestoes;
-                });
-        }
-          // Função para selecionar nome e preencher célula
-          function selecionarNome(nome) {
-              document.getElementById('nome').value = nome;
-              document.getElementById('sugestoesNomes').innerHTML = '';
-              document.getElementById('celula').value = '';
-
-              bancoDeDados.collection('membros')
-                  .where('nome', '==', nome)
-                  .get()
-                  .then((querySnapshot) => {
-                      querySnapshot.forEach((doc) => {
-                          document.getElementById('celula').value = doc.data().lidercelula;
-                      });
-                  });
-          }
-        // Carregar turmas
-        function carregarTurmas() {
-    return new Promise((resolve, reject) => {
-        const selectTurma = document.getElementById('turma');
-        selectTurma.innerHTML = '';
-        const hoje = new Date();
-
-        bancoDeDados.collection('cursosTurmas')
-            .orderBy('dtIniInsc', 'desc')
-            .get()
-            .then((querySnapshot) => {
-                const turmasUnicas = new Set();
+            try {
+                const pessoasRef = collection(db, 'igrejas/iebi/pessoas');
+                const q = query(pessoasRef, where('nome', '>=', texto), where('nome', '<=', texto + '\uf8ff'));
+                const querySnapshot = await getDocs(q);
                 
+                let sugestoes = '';
+                window.sugestoesAtuais = [];
+                
+                let cont = 0;
                 querySnapshot.forEach((doc) => {
-                    const turma = doc.data();
-                    const dtIniInsc = converterData(turma.dtIniInsc);
-                    const dtFimInsc = converterData(turma.dtFimInsc);
-                    
-                    if (hoje >= dtIniInsc && hoje <= dtFimInsc) {
-                        turmasUnicas.add(turma.nomeTurma);
+                    if(cont < 5) {
+                        const dados = doc.data();
+                        window.sugestoesAtuais.push({id: doc.id, ...dados});
+                        sugestoes += `<div class="sugestao-item" onclick="selecionarNome(${cont})">${dados.nome}</div>`;
+                        cont++;
                     }
                 });
+                document.getElementById('sugestoesNomes').innerHTML = sugestoes;
+            } catch (error) {
+                console.error("Erro ao buscar nomes:", error);
+            }
+        }
 
-                const turmasArray = Array.from(turmasUnicas);
+        window.selecionarNome = function(index) {
+            const pessoa = window.sugestoesAtuais[index];
+            if(pessoa) {
+                document.getElementById('nome').value = pessoa.nome;
+                document.getElementById('id_pessoa').value = pessoa.id;
+                document.getElementById('nome_pessoa_cache').value = pessoa.nome;
+                document.getElementById('contato_cache').value = pessoa.celular || '';
+                document.getElementById('sugestoesNomes').innerHTML = '';
+            }
+        };
 
-                if (turmasArray.length === 0) {
+        async function carregarTurmas() {
+            selectTurma.innerHTML = '';
+            
+            try {
+                const turmasRef = collection(db, 'igrejas/iebi/turmas');
+                const q = query(turmasRef, where('status', '==', 'Inscrições Abertas'), where('inscricao_site', '==', true));
+                const querySnapshot = await getDocs(q);
+                
+                const turmas = [];
+                querySnapshot.forEach((doc) => {
+                    turmas.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (turmas.length === 0) {
                     const option = document.createElement('option');
                     option.value = "";
                     option.text = "Nenhuma turma com inscrições abertas";
@@ -322,153 +327,125 @@
                     defaultOption.text = "Selecione a Turma...";
                     selectTurma.add(defaultOption);
 
-                    turmasArray.forEach((nomeTurma) => {
-                        const option = document.createElement('option');
-                        option.value = nomeTurma;
-                        option.text = nomeTurma;
-                        selectTurma.add(option);
-                    });
-                }
-                resolve();
-            })
-            .catch(reject);
-    });
-}
+                    for (const turma of turmas) {
+                        const limiteVagas = Number(turma.vagas_totais) || 0;
+                        const vagasOcupadas = Number(turma.vagas_ocupadas) || 0;
+                        let isEsgotado = false;
 
-
-        function converterData(dataString) {
-            const [dia, mes, ano] = dataString.split('/');
-            return new Date(ano, mes - 1, dia);
-        }
-
-        // Carregar disciplinas
-        function carregarDisciplinas(turmaSelecionada) {
-            const selectDisciplina = document.getElementById('disciplina');
-            selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina</option>';
-            const hoje = new Date();
-
-            document.getElementById('splash-screen').classList.add('show');
-
-            bancoDeDados.collection('cursosTurmas')
-                .where('nomeTurma', '==', turmaSelecionada)
-                .get()
-                .then((querySnapshot) => {
-                    const disciplinasUnicas = new Set();
-                    
-                    querySnapshot.forEach((doc) => {
-                        const turma = doc.data();
-                        const dtIniInsc = converterData(turma.dtIniInsc);
-                        const dtFimInsc = converterData(turma.dtFimInsc);
-                        
-                        if (hoje >= dtIniInsc && hoje <= dtFimInsc) {
-                            disciplinasUnicas.add(turma.disciplinas);
+                        if (limiteVagas > 0 && vagasOcupadas >= limiteVagas) {
+                            isEsgotado = true;
                         }
-                    });
 
-                    if (disciplinasUnicas.size === 0) {
                         const option = document.createElement('option');
-                        option.value = "";
-                        option.text = "Nenhuma disciplina disponível";
-                        selectDisciplina.add(option);
-                    } else {
-                        disciplinasUnicas.forEach((disciplina) => {
-                            const option = document.createElement('option');
-                            option.value = disciplina;
-                            option.text = disciplina;
-                            selectDisciplina.add(option);
-                        });
+                        option.value = turma.id;
+                        option.dataset.nome_turma = turma.nome_turma;
+                        option.dataset.nome_curso = turma.nome_curso_cache;
+                        option.dataset.limite_vagas = limiteVagas;
+
+                        if (isEsgotado) {
+                            option.text = `${turma.nome_curso_cache} - ${turma.nome_turma} (Vagas Esgotadas)`;
+                            option.disabled = true;
+                        } else {
+                            option.text = `${turma.nome_curso_cache} - ${turma.nome_turma}`;
+                        }
+                        selectTurma.add(option);
                     }
-                })
-                .finally(() => {
-                    document.getElementById('splash-screen').classList.remove('show');
-                });
+                }
+            } catch (error) {
+                console.error("Erro ao carregar turmas:", error);
+                const option = document.createElement('option');
+                option.value = "";
+                option.text = "Erro ao carregar turmas";
+                selectTurma.add(option);
+            }
         }
 
-        // Event Listeners        
-        document.getElementById('turma').addEventListener('change', function () {
-            carregarDisciplinas(this.value);
-        });
-
-        // Inicialização
-        window.onload = function () {
+        window.onload = async function () {
             document.getElementById('splash-screen').classList.add('show');
-            carregarTurmas()
-                .then(() => {
-                    document.getElementById('splash-screen').classList.remove('show');
-                })
-                .catch(error => {
-                    console.error("Error loading initial data:", error);
-                    document.getElementById('splash-screen').classList.remove('show');
-                });
+            await carregarTurmas();
+            document.getElementById('splash-screen').classList.remove('show');
         };
 
-        // Submit do formulário
-        formulario.addEventListener('submit', function (e) {
+        formulario.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const nomeMembro = document.getElementById('nome').value.trim();
-            const celulaNome = document.getElementById('celula').value.trim();
-            const turmaSelect = document.getElementById('turma');
-            const disciplinaSelect = document.getElementById('disciplina');
-
-            // Validações iniciais
-            if (!nomeMembro) {
-                alert('Por favor, selecione um nome válido, ou faça o cadastro com seu Líder de Célula!');
+            const idPessoa = document.getElementById('id_pessoa').value;
+            const nomePessoaCache = document.getElementById('nome_pessoa_cache').value;
+            const contatoCache = document.getElementById('contato_cache').value;
+            
+            if (!idPessoa || !nomePessoaCache) {
+                alert('Por favor, selecione um nome válido na lista de sugestões!');
                 return;
             }
 
-            if (turmaSelect.selectedIndex === 0) {
+            if (selectTurma.selectedIndex === 0 || selectTurma.value === "") {
                 alert('Por favor, selecione uma turma');
                 return;
             }
 
-            if (disciplinaSelect.selectedIndex === 0) {
-                alert('Por favor, selecione uma disciplina');
-                return;
-            }
+            const optionTurma = selectTurma.options[selectTurma.selectedIndex];
+            const idTurma = optionTurma.value;
+            const nomeTurmaCache = optionTurma.dataset.nome_turma;
+            const nomeCursoCache = optionTurma.dataset.nome_curso;
 
-            // Verificar se o membro já tem inscrição na turma selecionada
-            bancoDeDados.collection('cursosInscricoes')
-                .where('nome', '==', nomeMembro)
-                .where('turma', '==', turmaSelect.options[turmaSelect.selectedIndex].text)
-                .get()
-                .then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        alert('Você já está inscrito nesta turma. É permitida apenas uma inscrição por turma.');
-                        return;
+            document.getElementById('splash-screen').classList.add('show');
+            
+            try {
+                // 1. Validar Duplicidade
+                const inscricoesRef = collection(db, 'igrejas/iebi/inscricoes');
+                const qDuplicidade = query(inscricoesRef, 
+                    where('id_turma', '==', idTurma),
+                    where('id_pessoa', '==', idPessoa)
+                );
+                
+                const snapDuplicidade = await getDocs(qDuplicidade);
+                
+                if (!snapDuplicidade.empty) {
+                    alert('Você já está inscrito nesta turma. É permitida apenas uma inscrição por turma.');
+                    document.getElementById('splash-screen').classList.remove('show');
+                    return;
+                }
+
+                // 2. Validar limite de vagas (caso tenham se esgotado enquanto o usuário preenchia a tela)
+                const limiteVagas = Number(optionTurma.dataset.limite_vagas) || 0;
+                if (limiteVagas > 0) {
+                    const turmaDoc = await getDoc(doc(db, 'igrejas/iebi/turmas', idTurma));
+                    if (turmaDoc.exists()) {
+                        const vagasOcupadasAgora = Number(turmaDoc.data().vagas_ocupadas) || 0;
+                        if (vagasOcupadasAgora >= limiteVagas) {
+                            alert('Infelizmente as vagas para esta turma acabaram de se esgotar!');
+                            document.getElementById('splash-screen').classList.remove('show');
+                            await carregarTurmas(); // Atualiza a lista para bloquear a turma
+                            return;
+                        }
                     }
+                }
 
-                    // Prossegue com a inscrição
-                    bancoDeDados.collection('cursosInscricoes').add({
-                        nome: nomeMembro,
-                        celula: celulaNome,
-                        turma: turmaSelect.options[turmaSelect.selectedIndex].text,
-                        disciplina: disciplinaSelect.options[disciplinaSelect.selectedIndex].text,
-                        dataInscricao: new Date()
-                    })
-                        .then(function () {
-                            alert('Inscrição realizada com sucesso!');
-                            formulario.reset();
-                            carregarTurmas();
-                        })
-                        .catch(function (error) {
-                            console.error("Erro ao realizar inscrição:", error);
-                            alert('Erro ao realizar inscrição: ' + error.message);
-                        });
-                });
+                // 3. Gravar a Inscrição
+                const novaInscricao = {
+                    id_turma: idTurma,
+                    id_pessoa: idPessoa,
+                    nome_pessoa_cache: nomePessoaCache,
+                    contato_cache: contatoCache,
+                    nome_turma_cache: nomeTurmaCache,
+                    nome_curso_cache: nomeCursoCache,
+                    data_inscricao: serverTimestamp(),
+                    status: 'Ativa'
+                };
+
+                await addDoc(inscricoesRef, novaInscricao);
+                
+                alert('Inscrição realizada com sucesso!');
+                formulario.reset();
+                limparSelecaoPessoa();
+                
+            } catch (error) {
+                console.error("Erro ao realizar inscrição:", error);
+                alert('Erro ao realizar inscrição: ' + error.message);
+            } finally {
+                document.getElementById('splash-screen').classList.remove('show');
+            }
         });
-
-        document.getElementById('nome').addEventListener('input', function() {
-    if (this.value.trim() === '') {
-        document.getElementById('celula').value = '';
-    }
-});
-
-
     </script>
-
 </body>
-
 </html>
-
-
