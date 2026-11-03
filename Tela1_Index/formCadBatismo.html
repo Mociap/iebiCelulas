@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ficha de Cadastro e Integração - Batismo | IEBI</title>
+  <link rel="shortcut icon" href="../assets/favico.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="../css/botao-voltar.css">
+
+  <style>
+    body {
+      font-family: "Nunito", sans-serif;
+      background-color: #1a1a1a;
+      color: #ffffff;
+      margin: 0;
+      padding: 0px;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 20px auto 40px;
+      background-color: #2c2c2c;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .header {
+      background-color: #2c2c2c;
+      padding: 20px 0;
+      text-align: center;
+      position: relative;
+      z-index: 1000;
+    }
+
+    .header img {
+      max-width: 180px;
+    }
+
+    .divider {
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00bcd4, transparent);
+      margin: 15px auto 25px;
+    }
+
+    .secao-titulo {
+      font-size: 1.05em;
+      font-weight: 700;
+      color: #00bcd4;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 20px;
+      margin-bottom: 12px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #3c3c3c;
+      display: flex;
+      align-items: center;
+    }
+
+    .secao-titulo i {
+      margin-right: 8px;
+    }
+
+    .btn-primary {
+      background-color: #00bcd4;
+      border-color: #00bcd4;
+      transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+      font-weight: 700;
+      padding: 12px 20px;
+      font-size: 1.05em;
+    }
+
+    .btn-primary:hover {
+      background-color: #0097a7;
+      border-color: #0097a7;
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      background-color: #555555;
+      border-color: #555555;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .form-control {
+      background-color: #3c3c3c;
+      border: 1px solid #4a4a4a;
+      color: #ffffff;
+      border-radius: 6px;
+    }
+
+    .form-control:focus {
+      background-color: #444444;
+      border-color: #00bcd4;
+      color: #ffffff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25);
+    }
+
+    .form-control::placeholder {
+      color: #7a7a7a;
+      opacity: 1;
+    }
+
+    /* Campo de data com cor de placeholder quando ainda não preenchido */
+    input[type="date"] {
+      color: #7a7a7a;
+    }
+
+    input[type="date"].has-value,
+    input[type="date"]:focus {
+      color: #ffffff;
+    }
+
+    input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+      color: inherit;
+    }
+
+    input[type="date"]:not(.has-value):not(:focus)::-webkit-datetime-edit,
+    input[type="date"]:not(.has-value):not(:focus)::-webkit-datetime-edit-text,
+    input[type="date"]:not(.has-value):not(:focus)::-webkit-datetime-edit-month-field,
+    input[type="date"]:not(.has-value):not(:focus)::-webkit-datetime-edit-day-field,
+    input[type="date"]:not(.has-value):not(:focus)::-webkit-datetime-edit-year-field {
+      color: #7a7a7a;
+    }
+
+    input[type="date"].has-value::-webkit-datetime-edit,
+    input[type="date"].has-value::-webkit-datetime-edit-text,
+    input[type="date"].has-value::-webkit-datetime-edit-month-field,
+    input[type="date"].has-value::-webkit-datetime-edit-day-field,
+    input[type="date"].has-value::-webkit-datetime-edit-year-field,
+    input[type="date"]:focus::-webkit-datetime-edit,
+    input[type="date"]:focus::-webkit-datetime-edit-text,
+    input[type="date"]:focus::-webkit-datetime-edit-month-field,
+    input[type="date"]:focus::-webkit-datetime-edit-day-field,
+    input[type="date"]:focus::-webkit-datetime-edit-year-field {
+      color: #ffffff;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.6);
+      cursor: pointer;
+    }
+
+    input[type="date"].has-value::-webkit-calendar-picker-indicator,
+    input[type="date"]:focus::-webkit-calendar-picker-indicator {
+      filter: invert(0.9);
+    }
+
+    label {
+      color: #cfcccc;
+      font-weight: 700;
+      font-size: 0.9em;
+      margin-bottom: 4px;
+    }
+
+    .choice-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+      transition: outline 0.2s;
+    }
+
+    .choice-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 16px;
+      background-color: #3c3c3c;
+      cursor: pointer;
+      transition: background-color 0.25s, transform 0.2s, border-color 0.25s;
+      font-size: 0.88em;
+      border: 1px solid #4a4a4a;
+      color: #e0e0e0;
+      user-select: none;
+    }
+
+    .choice-chip:hover {
+      background-color: #4a4a4a;
+    }
+
+    .choice-chip.selected {
+      background-color: #00bcd4;
+      border-color: #00bcd4;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .choice-chip i {
+      margin-right: 6px;
+    }
+
+    /* 1. Ajustes específicos de Sexo e Est. Civil */
+    #chipsSexo .choice-chip {
+      padding: 8px 12px;
+    }
+
+    #chipsEstadoCivil .choice-chip {
+      padding: 8px 10px;
+      font-size: 0.86em;
+      white-space: nowrap;
+    }
+
+    @media (min-width: 768px) {
+      #chipsEstadoCivil {
+        flex-wrap: nowrap !important;
+      }
+    }
+
+    .chip-erro {
+      font-size: 0.82em;
+      color: #ff9f9f;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .back-button {
+      background-color: #00bcd4 !important;
+    }
+
+    .back-button:hover {
+      background-color: #0097a7 !important;
+    }
+
+    .badge-icon {
+      color: #00bcd4;
+      font-size: 2.2em;
+      display: block;
+      margin: 0 auto 10px;
+      text-align: center;
+    }
+
+    /* Autocomplete de Sugestões */
+    .sugestoes {
+      background-color: #2c2c2c;
+      border: 1px solid #00bcd4;
+      border-radius: 0 0 8px 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 1050;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    .sugestao-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #3c3c3c;
+      color: #ffffff;
+      transition: background 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sugestao-item:last-child {
+      border-bottom: none;
+    }
+
+    .sugestao-item:hover,
+    .sugestao-item.ativo {
+      background-color: #00bcd4;
+      color: #ffffff;
+    }
+
+    .sugestao-item .sugestao-nome {
+      font-weight: 700;
+      font-size: 0.95em;
+    }
+
+    .sugestao-item .sugestao-sub {
+      font-size: 0.8em;
+      color: #b3b3b3;
+      margin-left: 10px;
+    }
+
+    .sugestao-item:hover .sugestao-sub,
+    .sugestao-item.ativo .sugestao-sub {
+      color: #e0f7fa;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .loading-spinner-nome {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #00bcd4;
+      display: none;
+      z-index: 5;
+    }
+
+    .badge-status-membresia {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      margin-top: 6px;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="../index.html" class="back-button" title="Voltar ao início">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  <div class="header">
+    <img src="../assets/LogoBranco.png" alt="Logo da IEBI" />
+  </div>
+
+  <div class="container">
+    <i class="fas fa-id-card badge-icon"></i>
+    <h2 class="text-center mb-1 font-weight-bold">Ficha de Membro / Batismo</h2>
+    <p class="text-center text-muted mb-0" style="font-size: 0.9em;">Preencha os dados cadastrais conforme a ficha de membros.</p>
+    <div class="divider"></div>
+
+    <form id="batismoForm" novalidate>
+      <!-- 1. DADOS PESSOAIS -->
+      <div class="secao-titulo">
+        <i class="fas fa-user"></i> Identificação
+      </div>
+
+      <!-- Nome com Autocomplete (sem textos abaixo) -->
+      <div class="form-group" style="position: relative;">
+        <label for="nome">NOME COMPLETO *</label>
+        <div class="input-wrapper">
+          <input type="text" class="form-control" id="nome" required onkeyup="this.value = this.value.toUpperCase();" placeholder="DIGITE O NOME COMPLETO" autocomplete="off" />
+          <i class="fas fa-spinner fa-spin loading-spinner-nome" id="nomeLoading"></i>
+          <div id="sugestoesNomes" class="sugestoes" style="display: none;"></div>
+        </div>
+      </div>
+
+      <!-- Data Nasc, Identidade (RG) e CPF na mesma linha (Responsivo) -->
+      <div class="form-row">
+        <div class="form-group col-12 col-md-4">
+          <label for="dtnasc">DATA NASC. *</label>
+          <input type="date" class="form-control" id="dtnasc" required />
+          <small class="chip-erro" id="dtnascErro">Preencha a data de nascimento.</small>
+        </div>
+
+        <div class="form-group col-12 col-md-4">
+          <label for="rg">IDENTIDADE (RG)</label>
+          <input type="text" class="form-control" id="rg" placeholder="Número do RG" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+
+        <div class="form-group col-12 col-md-4">
+          <label for="cpf">CPF</label>
+          <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" />
+        </div>
+      </div>
+
+      <!-- Sexo (reduzido) e Estado Civil (opções na mesma linha e responsivo) -->
+      <div class="form-row">
+        <div class="form-group col-12 col-md-4">
+          <label>SEXO *</label>
+          <div class="choice-chips" id="chipsSexo">
+            <div class="choice-chip" data-value="MASCULINO">
+              <i class="fas fa-male"></i> Masc.
+            </div>
+            <div class="choice-chip" data-value="FEMININO">
+              <i class="fas fa-female"></i> Fem.
+            </div>
+          </div>
+          <input type="hidden" id="sexo" name="sexo" />
+          <small class="chip-erro" id="sexoErro">Selecione o sexo.</small>
+        </div>
+
+        <div class="form-group col-12 col-md-8">
+          <label>EST. CIVIL *</label>
+          <div class="choice-chips" id="chipsEstadoCivil">
+            <div class="choice-chip" data-value="SOLTEIRO">Solteiro(a)</div>
+            <div class="choice-chip" data-value="CASADO">Casado(a)</div>
+            <div class="choice-chip" data-value="DIVORCIADO">Divorc.</div>
+            <div class="choice-chip" data-value="VIÚVO">Viúvo(a)</div>
+          </div>
+          <input type="hidden" id="estadoCivil" name="estadoCivil" />
+          <small class="chip-erro" id="estadoCivilErro">Selecione o estado civil.</small>
+        </div>
+      </div>
+
+      <!-- 2. ENDEREÇO E CONTATO -->
+      <div class="secao-titulo">
+        <i class="fas fa-map-marker-alt"></i> Endereço e Contatos
+      </div>
+
+      <!-- CEP, Endereço e Número -->
+      <div class="form-row">
+        <div class="form-group col-12 col-md-3">
+          <label for="cep">CEP</label>
+          <input type="text" class="form-control" id="cep" maxlength="9" placeholder="99999-999" onkeyup="this.value = this.value.toUpperCase();" />
+          <small id="cepError" style="color: rgb(255, 159, 159); display: none">CEP inválido</small>
+          <small id="cepSuccess" style="color: #2ecc71; display: none"><i class="fas fa-check-circle"></i> Endereço atualizado pelo CEP!</small>
+        </div>
+
+        <div class="form-group col-12 col-md-6">
+          <label for="endereco">ENDEREÇO / LOGRADOURO</label>
+          <input type="text" class="form-control" id="endereco" placeholder="Ex: Rua das Flores" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+
+        <div class="form-group col-12 col-md-3">
+          <label for="numero">NÚMERO</label>
+          <input type="text" class="form-control" id="numero" placeholder="Nº / Apto" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+      </div>
+
+      <!-- Bairro, Cidade, UF -->
+      <div class="form-row">
+        <div class="form-group col-12 col-md-5">
+          <label for="bairro">BAIRRO</label>
+          <input type="text" class="form-control" id="bairro" placeholder="Bairro" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+
+        <div class="form-group col-12 col-md-5">
+          <label for="cidade">CIDADE</label>
+          <input type="text" class="form-control" id="cidade" placeholder="Cidade" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+
+        <div class="form-group col-12 col-md-2">
+          <label for="uf">UF</label>
+          <input type="text" class="form-control px-1 text-center" id="uf" maxlength="2" placeholder="UF" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+      </div>
+
+      <!-- Fone(s) e E-mail -->
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="telefone">FONE(S) *</label>
+          <input type="text" class="form-control" id="telefone" required placeholder="(99) 99999-9999" />
+          <small class="chip-erro" id="telefoneErro">Informe um telefone com DDD.</small>
+        </div>
+
+        <div class="form-group col-md-6">
+          <label for="email">E-MAIL</label>
+          <input type="email" class="form-control" id="email" placeholder="email@exemplo.com" />
+        </div>
+      </div>
+
+      <!-- 3. FAMÍLIA E FILIAÇÃO -->
+      <div class="secao-titulo">
+        <i class="fas fa-users"></i> Filiação e Família
+      </div>
+
+      <!-- Cônjuge (visível apenas se Casado) -->
+      <div class="form-group" id="grupoConjuge" style="display: none;">
+        <label for="conjuge">CÔNJUGE</label>
+        <input type="text" class="form-control" id="conjuge" placeholder="Nome do cônjuge" onkeyup="this.value = this.value.toUpperCase();" />
+      </div>
+
+      <!-- Pai e Mãe -->
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="pai">PAI</label>
+          <input type="text" class="form-control" id="pai" placeholder="Nome completo do pai" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+
+        <div class="form-group col-md-6">
+          <label for="mae">MÃE</label>
+          <input type="text" class="form-control" id="mae" placeholder="Nome completo da mãe" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+      </div>
+
+      <!-- 4. INTEGRAÇÃO E BATISMO -->
+      <div class="secao-titulo">
+        <i class="fas fa-water"></i> Modo de Integração e Batismo
+      </div>
+
+      <!-- Modo de Integração -->
+      <div class="form-group">
+        <label>MODO DE INTEGRAÇÃO *</label>
+        <div class="choice-chips" id="chipsModoIntegracao">
+          <div class="choice-chip" data-value="BATISMO">
+            <i class="fas fa-water text-info"></i> BATISMO
+          </div>
+          <div class="choice-chip" data-value="DECLARAÇÃO">
+            <i class="fas fa-file-signature text-warning"></i> DECLARAÇÃO
+          </div>
+        </div>
+        <input type="hidden" id="modoIntegracao" name="modoIntegracao" />
+        <small class="chip-erro" id="modoIntegracaoErro">Selecione o modo de integração (BATISMO ou DECLARAÇÃO).</small>
+      </div>
+
+      <!-- Igreja onde se batizou e Data (visíveis apenas para DECLARAÇÃO) -->
+      <div class="form-row" id="grupoDeclaracao" style="display: none;">
+        <div class="form-group col-12 col-md-8">
+          <label for="igrejaBatismo">IGREJA ONDE SE BATIZOU</label>
+          <input type="text" class="form-control" id="igrejaBatismo" placeholder="Ex: IEBI Itapevi ou nome da igreja" onkeyup="this.value = this.value.toUpperCase();" />
+        </div>
+
+        <div class="form-group col-12 col-md-4">
+          <label for="dataBatismo">DATA DO BATISMO</label>
+          <input type="date" class="form-control" id="dataBatismo" />
+        </div>
+      </div>
+
+      <!-- Data de Inscrição na linha debaixo sozinho (na última linha), bloqueado para o usuário -->
+      <div class="form-group mt-3">
+        <label for="dataInscricaoMembresia">
+          <i class="fas fa-calendar-alt text-info mr-1"></i> DATA INSCRIÇÃO PARA MEMBRESIA
+        </label>
+        <input type="date" class="form-control" id="dataInscricaoMembresia" readonly tabindex="-1" style="cursor: not-allowed; background-color: #242424; color: #00bcd4; font-weight: 700; pointer-events: none; border: 1px solid #3c3c3c;" />
+        <div id="statusInscricaoMembresia" class="badge-status-membresia" style="display: none;"></div>
+      </div>
+
+      <div style="height: 15px;"></div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="cadastrarBtn">
+        <i class="fas fa-save mr-2"></i> Salvar Ficha de Cadastro
+      </button>
+    </form>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Vanilla Masker -->
+  <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
+
+  <script>
+    // Configuração do Firebase
+    var configuracaoFirebase = {
+      apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+      authDomain: "dbiebi.firebaseapp.com",
+      databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+      projectId: "dbiebi",
+      storageBucket: "dbiebi.appspot.com",
+      messagingSenderId: "1068164821081",
+      appId: "1:1068164821081:web:2d3e0030d5311d94f30148",
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(configuracaoFirebase);
+    }
+    var bancoDeDados = firebase.firestore();
+
+    // Referências aos elementos
+    var formulario = document.getElementById("batismoForm");
+    var inputNome = document.getElementById("nome");
+    var inputEndereco = document.getElementById("endereco");
+    var inputNumero = document.getElementById("numero");
+    var inputBairro = document.getElementById("bairro");
+    var inputCidade = document.getElementById("cidade");
+    var inputUf = document.getElementById("uf");
+    var inputCep = document.getElementById("cep");
+    var inputTelefone = document.getElementById("telefone");
+    var inputEmail = document.getElementById("email");
+    var inputDtnasc = document.getElementById("dtnasc");
+    var inputRg = document.getElementById("rg");
+    var inputCpf = document.getElementById("cpf");
+    var inputConjuge = document.getElementById("conjuge");
+    var grupoConjuge = document.getElementById("grupoConjuge");
+    var inputPai = document.getElementById("pai");
+    var inputMae = document.getElementById("mae");
+    var grupoDeclaracao = document.getElementById("grupoDeclaracao");
+    var inputIgrejaBatismo = document.getElementById("igrejaBatismo");
+    var inputDataBatismo = document.getElementById("dataBatismo");
+    var inputDataInscricaoMembresia = document.getElementById("dataInscricaoMembresia");
+    var statusInscricaoMembresia = document.getElementById("statusInscricaoMembresia");
+    var cadastrarBtn = document.getElementById("cadastrarBtn");
+    var cepError = document.getElementById("cepError");
+    var cepSuccess = document.getElementById("cepSuccess");
+    var sugestoesNomes = document.getElementById("sugestoesNomes");
+    var nomeLoading = document.getElementById("nomeLoading");
+
+    // Variáveis de controle de unicidade e rastreamento de membro
+    let docIdExistente = null;
+    let dadosOriginaisExistentes = null;
+    let ultimoNomeCarregado = "";
+
+    // Máscaras de entrada
+    VMasker(inputTelefone).maskPattern("(99) 99999-9999");
+    VMasker(inputCep).maskPattern("99999-999");
+    VMasker(inputCpf).maskPattern("999.999.999-99");
+
+    // Formatar data para input date (DD/MM/YYYY -> YYYY-MM-DD)
+    function formatarDataParaInput(dataStr) {
+      if (!dataStr) return "";
+      var d = dataStr.toString().trim();
+      if (d === "0" || d === "null" || d === "undefined") return "";
+
+      if (d.includes("/")) {
+        var partes = d.split("/");
+        if (partes.length === 3 && partes[2].length === 4) {
+          var dia = partes[0].padStart(2, "0");
+          var mes = partes[1].padStart(2, "0");
+          var ano = partes[2];
+          return `${ano}-${mes}-${dia}`;
+        }
+      } else if (d.includes("-")) {
+        var p = d.split("-");
+        if (p.length === 3) {
+          if (p[0].length === 4) return d;
+          if (p[2].length === 4) return `${p[2]}-${p[1].padStart(2, "0")}-${p[0].padStart(2, "0")}`;
+        }
+      }
+      return "";
+    }
+
+    // Atualizar cor do campo de data conforme preenchimento (estilo placeholder)
+    function atualizarEstiloData(input) {
+      if (!input) return;
+      if (input.value && input.value.trim() !== "") {
+        input.classList.add("has-value");
+      } else {
+        input.classList.remove("has-value");
+      }
+    }
+
+    // Inicializar listeners em todos os campos de data
+    document.querySelectorAll('input[type="date"]').forEach(function (input) {
+      atualizarEstiloData(input);
+      input.addEventListener("input", function () {
+        atualizarEstiloData(this);
+      });
+      input.addEventListener("change", function () {
+        atualizarEstiloData(this);
+      });
+      input.addEventListener("blur", function () {
+        atualizarEstiloData(this);
+      });
+    });
+
+    // Data de hoje padrão para a inscrição de membresia (bloqueada para o usuário)
+    if (!inputDataInscricaoMembresia.value) {
+      var hojeStr = new Date().toISOString().split("T")[0];
+      inputDataInscricaoMembresia.value = hojeStr;
+      atualizarEstiloData(inputDataInscricaoMembresia);
+    }
+
+    // Controle de visibilidade condicional
+    function atualizarVisibilidadeConjuge(estadoCivilValor) {
+      if (!grupoConjuge) return;
+      if (estadoCivilValor === "CASADO") {
+        grupoConjuge.style.display = "block";
+      } else {
+        grupoConjuge.style.display = "none";
+        if (inputConjuge && estadoCivilValor) {
+          inputConjuge.value = "";
+        }
+      }
+    }
+
+    function atualizarVisibilidadeDeclaracao(modoValor) {
+      if (!grupoDeclaracao) return;
+      if (modoValor === "DECLARAÇÃO") {
+        grupoDeclaracao.style.display = "flex";
+      } else {
+        grupoDeclaracao.style.display = "none";
+        if (inputIgrejaBatismo) inputIgrejaBatismo.value = "";
+        if (inputDataBatismo) {
+          inputDataBatismo.value = "";
+          atualizarEstiloData(inputDataBatismo);
+        }
+      }
+    }
+
+    // Selecionar ChoiceChip programaticamente com normalização
+    function selecionarChoiceChip(nomeCampo, valor) {
+      var inputHidden = document.getElementById(nomeCampo);
+      if (!inputHidden) return;
+
+      if (!valor || valor === "0" || valor === "null" || valor === "undefined") {
+        inputHidden.value = "";
+        limparSelecaoChips(inputHidden);
+        if (nomeCampo === "estadoCivil") atualizarVisibilidadeConjuge("");
+        if (nomeCampo === "modoIntegracao") atualizarVisibilidadeDeclaracao("");
+        return;
+      }
+
+      var v = valor.toString().toUpperCase().trim();
+
+      // Normalização de Sexo
+      if (nomeCampo === "sexo") {
+        if (v === "M" || v.startsWith("MASC")) v = "MASCULINO";
+        else if (v === "F" || v.startsWith("FEM")) v = "FEMININO";
+      }
+
+      // Normalização de Estado Civil
+      if (nomeCampo === "estadoCivil") {
+        if (v.startsWith("SOLT")) v = "SOLTEIRO";
+        else if (v.startsWith("CAS")) v = "CASADO";
+        else if (v.startsWith("DIV")) v = "DIVORCIADO";
+        else if (v.startsWith("VIUV") || v.startsWith("VIÚV")) v = "VIÚVO";
+      }
+
+      inputHidden.value = v;
+
+      // Atualiza visibilidade dos campos condicionais
+      if (nomeCampo === "estadoCivil") {
+        atualizarVisibilidadeConjuge(v);
+      }
+      if (nomeCampo === "modoIntegracao") {
+        atualizarVisibilidadeDeclaracao(v);
+      }
+
+      var formGroup = inputHidden.closest(".form-group");
+      if (formGroup) {
+        var container = formGroup.querySelector(".choice-chips");
+        if (container) {
+          var chips = container.querySelectorAll(".choice-chip");
+          chips.forEach(function (chip) {
+            if (chip.dataset.value && chip.dataset.value.toUpperCase().trim() === v) {
+              chip.classList.add("selected");
+            } else {
+              chip.classList.remove("selected");
+            }
+          });
+          container.style.outline = "none";
+          var erroMsg = formGroup.querySelector(".chip-erro");
+          if (erroMsg) erroMsg.style.display = "none";
+        }
+      }
+    }
+
+    function limparSelecaoChips(inputHidden) {
+      var formGroup = inputHidden.closest(".form-group");
+      if (formGroup) {
+        var container = formGroup.querySelector(".choice-chips");
+        if (container) {
+          container.querySelectorAll(".choice-chip").forEach(function (c) {
+            c.classList.remove("selected");
+          });
+        }
+      }
+    }
+
+    // Consulta de endereço pelo ViaCEP
+    let ultimoCepBuscado = "";
+
+    function buscarEnderecoPorCep(cepLimpo) {
+      if (!cepLimpo || cepLimpo.length !== 8) return;
+      if (cepLimpo === ultimoCepBuscado) return;
+      ultimoCepBuscado = cepLimpo;
+
+      var url = `https://viacep.com.br/ws/${cepLimpo}/json/`;
+
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.erro) {
+            cepError.style.display = "block";
+            cepError.textContent = "CEP não encontrado.";
+            if (cepSuccess) cepSuccess.style.display = "none";
+          } else {
+            cepError.style.display = "none";
+            if (cepSuccess) {
+              cepSuccess.style.display = "block";
+              setTimeout(() => { if (cepSuccess) cepSuccess.style.display = "none"; }, 3500);
+            }
+
+            // Garante a atualização do logradouro e foca no Número
+            if (data.logradouro) {
+              var ruaUpper = data.logradouro.toUpperCase();
+              if (!inputEndereco.value || !inputEndereco.value.includes(ruaUpper)) {
+                inputEndereco.value = ruaUpper;
+              }
+            }
+            if (data.bairro) inputBairro.value = data.bairro.toUpperCase();
+            if (data.localidade) inputCidade.value = data.localidade.toUpperCase();
+            if (data.uf) inputUf.value = data.uf.toUpperCase();
+
+            // Posiciona o foco no campo NÚMERO
+            if (inputNumero) {
+              inputNumero.focus();
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar endereço:", error);
+          cepError.style.display = "block";
+          cepError.textContent = "Erro ao consultar CEP.";
+          if (cepSuccess) cepSuccess.style.display = "none";
+        });
+    }
+
+    // Dispara a busca automaticamente ao atingir 8 dígitos
+    inputCep.addEventListener("input", function () {
+      var cepLimpo = this.value.replace(/\D/g, "");
+      if (cepLimpo.length === 8) {
+        buscarEnderecoPorCep(cepLimpo);
+      } else {
+        ultimoCepBuscado = "";
+        cepError.style.display = "none";
+        if (cepSuccess) cepSuccess.style.display = "none";
+      }
+    });
+
+    // Dispara também na saída do campo caso tenha 8 dígitos
+    inputCep.addEventListener("blur", function () {
+      var cepLimpo = this.value.replace(/\D/g, "");
+      if (cepLimpo.length === 8) {
+        buscarEnderecoPorCep(cepLimpo);
+      } else if (cepLimpo.length > 0 && cepLimpo.length < 8) {
+        cepError.style.display = "block";
+        cepError.textContent = "CEP incompleto (deve ter 8 dígitos).";
+        if (cepSuccess) cepSuccess.style.display = "none";
+      }
+    });
+
+    // ==========================================
+    // AUTOCOMPLETE E BUSCA EM TEMPO REAL
+    // ==========================================
+    let debounceTimer;
+    window.sugestoesAtuais = [];
+
+    function esconderSugestoes() {
+      sugestoesNomes.style.display = "none";
+    }
+
+    inputNome.addEventListener("input", function () {
+      this.value = this.value.toUpperCase();
+      const termo = this.value.trim();
+
+      if (statusInscricaoMembresia) statusInscricaoMembresia.style.display = "none";
+      clearTimeout(debounceTimer);
+
+      if (termo.length < 2) {
+        esconderSugestoes();
+        return;
+      }
+
+      if (nomeLoading) nomeLoading.style.display = "block";
+
+      debounceTimer = setTimeout(() => {
+        buscarMembros(termo);
+      }, 250);
+    });
+
+    // Navegação com setas e enter
+    inputNome.addEventListener("keydown", function (e) {
+      if (sugestoesNomes.style.display === "none") return;
+
+      const itens = sugestoesNomes.querySelectorAll(".sugestao-item");
+      if (!itens.length) return;
+
+      let ativo = sugestoesNomes.querySelector(".sugestao-item.ativo");
+      let index = -1;
+      if (ativo) {
+        index = Array.from(itens).indexOf(ativo);
+      }
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        index = (index + 1) % itens.length;
+        itens.forEach((it) => it.classList.remove("ativo"));
+        itens[index].classList.add("ativo");
+        itens[index].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        index = (index - 1 + itens.length) % itens.length;
+        itens.forEach((it) => it.classList.remove("ativo"));
+        itens[index].classList.add("ativo");
+        itens[index].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "Enter") {
+        if (ativo && index >= 0) {
+          e.preventDefault();
+          selecionarMembroPorIndex(index);
+        }
+      } else if (e.key === "Escape") {
+        esconderSugestoes();
+      }
+    });
+
+    // Buscar sugestões na coleção "membros"
+    function buscarMembros(termo) {
+      bancoDeDados
+        .collection("membros")
+        .where("nome", ">=", termo)
+        .where("nome", "<=", termo + "\uf8ff")
+        .limit(8)
+        .get()
+        .then((querySnapshot) => {
+          if (nomeLoading) nomeLoading.style.display = "none";
+          window.sugestoesAtuais = [];
+          sugestoesNomes.innerHTML = "";
+
+          if (querySnapshot.empty) {
+            sugestoesNomes.style.display = "none";
+            return;
+          }
+
+          let i = 0;
+          querySnapshot.forEach((doc) => {
+            const m = doc.data();
+            window.sugestoesAtuais.push({ id: doc.id, ...m });
+
+            const item = document.createElement("div");
+            item.className = "sugestao-item";
+            const sub = m.nomedacelula || m.lidercelula || m.igreja || "";
+            item.innerHTML = `
+              <span class="sugestao-nome"><i class="fas fa-user mr-2 text-info"></i>${m.nome}</span>
+              ${sub ? `<span class="sugestao-sub">${sub}</span>` : ""}
+            `;
+
+            const idx = i;
+            item.addEventListener("mousedown", function (e) {
+              e.preventDefault();
+              selecionarMembroPorIndex(idx);
+            });
+
+            sugestoesNomes.appendChild(item);
+            i++;
+          });
+
+          sugestoesNomes.style.display = "block";
+        })
+        .catch((error) => {
+          if (nomeLoading) nomeLoading.style.display = "none";
+          console.error("Erro ao buscar membros:", error);
+          esconderSugestoes();
+        });
+    }
+
+    function selecionarMembroPorIndex(index) {
+      const membro = window.sugestoesAtuais[index];
+      if (membro) {
+        preencherDadosMembro(membro);
+      }
+      esconderSugestoes();
+    }
+
+    // 2. Saída do campo Nome Completo (blur): atualiza sempre os demais campos, mesmo após clique ou edição
+    inputNome.addEventListener("blur", function () {
+      const nomeDigitado = this.value.trim().toUpperCase();
+      this.value = nomeDigitado;
+
+      setTimeout(() => {
+        esconderSugestoes();
+        if (nomeDigitado.length >= 2) {
+          carregarDadosPorNome(nomeDigitado);
+        } else if (nomeDigitado.length === 0) {
+          limparCamposFormulario(false);
+          ultimoNomeCarregado = "";
+        }
+      }, 250);
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest(".form-group")) {
+        esconderSugestoes();
+      }
+    });
+
+    // Limpa os campos preenchidos do formulário quando necessário
+    function limparCamposFormulario(limparNome) {
+      if (limparNome) {
+        inputNome.value = "";
+        ultimoNomeCarregado = "";
+      }
+      inputDtnasc.value = "";
+      atualizarEstiloData(inputDtnasc);
+      inputRg.value = "";
+      inputCpf.value = "";
+      selecionarChoiceChip("sexo", "");
+      selecionarChoiceChip("estadoCivil", "");
+      inputEndereco.value = "";
+      inputNumero.value = "";
+      inputCep.value = "";
+      inputBairro.value = "";
+      inputCidade.value = "";
+      inputUf.value = "";
+      inputTelefone.value = "";
+      inputEmail.value = "";
+      inputConjuge.value = "";
+      inputPai.value = "";
+      inputMae.value = "";
+      selecionarChoiceChip("modoIntegracao", "");
+      inputIgrejaBatismo.value = "";
+      inputDataBatismo.value = "";
+      atualizarEstiloData(inputDataBatismo);
+
+      docIdExistente = null;
+      dadosOriginaisExistentes = null;
+
+      var hojeStr = new Date().toISOString().split("T")[0];
+      inputDataInscricaoMembresia.value = hojeStr;
+      atualizarEstiloData(inputDataInscricaoMembresia);
+
+      if (statusInscricaoMembresia) {
+        statusInscricaoMembresia.style.display = "block";
+        statusInscricaoMembresia.style.backgroundColor = "rgba(46, 204, 113, 0.15)";
+        statusInscricaoMembresia.style.border = "1px solid #2ecc71";
+        statusInscricaoMembresia.style.color = "#2ecc71";
+        statusInscricaoMembresia.innerHTML = `<i class="fas fa-calendar-check mr-1"></i> Nova inscrição (data atual definida)`;
+      }
+
+      document.querySelectorAll(".chip-erro").forEach(function (el) {
+        el.style.display = "none";
+      });
+    }
+
+    // 2. Função que carrega e atualiza todos os campos pelo nome digitado
+    function carregarDadosPorNome(nome) {
+      if (!nome) return;
+      var nomeBusca = nome.trim().toUpperCase();
+
+      bancoDeDados
+        .collection("membros")
+        .where("nome", "==", nomeBusca)
+        .limit(1)
+        .get()
+        .then((querySnapshot) => {
+          if (!querySnapshot.empty) {
+            const membro = querySnapshot.docs[0].data();
+            preencherDadosMembro(membro);
+          } else {
+            // Tenta buscar com range caso haja espaços extras no registro original
+            bancoDeDados
+              .collection("membros")
+              .where("nome", ">=", nomeBusca)
+              .where("nome", "<=", nomeBusca + "\uf8ff")
+              .limit(5)
+              .get()
+              .then((rangeSnapshot) => {
+                var membroDoc = null;
+                if (!rangeSnapshot.empty) {
+                  for (var i = 0; i < rangeSnapshot.docs.length; i++) {
+                    var mData = rangeSnapshot.docs[i].data();
+                    if ((mData.nome || "").trim().toUpperCase() === nomeBusca) {
+                      membroDoc = mData;
+                      break;
+                    }
+                  }
+                  if (!membroDoc && rangeSnapshot.docs.length === 1) {
+                    var mDataUnico = rangeSnapshot.docs[0].data();
+                    if ((mDataUnico.nome || "").trim().toUpperCase().startsWith(nomeBusca)) {
+                      membroDoc = mDataUnico;
+                    }
+                  }
+                }
+
+                if (membroDoc) {
+                  preencherDadosMembro(membroDoc);
+                } else {
+                  // Se não encontrou em membros, busca na coleção batismo
+                  bancoDeDados
+                    .collection("batismo")
+                    .where("nome", "==", nomeBusca)
+                    .limit(1)
+                    .get()
+                    .then((batismoSnapshot) => {
+                      if (!batismoSnapshot.empty) {
+                        var batismoDoc = batismoSnapshot.docs[0].data();
+                        preencherDadosMembro(batismoDoc);
+                      } else {
+                        // Novo membro sem cadastro prévio
+                        // Se antes havia outro membro carregado e o nome foi alterado, limpa os campos antigos
+                        if (ultimoNomeCarregado && ultimoNomeCarregado !== nomeBusca) {
+                          limparCamposFormulario(false);
+                        }
+                        ultimoNomeCarregado = nomeBusca;
+                        verificarInscricaoMembresia(nomeBusca, inputCpf.value);
+                      }
+                    })
+                    .catch(() => {
+                      if (ultimoNomeCarregado && ultimoNomeCarregado !== nomeBusca) {
+                        limparCamposFormulario(false);
+                      }
+                      ultimoNomeCarregado = nomeBusca;
+                      verificarInscricaoMembresia(nomeBusca, inputCpf.value);
+                    });
+                }
+              })
+              .catch(() => {
+                verificarInscricaoMembresia(nomeBusca, inputCpf.value);
+              });
+          }
+        })
+        .catch((err) => {
+          console.error("Erro ao buscar dados do membro:", err);
+          verificarInscricaoMembresia(nomeBusca, inputCpf.value);
+        });
+    }
+
+    // Preenchimento de dados vindos do cadastro de membro e verificação da inscrição de membresia
+    function preencherDadosMembro(membro) {
+      if (!membro) return;
+
+      var nomeLimpo = (membro.nome || "").trim().toUpperCase();
+      inputNome.value = nomeLimpo;
+      ultimoNomeCarregado = nomeLimpo;
+
+      // Data de nascimento
+      if (membro.dtnasc && membro.dtnasc !== "0") {
+        inputDtnasc.value = formatarDataParaInput(membro.dtnasc);
+      } else {
+        inputDtnasc.value = "";
+      }
+      atualizarEstiloData(inputDtnasc);
+
+      // RG e CPF
+      inputRg.value = (membro.rg && membro.rg !== "0") ? membro.rg.toUpperCase() : "";
+      if (membro.cpf && membro.cpf !== "0") {
+        inputCpf.value = membro.cpf;
+        VMasker(inputCpf).maskPattern("999.999.999-99");
+      } else {
+        inputCpf.value = "";
+      }
+
+      // Sexo e Estado Civil
+      selecionarChoiceChip("sexo", (membro.sexo && membro.sexo !== "0") ? membro.sexo : "");
+      selecionarChoiceChip("estadoCivil", (membro.estadoCivil && membro.estadoCivil !== "0") ? membro.estadoCivil : "");
+
+      // Endereço, Número e CEP
+      inputEndereco.value = (membro.endereco && membro.endereco !== "0") ? membro.endereco.toUpperCase() : "";
+      inputNumero.value = (membro.numero && membro.numero !== "0") ? membro.numero.toUpperCase() : "";
+
+      if (membro.cep && membro.cep !== "0") {
+        inputCep.value = membro.cep;
+        VMasker(inputCep).maskPattern("99999-999");
+        var cepLimpo = membro.cep.replace(/\D/g, "");
+        if (cepLimpo.length === 8 && (!membro.bairro || !membro.cidade || !membro.endereco)) {
+          buscarEnderecoPorCep(cepLimpo);
+        }
+      } else {
+        inputCep.value = "";
+      }
+      inputBairro.value = (membro.bairro && membro.bairro !== "0") ? membro.bairro.toUpperCase() : "";
+      inputCidade.value = (membro.cidade && membro.cidade !== "0") ? membro.cidade.toUpperCase() : "";
+      inputUf.value = (membro.uf && membro.uf !== "0") ? membro.uf.toUpperCase() : "";
+
+      // Telefone e Email
+      var tel = membro.celular || membro.telefone;
+      if (tel && tel !== "0") {
+        inputTelefone.value = tel;
+        VMasker(inputTelefone).maskPattern("(99) 99999-9999");
+      } else {
+        inputTelefone.value = "";
+      }
+      inputEmail.value = (membro.email && membro.email !== "0") ? membro.email : "";
+
+      // Cônjuge e Pais
+      inputConjuge.value = (membro.conjuge && membro.conjuge !== "0") ? membro.conjuge.toUpperCase() : "";
+      inputPai.value = (membro.pai && membro.pai !== "0") ? membro.pai.toUpperCase() : "";
+      inputMae.value = (membro.mae && membro.mae !== "0") ? membro.mae.toUpperCase() : "";
+
+      // Modo de Integração e Batismo (caso já venha registrado)
+      if (membro.modoIntegracao) {
+        selecionarChoiceChip("modoIntegracao", membro.modoIntegracao);
+      }
+      if (membro.igrejaBatismo && membro.igrejaBatismo !== "0") {
+        inputIgrejaBatismo.value = membro.igrejaBatismo.toUpperCase();
+      }
+      if (membro.dataBatismo && membro.dataBatismo !== "0") {
+        inputDataBatismo.value = formatarDataParaInput(membro.dataBatismo);
+      }
+      atualizarEstiloData(inputDataBatismo);
+
+      // Limpa possíveis mensagens de erro de validação
+      document.querySelectorAll(".chip-erro").forEach(function (el) {
+        el.style.display = "none";
+      });
+
+      // Verifica se o membro já possui inscrição na coleção batismo
+      verificarInscricaoMembresia(nomeLimpo, inputCpf.value);
+    }
+
+    // Função que verifica se o membro já se inscreveu para membresia e confirma a data
+    function verificarInscricaoMembresia(nome, cpf) {
+      if (!nome) return Promise.resolve(null);
+      var nomeBusca = nome.trim().toUpperCase();
+
+      return bancoDeDados
+        .collection("batismo")
+        .where("nome", "==", nomeBusca)
+        .limit(1)
+        .get()
+        .then(function (querySnapshot) {
+          if (!querySnapshot.empty) {
+            // Membro JÁ se inscreveu para membresia!
+            docIdExistente = querySnapshot.docs[0].id;
+            dadosOriginaisExistentes = querySnapshot.docs[0].data();
+
+            var dataEncontrada = dadosOriginaisExistentes.dataInscricaoMembresia || dadosOriginaisExistentes.dataCriacao || "";
+
+            // Formata a data para o input (YYYY-MM-DD)
+            var dataFormatadaInput = formatarDataParaInput(dataEncontrada);
+            if (!dataFormatadaInput && dadosOriginaisExistentes.dataCriacao) {
+              try {
+                dataFormatadaInput = dadosOriginaisExistentes.dataCriacao.split("T")[0];
+              } catch (e) {}
+            }
+
+            if (dataFormatadaInput) {
+              inputDataInscricaoMembresia.value = dataFormatadaInput;
+            }
+            atualizarEstiloData(inputDataInscricaoMembresia);
+
+            // Formata data legível DD/MM/AAAA para a confirmação visual
+            var dataExibicao = "";
+            if (inputDataInscricaoMembresia.value) {
+              var p = inputDataInscricaoMembresia.value.split("-");
+              if (p.length === 3) dataExibicao = `${p[2]}/${p[1]}/${p[0]}`;
+            }
+
+            // Exibe mensagem de confirmação de inscrição para membresia exclusivamente no selo inferior
+            if (statusInscricaoMembresia) {
+              statusInscricaoMembresia.style.display = "block";
+              statusInscricaoMembresia.style.backgroundColor = "rgba(0, 188, 212, 0.15)";
+              statusInscricaoMembresia.style.border = "1px solid #00bcd4";
+              statusInscricaoMembresia.style.color = "#00e5ff";
+              statusInscricaoMembresia.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Inscrição de membresia confirmada em: <strong>${dataExibicao || "data registrada"}</strong>`;
+            }
+
+            // Puxa também outros dados da ficha já preenchida
+            if (dadosOriginaisExistentes.modoIntegracao) {
+              selecionarChoiceChip("modoIntegracao", dadosOriginaisExistentes.modoIntegracao);
+            }
+            if (dadosOriginaisExistentes.igrejaBatismo) {
+              inputIgrejaBatismo.value = dadosOriginaisExistentes.igrejaBatismo;
+            }
+            if (dadosOriginaisExistentes.dataBatismo) {
+              inputDataBatismo.value = formatarDataParaInput(dadosOriginaisExistentes.dataBatismo);
+              atualizarEstiloData(inputDataBatismo);
+            }
+            if (dadosOriginaisExistentes.numero && !inputNumero.value) {
+              inputNumero.value = dadosOriginaisExistentes.numero;
+            }
+            if (dadosOriginaisExistentes.rg && !inputRg.value) {
+              inputRg.value = dadosOriginaisExistentes.rg;
+            }
+            if (dadosOriginaisExistentes.cpf && !inputCpf.value) {
+              inputCpf.value = dadosOriginaisExistentes.cpf;
+              VMasker(inputCpf).maskPattern("999.999.999-99");
+            }
+            if (dadosOriginaisExistentes.conjuge && !inputConjuge.value) {
+              inputConjuge.value = dadosOriginaisExistentes.conjuge;
+            }
+            if (dadosOriginaisExistentes.pai && !inputPai.value) {
+              inputPai.value = dadosOriginaisExistentes.pai;
+            }
+            if (dadosOriginaisExistentes.mae && !inputMae.value) {
+              inputMae.value = dadosOriginaisExistentes.mae;
+            }
+
+            return { id: docIdExistente, data: dadosOriginaisExistentes };
+          } else {
+            // Membro NÃO possui inscrição prévia de membresia
+            docIdExistente = null;
+            dadosOriginaisExistentes = null;
+
+            if (statusInscricaoMembresia) {
+              statusInscricaoMembresia.style.display = "block";
+              statusInscricaoMembresia.style.backgroundColor = "rgba(46, 204, 113, 0.15)";
+              statusInscricaoMembresia.style.border = "1px solid #2ecc71";
+              statusInscricaoMembresia.style.color = "#2ecc71";
+              statusInscricaoMembresia.innerHTML = `<i class="fas fa-calendar-check mr-1"></i> Nova inscrição (data atual definida)`;
+            }
+
+            // Garante que tenha a data de hoje definida
+            var hojeStr = new Date().toISOString().split("T")[0];
+            inputDataInscricaoMembresia.value = hojeStr;
+            atualizarEstiloData(inputDataInscricaoMembresia);
+
+            return null;
+          }
+        })
+        .catch(function (error) {
+          console.error("Erro ao verificar inscrição de membresia:", error);
+          return null;
+        });
+    }
+
+    // Verificação rigorosa anti-duplicidade antes de salvar
+    function verificarDuplicidadeGarantida(nome, cpf) {
+      var nomeBusca = (nome || "").trim().toUpperCase();
+      var cpfLimpo = (cpf || "").replace(/\D/g, "");
+
+      // 1ª checagem: por nome
+      return bancoDeDados
+        .collection("batismo")
+        .where("nome", "==", nomeBusca)
+        .limit(1)
+        .get()
+        .then(function (snapNome) {
+          if (!snapNome.empty) {
+            return { id: snapNome.docs[0].id, data: snapNome.docs[0].data(), motivo: "nome" };
+          }
+
+          // 2ª checagem: por CPF se informado
+          if (cpfLimpo.length === 11) {
+            return bancoDeDados
+              .collection("batismo")
+              .where("cpf", "==", cpf.trim())
+              .limit(1)
+              .get()
+              .then(function (snapCpf) {
+                if (!snapCpf.empty) {
+                  return { id: snapCpf.docs[0].id, data: snapCpf.docs[0].data(), motivo: "cpf" };
+                }
+                return null;
+              });
+          }
+
+          return null;
+        });
+    }
+
+    // Gerador de ID determinístico único por membro
+    function gerarIdDocUnico(nome, cpf) {
+      var base = (nome || "").trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z0-9]/g, "_");
+      var cpfLimpo = (cpf || "").replace(/\D/g, "");
+      if (cpfLimpo.length === 11) {
+        return `${base}_${cpfLimpo}`.substring(0, 100);
+      }
+      return base.substring(0, 100);
+    }
+
+    // Função visual para destacar erro em ChoiceChips ou campos
+    function destacarErroCampo(campoId, mensagem) {
+      var input = document.getElementById(campoId);
+      if (!input) return;
+      var formGroup = input.closest(".form-group");
+      var container = formGroup.querySelector(".choice-chips");
+      if (container) {
+        container.style.outline = "2px solid #e74c3c";
+        container.style.borderRadius = "8px";
+        container.style.padding = "4px";
+      } else {
+        input.classList.add("is-invalid");
+      }
+      var erroEl = formGroup.querySelector(".chip-erro");
+      if (erroEl) {
+        erroEl.textContent = mensagem;
+        erroEl.style.display = "block";
+      }
+      formGroup.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function limparTodosErros() {
+      document.querySelectorAll(".chip-erro").forEach(function (el) {
+        el.style.display = "none";
+      });
+      document.querySelectorAll(".choice-chips").forEach(function (el) {
+        el.style.outline = "none";
+      });
+      document.querySelectorAll(".form-control").forEach(function (el) {
+        el.classList.remove("is-invalid");
+      });
+    }
+
+    // Envio do formulário com proteção anti-duplicidade garantida
+    formulario.addEventListener("submit", function (e) {
+      e.preventDefault();
+      limparTodosErros();
+
+      var nome = inputNome.value.trim().toUpperCase();
+      if (!nome) {
+        destacarErroCampo("nome", "Por favor, digite o nome completo.");
+        inputNome.focus();
+        return;
+      }
+
+      if (!inputDtnasc.value) {
+        destacarErroCampo("dtnasc", "Por favor, preencha a data de nascimento.");
+        inputDtnasc.focus();
+        return;
+      }
+
+      const sexo = document.getElementById("sexo").value;
+      if (!sexo) {
+        destacarErroCampo("sexo", "Por favor, selecione o Sexo (Masc. ou Fem.).");
+        return;
+      }
+
+      const estadoCivil = document.getElementById("estadoCivil").value;
+      if (!estadoCivil) {
+        destacarErroCampo("estadoCivil", "Por favor, selecione o Estado Civil.");
+        return;
+      }
+
+      const telNumeros = inputTelefone.value.replace(/\D/g, "");
+      if (telNumeros.length < 10) {
+        destacarErroCampo("telefone", "Por favor, informe um telefone válido com DDD (mínimo 10 dígitos).");
+        inputTelefone.focus();
+        return;
+      }
+
+      const modoIntegracao = document.getElementById("modoIntegracao").value;
+      if (!modoIntegracao) {
+        destacarErroCampo("modoIntegracao", "Por favor, selecione o Modo de Integração (BATISMO ou DECLARAÇÃO).");
+        return;
+      }
+
+      // Desabilita botão imediatamente para evitar cliques duplos
+      cadastrarBtn.disabled = true;
+      cadastrarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verificando duplicidade...';
+
+      // Verificação rigorosa anti-duplicidade na coleção "batismo"
+      verificarDuplicidadeGarantida(nome, inputCpf.value)
+        .then((registroExistente) => {
+          if (registroExistente) {
+            var dataOriginal = registroExistente.data.dataInscricaoMembresia || registroExistente.data.dataCriacao || "já confirmada";
+            var msgConfirm = `O membro "${nome}" já possui uma ficha de membresia (${dataOriginal}).\n\nDeseja ATUALIZAR a ficha existente sem gerar duplicidade na coleção?`;
+
+            if (!confirm(msgConfirm)) {
+              cadastrarBtn.disabled = false;
+              cadastrarBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Ficha de Cadastro';
+              return;
+            }
+
+            cadastrarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Atualizando cadastro existente...';
+            salvarFichaBatismo(registroExistente.id, registroExistente.data);
+          } else {
+            cadastrarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Gravando novo registro...';
+            salvarFichaBatismo(null, null);
+          }
+        })
+        .catch((err) => {
+          console.error("Erro na verificação prévia:", err);
+          salvarFichaBatismo(docIdExistente, dadosOriginaisExistentes);
+        });
+    });
+
+    // Salvar ficha garantindo que nunca gere duplicidade
+    function salvarFichaBatismo(idDocExistente, dadosAntigos) {
+      try {
+        var dtnascVal = inputDtnasc.value;
+        var dataNascFormatada = "";
+        if (dtnascVal) {
+          var p = dtnascVal.split("-");
+          if (p.length === 3) dataNascFormatada = `${p[2]}/${p[1]}/${p[0]}`;
+        }
+
+        var modoIntegracaoVal = document.getElementById("modoIntegracao").value;
+        var estadoCivilVal = document.getElementById("estadoCivil").value;
+
+        var dtBatismoVal = inputDataBatismo.value;
+        var dataBatismoFormatada = "";
+        if (modoIntegracaoVal === "DECLARAÇÃO" && dtBatismoVal) {
+          var pb = dtBatismoVal.split("-");
+          if (pb.length === 3) dataBatismoFormatada = `${pb[2]}/${pb[1]}/${pb[0]}`;
+        }
+
+        // Data de Inscrição para Membresia (preserva original se for atualização)
+        var dataInscricaoMembresiaFormatada = "";
+        if (dadosAntigos && dadosAntigos.dataInscricaoMembresia) {
+          dataInscricaoMembresiaFormatada = dadosAntigos.dataInscricaoMembresia;
+        } else {
+          var dtInscricaoMembresiaVal = inputDataInscricaoMembresia.value;
+          if (dtInscricaoMembresiaVal) {
+            var pi = dtInscricaoMembresiaVal.split("-");
+            if (pi.length === 3) dataInscricaoMembresiaFormatada = `${pi[2]}/${pi[1]}/${pi[0]}`;
+          }
+        }
+
+        var telVal = inputTelefone.value.trim();
+        var nomeFormatado = inputNome.value.trim().toUpperCase();
+        var cpfVal = inputCpf.value.trim();
+
+        // Linha do tempo (histórico)
+        var timelineAtual = (dadosAntigos && Array.isArray(dadosAntigos.timeline)) ? dadosAntigos.timeline : [];
+        timelineAtual.push({
+          data: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+          acao: idDocExistente ? "Atualização de Membresia / Batismo" : "Inscrição de Membresia / Batismo",
+          alteracoes: idDocExistente ? "Ficha existente atualizada sem duplicidade" : "Cadastro inicial criado"
+        });
+
+        // Dados estruturados conforme a Ficha Física e regras
+        var dadosFicha = {
+          nome: nomeFormatado,
+          endereco: inputEndereco.value.trim().toUpperCase(),
+          numero: inputNumero.value.trim().toUpperCase(),
+          bairro: inputBairro.value.trim().toUpperCase(),
+          cidade: inputCidade.value.trim().toUpperCase(),
+          uf: inputUf.value.trim().toUpperCase(),
+          cep: inputCep.value.trim(),
+          telefone: telVal,
+          celular: telVal,
+          email: inputEmail.value.trim(),
+          dtnasc: dataNascFormatada,
+          sexo: document.getElementById("sexo").value,
+          estadoCivil: estadoCivilVal,
+          rg: inputRg.value.trim().toUpperCase(),
+          cpf: cpfVal,
+          conjuge: estadoCivilVal === "CASADO" ? inputConjuge.value.trim().toUpperCase() : "",
+          pai: inputPai.value.trim().toUpperCase(),
+          mae: inputMae.value.trim().toUpperCase(),
+          modoIntegracao: modoIntegracaoVal,
+          dataInscricaoMembresia: dataInscricaoMembresiaFormatada,
+          igrejaBatismo: modoIntegracaoVal === "DECLARAÇÃO" ? inputIgrejaBatismo.value.trim().toUpperCase() : "",
+          dataBatismo: dataBatismoFormatada,
+          status: "Cadastrado",
+          dataAtualizacao: new Date().toISOString(),
+          dataCriacao: (dadosAntigos && dadosAntigos.dataCriacao) ? dadosAntigos.dataCriacao : new Date().toISOString(),
+          timeline: timelineAtual
+        };
+
+        // Se o cadastro já existe, atualiza no mesmo ID; se não existe, usa ID único determinístico
+        var targetDocId = idDocExistente || gerarIdDocUnico(nomeFormatado, cpfVal);
+
+        bancoDeDados
+          .collection("batismo")
+          .doc(targetDocId)
+          .set(dadosFicha, { merge: true })
+          .then(function () {
+            window.location.href = "../agradecimento.html";
+          })
+          .catch(function (error) {
+            console.error("Erro ao salvar ficha:", error);
+            alert("Erro ao salvar cadastro: " + (error.message || error));
+            cadastrarBtn.disabled = false;
+            cadastrarBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Ficha de Cadastro';
+          });
+      } catch (err) {
+        console.error("Erro ao preparar dados da ficha:", err);
+        alert("Ocorreu um erro ao preparar o cadastro: " + err.message);
+        cadastrarBtn.disabled = false;
+        cadastrarBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Ficha de Cadastro';
+      }
+    }
+
+    // Alternar seleção dos ChoiceChips via clique
+    function toggleChoiceChip(chip) {
+      var container = chip.closest(".choice-chips");
+      if (!container) return;
+
+      var chips = container.querySelectorAll(".choice-chip");
+      chips.forEach(function (c) {
+        c.classList.remove("selected");
+      });
+      chip.classList.add("selected");
+
+      var formGroup = chip.closest(".form-group");
+      if (formGroup) {
+        var inputField = formGroup.querySelector("input[type=hidden]");
+        if (inputField) {
+          inputField.value = chip.dataset.value;
+
+          // Atualizações de visibilidade dinâmica
+          if (inputField.id === "estadoCivil") {
+            atualizarVisibilidadeConjuge(chip.dataset.value);
+          }
+          if (inputField.id === "modoIntegracao") {
+            atualizarVisibilidadeDeclaracao(chip.dataset.value);
+          }
+        }
+        container.style.outline = "none";
+        var erroMsg = formGroup.querySelector(".chip-erro");
+        if (erroMsg) erroMsg.style.display = "none";
+      }
+    }
+
+    var choiceChips = document.getElementsByClassName("choice-chip");
+    for (var i = 0; i < choiceChips.length; i++) {
+      choiceChips[i].addEventListener("click", function () {
+        toggleChoiceChip(this);
+      });
+    }
+  </script>
+</body>
+
+</html>
