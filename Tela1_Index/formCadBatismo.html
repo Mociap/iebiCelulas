@@ -107,6 +107,13 @@
       opacity: 1;
     }
 
+    .form-control[readonly] {
+      background-color: #242424 !important;
+      cursor: not-allowed;
+      color: #b0bec5;
+      border-color: #383838;
+    }
+
     /* Campo de data com cor de placeholder quando ainda não preenchido */
     input[type="date"] {
       color: #7a7a7a;
@@ -322,7 +329,8 @@
   <div class="container">
     <i class="fas fa-id-card badge-icon"></i>
     <h2 class="text-center mb-1 font-weight-bold">Ficha de Membro / Batismo</h2>
-    <p class="text-center text-muted mb-0" style="font-size: 0.9em;">Preencha os dados cadastrais conforme a ficha de membros.</p>
+    <p class="text-center text-muted mb-0" style="font-size: 0.9em;">Preencha os dados cadastrais conforme a ficha de
+      membros.</p>
     <div class="divider"></div>
 
     <form id="batismoForm" novalidate>
@@ -335,13 +343,14 @@
       <div class="form-group" style="position: relative;">
         <label for="nome">NOME COMPLETO *</label>
         <div class="input-wrapper">
-          <input type="text" class="form-control" id="nome" required onkeyup="this.value = this.value.toUpperCase();" placeholder="DIGITE O NOME COMPLETO" autocomplete="off" />
+          <input type="text" class="form-control" id="nome" required onkeyup="this.value = this.value.toUpperCase();"
+            placeholder="DIGITE O NOME COMPLETO" autocomplete="off" />
           <i class="fas fa-spinner fa-spin loading-spinner-nome" id="nomeLoading"></i>
           <div id="sugestoesNomes" class="sugestoes" style="display: none;"></div>
         </div>
       </div>
 
-      <!-- Data Nasc, Identidade (RG) e CPF na mesma linha (Responsivo) -->
+      <!-- Data Nasc, Identidade (RG) e CPF na mesma linha (Responsivo - ao menos 1 documento obrigatório) -->
       <div class="form-row">
         <div class="form-group col-12 col-md-4">
           <label for="dtnasc">DATA NASC. *</label>
@@ -350,13 +359,16 @@
         </div>
 
         <div class="form-group col-12 col-md-4">
-          <label for="rg">IDENTIDADE (RG)</label>
-          <input type="text" class="form-control" id="rg" placeholder="Número do RG" onkeyup="this.value = this.value.toUpperCase();" />
+          <label for="rg">IDENTIDADE (RG) <span class="text-info" title="Obrigatório RG ou CPF">*</span></label>
+          <input type="text" class="form-control" id="rg" placeholder="Número do RG"
+            onkeyup="this.value = this.value.toUpperCase();" />
+          <small class="chip-erro" id="rgErro">Informe ao menos RG ou CPF.</small>
         </div>
 
         <div class="form-group col-12 col-md-4">
-          <label for="cpf">CPF</label>
+          <label for="cpf">CPF <span class="text-info" title="Obrigatório RG ou CPF">*</span></label>
           <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" />
+          <small class="chip-erro" id="cpfErro">Informe ao menos RG ou CPF.</small>
         </div>
       </div>
 
@@ -397,38 +409,47 @@
       <!-- CEP, Endereço e Número -->
       <div class="form-row">
         <div class="form-group col-12 col-md-3">
-          <label for="cep">CEP</label>
-          <input type="text" class="form-control" id="cep" maxlength="9" placeholder="99999-999" onkeyup="this.value = this.value.toUpperCase();" />
+          <label for="cep">CEP *</label>
+          <input type="text" class="form-control" id="cep" maxlength="9" placeholder="99999-999" required
+            onkeyup="this.value = this.value.toUpperCase();" />
           <small id="cepError" style="color: rgb(255, 159, 159); display: none">CEP inválido</small>
-          <small id="cepSuccess" style="color: #2ecc71; display: none"><i class="fas fa-check-circle"></i> Endereço atualizado pelo CEP!</small>
+          <small id="cepSuccess" style="color: #2ecc71; display: none"><i class="fas fa-check-circle"></i> Endereço
+            atualizado pelo CEP!</small>
+          <small class="chip-erro" id="cepErro">Informe o CEP com 8 dígitos.</small>
         </div>
 
         <div class="form-group col-12 col-md-6">
           <label for="endereco">ENDEREÇO / LOGRADOURO</label>
-          <input type="text" class="form-control" id="endereco" placeholder="Ex: Rua das Flores" onkeyup="this.value = this.value.toUpperCase();" />
+          <input type="text" class="form-control" id="endereco" readonly placeholder="Preenchido pelo CEP"
+            onkeyup="this.value = this.value.toUpperCase();" />
         </div>
 
         <div class="form-group col-12 col-md-3">
-          <label for="numero">NÚMERO</label>
-          <input type="text" class="form-control" id="numero" placeholder="Nº / Apto" onkeyup="this.value = this.value.toUpperCase();" />
+          <label for="numero">NÚMERO *</label>
+          <input type="text" class="form-control" id="numero" required placeholder="Nº / Apto"
+            onkeyup="this.value = this.value.toUpperCase();" />
+          <small class="chip-erro" id="numeroErro">Informe o número do endereço.</small>
         </div>
       </div>
 
-      <!-- Bairro, Cidade, UF -->
+      <!-- Bairro, Cidade, UF (Bloqueados - preenchidos pelo CEP) -->
       <div class="form-row">
         <div class="form-group col-12 col-md-5">
           <label for="bairro">BAIRRO</label>
-          <input type="text" class="form-control" id="bairro" placeholder="Bairro" onkeyup="this.value = this.value.toUpperCase();" />
+          <input type="text" class="form-control" id="bairro" readonly placeholder="Preenchido pelo CEP"
+            onkeyup="this.value = this.value.toUpperCase();" />
         </div>
 
         <div class="form-group col-12 col-md-5">
           <label for="cidade">CIDADE</label>
-          <input type="text" class="form-control" id="cidade" placeholder="Cidade" onkeyup="this.value = this.value.toUpperCase();" />
+          <input type="text" class="form-control" id="cidade" readonly placeholder="Preenchido pelo CEP"
+            onkeyup="this.value = this.value.toUpperCase();" />
         </div>
 
         <div class="form-group col-12 col-md-2">
           <label for="uf">UF</label>
-          <input type="text" class="form-control px-1 text-center" id="uf" maxlength="2" placeholder="UF" onkeyup="this.value = this.value.toUpperCase();" />
+          <input type="text" class="form-control px-1 text-center" id="uf" readonly maxlength="2" placeholder="UF"
+            onkeyup="this.value = this.value.toUpperCase();" />
         </div>
       </div>
 
@@ -454,25 +475,28 @@
       <!-- Cônjuge (visível apenas se Casado) -->
       <div class="form-group" id="grupoConjuge" style="display: none;">
         <label for="conjuge">CÔNJUGE</label>
-        <input type="text" class="form-control" id="conjuge" placeholder="Nome do cônjuge" onkeyup="this.value = this.value.toUpperCase();" />
+        <input type="text" class="form-control" id="conjuge" placeholder="Nome do cônjuge"
+          onkeyup="this.value = this.value.toUpperCase();" />
       </div>
 
       <!-- Pai e Mãe -->
       <div class="form-row">
         <div class="form-group col-md-6">
           <label for="pai">PAI</label>
-          <input type="text" class="form-control" id="pai" placeholder="Nome completo do pai" onkeyup="this.value = this.value.toUpperCase();" />
+          <input type="text" class="form-control" id="pai" placeholder="Nome completo do pai"
+            onkeyup="this.value = this.value.toUpperCase();" />
         </div>
 
         <div class="form-group col-md-6">
           <label for="mae">MÃE</label>
-          <input type="text" class="form-control" id="mae" placeholder="Nome completo da mãe" onkeyup="this.value = this.value.toUpperCase();" />
+          <input type="text" class="form-control" id="mae" placeholder="Nome completo da mãe"
+            onkeyup="this.value = this.value.toUpperCase();" />
         </div>
       </div>
 
       <!-- 4. INTEGRAÇÃO E BATISMO -->
       <div class="secao-titulo">
-        <i class="fas fa-water"></i> Modo de Integração e Batismo
+        <i class="fas fa-water"></i> Modo de Integração
       </div>
 
       <!-- Modo de Integração -->
@@ -494,7 +518,8 @@
       <div class="form-row" id="grupoDeclaracao" style="display: none;">
         <div class="form-group col-12 col-md-8">
           <label for="igrejaBatismo">IGREJA ONDE SE BATIZOU</label>
-          <input type="text" class="form-control" id="igrejaBatismo" placeholder="Ex: IEBI Itapevi ou nome da igreja" onkeyup="this.value = this.value.toUpperCase();" />
+          <input type="text" class="form-control" id="igrejaBatismo" placeholder="Ex: IEBI Itapevi ou nome da igreja"
+            onkeyup="this.value = this.value.toUpperCase();" />
         </div>
 
         <div class="form-group col-12 col-md-4">
@@ -503,13 +528,28 @@
         </div>
       </div>
 
-      <!-- Data de Inscrição na linha debaixo sozinho (na última linha), bloqueado para o usuário -->
-      <div class="form-group mt-3">
-        <label for="dataInscricaoMembresia">
-          <i class="fas fa-calendar-alt text-info mr-1"></i> DATA INSCRIÇÃO PARA MEMBRESIA
-        </label>
-        <input type="date" class="form-control" id="dataInscricaoMembresia" readonly tabindex="-1" style="cursor: not-allowed; background-color: #242424; color: #00bcd4; font-weight: 700; pointer-events: none; border: 1px solid #3c3c3c;" />
-        <div id="statusInscricaoMembresia" class="badge-status-membresia" style="display: none;"></div>
+      <!-- Linha com Data Inscrição para Membresia e Data de Integração (lado a lado e bloqueadas) -->
+      <div class="form-row mt-3">
+        <div class="form-group col-12 col-md-6">
+          <label for="dataInscricaoMembresia">
+            <i class="fas fa-calendar-alt text-info mr-1"></i> DATA INSCRIÇÃO PARA MEMBRESIA
+          </label>
+          <input type="date" class="form-control" id="dataInscricaoMembresia" readonly tabindex="-1"
+            style="cursor: not-allowed; background-color: #242424; color: #00bcd4; font-weight: 700; pointer-events: none; border: 1px solid #3c3c3c;" />
+          <div id="statusInscricaoMembresia" class="badge-status-membresia" style="display: none;"></div>
+        </div>
+
+        <div class="form-group col-12 col-md-6">
+          <label for="dataIntegracao">
+            <i class="fas fa-calendar-check text-warning mr-1"></i> DATA DE INTEGRAÇÃO
+          </label>
+          <input type="date" class="form-control" id="dataIntegracao" value="2026-11-05" readonly tabindex="-1"
+            style="cursor: not-allowed; background-color: #242424; color: #f39c12; font-weight: 700; pointer-events: none; border: 1px solid #3c3c3c;" />
+          <div id="statusIntegracao" class="badge-status-membresia"
+            style="display: block; background-color: rgba(243, 156, 18, 0.15); border: 1px solid #f39c12; color: #f39c12;">
+            <i class="fas fa-calendar-day mr-1"></i> Data prevista: <strong>05/11/2026</strong>
+          </div>
+        </div>
       </div>
 
       <div style="height: 15px;"></div>
@@ -566,6 +606,7 @@
     var inputIgrejaBatismo = document.getElementById("igrejaBatismo");
     var inputDataBatismo = document.getElementById("dataBatismo");
     var inputDataInscricaoMembresia = document.getElementById("dataInscricaoMembresia");
+    var inputDataIntegracao = document.getElementById("dataIntegracao");
     var statusInscricaoMembresia = document.getElementById("statusInscricaoMembresia");
     var cadastrarBtn = document.getElementById("cadastrarBtn");
     var cepError = document.getElementById("cepError");
@@ -582,6 +623,56 @@
     VMasker(inputTelefone).maskPattern("(99) 99999-9999");
     VMasker(inputCep).maskPattern("99999-999");
     VMasker(inputCpf).maskPattern("999.999.999-99");
+
+    // Limpeza de erros em tempo real ao digitar nos documentos (RG ou CPF)
+    function limparErroDocumentos() {
+      inputRg.classList.remove("is-invalid");
+      inputCpf.classList.remove("is-invalid");
+      var fRg = inputRg.closest(".form-group");
+      if (fRg) {
+        var eRg = fRg.querySelector(".chip-erro");
+        if (eRg) eRg.style.display = "none";
+      }
+      var fCpf = inputCpf.closest(".form-group");
+      if (fCpf) {
+        var eCpf = fCpf.querySelector(".chip-erro");
+        if (eCpf) eCpf.style.display = "none";
+      }
+    }
+
+    inputRg.addEventListener("input", function () {
+      if (this.value.trim().length > 0 || inputCpf.value.replace(/\D/g, "").length === 11) {
+        limparErroDocumentos();
+      }
+    });
+
+    inputCpf.addEventListener("input", function () {
+      if (this.value.replace(/\D/g, "").length === 11 || inputRg.value.trim().length > 0) {
+        limparErroDocumentos();
+      }
+    });
+
+    inputCep.addEventListener("input", function () {
+      if (this.value.replace(/\D/g, "").length === 8) {
+        this.classList.remove("is-invalid");
+        var f = this.closest(".form-group");
+        if (f) {
+          var err = f.querySelector(".chip-erro");
+          if (err) err.style.display = "none";
+        }
+      }
+    });
+
+    inputNumero.addEventListener("input", function () {
+      if (this.value.trim().length > 0) {
+        this.classList.remove("is-invalid");
+        var f = this.closest(".form-group");
+        if (f) {
+          var err = f.querySelector(".chip-erro");
+          if (err) err.style.display = "none";
+        }
+      }
+    });
 
     // Formatar data para input date (DD/MM/YYYY -> YYYY-MM-DD)
     function formatarDataParaInput(dataStr) {
@@ -636,6 +727,15 @@
       var hojeStr = new Date().toISOString().split("T")[0];
       inputDataInscricaoMembresia.value = hojeStr;
       atualizarEstiloData(inputDataInscricaoMembresia);
+
+      if (inputDataIntegracao) {
+        inputDataIntegracao.value = "2026-11-05";
+        atualizarEstiloData(inputDataIntegracao);
+      }
+
+      if (inputEndereco) {
+        inputEndereco.setAttribute("readonly", "readonly");
+      }
     }
 
     // Controle de visibilidade condicional
@@ -759,12 +859,14 @@
               setTimeout(() => { if (cepSuccess) cepSuccess.style.display = "none"; }, 3500);
             }
 
-            // Garante a atualização do logradouro e foca no Número
+            // Garante a atualização dos campos bloqueados pelo CEP e foca no Número
             if (data.logradouro) {
               var ruaUpper = data.logradouro.toUpperCase();
-              if (!inputEndereco.value || !inputEndereco.value.includes(ruaUpper)) {
-                inputEndereco.value = ruaUpper;
-              }
+              inputEndereco.value = ruaUpper;
+              inputEndereco.setAttribute("readonly", "readonly");
+            } else {
+              inputEndereco.removeAttribute("readonly");
+              inputEndereco.placeholder = "Informe o endereço / logradouro";
             }
             if (data.bairro) inputBairro.value = data.bairro.toUpperCase();
             if (data.localidade) inputCidade.value = data.localidade.toUpperCase();
@@ -987,6 +1089,15 @@
       inputDataInscricaoMembresia.value = hojeStr;
       atualizarEstiloData(inputDataInscricaoMembresia);
 
+      if (inputDataIntegracao) {
+        inputDataIntegracao.value = "2026-11-05";
+        atualizarEstiloData(inputDataIntegracao);
+      }
+
+      if (inputEndereco) {
+        inputEndereco.setAttribute("readonly", "readonly");
+      }
+
       if (statusInscricaoMembresia) {
         statusInscricaoMembresia.style.display = "block";
         statusInscricaoMembresia.style.backgroundColor = "rgba(46, 204, 113, 0.15)";
@@ -1145,7 +1256,7 @@
       inputPai.value = (membro.pai && membro.pai !== "0") ? membro.pai.toUpperCase() : "";
       inputMae.value = (membro.mae && membro.mae !== "0") ? membro.mae.toUpperCase() : "";
 
-      // Modo de Integração e Batismo (caso já venha registrado)
+      // Modo de Integração (caso já venha registrado)
       if (membro.modoIntegracao) {
         selecionarChoiceChip("modoIntegracao", membro.modoIntegracao);
       }
@@ -1156,6 +1267,16 @@
         inputDataBatismo.value = formatarDataParaInput(membro.dataBatismo);
       }
       atualizarEstiloData(inputDataBatismo);
+
+      // Data de Integração (padrão 05/11/2026 ou registrado)
+      if (inputDataIntegracao) {
+        if (membro.dataIntegracao && membro.dataIntegracao !== "0") {
+          inputDataIntegracao.value = formatarDataParaInput(membro.dataIntegracao) || "2026-11-05";
+        } else {
+          inputDataIntegracao.value = "2026-11-05";
+        }
+        atualizarEstiloData(inputDataIntegracao);
+      }
 
       // Limpa possíveis mensagens de erro de validação
       document.querySelectorAll(".chip-erro").forEach(function (el) {
@@ -1189,7 +1310,7 @@
             if (!dataFormatadaInput && dadosOriginaisExistentes.dataCriacao) {
               try {
                 dataFormatadaInput = dadosOriginaisExistentes.dataCriacao.split("T")[0];
-              } catch (e) {}
+              } catch (e) { }
             }
 
             if (dataFormatadaInput) {
@@ -1242,6 +1363,10 @@
             }
             if (dadosOriginaisExistentes.mae && !inputMae.value) {
               inputMae.value = dadosOriginaisExistentes.mae;
+            }
+            if (dadosOriginaisExistentes.dataIntegracao && inputDataIntegracao) {
+              inputDataIntegracao.value = formatarDataParaInput(dadosOriginaisExistentes.dataIntegracao) || "2026-11-05";
+              atualizarEstiloData(inputDataIntegracao);
             }
 
             return { id: docIdExistente, data: dadosOriginaisExistentes };
@@ -1368,6 +1493,24 @@
         return;
       }
 
+      // Validação de documento (RG ou CPF: ao menos um obrigatório)
+      var rgVal = inputRg.value.trim();
+      var cpfVal = inputCpf.value.trim();
+      var cpfNumeros = cpfVal.replace(/\D/g, "");
+
+      if (!rgVal && cpfNumeros.length === 0) {
+        destacarErroCampo("rg", "Preencha ao menos um documento: RG ou CPF.");
+        destacarErroCampo("cpf", "Preencha ao menos um documento: RG ou CPF.");
+        inputRg.focus();
+        return;
+      }
+
+      if (cpfNumeros.length > 0 && cpfNumeros.length < 11) {
+        destacarErroCampo("cpf", "CPF incompleto (deve conter 11 dígitos).");
+        inputCpf.focus();
+        return;
+      }
+
       const sexo = document.getElementById("sexo").value;
       if (!sexo) {
         destacarErroCampo("sexo", "Por favor, selecione o Sexo (Masc. ou Fem.).");
@@ -1377,6 +1520,21 @@
       const estadoCivil = document.getElementById("estadoCivil").value;
       if (!estadoCivil) {
         destacarErroCampo("estadoCivil", "Por favor, selecione o Estado Civil.");
+        return;
+      }
+
+      // Validação de endereço (CEP e Número obrigatórios)
+      var cepLimpo = inputCep.value.replace(/\D/g, "");
+      if (cepLimpo.length !== 8) {
+        destacarErroCampo("cep", "Por favor, informe um CEP válido com 8 dígitos.");
+        inputCep.focus();
+        return;
+      }
+
+      var numeroVal = inputNumero.value.trim();
+      if (!numeroVal) {
+        destacarErroCampo("numero", "Por favor, informe o número do endereço.");
+        inputNumero.focus();
         return;
       }
 
@@ -1455,6 +1613,14 @@
           }
         }
 
+        // Data de Integração (padrão 05/11/2026 ou registrado)
+        var dtIntegracaoVal = inputDataIntegracao ? inputDataIntegracao.value : "2026-11-05";
+        var dataIntegracaoFormatada = "05/11/2026";
+        if (dtIntegracaoVal) {
+          var pInt = dtIntegracaoVal.split("-");
+          if (pInt.length === 3) dataIntegracaoFormatada = `${pInt[2]}/${pInt[1]}/${pInt[0]}`;
+        }
+
         var telVal = inputTelefone.value.trim();
         var nomeFormatado = inputNome.value.trim().toUpperCase();
         var cpfVal = inputCpf.value.trim();
@@ -1489,6 +1655,7 @@
           mae: inputMae.value.trim().toUpperCase(),
           modoIntegracao: modoIntegracaoVal,
           dataInscricaoMembresia: dataInscricaoMembresiaFormatada,
+          dataIntegracao: dataIntegracaoFormatada,
           igrejaBatismo: modoIntegracaoVal === "DECLARAÇÃO" ? inputIgrejaBatismo.value.trim().toUpperCase() : "",
           dataBatismo: dataBatismoFormatada,
           status: "Cadastrado",
