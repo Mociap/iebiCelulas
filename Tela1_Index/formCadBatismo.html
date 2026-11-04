@@ -208,6 +208,19 @@
       padding: 8px 12px;
     }
 
+    #chipsSexo .choice-chip[data-value="FEMININO"].selected,
+    .choice-chip.chip-feminino.selected {
+      background-color: #e83e8c;
+      border-color: #e83e8c;
+      color: #fff;
+    }
+
+    #chipsSexo .choice-chip[data-value="FEMININO"].selected:hover,
+    .choice-chip.chip-feminino.selected:hover {
+      background-color: #d63384;
+      border-color: #d63384;
+    }
+
     #chipsEstadoCivil .choice-chip {
       padding: 8px 10px;
       font-size: 0.86em;
@@ -380,7 +393,7 @@
             <div class="choice-chip" data-value="MASCULINO">
               <i class="fas fa-male"></i> Masc.
             </div>
-            <div class="choice-chip" data-value="FEMININO">
+            <div class="choice-chip chip-feminino" data-value="FEMININO">
               <i class="fas fa-female"></i> Fem.
             </div>
           </div>
@@ -453,10 +466,10 @@
         </div>
       </div>
 
-      <!-- Fone(s) e E-mail -->
+      <!-- Fone e E-mail -->
       <div class="form-row">
         <div class="form-group col-md-6">
-          <label for="telefone">FONE(S) *</label>
+          <label for="telefone">TELEFONE *</label>
           <input type="text" class="form-control" id="telefone" required placeholder="(99) 99999-9999" />
           <small class="chip-erro" id="telefoneErro">Informe um telefone com DDD.</small>
         </div>
@@ -543,7 +556,7 @@
           <label for="dataIntegracao">
             <i class="fas fa-calendar-check text-warning mr-1"></i> DATA DE INTEGRAÇÃO
           </label>
-          <input type="date" class="form-control" id="dataIntegracao" value="2026-11-05" readonly tabindex="-1"
+          <input type="date" class="form-control" id="dataIntegracao" value="2026-12-05" readonly tabindex="-1"
             style="cursor: not-allowed; background-color: #242424; color: #f39c12; font-weight: 700; pointer-events: none; border: 1px solid #3c3c3c;" />
         </div>
       </div>
@@ -723,15 +736,15 @@
       var hojeStr = new Date().toISOString().split("T")[0];
       inputDataInscricaoMembresia.value = hojeStr;
       atualizarEstiloData(inputDataInscricaoMembresia);
+    }
 
-      if (inputDataIntegracao) {
-        inputDataIntegracao.value = "2026-11-05";
-        atualizarEstiloData(inputDataIntegracao);
-      }
+    if (inputDataIntegracao) {
+      inputDataIntegracao.value = "2026-12-05";
+      atualizarEstiloData(inputDataIntegracao);
+    }
 
-      if (inputEndereco) {
-        inputEndereco.setAttribute("readonly", "readonly");
-      }
+    if (inputEndereco) {
+      inputEndereco.setAttribute("readonly", "readonly");
     }
 
     // Controle de visibilidade condicional
@@ -1086,7 +1099,7 @@
       atualizarEstiloData(inputDataInscricaoMembresia);
 
       if (inputDataIntegracao) {
-        inputDataIntegracao.value = "2026-11-05";
+        inputDataIntegracao.value = "2026-12-05";
         atualizarEstiloData(inputDataIntegracao);
       }
 
@@ -1264,12 +1277,12 @@
       }
       atualizarEstiloData(inputDataBatismo);
 
-      // Data de Integração (padrão 05/11/2026 ou registrado)
+      // Data de Integração (padrão 05/12/2026 ou registrado)
       if (inputDataIntegracao) {
         if (membro.dataIntegracao && membro.dataIntegracao !== "0") {
-          inputDataIntegracao.value = formatarDataParaInput(membro.dataIntegracao) || "2026-11-05";
+          inputDataIntegracao.value = formatarDataParaInput(membro.dataIntegracao) || "2026-12-05";
         } else {
-          inputDataIntegracao.value = "2026-11-05";
+          inputDataIntegracao.value = "2026-12-05";
         }
         atualizarEstiloData(inputDataIntegracao);
       }
@@ -1361,7 +1374,7 @@
               inputMae.value = dadosOriginaisExistentes.mae;
             }
             if (dadosOriginaisExistentes.dataIntegracao && inputDataIntegracao) {
-              inputDataIntegracao.value = formatarDataParaInput(dadosOriginaisExistentes.dataIntegracao) || "2026-11-05";
+              inputDataIntegracao.value = formatarDataParaInput(dadosOriginaisExistentes.dataIntegracao) || "2026-12-05";
               atualizarEstiloData(inputDataIntegracao);
             }
 
@@ -1609,9 +1622,9 @@
           }
         }
 
-        // Data de Integração (padrão 05/11/2026 ou registrado)
-        var dtIntegracaoVal = inputDataIntegracao ? inputDataIntegracao.value : "2026-11-05";
-        var dataIntegracaoFormatada = "05/11/2026";
+        // Data de Integração (padrão 05/12/2026 ou registrado)
+        var dtIntegracaoVal = inputDataIntegracao ? inputDataIntegracao.value : "2026-12-05";
+        var dataIntegracaoFormatada = "05/12/2026";
         if (dtIntegracaoVal) {
           var pInt = dtIntegracaoVal.split("-");
           if (pInt.length === 3) dataIntegracaoFormatada = `${pInt[2]}/${pInt[1]}/${pInt[0]}`;
