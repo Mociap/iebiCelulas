@@ -20,10 +20,11 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 98% !important;
+            width: 98%;
             margin-top: 20px;
             background-color: #fff;
-            padding: 30px;
+            padding: 30px 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             font-size: 12px;
@@ -66,11 +67,12 @@
         }
 
         .node {
-            width: 220px;
-            height: 80px;
-            padding: 10px;
+            width: 185px;
+            min-height: 70px;
+            height: auto;
+            padding: 8px 10px;
             border-radius: 10px;
-            margin: 10px;
+            margin: 4px 0;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: relative;
@@ -82,6 +84,7 @@
             overflow: hidden;
             color: white;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            word-break: break-word;
         }
 
         .node:hover {
@@ -90,26 +93,36 @@
         }
 
         .node.lider {
-            color: black;
+            width: 185px;
+            min-height: 48px;
+            height: auto;
+            padding: 8px 6px;
+            color: #145a32;
             text-shadow: none;
+            font-weight: 600;
         }
 
         .node.rede {
-            width: 100%;
-            max-width: none;
-            border-radius: 0;
-            margin: 0;
-            padding: 20px;
-            font-size: 1.4em;
+            width: fit-content;
+            min-width: 185px;
+            max-width: 100%;
+            min-height: 60px;
+            height: auto;
+            border-radius: 10px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            font-size: 1.3em;
             font-weight: bold;
             text-align: center;
+            box-sizing: border-box;
+            transition: width 0.2s ease-out;
         }
 
         .content-wrapper {
             width: 100%;
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0;
         }
 
         .supervisores-container {
@@ -119,14 +132,16 @@
             margin-top: 5px;
             width: 100%;
             font-size: 12px;
+            gap: 12px;
         }
 
         .supervisor-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0 15px;
+            margin: 0;
             font-size: 12px;
+            flex: 0 0 auto;
         }
 
         .supervisor-info {
@@ -138,9 +153,8 @@
         .connector-vertical {
             width: 2px;
             background-color: #bdc3c7;
-            height: 30px;
+            height: 20px;
             margin: 0 auto;
-            margin-top: 10px;
         }
 
         .connector-horizontal {
@@ -159,6 +173,7 @@
         }
 
         .lider-info {
+            display: none; /* Ocultado temporariamente a pedido do usuário */
             font-size: 0.8em;
             color: rgba(0, 0, 0, 0.8);
             white-space: nowrap;
@@ -172,6 +187,9 @@
             margin-bottom: 50px;
             width: 100%;
             font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .form-control {
@@ -193,8 +211,10 @@
         }
 
         .node.supervisor {
+            width: 185px;
+            min-height: 110px;
             height: auto;
-            padding: 15px;
+            padding: 12px 8px;
         }
     </style>
 </head>
@@ -209,13 +229,15 @@
     <div class="container">
         <h2 class="text-center mb-4">Organograma das Células</h2>
         <div class="divider"></div>
-        <div class="form-group">
-            <label for="coordenador">Coordenador</label>
-            <select class="form-control" id="coordenador"></select>
-        </div>
-        <div class="form-group">
-            <label for="supervisor">Supervisor</label>
-            <select class="form-control" id="supervisor"></select>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="coordenador">Coordenador</label>
+                <select class="form-control" id="coordenador"></select>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="supervisor">Supervisor</label>
+                <select class="form-control" id="supervisor"></select>
+            </div>
         </div>
         <div id="organogramaContainer"></div>
     </div>
@@ -415,14 +437,14 @@
                     // Criar nós para cada coordenador, supervisor e líder
                     Object.keys(coordenadores).forEach((coordenador) => {
                         const supervisores = coordenadores[coordenador];
-                        // Usar a cor da rede associada ao coordenador (se disponível)
-                        // Aqui você pode adicionar lógica para determinar a cor com base no coordenador
-                        const corBase = '#1abc9c'; // Cor padrão para coordenador
-                        const corClara = '#e0f2f1'; // Versão clara da cor padrão
+                        // Tonalidades de verde por nível: Escuro -> Médio -> Claro
+                        const corCoordenador = '#1b4332'; // Verde escuro (Nível 1)
+                        const corSupervisor = '#2d6a4f';  // Verde médio (Nível 2)
+                        const corLider = '#d8f3dc';       // Verde claro (Nível 3)
 
                         html += `
                             <div class="rede-group">
-                                <div class="node rede" style="background-color: ${corBase};">
+                                <div class="node rede" style="background-color: ${corCoordenador};">
                                     ${coordenador}
                                     <div class="rede-info">
                                         Células: ${contarCelulasPorRede(supervisores)}
@@ -436,7 +458,7 @@
                         for (const [supervisor, lideres] of Object.entries(supervisores)) {
                             html += `
                                 <div class="supervisor-group">
-                                    <div class="node supervisor" style="background-color: ${corBase};">
+                                    <div class="node supervisor" style="background-color: ${corSupervisor};">
                                         <img src="${getImagePath(supervisor)}" alt="${supervisor}" class="supervisor-image">
                                         <strong>${supervisor}</strong>
                                         <div class="supervisor-info">
@@ -448,7 +470,7 @@
                             `;
                             lideres.forEach((lider) => {
                                 html += `
-                                    <div class="node lider" style="background-color: ${corClara};">
+                                    <div class="node lider" style="background-color: ${corLider};">
                                         <div>${lider.conclider || 'Líder não especificado'}</div>
                                         <div class="lider-info">
                                             ${lider.nomecelula || 'Nome da célula não especificado'}
@@ -464,8 +486,9 @@
                     });
                 } else {
                     // Lógica para um coordenador específico
-                    const corBase = '#1abc9c'; // Cor padrão para coordenador
-                    const corClara = '#e0f2f1'; // Versão clara da cor padrão
+                    const corCoordenador = '#1b4332'; // Verde escuro (Nível 1)
+                    const corSupervisor = '#2d6a4f';  // Verde médio (Nível 2)
+                    const corLider = '#d8f3dc';       // Verde claro (Nível 3)
 
                     const supervisores = {};
                     let totalCelulas = 0;
@@ -479,22 +502,23 @@
                     });
 
                     html += `
-                        <div class="node rede" style="background-color: ${corBase};">
-                            ${coordenadorEscolhido}
-                            <div class="rede-info">
-                                Células: ${totalCelulas}
+                        <div class="rede-group">
+                            <div class="node rede" style="background-color: ${corCoordenador};">
+                                ${coordenadorEscolhido}
+                                <div class="rede-info">
+                                    Células: ${totalCelulas}
+                                </div>
                             </div>
-                        </div>
-                        <div class="content-wrapper">
-                            <div class="connector-vertical"></div>
-                            <div class="supervisores-container">
+                            <div class="content-wrapper">
+                                <div class="connector-vertical"></div>
+                                <div class="supervisores-container">
                     `;
 
                     if (supervisorEscolhido === 'TODOS') {
                         for (const [supervisor, lideres] of Object.entries(supervisores)) {
                             html += `
                                 <div class="supervisor-group">
-                                    <div class="node supervisor" style="background-color: ${corBase};">
+                                    <div class="node supervisor" style="background-color: ${corSupervisor};">
                                         <img src="${getImagePath(supervisor)}" alt="${supervisor}" class="supervisor-image">
                                         <strong>${supervisor}</strong>
                                         <div class="supervisor-info">
@@ -507,7 +531,7 @@
 
                             lideres.forEach((lider) => {
                                 html += `
-                                    <div class="node lider" style="background-color: ${corClara};">
+                                    <div class="node lider" style="background-color: ${corLider};">
                                         <div>${lider.conclider || 'Líder não especificado'}</div>
                                         <div class="lider-info">
                                             ${lider.nomecelula || 'Nome da célula não especificado'}
@@ -523,7 +547,7 @@
                         const lideres = supervisores[supervisorEscolhido] || [];
                         html += `
                             <div class="supervisor-group">
-                                <div class="node supervisor" style="background-color: ${corBase};">
+                                <div class="node supervisor" style="background-color: ${corSupervisor};">
                                     <img src="${getImagePath(supervisorEscolhido)}" alt="${supervisorEscolhido}" class="supervisor-image">
                                     <strong>${supervisorEscolhido}</strong>
                                     <div class="supervisor-info">
@@ -536,7 +560,7 @@
 
                         lideres.forEach((lider) => {
                             html += `
-                                <div class="node lider" style="background-color: ${corClara};">
+                                <div class="node lider" style="background-color: ${corLider};">
                                     <div>${lider.conclider || 'Líder não especificado'}</div>
                                     <div class="lider-info">
                                         ${lider.nomecelula || 'Nome da célula não especificado'}
@@ -548,11 +572,44 @@
                         html += '</div></div>';
                     }
 
-                    html += '</div></div>';
+                    html += '</div></div></div>';
                 }
 
                 html += '</div>'; // Fecha a div organograma
                 organogramaContainer.innerHTML = html;
+                requestAnimationFrame(ajustarLarguraCoordenador);
+                setTimeout(ajustarLarguraCoordenador, 50);
+                setTimeout(ajustarLarguraCoordenador, 250);
+            });
+        }
+
+        // Função para ajustar a largura do card do coordenador para cobrir a soma dos cards abaixo
+        function ajustarLarguraCoordenador() {
+            document.querySelectorAll('.rede-group').forEach(group => {
+                const supContainer = group.querySelector('.supervisores-container');
+                const nodeRede = group.querySelector('.node.rede');
+                if (!supContainer || !nodeRede) return;
+
+                const supNodes = supContainer.querySelectorAll('.supervisor-group');
+                if (supNodes.length === 0) return;
+
+                let minLeft = Infinity;
+                let maxRight = -Infinity;
+                const firstTop = supNodes[0].offsetTop;
+
+                supNodes.forEach(node => {
+                    // Considera os supervisores posicionados na linha superior
+                    if (Math.abs(node.offsetTop - firstTop) <= 20) {
+                        const rect = node.getBoundingClientRect();
+                        if (rect.left < minLeft) minLeft = rect.left;
+                        if (rect.right > maxRight) maxRight = rect.right;
+                    }
+                });
+
+                if (maxRight > minLeft && minLeft !== Infinity) {
+                    const spanWidth = Math.round(maxRight - minLeft);
+                    nodeRede.style.width = spanWidth + 'px';
+                }
             });
         }
 
@@ -562,6 +619,7 @@
         // Adicionar event listeners
         selectCoordenadores.addEventListener('change', carregarSupervisores);
         selectSupervisores.addEventListener('change', carregarLideres);
+        window.addEventListener('resize', ajustarLarguraCoordenador);
     </script>
 </body>
 

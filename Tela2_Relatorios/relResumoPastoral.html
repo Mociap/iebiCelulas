@@ -4,102 +4,448 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resumo Pastoral</title>
+    <title>Resumo Pastoral - IEBI</title>
     <link rel="shortcut icon" href="../assets/favico.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- Bootstrap 5.3.3 Moderno & CDN Confiável jsDelivr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <!-- Google Fonts: Montserrat -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="../css/botao-voltar.css">
 
     <style>
+        :root {
+            --primary-dark: #0f172a;
+            --primary-accent: #1b4332;
+            --secondary-accent: #2d6a4f;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
         body {
-            background-color: #f8f9fa;
+            background-color: var(--light-bg);
             font-family: 'Montserrat', sans-serif;
-            color: #333;
-            padding-top: 0;
+            color: var(--text-dark);
+            padding-bottom: 60px;
         }
 
-        .container {
-            max-width: 950px;
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
+        /* Top Header */
         .header {
-            background-color: #000;
-            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 22px 20px;
             text-align: center;
-            margin-bottom: 30px;
-            border-radius: 10px 10px 0 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            position: relative;
         }
 
         .header img {
-            max-width: 200px;
-        }
-
-        .divider {
-            width: 90%;
-            height: 2px;
-            background-color: #000;
-            margin: 30px auto;
-        }
-
-        #relatorioContainer {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            overflow-x: auto;
+            max-width: 190px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .back-button {
-            background-color: #db7734;
+            background-color: #2d6a4f;
+            box-shadow: 0 4px 10px rgba(45, 106, 79, 0.3);
+            transition: all 0.25s ease;
+            text-decoration: none !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .back-button:hover {
-            background-color: #db7734;
+            background-color: #1b4332;
+            transform: scale(1.05);
+            color: white;
         }
 
-        .card-body .table {
-            font-size: 0.85rem;
+        /* Main Dashboard Container */
+        .dashboard-container {
+            max-width: 96% !important;
+            width: 96%;
+            margin: 25px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
         }
 
-        .card-body h4 {
-            font-size: 1.1rem;
+        .page-title {
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: -0.5px;
+            font-size: 1.8rem;
+            margin-bottom: 4px;
         }
 
-        .table-title {
-            font-size: 16;
-            font-weight: bold;
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.92rem;
         }
 
-        .table td,
-        .table th {
-            font-size: 12px;
+        /* KPI Cards */
+        .kpi-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            min-width: 0;
         }
 
+        .kpi-card>div:last-child {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .kpi-card.kpi-blue::before {
+            background-color: #3b82f6;
+        }
+
+        .kpi-card.kpi-green::before {
+            background-color: #10b981;
+        }
+
+        .kpi-card.kpi-purple::before {
+            background-color: #8b5cf6;
+        }
+
+        .kpi-card.kpi-teal::before {
+            background-color: #06b6d4;
+        }
+
+        .kpi-card.kpi-orange::before {
+            background-color: #f59e0b;
+        }
+
+        .kpi-card.kpi-emerald::before {
+            background-color: #059669;
+        }
+
+        .kpi-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .kpi-blue .kpi-icon {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .kpi-green .kpi-icon {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .kpi-purple .kpi-icon {
+            background: #f5f3ff;
+            color: #8b5cf6;
+        }
+
+        .kpi-teal .kpi-icon {
+            background: #ecfeff;
+            color: #06b6d4;
+        }
+
+        .kpi-orange .kpi-icon {
+            background: #fffbeb;
+            color: #f59e0b;
+        }
+
+        .kpi-emerald .kpi-icon {
+            background: #e6fcf5;
+            color: #059669;
+        }
+
+        .kpi-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .kpi-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .kpi-value.kpi-sm {
+            font-size: 1.05rem;
+            white-space: nowrap;
+        }
+
+        /* Filter Toolbar */
+        .filter-toolbar {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        .filter-input {
+            border-radius: 8px;
+            font-size: 0.88rem;
+            border: 1px solid #cbd5e1;
+            padding: 8px 14px;
+        }
+
+        .filter-input:focus {
+            border-color: #2d6a4f;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+        }
+
+        /* Navigation Pills */
+        .nav-pills {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            gap: 8px;
+        }
+
+        .nav-pills .nav-link {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.92rem;
+            padding: 10px 18px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #1b4332 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(27, 67, 50, 0.25);
+        }
+
+        .nav-pills .nav-link:hover:not(.active) {
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+        }
+
+        /* Card Panels */
+        .card-custom {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .card-custom .card-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 22px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-custom .card-body {
+            padding: 22px;
+        }
+
+        /* Modern Tables */
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .table-modern {
+            margin-bottom: 0;
+            font-size: 0.88rem;
+            color: var(--text-dark);
+        }
+
+        .table-modern thead th {
+            background: #1e293b;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            padding: 14px 12px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table-modern thead th:first-child {
+            text-align: left;
+            padding-left: 18px;
+        }
+
+        .table-modern tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .table-modern tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .table-modern tbody td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-modern tbody td:first-child {
+            padding-left: 18px;
+        }
+
+        .table-modern tfoot tr {
+            background: #0f172a !important;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .table-modern tfoot td {
+            padding: 14px 14px;
+            vertical-align: middle;
+            border: none;
+            font-size: 0.92rem;
+            background: #0f172a !important;
+            color: #ffffff !important;
+        }
+
+        /* Larguras e Layout da Tabela Consolidada */
+        #tabelaResumoTable {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        #tabelaResumoTable .col-coord {
+            width: 25%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #tabelaResumoTable .col-sup {
+            width: 23%;
+        }
+
+        #tabelaResumoTable .col-num {
+            width: 8.75%;
+            text-align: center;
+        }
+
+        #tabelaResumoTable .col-val {
+            width: 17%;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* Badge Pills Soft */
+        .badge-pill-soft {
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.78rem;
+            display: inline-block;
+        }
+
+        .badge-soft-success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-soft-primary {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .badge-soft-info {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge-soft-warning {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .rede-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Splash Screen */
         .splash-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 99999;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .splash-screen.show {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto;
         }
 
         .splash-content {
@@ -107,144 +453,669 @@
             color: white;
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid #fff;
-            border-top: 3px solid #007bff;
+        .spinner-modern {
+            width: 54px;
+            height: 54px;
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            border-top: 4px solid #10b981;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 18px;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                width: 98% !important;
+                max-width: 98% !important;
+                padding: 15px;
+                margin: 15px auto;
+            }
+
+            .page-title {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Margens do papel mínimas */
+        @page {
+            size: A4 portrait;
+            margin: 4mm 5mm !important;
+        }
+
+        /* Print styles */
+        @media print {
+
+            html,
+            body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .header,
+            .back-button,
+            .filter-toolbar,
+            .nav-pills,
+            .splash-screen,
+            .btn-action {
+                display: none !important;
+            }
+
+            .dashboard-container {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 2mm 3mm !important;
+            }
+
+            .page-title {
+                font-size: 1.35rem !important;
+                margin-bottom: 2px !important;
+            }
+
+            .page-subtitle {
+                font-size: 0.8rem !important;
+                margin-bottom: 8px !important;
+            }
+
+            /* 2. Cards: 3 por linha na impressão */
+            .kpi-row {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                margin-bottom: 10px !important;
+                gap: 6px !important;
+            }
+
+            .kpi-row>div,
+            .kpi-row .col-4,
+            .kpi-row [class*="col-"] {
+                width: calc(33.333% - 4px) !important;
+                flex: 0 0 calc(33.333% - 4px) !important;
+                max-width: calc(33.333% - 4px) !important;
+                padding: 0 !important;
+            }
+
+            .kpi-card {
+                padding: 8px 12px !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 8px !important;
+                box-shadow: none !important;
+                height: auto !important;
+            }
+
+            .kpi-icon {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 14px !important;
+                margin-right: 8px !important;
+                border-radius: 6px !important;
+            }
+
+            .kpi-label {
+                font-size: 0.65rem !important;
+                margin-bottom: 1px !important;
+            }
+
+            .kpi-value {
+                font-size: 1.15rem !important;
+            }
+
+            .kpi-value.kpi-sm {
+                font-size: 0.95rem !important;
+            }
+
+            /* 4. Gráficos lado a lado na mesma linha sem sair da folha */
+            .charts-row {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                gap: 8px !important;
+                margin-bottom: 10px !important;
+                page-break-inside: avoid !important;
+            }
+
+            .charts-row .chart-col,
+            .charts-row>div {
+                width: calc(50% - 4px) !important;
+                flex: 0 0 calc(50% - 4px) !important;
+                max-width: calc(50% - 4px) !important;
+                padding: 0 !important;
+            }
+
+            .card-custom {
+                margin-bottom: 6px !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 8px !important;
+                box-shadow: none !important;
+            }
+
+            .card-custom .card-header {
+                padding: 5px 10px !important;
+                font-size: 0.82rem !important;
+                background: #f8fafc !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+            }
+
+            .card-custom .card-body {
+                padding: 4px !important;
+            }
+
+            .charts-row .card-custom {
+                margin-bottom: 0 !important;
+            }
+
+            .charts-row .chart-canvas-wrapper {
+                height: 160px !important;
+                max-height: 160px !important;
+            }
+
+            .charts-row canvas {
+                max-height: 160px !important;
+                width: 100% !important;
+            }
+
+            /* Estrutura de Páginas na Impressão */
+            .tab-content {
+                display: block !important;
+            }
+
+            .tab-content > .tab-pane {
+                display: none !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                transition: none !important;
+            }
+
+            /* Página 1: Visão Geral, Totais e Tabela Consolidada */
+            .tab-content > #pane-geral {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                page-break-after: always !important;
+                break-after: page !important;
+            }
+
+            /* Página 2: Gráficos Comparativos */
+            .tab-content > #pane-graficos {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                page-break-before: always !important;
+                break-before: page !important;
+                margin-top: 5mm !important;
+            }
+
+            .print-page2-header {
+                display: block !important;
+                margin-bottom: 12px !important;
+            }
+
+            .print-graficos-row {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                gap: 10px !important;
+            }
+
+            .print-graficos-row .print-col-6,
+            .print-graficos-row > div {
+                width: calc(50% - 5px) !important;
+                flex: 0 0 calc(50% - 5px) !important;
+                max-width: calc(50% - 5px) !important;
+                padding: 0 !important;
+            }
+
+            .print-graficos-row .card-custom {
+                margin-bottom: 0 !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 8px !important;
+                box-shadow: none !important;
+            }
+
+            .print-graficos-row .card-header {
+                padding: 6px 12px !important;
+                font-size: 0.82rem !important;
+                background: #f8fafc !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+            }
+
+            .print-graficos-row .card-body {
+                padding: 8px !important;
+            }
+
+            .print-graficos-row .chart-canvas-wrapper-comparativo {
+                height: 320px !important;
+                max-height: 320px !important;
+            }
+
+            .print-graficos-row canvas {
+                max-height: 320px !important;
+                width: 100% !important;
+            }
+
+            /* Demais abas ocultas na impressão */
+            #pane-lideres,
+            #pane-redes {
+                display: none !important;
+            }
+
+            /* Tabela Consolidada - Larguras das Colunas na Impressão */
+            #tabelaResumoTable {
+                width: 100% !important;
+                table-layout: fixed !important;
+            }
+
+            #tabelaResumoTable .col-coord {
+                width: 25% !important;
+                white-space: nowrap !important;
+                text-align: left !important;
+                padding-left: 8px !important;
+            }
+
+            #tabelaResumoTable .col-sup {
+                width: 23% !important;
+                text-align: center !important;
+            }
+
+            #tabelaResumoTable .col-num {
+                width: 8.75% !important;
+                text-align: center !important;
+                padding: 3px 2px !important;
+            }
+
+            #tabelaResumoTable .col-val {
+                width: 17% !important;
+                text-align: center !important;
+                white-space: nowrap !important;
+            }
+
+            /* Evitar repetição do total consolidado (tfoot) na quebra de página */
+            tfoot,
+            #tabelaResumoTable tfoot,
+            .table-modern tfoot {
+                display: table-row-group !important;
+            }
+
+            .table-modern tr,
+            .table-modern tfoot tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .table-modern {
+                font-size: 7.5pt !important;
+            }
+
+            .table-modern thead th {
+                padding: 4px 6px !important;
+                font-size: 7pt !important;
+            }
+
+            .table-modern tbody td {
+                padding: 3px 6px !important;
+                font-size: 7.5pt !important;
+            }
+
+            .table-modern tfoot td {
+                padding: 4px 6px !important;
+                font-size: 7.5pt !important;
+            }
+
+            .badge-pill-soft {
+                padding: 2px 6px !important;
+                font-size: 7pt !important;
+            }
         }
     </style>
-
 </head>
 
 <body>
+    <!-- Splash Screen -->
     <div id="splash-screen" class="splash-screen show">
         <div class="splash-content">
-            <div class="spinner"></div>
-            <p>Aguarde, carregando dados...</p>
+            <div class="spinner-modern"></div>
+            <h5 class="fw-bold mb-1">Carregando Resumo Pastoral</h5>
+            <p class="text-white-50 small mb-0">Consolidando células, membros e reuniões...</p>
         </div>
     </div>
-    
-    <a href="..//Tela1_Index/frmRelatorios.html" class="back-button">
+
+    <!-- Botão Voltar -->
+    <a href="../Tela1_Index/frmRelatorios.html" class="back-button" title="Voltar para Relatórios">
         <i class="fas fa-arrow-left"></i>
     </a>
 
+    <!-- Header com Logo -->
     <div class="header">
         <img src="../assets/LogoBranco.png" alt="Logo da Igreja Evangélica Batista Itapevi">
     </div>
 
-    <div class="container container-fluid">
-        <h2 class="text-center mb-4 font-weight-bold" style="margin-top: 20px;">Resumo Pastoral</h2>
-        <div class="divider"></div>
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Top Action Bar -->
+        <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-2 border-bottom">
+            <div>
+                <h1 class="page-title"><i class="fas fa-chart-line text-success me-2"></i>Resumo Pastoral</h1>
+                <p class="page-subtitle mb-0">Visão integrada da estrutura celular, membros, liderança e resultados de
+                    reuniões</p>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge rounded-pill bg-light text-dark border px-3 py-2 fw-normal" id="badgeAnoVigente">
+                    <i class="far fa-calendar-alt me-1 text-primary"></i> Ano: <strong>2026</strong>
+                </span>
+                <button class="btn btn-outline-secondary btn-sm btn-action" onclick="imprimirRelatorio()"
+                    title="Imprimir Relatório">
+                    <i class="fas fa-print me-1"></i> Imprimir
+                </button>
+                <button class="btn btn-success btn-sm btn-action text-white" id="btnExportarCSV"
+                    title="Exportar dados para planilha CSV">
+                    <i class="fas fa-file-excel me-1"></i> Exportar CSV
+                </button>
+            </div>
+        </div>
 
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <ul class="nav nav-pills nav-fill mb-4" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
-                            aria-controls="home" aria-selected="true">
-                            <i class="fas fa-chart-pie mr-2"></i>Resumo Geral
-                        </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
-                            aria-controls="profile" aria-selected="false">
-                            <i class="fas fa-network-wired mr-2"></i>Detalhes por Rede
-                        </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab"
-                            aria-controls="contact" aria-selected="false">
-                            <i class="fas fa-chart-bar mr-2"></i>Gráficos
-                        </a>
-                    </li>
-                </ul>
-                <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <canvas id="graficoSupervisores"></canvas>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <canvas id="graficoCelulas"></canvas>
-                                    </div>
-                                </div>
+        <!-- 6 KPI Metric Cards (Todos na mesma linha na tela principal) -->
+        <div class="row g-3 mb-4 kpi-row">
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="kpi-card kpi-blue">
+                    <div class="kpi-icon"><i class="fas fa-church"></i></div>
+                    <div>
+                        <span class="kpi-label">Células</span>
+                        <h3 class="kpi-value" id="kpiCelulas">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="kpi-card kpi-green">
+                    <div class="kpi-icon"><i class="fas fa-user-tie"></i></div>
+                    <div>
+                        <span class="kpi-label">Supervisores</span>
+                        <h3 class="kpi-value" id="kpiSupervisores">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon"><i class="fas fa-users-cog"></i></div>
+                    <div>
+                        <span class="kpi-label">Líderes</span>
+                        <h3 class="kpi-value" id="kpiLideres">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="kpi-card kpi-teal">
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <span class="kpi-label">Membros</span>
+                        <h3 class="kpi-value" id="kpiMembros">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="kpi-card kpi-orange">
+                    <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div>
+                        <span class="kpi-label">Reuniões</span>
+                        <h3 class="kpi-value" id="kpiReunioes">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="kpi-card kpi-emerald">
+                    <div class="kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div>
+                        <span class="kpi-label">Ofertas</span>
+                        <h3 class="kpi-value kpi-sm" id="kpiOfertas">R$ 0,00</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="filter-toolbar mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-5 col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i
+                                class="fas fa-search"></i></span>
+                        <input type="text" id="filtroTexto" class="form-control border-start-0 filter-input"
+                            placeholder="Buscar por supervisor, líder, coordenador ou célula...">
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <select id="filtroCoordenador" class="form-select filter-input">
+                        <option value="">Todos os Coordenadores</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-sm-6">
+                    <select id="filtroRede" class="form-select filter-input">
+                        <option value="">Todas as Redes</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-12 d-flex justify-content-end">
+                    <button class="btn btn-outline-secondary btn-sm w-100" id="btnLimparFiltros">
+                        <i class="fas fa-undo-alt me-1"></i> Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs (Bootstrap 5) -->
+        <ul class="nav nav-pills mb-4" id="resumoTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-geral" data-bs-toggle="pill" data-bs-target="#pane-geral"
+                    type="button" role="tab">
+                    <i class="fas fa-chart-pie me-1"></i> Visão Geral & Supervisores
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-lideres" data-bs-toggle="pill" data-bs-target="#pane-lideres"
+                    type="button" role="tab">
+                    <i class="fas fa-user-friends me-1"></i> Detalhes por Líderes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-redes" data-bs-toggle="pill" data-bs-target="#pane-redes" type="button"
+                    role="tab">
+                    <i class="fas fa-project-diagram me-1"></i> Desempenho por Rede
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-graficos" data-bs-toggle="pill" data-bs-target="#pane-graficos"
+                    type="button" role="tab">
+                    <i class="fas fa-chart-bar me-1"></i> Gráficos Comparativos
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content Panes -->
+        <div class="tab-content">
+            <!-- TAB 1: VISÃO GERAL -->
+            <div class="tab-pane fade show active" id="pane-geral" role="tabpanel">
+                <!-- Doughnut Charts Row -->
+                <div class="row g-3 mb-4 charts-row">
+                    <div class="col-6 chart-col">
+                        <div class="card-custom h-100 mb-0">
+                            <div class="card-header">
+                                <span><i class="fas fa-user-shield text-primary me-2"></i>Supervisores por Rede</span>
+                                <span class="badge badge-pill-soft badge-soft-primary">Distribuição</span>
                             </div>
-                        </div>
-                        <div class="card mt-4">
                             <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <h4 class="mb-3 table-title text-center">Resumo Geral</h4>
-                                        <table class="table table-striped table-bordered table-sm">
-                                            <thead class="thead-dark">
-                                                <tr>
-                                                    <th class="text-center align-middle">Coordenador</th>
-                                                    <th class="text-center align-middle">Supervisor</th>
-                                                    <th class="text-center align-middle">Qtd Células</th>
-                                                    <th class="text-center align-middle">Qtd Líderes</th>
-                                                    <th class="text-center align-middle">Qtd Membros</th>
-                                                    <th class="text-center align-middle">Qtd Reuniões</th>
-                                                    <th class="text-center align-middle">Total Oferta</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tabelaResumo">
-                                                <!-- Os dados serão inseridos aqui via JavaScript -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card mt-4">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <h4 class="mb-3 table-title text-center">Detalhes por Líderes</h4>
-                                        <table class="table table-striped table-bordered table-sm">
-                                            <thead class="thead-dark">
-                                                <tr>
-                                                    <th class="text-center align-middle">Supervisor</th>
-                                                    <th class="text-center align-middle">Líderes</th>
-                                                    <th class="text-center align-middle">Qtd Membros</th>
-                                                    <th class="text-center align-middle">Qtd Reuniões</th>
-                                                    <th class="text-center align-middle">Total Oferta</th>
-                                                    <th class="text-center align-middle">Alimento</th>
-                                                    <th class="text-center align-middle">Kg Alimentos</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tabelaLideres">
-                                                <!-- Os dados serão inseridos aqui via JavaScript -->
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <div class="chart-canvas-wrapper" style="height: 260px; position: relative;">
+                                    <canvas id="graficoSupervisores"></canvas>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                        <div class="card">
+                    <div class="col-6 chart-col">
+                        <div class="card-custom h-100 mb-0">
+                            <div class="card-header">
+                                <span><i class="fas fa-sitemap text-success me-2"></i>Células por Coordenador</span>
+                                <span class="badge badge-pill-soft badge-soft-success">Coordenação</span>
+                            </div>
                             <div class="card-body">
-                                <h3 class="card-title">Detalhes por Rede</h3>
-                                <!-- Conteúdo dos Detalhes por Rede aqui -->
+                                <div class="chart-canvas-wrapper" style="height: 260px; position: relative;">
+                                    <canvas id="graficoCelulas"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-                        <div class="card">
+                </div>
+
+                <!-- Tabela Resumo Geral -->
+                <div class="card-custom">
+                    <div class="card-header">
+                        <span><i class="fas fa-table me-2 text-dark"></i>Consolidado por Coordenador e Supervisor</span>
+                        <span class="badge rounded-pill bg-light text-dark border" id="badgeTotalSupervisores">0
+                            Registros</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-modern table-hover" id="tabelaResumoTable">
+                                <thead>
+                                    <tr>
+                                        <th class="col-coord">Coordenador</th>
+                                        <th class="col-sup">Supervisor</th>
+                                        <th class="col-num">Qtd Células</th>
+                                        <th class="col-num">Qtd Líderes</th>
+                                        <th class="col-num">Qtd Membros</th>
+                                        <th class="col-num">Qtd Reuniões</th>
+                                        <th class="col-val">Total Oferta</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaResumo">
+                                    <!-- Preenchido via JS -->
+                                </tbody>
+                                <tfoot id="tabelaResumoFoot">
+                                    <!-- Totais via JS -->
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: DETALHES POR LÍDERES -->
+            <div class="tab-pane fade" id="pane-lideres" role="tabpanel">
+                <div class="card-custom">
+                    <div class="card-header">
+                        <span><i class="fas fa-users-cog me-2 text-dark"></i>Detalhamento Individual por Célula e
+                            Líderes</span>
+                        <span class="badge rounded-pill bg-light text-dark border" id="badgeTotalLideres">0
+                            Células</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-modern table-hover" id="tabelaLideresTable">
+                                <thead>
+                                    <tr>
+                                        <th>Supervisor</th>
+                                        <th>Líderes / Célula</th>
+                                        <th>Membros</th>
+                                        <th>Reuniões</th>
+                                        <th>Total Oferta</th>
+                                        <th>Alimentos Doados</th>
+                                        <th>Kg Alimentos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaLideres">
+                                    <!-- Preenchido via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: DESEMPENHO POR REDE -->
+            <div class="tab-pane fade" id="pane-redes" role="tabpanel">
+                <div class="card-custom">
+                    <div class="card-header">
+                        <span><i class="fas fa-network-wired me-2 text-dark"></i>Resultados Gerais por Rede</span>
+                        <span class="badge badge-pill-soft badge-soft-info">Visão Departamental</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-modern table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Rede</th>
+                                        <th>Células</th>
+                                        <th>Supervisores</th>
+                                        <th>Membros</th>
+                                        <th>Reuniões</th>
+                                        <th>Total Ofertas</th>
+                                        <th>Kg Alimentos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaRedes">
+                                    <!-- Preenchido via JS -->
+                                </tbody>
+                                <tfoot id="tabelaRedesFoot">
+                                    <!-- Totais via JS -->
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: GRÁFICOS COMPARATIVOS (Página 2 na impressão) -->
+            <div class="tab-pane fade" id="pane-graficos" role="tabpanel">
+                <!-- Cabeçalho exclusivo para a Página 2 na Impressão -->
+                <div class="print-page2-header d-none d-print-block mb-3 pt-2">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                        <div>
+                            <h2 class="page-title mb-0" style="font-size: 1.35rem;"><i class="fas fa-chart-bar text-success me-2"></i>Resumo Pastoral - Gráficos Comparativos</h2>
+                            <p class="page-subtitle mb-0">Comparativo de Membros por Rede e Volume de Ofertas por Coordenação</p>
+                        </div>
+                        <div>
+                            <span class="badge rounded-pill bg-light text-dark border px-3 py-2 fw-normal">
+                                <i class="far fa-calendar-alt me-1 text-primary"></i> Ano: <strong>2026</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 print-graficos-row">
+                    <div class="col-lg-6 print-col-6">
+                        <div class="card-custom mb-0">
+                            <div class="card-header">
+                                <span><i class="fas fa-users text-info me-2"></i>Membros por Rede</span>
+                            </div>
                             <div class="card-body">
-                                <h3 class="card-title">Gráficos</h3>
-                                <!-- Conteúdo dos Gráficos aqui -->
+                                <div class="chart-canvas-wrapper-comparativo" style="height: 320px; position: relative;">
+                                    <canvas id="graficoMembrosPorRede"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 print-col-6">
+                        <div class="card-custom mb-0">
+                            <div class="card-header">
+                                <span><i class="fas fa-coins text-warning me-2"></i>Ofertas por Coordenador</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-canvas-wrapper-comparativo" style="height: 320px; position: relative;">
+                                    <canvas id="graficoOfertasPorCoordenador"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -253,18 +1124,14 @@
         </div>
     </div>
 
+    <!-- Scripts: Bootstrap 5.3.3 Bundle (Sem jQuery necessário) & Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
-    <!-- Bootstrap JS e dependências -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <!-- Firebase SDK v9 modular -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const configuracaoFirebase = {
             apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
@@ -278,557 +1145,676 @@
 
         const app = initializeApp(configuracaoFirebase);
         const bancoDeDados = getFirestore(app);
-        const auth = getAuth(app);
 
-        // Obtém todas as chaves do localStorage
-        const chaves = Object.keys(localStorage);
+        // Paleta moderna
+        const CORES_PALETA = [
+            '#2d6a4f', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899',
+            '#06b6d4', '#ef4444', '#10b981', '#6366f1', '#14b8a6'
+        ];
 
-        // Verifica se há chaves no localStorage
-        if (chaves.length > 0) {
-            console.log("Dados armazenados no localStorage:");
-            chaves.forEach(function (chave) {
-                const valor = localStorage.getItem(chave);
-                console.log(`${chave}: ${valor}`);
-            });
-        } else {
-            console.log("Não há dados armazenados no localStorage.");
-        }
-
-        // Função para contar supervisores por rede
-        function contarSupervisoresPorRede() {
-            const supervisores = JSON.parse(localStorage.getItem('supervisores'));
-            const contagem = {};
-            for (const rede in supervisores) {
-                contagem[rede] = supervisores[rede].length;
-            }
-            return contagem;
-        }
-
-        // Função para contar células por rede
-        function contarCelulasPorRede() {
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
-            const contagem = {};
-            for (const rede in lideres) {
-                contagem[rede] = lideres[rede].length;
-            }
-            return contagem;
-        }
-
-        function getCorRede(rede) {
-            const cores = {
-                'AMARELA': '#FFD700',
-                'AZUL': '#000080',
-                'TEEN': '#4B0082',
-                'LARANJA': '#FF8C00',
-                'VERMELHA': '#8B0000',
-                'BLACK': '#000000',
-                'VERDE': '#006400'
-            };
-            return cores[rede.toUpperCase()] || '#000000';
-        }
-
-        function calcularTotal(dados) {
-            return Object.values(dados).reduce((a, b) => a + b, 0);
-        }
-
-        const opcoesGrafico = {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            return `${context.label}: ${context.raw}`;
-                        }
-                    }
-                }
-            },
-            elements: {
-                arc: {
-                    borderWidth: 0
-                }
-            },
-            layout: {
-                padding: 20
-            },
-            cutout: '50%'
+        const CORES_REDES = {
+            'VERMELHA': '#dc2626',
+            'AMARELA': '#d97706',
+            'VERDE': '#15803d',
+            'AZUL': '#1d4ed8',
+            'BLACK': '#1e293b',
+            'TEEN': '#7c3aed',
+            'LARANJA': '#ea580c',
+            'OUTROS': '#64748b'
         };
 
-        // Para o gráfico de supervisores
-        const opcoesSupervisores = {
-            ...opcoesGrafico,
-            plugins: {
-                ...opcoesGrafico.plugins,
-                title: {
-                    display: true,
-                    text: 'Supervisores',
-                    font: {
-                        size: 18
-                    }
-                }
-            }
-        };
-
-        const options = {
-            ...opcoesSupervisores,
-            plugins: {
-                ...opcoesSupervisores.plugins,
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20,
-                        font: {
-                            size: 12
-                        }
-                    }
-                }
-            }
-        };
-        // Para o gráfico de células
-        const opcoesCelulas = {
-            ...opcoesGrafico,
-            plugins: {
-                ...opcoesGrafico.plugins,
-                title: {
-                    display: true,
-                    text: 'Células',
-                    font: {
-                        size: 18
-                    }
-                }
-            }
-        };
-
-        const pluginTextoCentral = {
-            id: 'textoCentral',
-            afterDraw: function (grafico) {
-                var ctx = grafico.ctx;
-                ctx.save();
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                grafico.data.datasets.forEach(function (dataset, indiceDataset) {
-                    var meta = grafico.getDatasetMeta(indiceDataset);
-                    meta.data.forEach(function (elemento, indice) {
-                        var textoValor = dataset.data[indice].toString();
-                        var tamanhoFonte = 16;
-                        ctx.font = `bold ${tamanhoFonte}px Arial`;
-                        ctx.fillStyle = 'white';
-
-                        var angulo = (elemento.startAngle + elemento.endAngle) / 2;
-                        var raio = (elemento.outerRadius + elemento.innerRadius) / 2;
-
-                        var x = elemento.x + Math.cos(angulo) * raio;
-                        var y = elemento.y + Math.sin(angulo) * raio;
-
-                        ctx.fillText(textoValor, x, y);
-                    });
-                });
-                ctx.restore();
-            }
-        };
-
-        const pluginCentroTotal = {
-            id: 'centroTotal',
-            afterDraw: function (chart) {
-                const ctx = chart.ctx;
-                const chartArea = chart.chartArea;
-
-                const centerX = (chartArea.left + chartArea.right) / 2;
-                const centerY = (chartArea.top + chartArea.bottom) / 2;
-
-                ctx.save();
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                const fontSize = ((chartArea.bottom - chartArea.top) / 15) * 1.5;
-                ctx.font = fontSize + "px sans-serif";
-
-                const text = "Total: ";
-                const total = calcularTotal(chart.data.datasets[0].data);
-                const fullText = text + total;
-
-                ctx.fillStyle = "#000000";
-                ctx.fillText(fullText, centerX, centerY);
-
-                ctx.restore();
-            }
-        };
-        // Função para gerar cores suaves para supervisores
-        function gerarCor(index) {
-            const cores = [
-                '#008000', // Verde
-                '#FF0000', // Vermelho
-                '#0000FF', // Azul  
-                '#FFD700', // Amarelo
-                '#FFA500', // Laranja
-                '#800080', // Roxo
-                '#4B0082', // Índigo
-                '#FF1493', // Rosa
-                '#00CED1', // Turquesa
-                '#8B4513'  // Marrom
-            ];
-            return cores[index % cores.length];
-        }
-
-        // Modificar o gráfico de supervisores
-        const ctxSupervisores = document.getElementById('graficoSupervisores').getContext('2d');
-        const dadosSupervisores = contarSupervisoresPorRede();
-
-        new Chart(ctxSupervisores, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(dadosSupervisores).map((label, index) => `${index + 1}. ${label}`),
-                datasets: [{
-                    data: Object.values(dadosSupervisores),
-                    backgroundColor: Object.keys(dadosSupervisores).map((_, index) => gerarCor(index))
-                }]
-            },
-            options: {
-                ...opcoesSupervisores,
-                plugins: {
-                    ...opcoesSupervisores.plugins,
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                }
-            },
-            plugins: [pluginTextoCentral, pluginCentroTotal]
-        });
-
-        function contarCelulasPorCoordenador() {
-            const lideresData = JSON.parse(localStorage.getItem('lideres'));
-            if (!lideresData || !lideresData['AUGUSTO / IVETE']) {
-                return {};
-            }
-            
-            const lideres = lideresData['AUGUSTO / IVETE'];
-            const contagem = {};
-
-            lideres.forEach(lider => {
-                const coordenador = lider.coordenador || 'Não atribuído';
-                contagem[coordenador] = (contagem[coordenador] || 0) + 1;
-            });
-            
-            return contagem;
-        }
-
-        // Atualização do gráfico de células
-        const ctxCelulas = document.getElementById('graficoCelulas').getContext('2d');
-        const dadosCelulas = contarCelulasPorCoordenador();
-
-        new Chart(ctxCelulas, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(dadosCelulas).map((label, index) => `${index + 1}. ${label}`),
-                datasets: [{
-                    data: Object.values(dadosCelulas),
-                    backgroundColor: Object.keys(dadosCelulas).map((_, index) => gerarCor(index))
-                }]
-            },
-            options: {
-                ...opcoesCelulas,
-                plugins: {
-                    ...opcoesCelulas.plugins,
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                }
-            },
-            plugins: [pluginTextoCentral, pluginCentroTotal]
-        });
-        async function atualizarDadosLideres(lideres) {
-            console.log('Iniciando atualização dos dados dos líderes');
-            for (const rede in lideres) {
-                lideres[rede] = await Promise.all(lideres[rede].map(async (lider) => {
-                    try {
-                        const nomecelulas = await obterNomeCelulas(lider.conclider);
-                        const membrosCount = await contarMembros(nomecelulas);
-                        const reunioesCount = await contarReunioes(lider.conclider);
-                        const totalOferta = await somarOfertas(lider.conclider);
-                        const dadosAlimentos = await somarAlimentos(lider.conclider);
-                        const coordenador = await obterCoordenador(lider.conclider);
-                        return { ...lider, nomecelulas, membrosCount, reunioesCount, totalOferta, dadosAlimentos, coordenador };
-                    } catch (erro) {
-                        console.error(`Erro ao processar líder ${lider.conclider}:`, erro);
-                        return lider;
-                    }
-                }));
-            }
-            console.log('Dados dos líderes atualizados:', lideres);
-            return lideres;
-        }
-
-        async function obterCoordenador(conclider) {
-            const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
-            const q = query(estruturaCelulaRef, where("conclider", "==", conclider));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                return querySnapshot.docs[0].data().coordenador;
-            }
-            return '';
-        }
-
-
-        async function obterNomeCelulas(conclider) {
-            const estruturaCelulaRef = collection(bancoDeDados, "estruturacelula");
-            const q = query(estruturaCelulaRef, where("conclider", "==", conclider));
-            const querySnapshot = await getDocs(q);
-            const nomecelulas = querySnapshot.docs.map(doc => doc.data().nomecelula);
-            return nomecelulas.join(' / '); // Junta os nomes das células com ' / '
-        }
-
-        async function contarMembros(nomecelulas) {
-            if (!nomecelulas) return 0;
-            const celulas = nomecelulas.split(' / ');
-            const membrosRef = collection(bancoDeDados, "membros");
-            const q = query(membrosRef, where("nomedacelula", "in", celulas));
-            const querySnapshot = await getDocs(q);
-            return querySnapshot.size;
-        }
-
-
-
-        async function contarReunioes(conclider) {
-            if (!conclider) return 0;
-            
-            try {
-                const lideres = conclider.split(' / ');
-                const anoAtual = new Date().getFullYear();
-                const reunioesRef = collection(bancoDeDados, "reuniao");
-                
-                // Buscar todas as reuniões dos líderes
-                const q = query(reunioesRef, where("lider", "in", lideres));
-                const querySnapshot = await getDocs(q);
-                
-                // Filtrar por ano atual
-                let count = 0;
-                querySnapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    // Verificar se o ano corresponde (como string ou número)
-                    if (data.ano == anoAtual || data.ano == anoAtual.toString()) {
-                        count++;
-                    }
-                });
-                
-                return count;
-            } catch (error) {
-                console.error('Erro na função contarReunioes:', error);
-                return 0;
-            }
-        }
-
-        async function somarOfertas(conclider) {
-            if (!conclider) return 0;
-            
-            try {
-                const lideres = conclider.split(' / ');
-                const anoAtual = new Date().getFullYear();
-                const reunioesRef = collection(bancoDeDados, "reuniao");
-                
-                // Buscar todas as reuniões dos líderes
-                const q = query(reunioesRef, where("lider", "in", lideres));
-                const querySnapshot = await getDocs(q);
-                
-                // Somar ofertas do ano atual
-                let totalOferta = 0;
-                querySnapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    // Verificar se o ano corresponde (como string ou número)
-                    if (data.ano == anoAtual || data.ano == anoAtual.toString()) {
-                        // Somar a oferta se existir e for um número válido
-                        const oferta = parseFloat(data.oferta) || 0;
-                        totalOferta += oferta;
-                    }
-                });
-                
-                return totalOferta;
-            } catch (error) {
-                console.error('Erro na função somarOfertas:', error);
-                return 0;
-            }
-        }
-
-        async function somarAlimentos(conclider) {
-            if (!conclider) return { tiposAlimento: [], totalKg: 0 };
-            
-            try {
-                const lideres = conclider.split(' / ');
-                const anoAtual = new Date().getFullYear();
-                const reunioesRef = collection(bancoDeDados, "reuniao");
-                
-                // Buscar todas as reuniões dos líderes
-                const q = query(reunioesRef, where("lider", "in", lideres));
-                const querySnapshot = await getDocs(q);
-                
-                // Somar alimentos do ano atual
-                let totalKg = 0;
-                const tiposAlimentoSet = new Set();
-                
-                querySnapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    // Verificar se o ano corresponde (como string ou número)
-                    if (data.ano == anoAtual || data.ano == anoAtual.toString()) {
-                        // Adicionar tipo de alimento se existir
-                        if (data.tipoAlimento && data.tipoAlimento.trim() !== '') {
-                            tiposAlimentoSet.add(data.tipoAlimento.trim());
-                        }
-                        
-                        // Somar quantidade de alimento se existir e for um número válido
-                        const qtdAlimento = parseFloat(data.qtdAlimento) || 0;
-                        totalKg += qtdAlimento;
-                    }
-                });
-                
-                return {
-                    tiposAlimento: Array.from(tiposAlimentoSet),
-                    totalKg: totalKg
-                };
-            } catch (error) {
-                console.error('Erro na função somarAlimentos:', error);
-                return { tiposAlimento: [], totalKg: 0 };
-            }
-        }
-
-        function preencherTabelaLideres(lideres) {
-            const tbody = document.querySelector('#tabelaLideres');
-            tbody.innerHTML = '';
-
-            // Iterar por cada rede/supervisor
-            for (const supervisor in lideres) {
-                const lideresDoSupervisor = lideres[supervisor];
-                
-                // Para cada líder do supervisor
-                lideresDoSupervisor.forEach((lider, index) => {
-                    const row = tbody.insertRow();
-                    
-                    // Supervisor (apenas na primeira linha do supervisor)
-                    const cellSupervisor = row.insertCell(0);
-                    if (index === 0) {
-                        cellSupervisor.textContent = supervisor;
-                        cellSupervisor.rowSpan = lideresDoSupervisor.length;
-                    } else {
-                        cellSupervisor.style.display = 'none';
-                    }
-                    
-                    // Líderes
-                    const cellLider = row.insertCell(1);
-                    cellLider.textContent = lider.conclider || '';
-                    
-                    // Qtd Membros
-                    const cellMembros = row.insertCell(2);
-                    cellMembros.textContent = lider.membrosCount || 0;
-                    
-                    // Qtd Reuniões
-                    const cellReunioes = row.insertCell(3);
-                    cellReunioes.textContent = lider.reunioesCount || 0;
-                    
-                    // Total Oferta
-                    const cellOferta = row.insertCell(4);
-                    cellOferta.textContent = formatarMoeda(lider.totalOferta || 0);
-                    
-                    // Alimento (tipos)
-                    const cellAlimento = row.insertCell(5);
-                    const tiposAlimento = lider.dadosAlimentos?.tiposAlimento || [];
-                    cellAlimento.textContent = tiposAlimento.length > 0 ? tiposAlimento.join(', ') : '-';
-                    
-                    // Kg Alimentos
-                    const cellKgAlimentos = row.insertCell(6);
-                    const totalKg = lider.dadosAlimentos?.totalKg || 0;
-                    cellKgAlimentos.textContent = totalKg > 0 ? `${totalKg.toFixed(2)} kg` : '0 kg';
-                });
-            }
-        }
-
-        // Chame esta função após o carregamento da página
-        document.addEventListener('DOMContentLoaded', async function () {
-            //Atualizar Localstorage
-            const lideres = JSON.parse(localStorage.getItem('lideres'));
-            const lideresAtualizados = await atualizarDadosLideres(lideres);
-            localStorage.setItem('lideres', JSON.stringify(lideresAtualizados));
-
-            // Contagem e Ordenação
-            const contagem = {};
-
-            for (const rede in lideres) {
-                lideres[rede].forEach(lider => {
-                    const chave = `${rede} - ${lider.supervisor}`;
-                    contagem[chave] = (contagem[chave] || 0) + 1;
-                });
-            }
-
-            const dadosOrdenados = Object.entries(contagem)
-                .map(([chave, valor]) => {
-                    const [rede, supervisor] = chave.split(' - ');
-                    return { rede, supervisor, qtdCelulas: valor };
-                })
-                .sort((a, b) => {
-                    if (a.rede !== b.rede) {
-                        return a.rede.localeCompare(b.rede);
-                    }
-                    return a.supervisor.localeCompare(b.supervisor);
-                });
-
-            console.log('DOM carregado, iniciando preenchimento das tabelas');
-            preencherTabelaResumo();
-            preencherTabelaLideres(lideresAtualizados);
-            console.log('Preenchimento das tabelas concluído');
-        });
-        
         function formatarMoeda(valor) {
             return new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
             }).format(valor || 0);
         }
-        
-        function preencherTabelaResumo() {
-            const lideresData = JSON.parse(localStorage.getItem('lideres'));
-            if (!lideresData || !lideresData['AUGUSTO / IVETE']) {
-                console.log('Dados não encontrados no localStorage');
-                return;
+
+        // Variáveis de Estado
+        let todasCelulas = [];
+        let chartSupervisores = null;
+        let chartCelulas = null;
+        let chartMembrosRede = null;
+        let chartOfertasCoord = null;
+
+        // Plugin Totalizador Central para Doughnut
+        const pluginDoughnutCenter = {
+            id: 'doughnutCenter',
+            beforeDraw: function (chart) {
+                if (chart.config.type !== 'doughnut') return;
+                const { chartArea, ctx } = chart;
+                if (!chartArea) return;
+                const centerX = (chartArea.left + chartArea.right) / 2;
+                const centerY = (chartArea.top + chartArea.bottom) / 2;
+                const total = chart.data.datasets[0].data.reduce((a, b) => a + (Number(b) || 0), 0);
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                ctx.font = 'bold 22px Montserrat, sans-serif';
+                ctx.fillStyle = '#1e293b';
+                ctx.fillText(total, centerX, centerY - 8);
+
+                ctx.font = '600 11px Montserrat, sans-serif';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText('TOTAL', centerX, centerY + 14);
+                ctx.restore();
             }
-            const lideres = lideresData['AUGUSTO / IVETE'];
-            const tabelaBody = document.getElementById('tabelaResumo');
+        };
 
-            let dadosTabela = [];
-            let totalCelulas = 0;
-            let totalLideres = 0;
-            let totalMembros = 0;
-            let totalReunioes = 0;
-            let totalOfertas = 0;
+        // Plugin para exibir os números de cada fatia diretamente na cor correspondente
+        const pluginSliceLabels = {
+            id: 'sliceLabels',
+            afterDraw: function (chart) {
+                if (chart.config.type !== 'doughnut' && chart.config.type !== 'pie') return;
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
 
-            // Agrupa por supervisor
-            const supervisoresMap = new Map();
-            
-            lideres.forEach(lider => {
-                const supervisor = lider.supervisor;
-                const coordenador = lider.coordenador;
-                
-                if (!supervisoresMap.has(supervisor)) {
-                    supervisoresMap.set(supervisor, {
+                chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    if (!meta || !meta.data) return;
+
+                    meta.data.forEach(function (element, index) {
+                        if (!element) return;
+                        const value = dataset.data[index];
+                        if (value === undefined || value === null || value === 0) return;
+
+                        // Ponto central geométrico da fatia
+                        const angle = (element.startAngle + element.endAngle) / 2;
+                        const radius = (element.outerRadius + element.innerRadius) / 2;
+                        const x = element.x + Math.cos(angle) * radius;
+                        const y = element.y + Math.sin(angle) * radius;
+
+                        if (!isNaN(x) && !isNaN(y)) {
+                            // Sombra sutil para máxima legibilidade em qualquer cor
+                            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                            ctx.shadowBlur = 4;
+                            ctx.shadowOffsetX = 1;
+                            ctx.shadowOffsetY = 1;
+
+                            ctx.font = 'bold 13px Montserrat, sans-serif';
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillText(value.toString(), x, y);
+                        }
+                    });
+                });
+                ctx.restore();
+            }
+        };
+
+        // Plugin para exibir os números nas barras dos gráficos comparativos
+        const pluginBarLabels = {
+            id: 'barLabels',
+            afterDatasetsDraw: function (chart) {
+                if (chart.config.type !== 'bar') return;
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return;
+
+                const isHorizontal = chart.config.options.indexAxis === 'y';
+
+                chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    if (!meta || !meta.data || meta.hidden) return;
+
+                    meta.data.forEach(function (element, index) {
+                        if (!element) return;
+                        const value = dataset.data[index];
+                        if (value === undefined || value === null) return;
+
+                        ctx.save();
+                        ctx.font = 'bold 12px Montserrat, sans-serif';
+
+                        if (isHorizontal) {
+                            // Gráfico horizontal (ex: Ofertas por Coordenador)
+                            const texto = typeof formatarMoeda === 'function' ? formatarMoeda(value) : value.toString();
+                            const textoWidth = ctx.measureText(texto).width;
+                            const espacoDireita = chartArea.right - element.x;
+                            const larguraBarra = Math.abs(element.x - element.base);
+
+                            ctx.textBaseline = 'middle';
+
+                            if (espacoDireita < textoWidth + 14 && larguraBarra > textoWidth + 24) {
+                                // Desenha dentro da barra (branco com sombra)
+                                ctx.textAlign = 'right';
+                                ctx.fillStyle = '#ffffff';
+                                ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                                ctx.shadowBlur = 4;
+                                ctx.shadowOffsetX = 1;
+                                ctx.shadowOffsetY = 1;
+                                ctx.fillText(texto, element.x - 8, element.y);
+                            } else {
+                                // Desenha fora da barra (texto escuro com halo leve)
+                                ctx.textAlign = 'left';
+                                ctx.fillStyle = '#0f172a';
+                                ctx.fillText(texto, element.x + 8, element.y);
+                            }
+                        } else {
+                            // Gráfico vertical (ex: Membros por Rede)
+                            const texto = value.toString();
+                            const espacoTopo = element.y - chartArea.top;
+                            const alturaBarra = Math.abs(element.base - element.y);
+
+                            ctx.textAlign = 'center';
+
+                            if (espacoTopo < 18 && alturaBarra > 32) {
+                                // Desenha dentro do topo da barra (branco com sombra)
+                                ctx.textBaseline = 'top';
+                                ctx.fillStyle = '#ffffff';
+                                ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                                ctx.shadowBlur = 4;
+                                ctx.shadowOffsetX = 1;
+                                ctx.shadowOffsetY = 1;
+                                ctx.fillText(texto, element.x, element.y + 6);
+                            } else {
+                                // Desenha acima da barra (texto escuro)
+                                ctx.textBaseline = 'bottom';
+                                ctx.fillStyle = '#0f172a';
+                                ctx.fillText(texto, element.x, element.y - 4);
+                            }
+                        }
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+
+        // Renderização dos Gráficos
+        function renderizarGraficos(dadosSupervisores, celulasPorCoordenador, membrosPorRede, ofertasPorCoordenador) {
+            const ctxSupervisores = document.getElementById('graficoSupervisores')?.getContext('2d');
+            const ctxCelulas = document.getElementById('graficoCelulas')?.getContext('2d');
+            const ctxMembrosRede = document.getElementById('graficoMembrosPorRede')?.getContext('2d');
+            const ctxOfertasCoord = document.getElementById('graficoOfertasPorCoordenador')?.getContext('2d');
+
+            // 1. Supervisores por Rede
+            if (ctxSupervisores) {
+                if (chartSupervisores) chartSupervisores.destroy();
+                const labels = Object.keys(dadosSupervisores);
+                const values = Object.values(dadosSupervisores);
+                window.chartSupervisores = chartSupervisores = new Chart(ctxSupervisores, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: labels.map((rede, i) => CORES_REDES[rede] || CORES_PALETA[i % CORES_PALETA.length]),
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, padding: 12, font: { family: 'Montserrat', size: 11, weight: '600' } }
+                            }
+                        }
+                    },
+                    plugins: [pluginDoughnutCenter, pluginSliceLabels]
+                });
+            }
+
+            // 2. Células por Coordenador
+            if (ctxCelulas) {
+                if (chartCelulas) chartCelulas.destroy();
+                const labels = Object.keys(celulasPorCoordenador);
+                const values = Object.values(celulasPorCoordenador);
+                window.chartCelulas = chartCelulas = new Chart(ctxCelulas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: labels.map((_, i) => CORES_PALETA[i % CORES_PALETA.length]),
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, padding: 12, font: { family: 'Montserrat', size: 11, weight: '600' } }
+                            }
+                        }
+                    },
+                    plugins: [pluginDoughnutCenter, pluginSliceLabels]
+                });
+            }
+
+            // 3. Membros por Rede (Barra)
+            if (ctxMembrosRede) {
+                if (chartMembrosRede) chartMembrosRede.destroy();
+                const labels = Object.keys(membrosPorRede);
+                const values = Object.values(membrosPorRede);
+                window.chartMembrosRede = chartMembrosRede = new Chart(ctxMembrosRede, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Membros',
+                            data: values,
+                            backgroundColor: labels.map(r => CORES_REDES[r] || '#3b82f6'),
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.raw} membros`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grace: '15%',
+                                grid: { color: '#f1f5f9' }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    },
+                    plugins: [pluginBarLabels]
+                });
+            }
+
+            // 4. Ofertas por Coordenador (Barra Horizontal)
+            if (ctxOfertasCoord) {
+                if (chartOfertasCoord) chartOfertasCoord.destroy();
+                const labels = Object.keys(ofertasPorCoordenador);
+                const values = Object.values(ofertasPorCoordenador);
+                window.chartOfertasCoord = chartOfertasCoord = new Chart(ctxOfertasCoord, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Ofertas (R$)',
+                            data: values,
+                            backgroundColor: '#10b981',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => formatarMoeda(ctx.raw)
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grace: '22%',
+                                grid: { color: '#f1f5f9' },
+                                ticks: { callback: (v) => formatarMoeda(v) }
+                            },
+                            y: { grid: { display: false } }
+                        }
+                    },
+                    plugins: [pluginBarLabels]
+                });
+            }
+        }
+
+        // Listener para redimensionar gráficos nas abas e na impressão
+        document.getElementById('tab-graficos')?.addEventListener('shown.bs.tab', () => {
+            if (chartMembrosRede) chartMembrosRede.resize();
+            if (chartOfertasCoord) chartOfertasCoord.resize();
+        });
+        document.getElementById('tab-geral')?.addEventListener('shown.bs.tab', () => {
+            if (chartSupervisores) chartSupervisores.resize();
+            if (chartCelulas) chartCelulas.resize();
+        });
+
+        // Controle de ciclo de vida da impressão para garantir renderização perfeita de Página 1 e Página 2
+        let isPrintingPreparation = false;
+        let previousActiveTabPane = null;
+
+        function prepararParaImpressao() {
+            if (isPrintingPreparation) return;
+            isPrintingPreparation = true;
+
+            // Salva qual aba estava ativa na tela antes de imprimir
+            const activePane = document.querySelector('.tab-content > .tab-pane.active');
+            if (activePane) {
+                previousActiveTabPane = activePane.id;
+            }
+
+            // Exibe ambos os painéis necessários para medição e impressão
+            const paneGeral = document.getElementById('pane-geral');
+            const paneGraficos = document.getElementById('pane-graficos');
+
+            if (paneGeral) {
+                paneGeral.style.setProperty('display', 'block', 'important');
+                paneGeral.style.setProperty('visibility', 'visible', 'important');
+                paneGeral.style.setProperty('opacity', '1', 'important');
+            }
+            if (paneGraficos) {
+                paneGraficos.style.setProperty('display', 'block', 'important');
+                paneGraficos.style.setProperty('visibility', 'visible', 'important');
+                paneGraficos.style.setProperty('opacity', '1', 'important');
+            }
+
+            // Redimensiona e atualiza todos os 4 gráficos de forma síncrona e sem animação
+            const chartIds = [
+                'graficoSupervisores',
+                'graficoCelulas',
+                'graficoMembrosPorRede',
+                'graficoOfertasPorCoordenador'
+            ];
+
+            chartIds.forEach(id => {
+                const chart = typeof Chart !== 'undefined' ? Chart.getChart(id) : null;
+                if (chart) {
+                    chart.options.animation = false;
+                    chart.resize();
+                    chart.update('none');
+                }
+            });
+        }
+
+        function restaurarAposImpressao() {
+            if (!isPrintingPreparation) return;
+            isPrintingPreparation = false;
+
+            const paneGeral = document.getElementById('pane-geral');
+            const paneGraficos = document.getElementById('pane-graficos');
+
+            if (paneGeral) {
+                paneGeral.style.removeProperty('display');
+                paneGeral.style.removeProperty('visibility');
+                paneGeral.style.removeProperty('opacity');
+            }
+            if (paneGraficos) {
+                paneGraficos.style.removeProperty('display');
+                paneGraficos.style.removeProperty('visibility');
+                paneGraficos.style.removeProperty('opacity');
+            }
+
+            // Restaura a aba que o usuário estava visualizando na tela
+            if (previousActiveTabPane) {
+                const triggerEl = document.querySelector(`[data-bs-target="#${previousActiveTabPane}"]`);
+                if (triggerEl && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+                    const tab = bootstrap.Tab.getOrCreateInstance(triggerEl);
+                    tab.show();
+                }
+            }
+
+            // Redimensiona apenas os gráficos da aba visível na tela
+            setTimeout(() => {
+                const curActive = document.querySelector('.tab-content > .tab-pane.active');
+                if (curActive && curActive.id === 'pane-geral') {
+                    const c1 = typeof Chart !== 'undefined' ? Chart.getChart('graficoSupervisores') : null;
+                    const c2 = typeof Chart !== 'undefined' ? Chart.getChart('graficoCelulas') : null;
+                    if (c1) { c1.resize(); c1.update('none'); }
+                    if (c2) { c2.resize(); c2.update('none'); }
+                } else if (curActive && curActive.id === 'pane-graficos') {
+                    const c3 = typeof Chart !== 'undefined' ? Chart.getChart('graficoMembrosPorRede') : null;
+                    const c4 = typeof Chart !== 'undefined' ? Chart.getChart('graficoOfertasPorCoordenador') : null;
+                    if (c3) { c3.resize(); c3.update('none'); }
+                    if (c4) { c4.resize(); c4.update('none'); }
+                }
+            }, 100);
+        }
+
+        window.imprimirRelatorio = function() {
+            prepararParaImpressao();
+            setTimeout(() => {
+                window.print();
+            }, 80);
+        };
+
+        window.addEventListener('beforeprint', () => {
+            prepararParaImpressao();
+            // Durante o beforeprint, as dimensões de @media print já estão ativas;
+            // Forçamos o recálculo imediato de todos os gráficos com base no tamanho exato do papel:
+            const chartIds = [
+                'graficoSupervisores',
+                'graficoCelulas',
+                'graficoMembrosPorRede',
+                'graficoOfertasPorCoordenador'
+            ];
+            chartIds.forEach(id => {
+                const chart = typeof Chart !== 'undefined' ? Chart.getChart(id) : null;
+                if (chart) {
+                    chart.options.animation = false;
+                    chart.resize();
+                    chart.update('none');
+                }
+            });
+        });
+
+        window.addEventListener('afterprint', () => {
+            restaurarAposImpressao();
+        });
+
+        // Carregar Dados
+        async function carregarResumoPastoral() {
+            const splash = document.getElementById('splash-screen');
+            try {
+                const anoAtual = new Date().getFullYear();
+
+                const [snapshotEstrutura, snapshotMembros, snapshotReunioes] = await Promise.all([
+                    getDocs(collection(bancoDeDados, "estruturacelula")),
+                    getDocs(collection(bancoDeDados, "membros")),
+                    getDocs(collection(bancoDeDados, "reuniao"))
+                ]);
+
+                // Membros
+                const membrosPorCelula = {};
+                let totalMembrosGeral = 0;
+                snapshotMembros.forEach(doc => {
+                    const m = doc.data();
+                    const nome = (m.nomedacelula || "").toString().trim().toUpperCase();
+                    if (nome) {
+                        membrosPorCelula[nome] = (membrosPorCelula[nome] || 0) + 1;
+                        totalMembrosGeral++;
+                    }
+                });
+
+                // Reuniões
+                const reunioesDoAno = [];
+                let totalOfertasAno = 0;
+                let totalReunioesAno = 0;
+                snapshotReunioes.forEach(doc => {
+                    const r = doc.data();
+                    let ano = r.ano;
+                    if (!ano && r.data) {
+                        try {
+                            const dt = r.data.toDate ? r.data.toDate() : new Date(r.data);
+                            ano = dt.getFullYear();
+                        } catch (e) { }
+                    }
+                    if (ano == anoAtual || String(ano) === String(anoAtual)) {
+                        const oferta = parseFloat(r.oferta) || 0;
+                        totalOfertasAno += oferta;
+                        totalReunioesAno++;
+                        reunioesDoAno.push({
+                            id: doc.id,
+                            lider: (r.lider || "").toString().trim().toUpperCase(),
+                            oferta: oferta,
+                            tipoAlimento: r.tipoAlimento ? r.tipoAlimento.toString().trim() : "",
+                            qtdAlimento: parseFloat(r.qtdAlimento) || 0
+                        });
+                    }
+                });
+
+                // Estrutura
+                const celulas = [];
+                const supervisoresSet = new Set();
+                const lideresSet = new Set();
+                const supervisoresPorRede = {};
+                const celulasPorCoordenador = {};
+                const membrosPorRede = {};
+                const ofertasPorCoordenador = {};
+                const dadosPorRede = {};
+
+                snapshotEstrutura.forEach(doc => {
+                    const data = doc.data();
+                    const pastor = (data.Pastor || "").toString().trim().toUpperCase();
+                    const coordenador = (data.coordenador || "NÃO ATRIBUÍDO").toString().trim().toUpperCase();
+                    const supervisor = (data.supervisor || "NÃO ATRIBUÍDO").toString().trim().toUpperCase();
+                    const rede = (data.rede || "OUTROS").toString().trim().toUpperCase();
+                    const conclider = (data.conclider || "").toString().trim().toUpperCase();
+                    const nomecelula = (data.nomecelula || "").toString().trim().toUpperCase();
+
+                    if (supervisor && supervisor !== "NÃO ATRIBUÍDO") {
+                        supervisoresSet.add(supervisor);
+                        if (!supervisoresPorRede[rede]) supervisoresPorRede[rede] = new Set();
+                        supervisoresPorRede[rede].add(supervisor);
+                    }
+
+                    if (conclider) {
+                        conclider.split('/').map(s => s.trim()).filter(Boolean).forEach(l => lideresSet.add(l));
+                    }
+
+                    celulasPorCoordenador[coordenador] = (celulasPorCoordenador[coordenador] || 0) + 1;
+
+                    let membrosCount = 0;
+                    if (nomecelula) {
+                        const partes = nomecelula.split('/').map(s => s.trim()).filter(Boolean);
+                        partes.forEach(c => {
+                            if (membrosPorCelula[c]) membrosCount += membrosPorCelula[c];
+                        });
+                        if (partes.length === 0 && membrosPorCelula[nomecelula]) {
+                            membrosCount = membrosPorCelula[nomecelula];
+                        }
+                    }
+
+                    let reunioesCount = 0;
+                    let totalOferta = 0;
+                    const tiposAlimentoSet = new Set();
+                    let totalKgAlimento = 0;
+
+                    if (conclider) {
+                        const nomes = conclider.split('/').map(s => s.trim()).filter(Boolean);
+                        reunioesDoAno.forEach(r => {
+                            const match = nomes.some(n => n === r.lider || r.lider.includes(n) || n.includes(r.lider));
+                            if (match) {
+                                reunioesCount++;
+                                totalOferta += r.oferta;
+                                if (r.tipoAlimento) tiposAlimentoSet.add(r.tipoAlimento);
+                                totalKgAlimento += r.qtdAlimento;
+                            }
+                        });
+                    }
+
+                    membrosPorRede[rede] = (membrosPorRede[rede] || 0) + membrosCount;
+                    ofertasPorCoordenador[coordenador] = (ofertasPorCoordenador[coordenador] || 0) + totalOferta;
+
+                    if (!dadosPorRede[rede]) {
+                        dadosPorRede[rede] = {
+                            celulas: 0,
+                            supervisores: new Set(),
+                            membros: 0,
+                            reunioes: 0,
+                            ofertas: 0,
+                            kgAlimento: 0
+                        };
+                    }
+                    dadosPorRede[rede].celulas++;
+                    if (supervisor && supervisor !== "NÃO ATRIBUÍDO") dadosPorRede[rede].supervisores.add(supervisor);
+                    dadosPorRede[rede].membros += membrosCount;
+                    dadosPorRede[rede].reunioes += reunioesCount;
+                    dadosPorRede[rede].ofertas += totalOferta;
+                    dadosPorRede[rede].kgAlimento += totalKgAlimento;
+
+                    celulas.push({
+                        pastor,
                         coordenador,
                         supervisor,
+                        rede,
+                        conclider,
+                        nomecelula,
+                        membrosCount,
+                        reunioesCount,
+                        totalOferta,
+                        dadosAlimentos: {
+                            tiposAlimento: Array.from(tiposAlimentoSet),
+                            totalKg: totalKgAlimento
+                        }
+                    });
+                });
+
+                todasCelulas = celulas;
+
+                // Preencher KPIs
+                document.getElementById('kpiCelulas').textContent = celulas.length;
+                document.getElementById('kpiSupervisores').textContent = supervisoresSet.size;
+                document.getElementById('kpiLideres').textContent = lideresSet.size;
+                document.getElementById('kpiMembros').textContent = totalMembrosGeral;
+                document.getElementById('kpiReunioes').textContent = totalReunioesAno;
+                document.getElementById('kpiOfertas').textContent = formatarMoeda(totalOfertasAno);
+
+                // Popular Filtros
+                popularFiltros(celulas);
+
+                // Gráficos
+                const dadosSupCount = {};
+                for (const r in supervisoresPorRede) {
+                    dadosSupCount[r] = supervisoresPorRede[r].size;
+                }
+                renderizarGraficos(dadosSupCount, celulasPorCoordenador, membrosPorRede, ofertasPorCoordenador);
+
+                // Tabelas
+                renderizarTabelaSupervisores(celulas);
+                renderizarTabelaLideres(celulas);
+                renderizarTabelaRedes(dadosPorRede);
+
+            } catch (erro) {
+                console.error("Erro ao carregar dados do Resumo Pastoral:", erro);
+                alert("Erro ao carregar dados: " + (erro.message || erro));
+            } finally {
+                if (splash) {
+                    splash.classList.remove('show');
+                    splash.style.display = 'none';
+                }
+            }
+        }
+
+        function popularFiltros(celulas) {
+            const selectCoord = document.getElementById('filtroCoordenador');
+            const selectRede = document.getElementById('filtroRede');
+
+            const coords = Array.from(new Set(celulas.map(c => c.coordenador).filter(Boolean))).sort();
+            const redes = Array.from(new Set(celulas.map(c => c.rede).filter(Boolean))).sort();
+
+            selectCoord.innerHTML = '<option value="">Todos os Coordenadores</option>';
+            coords.forEach(c => selectCoord.innerHTML += `<option value="${c}">${c}</option>`);
+
+            selectRede.innerHTML = '<option value="">Todas as Redes</option>';
+            redes.forEach(r => selectRede.innerHTML += `<option value="${r}">${r}</option>`);
+        }
+
+        function renderizarTabelaSupervisores(celulasFiltradas) {
+            const map = new Map();
+            celulasFiltradas.forEach(cell => {
+                const sup = cell.supervisor || "NÃO ATRIBUÍDO";
+                if (!map.has(sup)) {
+                    map.set(sup, {
+                        coordenador: cell.coordenador,
+                        supervisor: sup,
                         qtdCelulas: 0,
                         qtdLideres: 0,
                         qtdMembros: 0,
@@ -836,77 +1822,247 @@
                         qtdOfertas: 0
                     });
                 }
-                
-                const dados = supervisoresMap.get(supervisor);
-                dados.qtdCelulas++;
-                dados.qtdLideres += lider.conclider ? lider.conclider.split('/').length : 0;
-                dados.qtdMembros += lider.membrosCount || 0;
-                dados.qtdReunioes += lider.reunioesCount || 0;
-                dados.qtdOfertas += lider.totalOferta || 0;
+                const item = map.get(sup);
+                item.qtdCelulas++;
+                item.qtdLideres += cell.conclider ? cell.conclider.split('/').length : 0;
+                item.qtdMembros += cell.membrosCount || 0;
+                item.qtdReunioes += cell.reunioesCount || 0;
+                item.qtdOfertas += cell.totalOferta || 0;
             });
 
-            dadosTabela = Array.from(supervisoresMap.values());
-            
-            // Calcula totais
-            dadosTabela.forEach(dados => {
-                totalCelulas += dados.qtdCelulas;
-                totalLideres += dados.qtdLideres;
-                totalMembros += dados.qtdMembros;
-                totalReunioes += dados.qtdReunioes;
-                totalOfertas += dados.qtdOfertas;
-            });
-
-            // Ordena e renderiza a tabela
-            dadosTabela.sort((a, b) => {
-                if (a.coordenador !== b.coordenador) {
-                    return a.coordenador.localeCompare(b.coordenador);
-                }
+            const lista = Array.from(map.values()).sort((a, b) => {
+                if (a.coordenador !== b.coordenador) return a.coordenador.localeCompare(b.coordenador);
                 return a.supervisor.localeCompare(b.supervisor);
             });
 
-            tabelaBody.innerHTML = '';
+            const tbody = document.getElementById('tabelaResumo');
+            const tfoot = document.getElementById('tabelaResumoFoot');
+            tbody.innerHTML = '';
 
-            dadosTabela.forEach(({ coordenador, supervisor, qtdCelulas, qtdLideres, qtdMembros, qtdReunioes, qtdOfertas }) => {
-                const row = `
+            let tCel = 0, tLid = 0, tMem = 0, tReu = 0, tOfe = 0;
+
+            lista.forEach(d => {
+                tCel += d.qtdCelulas;
+                tLid += d.qtdLideres;
+                tMem += d.qtdMembros;
+                tReu += d.qtdReunioes;
+                tOfe += d.qtdOfertas;
+
+                tbody.innerHTML += `
                     <tr>
-                        <td class="align-middle">${coordenador}</td>
-                        <td class="text-center align-middle">${supervisor}</td>
-                        <td class="text-center align-middle">${qtdCelulas}</td>
-                        <td class="text-center align-middle">${qtdLideres}</td>
-                        <td class="text-center align-middle">${qtdMembros}</td>
-                        <td class="text-center align-middle">${qtdReunioes}</td>
-                        <td class="text-center align-middle">${formatarMoeda(qtdOfertas)}</td>
+                        <td class="col-coord fw-semibold text-start ps-3">${d.coordenador}</td>
+                        <td class="col-sup text-center fw-bold">${d.supervisor}</td>
+                        <td class="col-num text-center"><span class="badge-pill-soft badge-soft-primary">${d.qtdCelulas}</span></td>
+                        <td class="col-num text-center"><span class="badge-pill-soft badge-soft-info">${d.qtdLideres}</span></td>
+                        <td class="col-num text-center fw-semibold">${d.qtdMembros}</td>
+                        <td class="col-num text-center"><span class="badge-pill-soft badge-soft-warning">${d.qtdReunioes}</span></td>
+                        <td class="col-val text-center fw-bold text-success">${formatarMoeda(d.qtdOfertas)}</td>
                     </tr>
                 `;
-                tabelaBody.innerHTML += row;
             });
 
-            const linhaTotalGeral = tabelaBody.insertRow();
-            linhaTotalGeral.className = 'thead-dark text-white bg-dark';
-            linhaTotalGeral.innerHTML = `
-                <td colspan="2" class="text-center align-middle font-weight-bold">Total Geral:</td>
-                <td class="text-center align-middle font-weight-bold">${totalCelulas}</td>
-                <td class="text-center align-middle font-weight-bold">${totalLideres}</td>
-                <td class="text-center align-middle font-weight-bold">${totalMembros}</td>
-                <td class="text-center align-middle font-weight-bold">${totalReunioes}</td>
-                <td class="text-center align-middle font-weight-bold">${formatarMoeda(totalOfertas)}</td>
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="2" class="text-start fw-bold ps-3">TOTAL CONSOLIDADO:</td>
+                    <td class="col-num text-center fw-bold">${tCel}</td>
+                    <td class="col-num text-center fw-bold">${tLid}</td>
+                    <td class="col-num text-center fw-bold">${tMem}</td>
+                    <td class="col-num text-center fw-bold">${tReu}</td>
+                    <td class="col-val text-center fw-bold text-success">${formatarMoeda(tOfe)}</td>
+                </tr>
             `;
-        // Após preencher a tabela, remova o splash screen
-    document.getElementById('splash-screen').classList.remove('show');
-        } 
-        
-        const coresRedes = {
-            'VERMELHA': '#FF0101',
-            'VERDE': '#008000',
-            'AZUL': '#0000FF',
-            'AMARELA': '#FFFF00',
-            'LARANJA': '#FFA500',
-            'BLACK': '#000000',
-            'TEEN': '#800080'
-        };
 
+            document.getElementById('badgeTotalSupervisores').textContent = `${lista.length} Supervisores`;
+        }
+
+        function renderizarTabelaLideres(celulasFiltradas) {
+            const tbody = document.getElementById('tabelaLideres');
+            tbody.innerHTML = '';
+
+            const porSupervisor = {};
+            celulasFiltradas.forEach(c => {
+                const sup = c.supervisor || "NÃO ATRIBUÍDO";
+                if (!porSupervisor[sup]) porSupervisor[sup] = [];
+                porSupervisor[sup].push(c);
+            });
+
+            const supervisores = Object.keys(porSupervisor).sort();
+            let totalCelulasCount = 0;
+
+            supervisores.forEach(sup => {
+                const lista = porSupervisor[sup];
+                totalCelulasCount += lista.length;
+
+                lista.forEach((c, idx) => {
+                    const tr = tbody.insertRow();
+                    if (idx === 0) {
+                        const tdSup = tr.insertCell();
+                        tdSup.textContent = sup;
+                        tdSup.rowSpan = lista.length;
+                        tdSup.className = 'fw-bold align-middle bg-light text-center';
+                    }
+
+                    const tdLider = tr.insertCell();
+                    tdLider.innerHTML = `
+                        <div class="fw-bold">${c.conclider || '-'}</div>
+                        <small class="text-muted">${c.nomecelula ? 'Célula: ' + c.nomecelula : ''}</small>
+                    `;
+
+                    const tdMem = tr.insertCell();
+                    tdMem.className = 'text-center align-middle fw-semibold';
+                    tdMem.textContent = c.membrosCount;
+
+                    const tdReu = tr.insertCell();
+                    tdReu.className = 'text-center align-middle';
+                    tdReu.innerHTML = `<span class="badge-pill-soft badge-soft-warning">${c.reunioesCount}</span>`;
+
+                    const tdOfe = tr.insertCell();
+                    tdOfe.className = 'text-center align-middle fw-bold text-success';
+                    tdOfe.textContent = formatarMoeda(c.totalOferta);
+
+                    const tdAli = tr.insertCell();
+                    tdAli.className = 'text-center align-middle';
+                    const tipos = c.dadosAlimentos?.tiposAlimento || [];
+                    tdAli.textContent = tipos.length > 0 ? tipos.join(', ') : '-';
+
+                    const tdKg = tr.insertCell();
+                    tdKg.className = 'text-center align-middle';
+                    const kg = c.dadosAlimentos?.totalKg || 0;
+                    tdKg.innerHTML = kg > 0 ? `<span class="badge-pill-soft badge-soft-info">${kg.toFixed(1)} kg</span>` : '-';
+                });
+            });
+
+            document.getElementById('badgeTotalLideres').textContent = `${totalCelulasCount} Células`;
+        }
+
+        function renderizarTabelaRedes(dadosPorRede) {
+            const tbody = document.getElementById('tabelaRedes');
+            const tfoot = document.getElementById('tabelaRedesFoot');
+            tbody.innerHTML = '';
+
+            const redes = Object.keys(dadosPorRede).sort();
+            let tCel = 0, tSup = 0, tMem = 0, tReu = 0, tOfe = 0, tKg = 0;
+
+            redes.forEach(rede => {
+                const d = dadosPorRede[rede];
+                const cor = CORES_REDES[rede] || '#64748b';
+                const qtdSup = d.supervisores.size;
+
+                tCel += d.celulas;
+                tSup += qtdSup;
+                tMem += d.membros;
+                tReu += d.reunioes;
+                tOfe += d.ofertas;
+                tKg += d.kgAlimento;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <span class="rede-badge" style="background-color: ${cor}">${rede}</span>
+                        </td>
+                        <td class="text-center fw-bold">${d.celulas}</td>
+                        <td class="text-center">${qtdSup}</td>
+                        <td class="text-center fw-semibold">${d.membros}</td>
+                        <td class="text-center"><span class="badge-pill-soft badge-soft-warning">${d.reunioes}</span></td>
+                        <td class="text-center fw-bold text-success">${formatarMoeda(d.ofertas)}</td>
+                        <td class="text-center">${d.kgAlimento > 0 ? d.kgAlimento.toFixed(1) + ' kg' : '-'}</td>
+                    </tr>
+                `;
+            });
+
+            tfoot.innerHTML = `
+                <tr>
+                    <td class="text-start fw-bold ps-3">TOTAL:</td>
+                    <td class="text-center fw-bold">${tCel}</td>
+                    <td class="text-center fw-bold">${tSup}</td>
+                    <td class="text-center fw-bold">${tMem}</td>
+                    <td class="text-center fw-bold">${tReu}</td>
+                    <td class="text-center fw-bold text-success">${formatarMoeda(tOfe)}</td>
+                    <td class="text-center fw-bold">${tKg > 0 ? tKg.toFixed(1) + ' kg' : '0 kg'}</td>
+                </tr>
+            `;
+        }
+
+        function aplicarFiltros() {
+            const termo = document.getElementById('filtroTexto').value.toLowerCase().trim();
+            const coord = document.getElementById('filtroCoordenador').value;
+            const rede = document.getElementById('filtroRede').value;
+
+            const filtradas = todasCelulas.filter(c => {
+                const matchTexto = !termo ||
+                    c.supervisor.toLowerCase().includes(termo) ||
+                    c.coordenador.toLowerCase().includes(termo) ||
+                    c.conclider.toLowerCase().includes(termo) ||
+                    c.nomecelula.toLowerCase().includes(termo) ||
+                    c.rede.toLowerCase().includes(termo);
+
+                const matchCoord = !coord || c.coordenador === coord;
+                const matchRede = !rede || c.rede === rede;
+
+                return matchTexto && matchCoord && matchRede;
+            });
+
+            renderizarTabelaSupervisores(filtradas);
+            renderizarTabelaLideres(filtradas);
+        }
+
+        function exportarCSV() {
+            const rows = [];
+            rows.push(['Coordenador', 'Supervisor', 'Lideres', 'Celula', 'Rede', 'Membros', 'Reunioes', 'Ofertas (R$)', 'Alimento', 'Kg Alimento']);
+
+            todasCelulas.forEach(c => {
+                rows.push([
+                    `"${c.coordenador}"`,
+                    `"${c.supervisor}"`,
+                    `"${c.conclider}"`,
+                    `"${c.nomecelula}"`,
+                    `"${c.rede}"`,
+                    c.membrosCount,
+                    c.reunioesCount,
+                    c.totalOferta.toFixed(2),
+                    `"${(c.dadosAlimentos?.tiposAlimento || []).join(', ')}"`,
+                    (c.dadosAlimentos?.totalKg || 0).toFixed(2)
+                ]);
+            });
+
+            const csvContent = "data:text/csv;charset=utf-8,﻿" + rows.map(e => e.join(';')).join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `Resumo_Pastoral_IEBI_${new Date().getFullYear()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Eventos
+        document.getElementById('filtroTexto').addEventListener('input', aplicarFiltros);
+        document.getElementById('filtroCoordenador').addEventListener('change', aplicarFiltros);
+        document.getElementById('filtroRede').addEventListener('change', aplicarFiltros);
+        document.getElementById('btnLimparFiltros').addEventListener('click', () => {
+            document.getElementById('filtroTexto').value = '';
+            document.getElementById('filtroCoordenador').value = '';
+            document.getElementById('filtroRede').value = '';
+            aplicarFiltros();
+        });
+        document.getElementById('btnExportarCSV').addEventListener('click', exportarCSV);
+
+        // Fallback de segurança para o splash screen (máximo 6 segundos)
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if (splash && splash.classList.contains('show')) {
+                splash.classList.remove('show');
+                splash.style.display = 'none';
+            }
+        }, 6000);
+
+        // Inicialização
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', carregarResumoPastoral);
+        } else {
+            carregarResumoPastoral();
+        }
     </script>
-
 </body>
 
 </html>

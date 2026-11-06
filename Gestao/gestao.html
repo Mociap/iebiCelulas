@@ -1184,7 +1184,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="modalPastor">Pastor</label>
-                                            <input type="text" class="form-control" id="modalPastor" readonly>
+                                            <input type="text" class="form-control" id="modalPastor" style="text-transform: uppercase;">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -1207,7 +1207,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="modalCoordenador">Coordenador</label>
-                                            <input type="text" class="form-control" id="modalCoordenador" readonly>
+                                            <input type="text" class="form-control" id="modalCoordenador" style="text-transform: uppercase;">
                                         </div>
                                     </div>
                                 </div>
@@ -1233,7 +1233,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="modalSupervisorDisplay">Supervisor</label>
-                                            <input type="text" class="form-control" id="modalSupervisorDisplay" readonly>
+                                            <input type="text" class="form-control" id="modalSupervisorDisplay" style="text-transform: uppercase;">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -1256,7 +1256,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="modalConclider">Líder</label>
-                                            <input type="text" class="form-control" id="modalConclider" readonly>
+                                            <input type="text" class="form-control" id="modalConclider" style="text-transform: uppercase;">
                                         </div>
                                     </div>
                                 </div>
@@ -3119,10 +3119,17 @@
                         const dados = doc.data();
                         
                         if (colecao === 'estruturacelula') {
-                            // Abrir modal específico de estrutura de células para edição
+                            // Abrir modal específico de estrutura de células para edição com campos desbloqueados
                             document.getElementById('estruturaCelulaModalLabel').textContent = 'Editar Célula';
-                            carregarIgrejas();
+                            desbloquearCamposEstruturaCelula();
+                            const igrejaSalva = dados.nomeigreja || dados.igreja || dados.Nomeigreja || dados.Igreja || '';
                             preencherDadosEstruturaCelula(dados);
+                            carregarIgrejas(igrejaSalva).then(() => {
+                                if (igrejaSalva) {
+                                    const select = document.getElementById('modalNomeigreja');
+                                    if (select) select.value = igrejaSalva;
+                                }
+                            });
                             $('#estruturaCelulaModal').modal('show');
                             return;
                         }
@@ -3740,6 +3747,7 @@
         
         // Função para limpar campos do modal de estrutura de células
         function limparCamposEstruturaCelula() {
+            desbloquearCamposEstruturaCelula();
             document.getElementById('modalNomeigreja').value = '';
             document.getElementById('modalRede').value = '';
             document.getElementById('modalPastor').value = '';
@@ -3774,25 +3782,72 @@
             };
         }
 
-        // Função para carregar igrejas no select
-        function carregarIgrejas() {
+                // Função para carregar igrejas no select
+        function carregarIgrejas(igrejaSelecionada = '') {
             const selectIgreja = document.getElementById('modalNomeigreja');
-            
-            db.collection('igreja')
+            if (!selectIgreja) return Promise.resolve();
+            const igrejaAlvo = (igrejaSelecionada || '').toString().trim();
+
+            return db.collection('igreja')
                 .get()
                 .then(querySnapshot => {
-                    selectIgreja.innerHTML = '<option value="">Selecione uma igreja</option>';
-                    
+                    const igrejasSet = new Set();
                     querySnapshot.forEach(doc => {
                         const dados = doc.data();
-                        const option = document.createElement('option');
-                        option.value = dados.nomeigreja;
-                        option.textContent = dados.nomeigreja;
-                        selectIgreja.appendChild(option);
+                        const nome = dados.nomeigreja || dados.nome || doc.id;
+                        if (nome && nome.trim()) {
+                            igrejasSet.add(nome.trim());
+                        }
+                    });
+
+                    // Também busca se há igrejas cadastradas em estruturacelula
+                    return db.collection('estruturacelula').get().then(snap => {
+                        snap.forEach(d => {
+                            const nom = d.data().nomeigreja || d.data().igreja;
+                            if (nom && nom.trim()) igrejasSet.add(nom.trim());
+                        });
+
+                        if (igrejaAlvo) {
+                            igrejasSet.add(igrejaAlvo);
+                        }
+
+                        selectIgreja.innerHTML = '<option value="">Selecione uma igreja</option>';
+                        let selecionou = false;
+
+                        Array.from(igrejasSet).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(nome => {
+                            const option = document.createElement('option');
+                            option.value = nome;
+                            option.textContent = nome;
+                            if (igrejaAlvo && nome.toUpperCase() === igrejaAlvo.toUpperCase()) {
+                                option.selected = true;
+                                selecionou = true;
+                            }
+                            selectIgreja.appendChild(option);
+                        });
+
+                        if (igrejaAlvo) {
+                            if (!selecionou) {
+                                const optExtra = document.createElement('option');
+                                optExtra.value = igrejaAlvo;
+                                optExtra.textContent = igrejaAlvo;
+                                optExtra.selected = true;
+                                selectIgreja.appendChild(optExtra);
+                            }
+                            selectIgreja.value = igrejaAlvo;
+                        }
                     });
                 })
                 .catch(error => {
                     console.error('Erro ao carregar igrejas:', error);
+                    selectIgreja.innerHTML = '<option value="">Selecione uma igreja</option>';
+                    if (igrejaAlvo) {
+                        const opt = document.createElement('option');
+                        opt.value = igrejaAlvo;
+                        opt.textContent = igrejaAlvo;
+                        opt.selected = true;
+                        selectIgreja.appendChild(opt);
+                        selectIgreja.value = igrejaAlvo;
+                    }
                 });
         }
 
@@ -4084,20 +4139,55 @@
             }
         }
 
+                // Função para desbloquear todos os campos do modal de estrutura de células
+        function desbloquearCamposEstruturaCelula() {
+            const form = document.getElementById('estruturaCelulaForm');
+            if (!form) return;
+            const campos = form.querySelectorAll('input, select, textarea');
+            campos.forEach(campo => {
+                campo.removeAttribute('readonly');
+                campo.removeAttribute('disabled');
+                campo.readOnly = false;
+                campo.disabled = false;
+                campo.style.pointerEvents = 'auto';
+                campo.style.cursor = 'auto';
+            });
+        }
+
         // Função para preencher dados da estrutura de célula no modal (para edição)
         function preencherDadosEstruturaCelula(dados) {
-            document.getElementById('modalNomeigreja').value = dados.nomeigreja || '';
+            desbloquearCamposEstruturaCelula();
+            const igreja = (dados.nomeigreja || dados.igreja || dados.Nomeigreja || dados.Igreja || '').toString().trim();
+            const selectIgreja = document.getElementById('modalNomeigreja');
+            if (selectIgreja) {
+                if (igreja) {
+                    let optExistente = Array.from(selectIgreja.options).find(o => o.value.toUpperCase() === igreja.toUpperCase());
+                    if (optExistente) {
+                        optExistente.selected = true;
+                        selectIgreja.value = optExistente.value;
+                    } else {
+                        const opt = document.createElement('option');
+                        opt.value = igreja;
+                        opt.textContent = igreja;
+                        opt.selected = true;
+                        selectIgreja.appendChild(opt);
+                        selectIgreja.value = igreja;
+                    }
+                } else {
+                    selectIgreja.value = '';
+                }
+            }
             document.getElementById('modalRede').value = dados.rede || '';
-            document.getElementById('modalPastor').value = dados.pastor || '';
+            document.getElementById('modalPastor').value = dados.pastor || dados.Pastor || '';
             document.getElementById('modalPastor1').value = dados.pastor1 || '';
             document.getElementById('modalPastor2').value = dados.pastor2 || '';
-            document.getElementById('modalCoordenador').value = dados.coordenador || '';
+            document.getElementById('modalCoordenador').value = dados.coordenador || dados.Coordenador || '';
             document.getElementById('modalCoordenador1').value = dados.coordenador1 || '';
             document.getElementById('modalCoordenador2').value = dados.coordenador2 || '';
-            document.getElementById('modalSupervisorDisplay').value = dados.supervisor || '';
+            document.getElementById('modalSupervisorDisplay').value = dados.supervisor || dados.Supervisor || '';
             document.getElementById('modalSupervisor1').value = dados.supervisor1 || '';
             document.getElementById('modalSupervisor2').value = dados.supervisor2 || '';
-            document.getElementById('modalConclider').value = dados.conclider || '';
+            document.getElementById('modalConclider').value = dados.conclider || dados.lider || '';
             document.getElementById('modalNomelider1').value = dados.nomelider1 || '';
             document.getElementById('modalNomelider2').value = dados.nomelider2 || '';
             document.getElementById('modalNomelider3').value = dados.nomelider3 || '';
@@ -4119,7 +4209,8 @@
             const dados = {
                 nomeigreja: document.getElementById('modalNomeigreja').value,
                 rede: document.getElementById('modalRede').value,
-                pastor: document.getElementById('modalPastor').value,
+                pastor: document.getElementById('modalPastor').value.toUpperCase(),
+                Pastor: document.getElementById('modalPastor').value.toUpperCase(),
                 pastor1: document.getElementById('modalPastor1').value.toUpperCase(),
                 pastor2: document.getElementById('modalPastor2').value.toUpperCase(),
                 coordenador: document.getElementById('modalCoordenador').value,
@@ -4192,12 +4283,16 @@
 
             // Transformar texto em maiúsculo nos campos apropriados
             const camposUpperCase = [
+                'modalPastor',
                 'modalPastor1',
                 'modalPastor2',
+                'modalCoordenador',
                 'modalCoordenador1',
                 'modalCoordenador2',
+                'modalSupervisorDisplay',
                 'modalSupervisor1',
                 'modalSupervisor2',
+                'modalConclider',
                 'modalNomelider1',
                 'modalNomelider2',
                 'modalNomelider3',
