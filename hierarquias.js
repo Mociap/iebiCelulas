@@ -17,6 +17,7 @@ const hierarquias = {
             'relatorioMembros',
             'dadosReunioes',
             'relApresentacao',
+            'indicadoresBatismo',
 
             // Escola Ministerial frmEM
             'inscricoes',
@@ -34,6 +35,7 @@ const hierarquias = {
             'relResumoMesCelula',
             'indicadores',
             'relatorioMembros',
+            'indicadoresBatismo',
 
             // Escola Ministerial frmEM
             'inscricoes',
@@ -51,6 +53,7 @@ const hierarquias = {
             'relResumoMesCelula',
             'indicadores',
             'relatorioMembros',
+            'indicadoresBatismo',
 
             // Escola Ministerial frmEM
             'inscricoes',
@@ -65,24 +68,26 @@ const hierarquias = {
             'relResumoMesCelula',
             'indicadores',
             'relatorioMembros',
+            'indicadoresBatismo',
 
             // Escola Ministerial frmEM
             'inscricoes'
         ]
     },
 
-        Líder: {
+    Líder: {
     },
 
-        LÍDER: {
+    LÍDER: {
     },
-    
+
     Membro: {
         nivel: 0,
         permissoes: [
             'organograma',
             'indicadores',
             'relatorioMembros',
+            'indicadoresBatismo',
 
             // Escola Ministerial frmEM
             'inscricoes'
@@ -120,7 +125,7 @@ const hierarquias = {
         nivel: 1,
         permissoes: [
             'relatorioMembros',
-            
+
             // Escola Ministerial frmEM
             'inscricoes',
             'chamada',

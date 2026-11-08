@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores de Batismo e Integração - IEBI</title>
+    <link rel="shortcut icon" href="../assets/favico.ico" type="image/x-icon">
+
+    <!-- Bootstrap 5.3.3 & Google Fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Nunito:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../css/botao-voltar.css">
+
+    <style>
+        :root {
+            --primary-dark: #0f172a;
+            --primary-accent: #1b4332;
+            --secondary-accent: #2d6a4f;
+            --teal-accent: #00bcd4;
+            --blue-accent: #3b82f6;
+            --pink-accent: #ec4899;
+            --amber-accent: #f59e0b;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-dark);
+            padding-bottom: 60px;
+        }
+
+        /* Top Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 22px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .header img {
+            max-width: 190px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .back-button {
+            background-color: #2d6a4f;
+            box-shadow: 0 4px 10px rgba(45, 106, 79, 0.3);
+            transition: all 0.25s ease;
+            text-decoration: none !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            top: 20px;
+            left: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #1b4332;
+            transform: scale(1.05);
+            color: white;
+        }
+
+        /* Main Dashboard Container */
+        .dashboard-container {
+            max-width: 96% !important;
+            width: 96%;
+            margin: 25px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-weight: 800;
+            color: var(--primary-dark);
+            letter-spacing: -0.5px;
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 1200px) {
+            .kpi-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            min-width: 0;
+        }
+
+        .kpi-card>div:last-child {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .kpi-card.kpi-blue::before { background-color: #3b82f6; }
+        .kpi-card.kpi-cyan::before { background-color: #00bcd4; }
+        .kpi-card.kpi-green::before { background-color: #10b981; }
+        .kpi-card.kpi-purple::before { background-color: #8b5cf6; }
+        .kpi-card.kpi-pink::before { background-color: #ec4899; }
+        .kpi-card.kpi-orange::before { background-color: #f59e0b; }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .kpi-blue .kpi-icon { background: #eff6ff; color: #3b82f6; }
+        .kpi-cyan .kpi-icon { background: #e0f7fa; color: #00bcd4; }
+        .kpi-green .kpi-icon { background: #ecfdf5; color: #10b981; }
+        .kpi-purple .kpi-icon { background: #f5f3ff; color: #8b5cf6; }
+        .kpi-pink .kpi-icon { background: #fdf2f8; color: #ec4899; }
+        .kpi-orange .kpi-icon { background: #fffbeb; color: #f59e0b; }
+
+        .kpi-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .kpi-value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            line-height: 1.15;
+        }
+
+        .kpi-sub {
+            font-size: 0.70rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+
+        /* Action Buttons */
+        .btn-action-primary {
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 9px 18px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+        }
+
+        .btn-action-primary:hover {
+            background-color: #1b4332;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-action-secondary {
+            background-color: #ffffff;
+            color: #2d6a4f;
+            border: 1px solid #2d6a4f;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+        }
+
+        .btn-action-secondary:hover {
+            background-color: #f0fdf4;
+            color: #1b4332;
+        }
+
+        /* Card Section / Chart Container */
+        .card-custom {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-custom-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-custom-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-box {
+            position: relative;
+            height: 270px;
+            width: 100%;
+            padding: 10px 14px;
+        }
+
+        /* Filter Toolbar */
+        .filter-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-control-custom,
+        .form-select-custom {
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            padding: 9px 14px;
+            font-size: 0.88rem;
+            font-family: inherit;
+        }
+
+        .form-control-custom:focus,
+        .form-select-custom:focus {
+            border-color: #2d6a4f;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+            outline: none;
+        }
+
+        /* Table Design */
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .table-custom {
+            margin-bottom: 0;
+            width: 100%;
+            font-size: 0.88rem;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table-custom th {
+            background: #0f172a;
+            color: #ffffff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.74rem;
+            letter-spacing: 0.6px;
+            padding: 14px 16px;
+            border: none;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table-custom td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            border-top: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .table-custom tfoot td {
+            background: #0f172a;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.82rem;
+            padding: 14px 16px;
+            border: none;
+        }
+
+        /* Badges */
+        .badge-modo {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-batismo {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .badge-declaracao {
+            background-color: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-civil {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            font-weight: 600;
+        }
+
+        .badge-sexo-m {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.74rem;
+        }
+
+        .badge-sexo-f {
+            background-color: #fdf2f8;
+            color: #be185d;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.74rem;
+        }
+
+        .badge-idade {
+            background-color: #f8fafc;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        /* Action Buttons in Table */
+        .btn-whatsapp {
+            background-color: #25D366;
+            color: white !important;
+            width: 32px;
+            height: 32px;
+            border-radius: 7px;
+            font-size: 1rem;
+            text-decoration: none !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border: none;
+            box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
+        }
+
+        .btn-whatsapp:hover {
+            background-color: #1eb956;
+            transform: scale(1.08);
+            color: white !important;
+        }
+
+        .btn-ver-ficha {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            width: 32px;
+            height: 32px;
+            border-radius: 7px;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-ver-ficha:hover {
+            background-color: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+            transform: scale(1.08);
+        }
+
+        .btn-excluir {
+            background-color: #fef2f2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+            width: 32px;
+            height: 32px;
+            border-radius: 7px;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-excluir:hover {
+            background-color: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+            transform: scale(1.08);
+        }
+
+        /* Modal Pastoral Styling */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            border-radius: 16px 16px 0 0;
+            padding: 18px 24px;
+        }
+
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-body {
+            padding: 22px;
+            background-color: #f8fafc;
+        }
+
+        .ficha-secao {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px 18px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+
+        .ficha-secao-titulo {
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2d6a4f;
+            border-bottom: 2px solid #ecfdf5;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ficha-campo-rotulo {
+            font-size: 0.70rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .ficha-campo-valor {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .edit-field {
+            font-size: 0.88rem;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            padding: 6px 10px;
+        }
+
+        .edit-field:focus {
+            border-color: #2d6a4f;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+        }
+
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        .splash-content {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #2d6a4f;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ----------------------------------------------------
+           REGRAS EXCLUSIVAS PARA IMPRESSÃO (A4 PAISAGEM)
+           ---------------------------------------------------- */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 6mm 8mm 6mm 8mm;
+            }
+
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                padding-bottom: 0 !important;
+                font-size: 8.5pt;
+            }
+
+            .header,
+            .back-button,
+            .filter-box,
+            .btn-action-primary,
+            .btn-action-secondary,
+            .btn-whatsapp,
+            .btn-ver-ficha,
+            .btn-excluir,
+            .no-print,
+            .splash-screen {
+                display: none !important;
+            }
+
+            .dashboard-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .print-header-area {
+                display: block !important;
+                margin-bottom: 8px;
+                border-bottom: 2px solid #0f172a;
+                padding-bottom: 4px;
+            }
+
+            /* Página 1: KPIs + Gráficos */
+            .pagina-1-print {
+                page-break-after: always;
+                break-after: page;
+            }
+
+            .kpi-grid {
+                display: grid !important;
+                grid-template-columns: repeat(6, 1fr) !important;
+                gap: 8px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .kpi-card {
+                padding: 6px 8px !important;
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+
+            .kpi-value {
+                font-size: 1.15rem !important;
+            }
+
+            .kpi-label {
+                font-size: 0.60rem !important;
+            }
+
+            .kpi-sub {
+                font-size: 0.60rem !important;
+            }
+
+            .kpi-icon {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 13px !important;
+                margin-right: 6px !important;
+            }
+
+            .charts-row-donuts {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr 1fr !important;
+                gap: 10px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .charts-row-bars {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+                margin-bottom: 0 !important;
+            }
+
+            .card-custom {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                margin-bottom: 0 !important;
+            }
+
+            .card-custom-header {
+                padding: 6px 10px !important;
+            }
+
+            .card-custom-title {
+                font-size: 0.82rem !important;
+            }
+
+            .chart-box-donut {
+                height: 180px !important;
+                padding: 4px !important;
+            }
+
+            .chart-box-bar {
+                height: 180px !important;
+                padding: 4px !important;
+            }
+
+            /* Página 2: Tabela de Candidatos */
+            .pagina-2-print {
+                page-break-before: always;
+                break-before: page;
+                margin-top: 10px;
+            }
+
+            .table-responsive {
+                border: 1px solid #000000 !important;
+                overflow: visible !important;
+            }
+
+            .table-custom {
+                font-size: 8pt !important;
+            }
+
+            .table-custom th {
+                background: #0f172a !important;
+                color: #ffffff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 6px 8px !important;
+            }
+
+            .table-custom td {
+                padding: 6px 8px !important;
+            }
+
+            .table-custom tfoot td {
+                background: #0f172a !important;
+                color: #ffffff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 8px !important;
+            }
+        }
+
+        .print-header-area {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Botão Voltar -->
+    <a href="../Tela1_Index/frmRelatorios.html" class="back-button" title="Voltar aos Relatórios">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+
+    <!-- Top Header -->
+    <div class="header">
+        <img src="../assets/LogoBranco.png" alt="Logo da IEBI">
+    </div>
+
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container">
+
+        <!-- BLOCO PÁGINA 1 NA IMPRESSÃO -->
+        <div class="pagina-1-print">
+            <!-- Cabeçalho Exclusivo para Impressão -->
+            <div class="print-header-area">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0 fw-bold" style="color: #0f172a;">IEBI - Gestão Pastoral de Batismo e Integração</h4>
+                        <p class="mb-0 text-muted" style="font-size: 8.5pt;">Painel Executivo de Candidatos, Distribuição Eclesial e Histórico de Membresia</p>
+                    </div>
+                    <div class="text-end text-muted" style="font-size: 8pt;">
+                        <div>Emitido em: <strong id="printDataEmissao">-</strong></div>
+                        <div>Próxima Integração: <strong id="printDataProxima">-</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Title & Controls (Tela) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom no-print">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-water text-primary me-2"></i>Indicadores de Batismo e Integração
+                    </h1>
+                    <p class="page-subtitle mb-0">
+                        Acompanhamento pastoral de candidatos ao batismo, histórico eclesial e acolhimento de novos membros.
+                    </p>
+                </div>
+                <div class="d-flex gap-2 mt-3 mt-md-0">
+                    <button type="button" class="btn-action-secondary" id="btnRecarregar" title="Atualizar dados do Firebase">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                    <button type="button" class="btn-action-secondary" id="btnExportarCSV" title="Exportar planilha CSV">
+                        <i class="fas fa-file-csv"></i> Exportar CSV
+                    </button>
+                    <button type="button" class="btn-action-primary" onclick="imprimirRelatorio()" title="Imprimir Relatório Pastoral">
+                        <i class="fas fa-print"></i> Imprimir Relatório
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Cards Grid (6 cards na mesma linha) -->
+            <div class="kpi-grid" id="kpiContainer">
+                <div class="kpi-card kpi-blue">
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <div class="kpi-label">Total Inscritos</div>
+                        <div class="kpi-value" id="kpiTotal">0</div>
+                        <div class="kpi-sub">Fichas cadastradas</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-cyan">
+                    <div class="kpi-icon"><i class="fas fa-water"></i></div>
+                    <div>
+                        <div class="kpi-label">Batismo (Águas)</div>
+                        <div class="kpi-value" id="kpiBatismo">0</div>
+                        <div class="kpi-sub" id="kpiBatismoPct">0% do total</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-orange">
+                    <div class="kpi-icon"><i class="fas fa-file-signature"></i></div>
+                    <div>
+                        <div class="kpi-label">Por Declaração</div>
+                        <div class="kpi-value" id="kpiDeclaracao">0</div>
+                        <div class="kpi-sub" id="kpiDeclaracaoPct">0% do total</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon"><i class="fas fa-venus-mars"></i></div>
+                    <div>
+                        <div class="kpi-label">Homens / Mulheres</div>
+                        <div class="kpi-value" id="kpiSexoRatio">0 / 0</div>
+                        <div class="kpi-sub" id="kpiSexoSub">Masc. / Fem.</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-green">
+                    <div class="kpi-icon"><i class="fas fa-heart"></i></div>
+                    <div>
+                        <div class="kpi-label">Casados / Solteiros</div>
+                        <div class="kpi-value" id="kpiCivilRatio">0 / 0</div>
+                        <div class="kpi-sub" id="kpiCivilSub">Famílias formadas</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-pink">
+                    <div class="kpi-icon"><i class="fas fa-birthday-cake"></i></div>
+                    <div>
+                        <div class="kpi-label">Média de Idade</div>
+                        <div class="kpi-value" id="kpiMediaIdade">0</div>
+                        <div class="kpi-sub" id="kpiFaixaSub">Faixa predominante</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LINHA 1 DE GRÁFICOS: 3 Doughnuts (Modo, Sexo, Estado Civil) -->
+            <div class="row charts-row-donuts g-3 mb-3">
+                <!-- Gráfico 1: Modo de Integração -->
+                <div class="col-12 col-md-4">
+                    <div class="card-custom h-100">
+                        <div class="card-custom-header">
+                            <h2 class="card-custom-title">
+                                <i class="fas fa-chart-pie text-primary"></i> Modo de Integração
+                            </h2>
+                            <span class="badge bg-light text-dark fw-bold border">Distribuição</span>
+                        </div>
+                        <div class="chart-box chart-box-donut">
+                            <canvas id="chartModoIntegracao"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico 2: Distribuição por Sexo -->
+                <div class="col-12 col-md-4">
+                    <div class="card-custom h-100">
+                        <div class="card-custom-header">
+                            <h2 class="card-custom-title">
+                                <i class="fas fa-venus-mars text-info"></i> Distribuição por Sexo
+                            </h2>
+                            <span class="badge bg-light text-dark fw-bold border">Gênero</span>
+                        </div>
+                        <div class="chart-box chart-box-donut">
+                            <canvas id="chartSexo"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico 3: Estado Civil -->
+                <div class="col-12 col-md-4">
+                    <div class="card-custom h-100">
+                        <div class="card-custom-header">
+                            <h2 class="card-custom-title">
+                                <i class="fas fa-ring text-danger"></i> Estado Civil
+                            </h2>
+                            <span class="badge bg-light text-dark fw-bold border">Família</span>
+                        </div>
+                        <div class="chart-box chart-box-donut">
+                            <canvas id="chartEstadoCivil"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LINHA 2 DE GRÁFICOS: 2 Gráficos de Barras (Faixa Etária & Bairros) -->
+            <div class="row charts-row-bars g-3 mb-4">
+                <!-- Gráfico 4: Faixas Etárias -->
+                <div class="col-12 col-md-6">
+                    <div class="card-custom h-100">
+                        <div class="card-custom-header">
+                            <h2 class="card-custom-title">
+                                <i class="fas fa-chart-bar text-success"></i> Distribuição por Faixa Etária
+                            </h2>
+                            <span class="badge bg-light text-dark fw-bold border">Gerações</span>
+                        </div>
+                        <div class="chart-box chart-box-bar">
+                            <canvas id="chartFaixasEtarias"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico 5: Distribuição por Bairro -->
+                <div class="col-12 col-md-6">
+                    <div class="card-custom h-100">
+                        <div class="card-custom-header">
+                            <h2 class="card-custom-title">
+                                <i class="fas fa-map-marked-alt text-warning"></i> Candidatos por Bairro
+                            </h2>
+                            <span class="badge bg-light text-dark fw-bold border">Geografia</span>
+                        </div>
+                        <div class="chart-box chart-box-bar">
+                            <canvas id="chartBairros"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOCO PÁGINA 2 NA IMPRESSÃO: TABELA DE CANDIDATOS -->
+        <div class="pagina-2-print">
+            <!-- Cabeçalho Exclusivo da Página 2 na Impressão -->
+            <div class="print-header-area">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0 fw-bold" style="color: #0f172a;">IEBI - Relação Consolidada de Candidatos</h4>
+                        <p class="mb-0 text-muted" style="font-size: 8.5pt;">Batismo e Integração para a Membresia</p>
+                    </div>
+                    <div class="text-end text-muted" style="font-size: 8pt;">
+                        <div>Página 2 - Lista Geral</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="card-custom-header">
+                    <h2 class="card-custom-title">
+                        <i class="fas fa-id-card-alt text-success"></i> Relação Geral de Candidatos
+                    </h2>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-dark text-white fw-bold px-3 py-2" id="badgeTotalLista">0 Candidatos</span>
+                    </div>
+                </div>
+
+                <!-- Toolbar de Filtros (Oculto na Impressão) -->
+                <div class="filter-box mx-3 my-3 no-print">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-12 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                <input type="text" id="filtroBusca" class="form-control form-control-custom border-start-0" placeholder="Buscar por Nome, Bairro ou Telefone...">
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <select id="filtroModo" class="form-select form-select-custom">
+                                <option value="">Todos os Modos</option>
+                                <option value="BATISMO">Batismo (Águas)</option>
+                                <option value="DECLARAÇÃO">Declaração</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <select id="filtroSexo" class="form-select form-select-custom">
+                                <option value="">Todos os Sexos</option>
+                                <option value="MASCULINO">Masculino</option>
+                                <option value="FEMININO">Feminino</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2 d-flex justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary w-100 fw-bold" id="btnLimparFiltros">
+                                <i class="fas fa-eraser me-1"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Candidatos -->
+                <div class="table-responsive px-3 pb-3">
+                    <table class="table-custom" id="tabelaCandidatos">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Candidato</th>
+                                <th style="width: 10%;">Idade</th>
+                                <th style="width: 9%;">Sexo</th>
+                                <th style="width: 13%;">Modo</th>
+                                <th style="width: 10%;">Est. Civil</th>
+                                <th style="width: 15%;">Bairro / Cidade</th>
+                                <th style="width: 8%;">Previsão</th>
+                                <th style="width: 10%;" class="text-center no-print">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabelaCandidatos">
+                            <!-- Linhas geradas dinamicamente via JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" id="tfootTotalTexto">TOTAL GERAL: 0 CANDIDATOS</td>
+                                <td id="tfootModoBatismo">0 Batismo</td>
+                                <td id="tfootModoDeclaracao">0 Declaração</td>
+                                <td colspan="3" class="text-end" id="tfootSubInfo">Atualizado em tempo real</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Detalhes e Edição do Candidato (Ficha Pastoral) -->
+    <div class="modal fade" id="modalFichaCandidato" tabindex="-1" aria-labelledby="modalFichaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title mb-0" id="modalFichaNome">Ficha do Candidato</h5>
+                        <small class="text-white-50" id="modalFichaSub">IEBI - Ficha de Membresia e Batismo</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Secao 1: Dados Pessoais -->
+                    <div class="ficha-secao">
+                        <div class="ficha-secao-titulo">
+                            <i class="fas fa-user-check"></i> Dados Pessoais & Identificação
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="ficha-campo-rotulo">Nome Completo *</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaNomeCompleto">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editNome" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="ficha-campo-rotulo">Data de Nasc. / Idade</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaNasc">-</div>
+                                <input type="date" class="edit-field form-control form-control-sm" id="editDtnasc" style="display: none;">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="ficha-campo-rotulo">Sexo</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaSexo">-</div>
+                                <select class="edit-field form-select form-select-sm" id="editSexo" style="display: none;">
+                                    <option value="MASCULINO">MASCULINO</option>
+                                    <option value="FEMININO">FEMININO</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">CPF</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaCpf">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editCpf" style="display: none;" placeholder="000.000.000-00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">RG (Identidade)</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaRg">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editRg" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">Estado Civil</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaEstadoCivil">-</div>
+                                <select class="edit-field form-select form-select-sm" id="editEstadoCivil" style="display: none;">
+                                    <option value="SOLTEIRO">SOLTEIRO(A)</option>
+                                    <option value="CASADO">CASADO(A)</option>
+                                    <option value="DIVORCIADO">DIVORCIADO(A)</option>
+                                    <option value="VIÚVO">VIÚVO(A)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secao 2: Filiação e Família -->
+                    <div class="ficha-secao">
+                        <div class="ficha-secao-titulo">
+                            <i class="fas fa-users"></i> Família & Filiação
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3" id="mFichaGrupoConjuge">
+                                <div class="ficha-campo-rotulo">Cônjuge</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaConjuge">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editConjuge" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="ficha-campo-rotulo">Nome do Pai</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaPai">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editPai" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="ficha-campo-rotulo">Nome da Mãe</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaMae">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editMae" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secao 3: Endereço & Contatos -->
+                    <div class="ficha-secao">
+                        <div class="ficha-secao-titulo">
+                            <i class="fas fa-map-marked-alt"></i> Endereço & Contatos
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="ficha-campo-rotulo">Logradouro</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaEndereco">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editEndereco" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <div class="ficha-campo-rotulo">Número</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaNumero">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editNumero" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">CEP</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaCep">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editCep" style="display: none;" placeholder="58102-000">
+                            </div>
+                            <div class="col-md-5 mb-3">
+                                <div class="ficha-campo-rotulo">Bairro</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaBairro">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editBairro" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-5 mb-3">
+                                <div class="ficha-campo-rotulo">Cidade</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaCidade">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editCidade" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <div class="ficha-campo-rotulo">UF</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaUf">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm text-center" id="editUf" style="display: none;" maxlength="2" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">Telefone</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaTelefone">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editTelefone" style="display: none;" placeholder="(83) 99999-9999">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">Celular</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaCelular">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editCelular" style="display: none;" placeholder="(83) 99999-9999">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">E-mail</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaEmail">-</div>
+                                <input type="email" class="edit-field form-control form-control-sm" id="editEmail" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secao 4: Integração Eclesiástica -->
+                    <div class="ficha-secao">
+                        <div class="ficha-secao-titulo">
+                            <i class="fas fa-church"></i> Dados Eclesiásticos & Integração
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">Modo de Integração</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaModo">-</div>
+                                <select class="edit-field form-select form-select-sm" id="editModo" style="display: none;">
+                                    <option value="BATISMO">BATISMO</option>
+                                    <option value="DECLARAÇÃO">DECLARAÇÃO</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">Data de Inscrição</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaDataInscricao">-</div>
+                                <input type="date" class="edit-field form-control form-control-sm" id="editDataInscricao" style="display: none;">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="ficha-campo-rotulo">Data Prevista de Integração</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaDataIntegracao">-</div>
+                                <input type="date" class="edit-field form-control form-control-sm" id="editDataIntegracao" style="display: none;">
+                            </div>
+                            <div class="col-md-8 mb-3" id="mFichaGrupoIgrejaOrigem">
+                                <div class="ficha-campo-rotulo">Igreja onde se batizou</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaIgreja">-</div>
+                                <input type="text" class="edit-field form-control form-control-sm" id="editIgreja" style="display: none;" onkeyup="this.value = this.value.toUpperCase();">
+                            </div>
+                            <div class="col-md-4 mb-3" id="mFichaGrupoDataBatismoOrigem">
+                                <div class="ficha-campo-rotulo">Data do Batismo Anterior</div>
+                                <div class="view-field ficha-campo-valor" id="mFichaDataBatismoAnterior">-</div>
+                                <input type="date" class="edit-field form-control form-control-sm" id="editDataBatismoAnterior" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secao 5: Histórico / Timeline -->
+                    <div class="ficha-secao mb-0" id="mFichaSecaoTimeline" style="display: none;">
+                        <div class="ficha-secao-titulo">
+                            <i class="fas fa-history"></i> Histórico / Atualizações
+                        </div>
+                        <div id="mFichaTimelineConteudo" class="small text-muted"></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <div>
+                        <a href="#" target="_blank" class="btn btn-success fw-bold" id="mFichaBtnWhatsapp">
+                            <i class="fab fa-whatsapp me-1"></i> Chamar no WhatsApp
+                        </a>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary fw-bold" id="mFichaBtnEditar">
+                            <i class="fas fa-edit me-1"></i> Editar
+                        </button>
+                        <button type="button" class="btn btn-success fw-bold" id="mFichaBtnSalvar" style="display: none;">
+                            <i class="fas fa-save me-1"></i> Salvar Alterações
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary fw-bold" id="mFichaBtnCancelarEdicao" style="display: none;">
+                            Cancelar
+                        </button>
+                        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="spinner"></div>
+            <h5 class="fw-bold mb-1" style="color: #0f172a;">Carregando Indicadores Pastorais</h5>
+            <p class="text-muted small mb-0">Consultando cadastros de batismo e integração...</p>
+        </div>
+    </div>
+
+    <!-- Scripts: Bootstrap 5.3.3, Chart.js 3.9.1 & Vanilla Masker -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
+
+    <!-- Firebase SDK Modular -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // Configuração do Firebase
+        const configuracaoFirebase = {
+            apiKey: "AIzaSyCEqseDS-_OSmdfGf-NNflAJnS_AT5i1-U",
+            authDomain: "dbiebi.firebaseapp.com",
+            databaseURL: "https://dbiebi-default-rtdb.firebaseio.com",
+            projectId: "dbiebi",
+            storageBucket: "dbiebi.appspot.com",
+            messagingSenderId: "1068164821081",
+            appId: "1:1068164821081:web:2d3e0030d5311d94f30148"
+        };
+
+        const app = initializeApp(configuracaoFirebase);
+        const bancoDeDados = getFirestore(app);
+
+        // Estado Global
+        let todosCandidatos = [];
+        let candidatosFiltrados = [];
+        let candidatoAtualSelecionado = null;
+        let chartModo = null;
+        let chartSexo = null;
+        let chartFaixas = null;
+        let chartBairros = null;
+        let chartCivil = null;
+
+        // Utilitários de Data e Idade
+        function parseDataPt(str) {
+            if (!str) return null;
+            const s = str.toString().trim();
+            if (s.includes('/')) {
+                const p = s.split('/');
+                if (p.length === 3) {
+                    return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+                }
+            } else if (s.includes('-')) {
+                const p = s.split('-');
+                if (p.length === 3) {
+                    if (p[0].length === 4) {
+                        return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+                    } else {
+                        return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+                    }
+                }
+            }
+            return null;
+        }
+
+        function formatarDataExibicao(str) {
+            if (!str) return '-';
+            const dt = parseDataPt(str);
+            if (!dt || isNaN(dt.getTime())) return str;
+            return dt.toLocaleDateString('pt-BR');
+        }
+
+        function formatarParaInputDate(str) {
+            if (!str) return '';
+            const dt = parseDataPt(str);
+            if (!dt || isNaN(dt.getTime())) return '';
+            const ano = dt.getFullYear();
+            const mes = String(dt.getMonth() + 1).padStart(2, '0');
+            const dia = String(dt.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        function toPtBrDate(inputVal) {
+            if (!inputVal) return '';
+            if (inputVal.includes('-')) {
+                const parts = inputVal.split('-');
+                if (parts.length === 3 && parts[0].length === 4) {
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
+            return inputVal;
+        }
+
+        function calcularIdade(str) {
+            const dt = parseDataPt(str);
+            if (!dt || isNaN(dt.getTime())) return null;
+            const hoje = new Date();
+            let idade = hoje.getFullYear() - dt.getFullYear();
+            const m = hoje.getMonth() - dt.getMonth();
+            if (m < 0 || (m === 0 && hoje.getDate() < dt.getDate())) {
+                idade--;
+            }
+            return (idade >= 0 && idade < 125) ? idade : null;
+        }
+
+        function limparTelefone(fone) {
+            if (!fone) return '';
+            return fone.toString().replace(/\D/g, '');
+        }
+
+        function formatarNumeroWhatsapp(fone) {
+            const digits = limparTelefone(fone);
+            if (!digits) return '';
+            if (digits.length === 10 || digits.length === 11) {
+                return '55' + digits;
+            }
+            return digits;
+        }
+
+        // Configuração de Máscaras nos campos de edição
+        if (typeof VMasker !== 'undefined') {
+            const elCpf = document.getElementById('editCpf');
+            const elCep = document.getElementById('editCep');
+            const elTel = document.getElementById('editTelefone');
+            const elCel = document.getElementById('editCelular');
+            if (elCpf) VMasker(elCpf).maskPattern("999.999.999-99");
+            if (elCep) VMasker(elCep).maskPattern("99999-999");
+            if (elTel) VMasker(elTel).maskPattern("(99) 99999-9999");
+            if (elCel) VMasker(elCel).maskPattern("(99) 99999-9999");
+        }
+
+        // Plugins do Chart.js
+        const pluginDoughnutCenter = {
+            id: 'doughnutCenter',
+            beforeDraw: function (chart) {
+                if (chart.config.type !== 'doughnut') return;
+                const { chartArea, ctx } = chart;
+                if (!chartArea) return;
+                const centerX = (chartArea.left + chartArea.right) / 2;
+                const centerY = (chartArea.top + chartArea.bottom) / 2;
+                const total = chart.data.datasets[0].data.reduce((a, b) => a + (Number(b) || 0), 0);
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                ctx.font = 'bold 22px Montserrat, sans-serif';
+                ctx.fillStyle = '#0f172a';
+                ctx.fillText(total, centerX, centerY - 8);
+
+                ctx.font = '700 11px Montserrat, sans-serif';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText('TOTAL', centerX, centerY + 14);
+                ctx.restore();
+            }
+        };
+
+        const pluginSliceLabels = {
+            id: 'sliceLabels',
+            afterDraw: function (chart) {
+                if (chart.config.type !== 'doughnut' && chart.config.type !== 'pie') return;
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    if (!meta || !meta.data) return;
+
+                    meta.data.forEach(function (element, index) {
+                        if (!element) return;
+                        const value = dataset.data[index];
+                        if (value === undefined || value === null || value === 0) return;
+
+                        const angle = (element.startAngle + element.endAngle) / 2;
+                        const radius = (element.outerRadius + element.innerRadius) / 2;
+                        const x = element.x + Math.cos(angle) * radius;
+                        const y = element.y + Math.sin(angle) * radius;
+
+                        if (!isNaN(x) && !isNaN(y)) {
+                            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                            ctx.shadowBlur = 4;
+                            ctx.shadowOffsetX = 1;
+                            ctx.shadowOffsetY = 1;
+
+                            ctx.font = 'bold 13px Montserrat, sans-serif';
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillText(value.toString(), x, y);
+                        }
+                    });
+                });
+                ctx.restore();
+            }
+        };
+
+        const pluginBarLabels = {
+            id: 'barLabels',
+            afterDatasetsDraw: function (chart) {
+                if (chart.config.type !== 'bar') return;
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return;
+
+                const isHorizontal = chart.config.options.indexAxis === 'y';
+
+                chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    if (!meta || !meta.data || meta.hidden) return;
+
+                    meta.data.forEach(function (element, index) {
+                        if (!element) return;
+                        const value = dataset.data[index];
+                        if (value === undefined || value === null || value === 0) return;
+
+                        ctx.save();
+                        ctx.font = 'bold 12px Montserrat, sans-serif';
+
+                        if (isHorizontal) {
+                            const texto = value.toString();
+                            const textoWidth = ctx.measureText(texto).width;
+                            const espacoDireita = chartArea.right - element.x;
+                            const larguraBarra = Math.abs(element.x - element.base);
+
+                            ctx.textBaseline = 'middle';
+                            if (espacoDireita < textoWidth + 14 && larguraBarra > textoWidth + 24) {
+                                ctx.textAlign = 'right';
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fillText(texto, element.x - 6, element.y);
+                            } else {
+                                ctx.textAlign = 'left';
+                                ctx.fillStyle = '#0f172a';
+                                ctx.fillText(texto, element.x + 6, element.y);
+                            }
+                        } else {
+                            const texto = value.toString();
+                            const espacoTopo = element.y - chartArea.top;
+                            const alturaBarra = Math.abs(element.base - element.y);
+
+                            ctx.textAlign = 'center';
+                            if (espacoTopo < 18 && alturaBarra > 30) {
+                                ctx.textBaseline = 'top';
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fillText(texto, element.x, element.y + 5);
+                            } else {
+                                ctx.textBaseline = 'bottom';
+                                ctx.fillStyle = '#0f172a';
+                                ctx.fillText(texto, element.x, element.y - 4);
+                            }
+                        }
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+
+        // Carregar Dados do Firestore
+        async function carregarDadosBatismo() {
+            const splash = document.getElementById('splash-screen');
+            if (splash) splash.style.display = 'flex';
+
+            try {
+                const snapshot = await getDocs(collection(bancoDeDados, "batismo"));
+                todosCandidatos = [];
+
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const idade = calcularIdade(d.dtnasc);
+
+                    const modo = (d.modoIntegracao || 'BATISMO').toString().trim().toUpperCase();
+                    const sexo = (d.sexo || 'MASCULINO').toString().trim().toUpperCase();
+                    const estadoCivil = (d.estadoCivil || 'NÃO INFORMADO').toString().trim().toUpperCase();
+                    const bairro = (d.bairro || 'NÃO INFORMADO').toString().trim().toUpperCase();
+                    const cidade = (d.cidade || 'CABEDELO').toString().trim().toUpperCase();
+
+                    todosCandidatos.push({
+                        id: docSnap.id,
+                        nome: (d.nome || 'SEM NOME').toString().trim().toUpperCase(),
+                        dtnasc: d.dtnasc || '',
+                        idade: idade,
+                        sexo: sexo,
+                        estadoCivil: estadoCivil,
+                        rg: d.rg || '',
+                        cpf: d.cpf || '',
+                        cep: d.cep || '',
+                        endereco: d.endereco || '',
+                        numero: d.numero || '',
+                        bairro: bairro,
+                        cidade: cidade,
+                        uf: d.uf || 'PB',
+                        telefone: d.telefone || d.celular || '',
+                        celular: d.celular || d.telefone || '',
+                        email: d.email || '',
+                        conjuge: d.conjuge || '',
+                        pai: d.pai || '',
+                        mae: d.mae || '',
+                        modoIntegracao: modo,
+                        igrejaBatismo: d.igrejaBatismo || '',
+                        dataBatismo: d.dataBatismo || '',
+                        dataInscricaoMembresia: d.dataInscricaoMembresia || '',
+                        dataIntegracao: d.dataIntegracao || '',
+                        status: d.status || 'Cadastrado',
+                        timeline: d.timeline || []
+                    });
+                });
+
+                todosCandidatos.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                document.getElementById('printDataEmissao').innerText = new Date().toLocaleDateString('pt-BR');
+                const proximaData = todosCandidatos.find(c => c.dataIntegracao)?.dataIntegracao || '05/12/2026';
+                document.getElementById('printDataProxima').innerText = formatarDataExibicao(proximaData);
+
+                aplicarFiltros();
+
+            } catch (erro) {
+                console.error("Erro ao carregar candidatos:", erro);
+                alert("Erro ao conectar com o banco de dados. Verifique a conexão com a internet.");
+            } finally {
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => { splash.style.display = 'none'; splash.style.opacity = '1'; }, 300);
+                }
+            }
+        }
+
+        // Atualizar Métricas e KPIs
+        function atualizarKpis(dados) {
+            const total = dados.length;
+            let countBatismo = 0;
+            let countDeclaracao = 0;
+            let countMasc = 0;
+            let countFem = 0;
+            let countCasado = 0;
+            let countSolteiro = 0;
+            let somaIdades = 0;
+            let idadesContadas = 0;
+
+            dados.forEach(c => {
+                if (c.modoIntegracao === 'BATISMO') countBatismo++;
+                else countDeclaracao++;
+
+                if (c.sexo === 'FEMININO') countFem++;
+                else countMasc++;
+
+                if (c.estadoCivil === 'CASADO' || c.estadoCivil === 'CASADA') countCasado++;
+                else if (c.estadoCivil === 'SOLTEIRO' || c.estadoCivil === 'SOLTEIRA') countSolteiro++;
+
+                if (c.idade !== null && !isNaN(c.idade)) {
+                    somaIdades += c.idade;
+                    idadesContadas++;
+                }
+            });
+
+            const mediaIdade = idadesContadas > 0 ? Math.round(somaIdades / idadesContadas) : 0;
+            const pctBatismo = total > 0 ? Math.round((countBatismo / total) * 100) : 0;
+            const pctDeclaracao = total > 0 ? Math.round((countDeclaracao / total) * 100) : 0;
+
+            document.getElementById('kpiTotal').innerText = total;
+            document.getElementById('kpiBatismo').innerText = countBatismo;
+            document.getElementById('kpiBatismoPct').innerText = `${pctBatismo}% do total`;
+            document.getElementById('kpiDeclaracao').innerText = countDeclaracao;
+            document.getElementById('kpiDeclaracaoPct').innerText = `${pctDeclaracao}% do total`;
+            document.getElementById('kpiSexoRatio').innerText = `${countMasc} / ${countFem}`;
+            document.getElementById('kpiCivilRatio').innerText = `${countCasado} / ${countSolteiro}`;
+            document.getElementById('kpiMediaIdade').innerText = `${mediaIdade} anos`;
+
+            let faixaTexto = 'Geral';
+            if (mediaIdade < 25) faixaTexto = 'Jovem';
+            else if (mediaIdade < 50) faixaTexto = 'Adultos';
+            else faixaTexto = 'Maturidade';
+            document.getElementById('kpiFaixaSub').innerText = `Predominância: ${faixaTexto}`;
+
+            document.getElementById('badgeTotalLista').innerText = `${total} Candidatos`;
+        }
+
+        // Renderização dos Gráficos
+        function renderizarGraficos(dados) {
+            const modoMap = { 'BATISMO': 0, 'DECLARAÇÃO': 0 };
+            const sexoMap = { 'MASCULINO': 0, 'FEMININO': 0 };
+            const faixaMap = { 'Até 17 anos': 0, '18 a 29 anos': 0, '30 a 49 anos': 0, '50+ anos': 0 };
+            const bairroMap = {};
+            const civilMap = {};
+
+            dados.forEach(c => {
+                modoMap[c.modoIntegracao] = (modoMap[c.modoIntegracao] || 0) + 1;
+                sexoMap[c.sexo] = (sexoMap[c.sexo] || 0) + 1;
+
+                if (c.idade !== null) {
+                    if (c.idade < 18) faixaMap['Até 17 anos']++;
+                    else if (c.idade <= 29) faixaMap['18 a 29 anos']++;
+                    else if (c.idade <= 49) faixaMap['30 a 49 anos']++;
+                    else faixaMap['50+ anos']++;
+                }
+
+                const b = c.bairro || 'NÃO INFORMADO';
+                bairroMap[b] = (bairroMap[b] || 0) + 1;
+
+                const ec = c.estadoCivil || 'OUTROS';
+                civilMap[ec] = (civilMap[ec] || 0) + 1;
+            });
+
+            // 1. Modo de Integração
+            const ctxModo = document.getElementById('chartModoIntegracao')?.getContext('2d');
+            if (ctxModo) {
+                if (chartModo) chartModo.destroy();
+                chartModo = new Chart(ctxModo, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Batismo (Águas)', 'Declaração'],
+                        datasets: [{
+                            data: [modoMap['BATISMO'] || 0, modoMap['DECLARAÇÃO'] || 0],
+                            backgroundColor: ['#00bcd4', '#f59e0b'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { family: 'Montserrat', weight: '600', size: 10 }, padding: 8 }
+                            }
+                        },
+                        cutout: '62%'
+                    },
+                    plugins: [pluginDoughnutCenter, pluginSliceLabels]
+                });
+            }
+
+            // 2. Sexo
+            const ctxSexo = document.getElementById('chartSexo')?.getContext('2d');
+            if (ctxSexo) {
+                if (chartSexo) chartSexo.destroy();
+                chartSexo = new Chart(ctxSexo, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Masculino', 'Feminino'],
+                        datasets: [{
+                            data: [sexoMap['MASCULINO'] || 0, sexoMap['FEMININO'] || 0],
+                            backgroundColor: ['#3b82f6', '#ec4899'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { family: 'Montserrat', weight: '600', size: 10 }, padding: 8 }
+                            }
+                        },
+                        cutout: '62%'
+                    },
+                    plugins: [pluginDoughnutCenter, pluginSliceLabels]
+                });
+            }
+
+            // 3. Estado Civil
+            const ctxCivil = document.getElementById('chartEstadoCivil')?.getContext('2d');
+            if (ctxCivil) {
+                if (chartCivil) chartCivil.destroy();
+                const civisOrdenados = Object.entries(civilMap).sort((a, b) => b[1] - a[1]);
+                chartCivil = new Chart(ctxCivil, {
+                    type: 'doughnut',
+                    data: {
+                        labels: civisOrdenados.map(e => e[0]),
+                        datasets: [{
+                            data: civisOrdenados.map(e => e[1]),
+                            backgroundColor: ['#2d6a4f', '#0284c7', '#ea580c', '#9333ea'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { family: 'Montserrat', weight: '600', size: 10 }, padding: 8 }
+                            }
+                        },
+                        cutout: '62%'
+                    },
+                    plugins: [pluginDoughnutCenter, pluginSliceLabels]
+                });
+            }
+
+            // 4. Faixas Etárias
+            const ctxFaixas = document.getElementById('chartFaixasEtarias')?.getContext('2d');
+            if (ctxFaixas) {
+                if (chartFaixas) chartFaixas.destroy();
+                chartFaixas = new Chart(ctxFaixas, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(faixaMap),
+                        datasets: [{
+                            data: Object.values(faixaMap),
+                            backgroundColor: ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Montserrat' } }, grid: { color: '#f1f5f9' } },
+                            x: { grid: { display: false }, ticks: { font: { family: 'Montserrat', size: 10 } } }
+                        }
+                    },
+                    plugins: [pluginBarLabels]
+                });
+            }
+
+            // 5. Bairros
+            const ctxBairros = document.getElementById('chartBairros')?.getContext('2d');
+            if (ctxBairros) {
+                if (chartBairros) chartBairros.destroy();
+                const bairrosOrdenados = Object.entries(bairroMap).sort((a, b) => b[1] - a[1]);
+                chartBairros = new Chart(ctxBairros, {
+                    type: 'bar',
+                    data: {
+                        labels: bairrosOrdenados.map(e => e[0]),
+                        datasets: [{
+                            data: bairrosOrdenados.map(e => e[1]),
+                            backgroundColor: '#1b4332',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Montserrat' } }, grid: { color: '#f1f5f9' } },
+                            y: { grid: { display: false }, ticks: { font: { family: 'Montserrat', size: 10 } } }
+                        }
+                    },
+                    plugins: [pluginBarLabels]
+                });
+            }
+        }
+
+        // Renderizar Tabela
+        function renderizarTabela(dados) {
+            const tbody = document.getElementById('corpoTabelaCandidatos');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (dados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>Nenhum candidato encontrado com os filtros selecionados.</td></tr>`;
+                document.getElementById('tfootTotalTexto').innerText = 'NENHUM REGISTRO';
+                document.getElementById('tfootModoBatismo').innerText = '0 Batismo';
+                document.getElementById('tfootModoDeclaracao').innerText = '0 Declaração';
+                return;
+            }
+
+            let batismoCount = 0;
+            let declaracaoCount = 0;
+
+            dados.forEach(c => {
+                if (c.modoIntegracao === 'BATISMO') batismoCount++;
+                else declaracaoCount++;
+
+                const tr = document.createElement('tr');
+
+                // Badges
+                const badgeModo = c.modoIntegracao === 'BATISMO'
+                    ? `<span class="badge-modo badge-batismo"><i class="fas fa-water"></i> Batismo</span>`
+                    : `<span class="badge-modo badge-declaracao"><i class="fas fa-file-signature"></i> Declaração</span>`;
+
+                const badgeSexo = c.sexo === 'FEMININO'
+                    ? `<span class="badge-sexo-f"><i class="fas fa-female"></i> Fem</span>`
+                    : `<span class="badge-sexo-m"><i class="fas fa-male"></i> Masc</span>`;
+
+                const idadeHtml = c.idade !== null
+                    ? `<span class="badge-idade">${c.idade} anos</span>`
+                    : `<span class="text-muted small">${formatarDataExibicao(c.dtnasc)}</span>`;
+
+                // WhatsApp link apenas com ícone conforme solicitado
+                const waNumero = formatarNumeroWhatsapp(c.telefone || c.celular);
+                const waBotao = waNumero
+                    ? `<a href="https://wa.me/${waNumero}?text=Olá%20${encodeURIComponent(c.nome)},%20a%20paz%20do%20Senhor!%20Estamos%20muito%20felizes%20com%20sua%20inscrição%20para%20Batismo/Integração%20na%20IEBI." target="_blank" class="btn-whatsapp no-print" title="Conversar no WhatsApp (${c.telefone || c.celular})"><i class="fab fa-whatsapp"></i></a>`
+                    : '';
+
+                const nomeEscapado = c.nome.replace(/'/g, "\\'");
+
+                tr.innerHTML = `
+                    <td>
+                        <div class="fw-bold text-dark">${c.nome}</div>
+                        <small class="text-muted">${c.cpf ? 'CPF: ' + c.cpf : (c.rg ? 'RG: ' + c.rg : '')}</small>
+                    </td>
+                    <td>${idadeHtml}</td>
+                    <td>${badgeSexo}</td>
+                    <td>${badgeModo}</td>
+                    <td><span class="badge-civil">${c.estadoCivil}</span></td>
+                    <td>
+                        <div class="fw-semibold">${c.bairro}</div>
+                        <small class="text-muted">${c.cidade} - ${c.uf}</small>
+                    </td>
+                    <td><span class="small fw-bold text-dark">${formatarDataExibicao(c.dataIntegracao)}</span></td>
+                    <td class="text-center no-print">
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            ${waBotao}
+                            <button class="btn-ver-ficha" onclick="abrirFichaModal('${c.id}')" title="Visualizar / Editar Ficha">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-excluir" onclick="confirmarExclusao('${c.id}', '${nomeEscapado}')" title="Excluir Candidato">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Atualiza Rodapé
+            document.getElementById('tfootTotalTexto').innerText = `TOTAL CONSOLIDADO: ${dados.length} CANDIDATOS`;
+            document.getElementById('tfootModoBatismo').innerText = `${batismoCount} Batismo`;
+            document.getElementById('tfootModoDeclaracao').innerText = `${declaracaoCount} Declaração`;
+        }
+
+        // Filtros
+        function aplicarFiltros() {
+            const busca = (document.getElementById('filtroBusca')?.value || '').toLowerCase().trim();
+            const modo = document.getElementById('filtroModo')?.value || '';
+            const sexo = document.getElementById('filtroSexo')?.value || '';
+
+            candidatosFiltrados = todosCandidatos.filter(c => {
+                const matchBusca = !busca ||
+                    c.nome.toLowerCase().includes(busca) ||
+                    c.bairro.toLowerCase().includes(busca) ||
+                    c.telefone.includes(busca) ||
+                    c.cpf.includes(busca);
+
+                const matchModo = !modo || c.modoIntegracao === modo;
+                const matchSexo = !sexo || c.sexo === sexo;
+
+                return matchBusca && matchModo && matchSexo;
+            });
+
+            atualizarKpis(candidatosFiltrados);
+            renderizarGraficos(candidatosFiltrados);
+            renderizarTabela(candidatosFiltrados);
+        }
+
+        // Exportação CSV
+        function exportarCSV() {
+            const rows = [];
+            rows.push([
+                'Nome',
+                'Data Nascimento',
+                'Idade',
+                'Sexo',
+                'Estado Civil',
+                'CPF',
+                'RG',
+                'Telefone',
+                'Email',
+                'CEP',
+                'Endereco',
+                'Numero',
+                'Bairro',
+                'Cidade',
+                'UF',
+                'Modo Integracao',
+                'Igreja Batismo Anterior',
+                'Data Batismo Anterior',
+                'Data Inscricao',
+                'Data Integracao',
+                'Conjuge',
+                'Pai',
+                'Mae'
+            ]);
+
+            todosCandidatos.forEach(c => {
+                rows.push([
+                    `"${c.nome}"`,
+                    `"${c.dtnasc}"`,
+                    c.idade !== null ? c.idade : '',
+                    `"${c.sexo}"`,
+                    `"${c.estadoCivil}"`,
+                    `"${c.cpf}"`,
+                    `"${c.rg}"`,
+                    `"${c.telefone}"`,
+                    `"${c.email}"`,
+                    `"${c.cep}"`,
+                    `"${c.endereco}"`,
+                    `"${c.numero}"`,
+                    `"${c.bairro}"`,
+                    `"${c.cidade}"`,
+                    `"${c.uf}"`,
+                    `"${c.modoIntegracao}"`,
+                    `"${c.igrejaBatismo}"`,
+                    `"${c.dataBatismo}"`,
+                    `"${c.dataInscricaoMembresia}"`,
+                    `"${c.dataIntegracao}"`,
+                    `"${c.conjuge}"`,
+                    `"${c.pai}"`,
+                    `"${c.mae}"`
+                ]);
+            });
+
+            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + rows.map(e => e.join(';')).join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `Indicadores_Batismo_IEBI_${new Date().getFullYear()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Modal Detalhes & Edição
+        function alternarModoEdicao(ativo) {
+            const viewFields = document.querySelectorAll('.view-field');
+            const editFields = document.querySelectorAll('.edit-field');
+            const btnEditar = document.getElementById('mFichaBtnEditar');
+            const btnSalvar = document.getElementById('mFichaBtnSalvar');
+            const btnCancelar = document.getElementById('mFichaBtnCancelarEdicao');
+
+            if (ativo) {
+                viewFields.forEach(el => el.style.display = 'none');
+                editFields.forEach(el => el.style.display = 'block');
+                btnEditar.style.display = 'none';
+                btnSalvar.style.display = 'inline-flex';
+                btnCancelar.style.display = 'inline-flex';
+            } else {
+                viewFields.forEach(el => el.style.display = 'block');
+                editFields.forEach(el => el.style.display = 'none');
+                btnEditar.style.display = 'inline-flex';
+                btnSalvar.style.display = 'none';
+                btnCancelar.style.display = 'none';
+            }
+        }
+
+        function preencherCamposModal(c) {
+            document.getElementById('modalFichaNome').innerText = c.nome;
+            document.getElementById('mFichaNomeCompleto').innerText = c.nome;
+            document.getElementById('mFichaNasc').innerText = `${formatarDataExibicao(c.dtnasc)} (${c.idade !== null ? c.idade + ' anos' : '-'})`;
+            document.getElementById('mFichaSexo').innerText = c.sexo;
+            document.getElementById('mFichaCpf').innerText = c.cpf || 'Não informado';
+            document.getElementById('mFichaRg').innerText = c.rg || 'Não informado';
+            document.getElementById('mFichaEstadoCivil').innerText = c.estadoCivil;
+
+            // Família
+            if (c.estadoCivil === 'CASADO' || c.estadoCivil === 'CASADA') {
+                document.getElementById('mFichaGrupoConjuge').style.display = 'block';
+                document.getElementById('mFichaConjuge').innerText = c.conjuge || 'Não informado';
+            } else {
+                document.getElementById('mFichaGrupoConjuge').style.display = 'none';
+            }
+            document.getElementById('mFichaPai').innerText = c.pai || 'Não informado';
+            document.getElementById('mFichaMae').innerText = c.mae || 'Não informado';
+
+            // Endereço
+            document.getElementById('mFichaEndereco').innerText = c.endereco || 'Não informado';
+            document.getElementById('mFichaNumero').innerText = c.numero || 'S/N';
+            document.getElementById('mFichaBairro').innerText = c.bairro;
+            document.getElementById('mFichaCidade').innerText = c.cidade;
+            document.getElementById('mFichaUf').innerText = c.uf;
+            document.getElementById('mFichaCep').innerText = c.cep || 'Não informado';
+
+            // Contatos
+            document.getElementById('mFichaTelefone').innerText = c.telefone || 'Não informado';
+            document.getElementById('mFichaCelular').innerText = c.celular || 'Não informado';
+            document.getElementById('mFichaEmail').innerText = c.email || 'Não informado';
+
+            // Integração
+            document.getElementById('mFichaModo').innerHTML = c.modoIntegracao === 'BATISMO'
+                ? `<span class="badge-modo badge-batismo"><i class="fas fa-water"></i> Batismo (Águas)</span>`
+                : `<span class="badge-modo badge-declaracao"><i class="fas fa-file-signature"></i> Declaração</span>`;
+
+            document.getElementById('mFichaDataInscricao').innerText = formatarDataExibicao(c.dataInscricaoMembresia);
+            document.getElementById('mFichaDataIntegracao').innerText = formatarDataExibicao(c.dataIntegracao);
+
+            if (c.modoIntegracao === 'DECLARAÇÃO') {
+                document.getElementById('mFichaGrupoIgrejaOrigem').style.display = 'block';
+                document.getElementById('mFichaGrupoDataBatismoOrigem').style.display = 'block';
+                document.getElementById('mFichaIgreja').innerText = c.igrejaBatismo || 'Não informado';
+                document.getElementById('mFichaDataBatismoAnterior').innerText = formatarDataExibicao(c.dataBatismo);
+            } else {
+                document.getElementById('mFichaGrupoIgrejaOrigem').style.display = 'none';
+                document.getElementById('mFichaGrupoDataBatismoOrigem').style.display = 'none';
+            }
+
+            // Timeline
+            const secTimeline = document.getElementById('mFichaSecaoTimeline');
+            const contTimeline = document.getElementById('mFichaTimelineConteudo');
+            if (c.timeline && c.timeline.length > 0) {
+                secTimeline.style.display = 'block';
+                contTimeline.innerHTML = c.timeline.map(t => `
+                    <div class="border-bottom pb-1 mb-1">
+                        <strong>${t.data || ''}:</strong> ${t.acao || ''} - <em>${t.alteracoes || ''}</em>
+                    </div>
+                `).join('');
+            } else {
+                secTimeline.style.display = 'none';
+            }
+
+            // Preenchimento dos inputs de Edição
+            document.getElementById('editNome').value = c.nome || '';
+            document.getElementById('editDtnasc').value = formatarParaInputDate(c.dtnasc);
+            document.getElementById('editSexo').value = c.sexo || 'MASCULINO';
+            document.getElementById('editCpf').value = c.cpf || '';
+            document.getElementById('editRg').value = c.rg || '';
+            document.getElementById('editEstadoCivil').value = c.estadoCivil || 'SOLTEIRO';
+            document.getElementById('editConjuge').value = c.conjuge || '';
+            document.getElementById('editPai').value = c.pai || '';
+            document.getElementById('editMae').value = c.mae || '';
+            document.getElementById('editEndereco').value = c.endereco || '';
+            document.getElementById('editNumero').value = c.numero || '';
+            document.getElementById('editBairro').value = c.bairro || '';
+            document.getElementById('editCidade').value = c.cidade || '';
+            document.getElementById('editUf').value = c.uf || 'PB';
+            document.getElementById('editCep').value = c.cep || '';
+            document.getElementById('editTelefone').value = c.telefone || '';
+            document.getElementById('editCelular').value = c.celular || '';
+            document.getElementById('editEmail').value = c.email || '';
+            document.getElementById('editModo').value = c.modoIntegracao || 'BATISMO';
+            document.getElementById('editDataInscricao').value = formatarParaInputDate(c.dataInscricaoMembresia);
+            document.getElementById('editDataIntegracao').value = formatarParaInputDate(c.dataIntegracao);
+            document.getElementById('editIgreja').value = c.igrejaBatismo || '';
+            document.getElementById('editDataBatismoAnterior').value = formatarParaInputDate(c.dataBatismo);
+
+            // WhatsApp no Modal
+            const btnWa = document.getElementById('mFichaBtnWhatsapp');
+            const waNumero = formatarNumeroWhatsapp(c.telefone || c.celular);
+            if (waNumero) {
+                btnWa.href = `https://wa.me/${waNumero}?text=Olá%20${encodeURIComponent(c.nome)},%20a%20paz%20do%20Senhor!%20Estamos%20muito%20felizes%20com%20sua%20inscrição%20para%20Batismo/Integração%20na%20IEBI.`;
+                btnWa.style.display = 'inline-flex';
+            } else {
+                btnWa.style.display = 'none';
+            }
+        }
+
+        window.abrirFichaModal = function (candidatoId) {
+            const c = todosCandidatos.find(item => item.id === candidatoId);
+            if (!c) return;
+
+            candidatoAtualSelecionado = c;
+            alternarModoEdicao(false);
+            preencherCamposModal(c);
+
+            const modalInstance = new bootstrap.Modal(document.getElementById('modalFichaCandidato'));
+            modalInstance.show();
+        };
+
+        // Eventos de Edição e Salvamento no Modal
+        document.getElementById('mFichaBtnEditar')?.addEventListener('click', () => {
+            alternarModoEdicao(true);
+            document.getElementById('mFichaGrupoConjuge').style.display = 'block';
+            document.getElementById('mFichaGrupoIgrejaOrigem').style.display = 'block';
+            document.getElementById('mFichaGrupoDataBatismoOrigem').style.display = 'block';
+        });
+
+        document.getElementById('mFichaBtnCancelarEdicao')?.addEventListener('click', () => {
+            if (candidatoAtualSelecionado) {
+                preencherCamposModal(candidatoAtualSelecionado);
+            }
+            alternarModoEdicao(false);
+        });
+
+        document.getElementById('mFichaBtnSalvar')?.addEventListener('click', async () => {
+            if (!candidatoAtualSelecionado) return;
+
+            const nome = document.getElementById('editNome').value.trim().toUpperCase();
+            if (!nome) {
+                alert("O Nome Completo é obrigatório.");
+                return;
+            }
+
+            const btnSalvar = document.getElementById('mFichaBtnSalvar');
+            const textoOriginal = btnSalvar.innerHTML;
+            btnSalvar.disabled = true;
+            btnSalvar.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Salvando...`;
+
+            try {
+                const docRef = doc(bancoDeDados, "batismo", candidatoAtualSelecionado.id);
+                const dtnascStr = toPtBrDate(document.getElementById('editDtnasc').value);
+                const dataInscStr = toPtBrDate(document.getElementById('editDataInscricao').value);
+                const dataIntegStr = toPtBrDate(document.getElementById('editDataIntegracao').value);
+                const dataBatismoAntStr = toPtBrDate(document.getElementById('editDataBatismoAnterior').value);
+
+                const novosDados = {
+                    nome: nome,
+                    dtnasc: dtnascStr,
+                    sexo: document.getElementById('editSexo').value,
+                    estadoCivil: document.getElementById('editEstadoCivil').value,
+                    cpf: document.getElementById('editCpf').value.trim(),
+                    rg: document.getElementById('editRg').value.trim(),
+                    conjuge: document.getElementById('editConjuge').value.trim().toUpperCase(),
+                    pai: document.getElementById('editPai').value.trim().toUpperCase(),
+                    mae: document.getElementById('editMae').value.trim().toUpperCase(),
+                    endereco: document.getElementById('editEndereco').value.trim().toUpperCase(),
+                    numero: document.getElementById('editNumero').value.trim().toUpperCase(),
+                    bairro: document.getElementById('editBairro').value.trim().toUpperCase(),
+                    cidade: document.getElementById('editCidade').value.trim().toUpperCase(),
+                    uf: document.getElementById('editUf').value.trim().toUpperCase(),
+                    cep: document.getElementById('editCep').value.trim(),
+                    telefone: document.getElementById('editTelefone').value.trim(),
+                    celular: document.getElementById('editCelular').value.trim(),
+                    email: document.getElementById('editEmail').value.trim().toLowerCase(),
+                    modoIntegracao: document.getElementById('editModo').value,
+                    dataInscricaoMembresia: dataInscStr,
+                    dataIntegracao: dataIntegStr,
+                    igrejaBatismo: document.getElementById('editIgreja').value.trim().toUpperCase(),
+                    dataBatismo: dataBatismoAntStr,
+                    dataAtualizacao: new Date().toISOString()
+                };
+
+                await updateDoc(docRef, novosDados);
+
+                // Atualizar objeto local
+                Object.assign(candidatoAtualSelecionado, novosDados);
+                candidatoAtualSelecionado.idade = calcularIdade(dtnascStr);
+
+                // Re-renderizar tela
+                aplicarFiltros();
+                preencherCamposModal(candidatoAtualSelecionado);
+                alternarModoEdicao(false);
+
+                alert("Informações atualizadas com sucesso!");
+            } catch (err) {
+                console.error("Erro ao atualizar candidato:", err);
+                alert("Erro ao salvar alterações no banco de dados. Verifique a conexão.");
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.innerHTML = textoOriginal;
+            }
+        });
+
+        // Ação Excluir Candidato
+        window.confirmarExclusao = async function (candidatoId, nomeCandidato) {
+            if (!confirm(`ATENÇÃO: Deseja realmente excluir o candidato:\n\n"${nomeCandidato}"?\n\nEsta ação não poderá ser revertida.`)) {
+                return;
+            }
+
+            const splash = document.getElementById('splash-screen');
+            if (splash) splash.style.display = 'flex';
+
+            try {
+                await deleteDoc(doc(bancoDeDados, "batismo", candidatoId));
+                todosCandidatos = todosCandidatos.filter(c => c.id !== candidatoId);
+                aplicarFiltros();
+                alert(`Candidato "${nomeCandidato}" excluído com sucesso.`);
+            } catch (err) {
+                console.error("Erro ao excluir candidato:", err);
+                alert("Erro ao excluir candidato do banco de dados.");
+            } finally {
+                if (splash) splash.style.display = 'none';
+            }
+        };
+
+        // Impressão Perfeita
+        window.imprimirRelatorio = function () {
+            [chartModo, chartSexo, chartFaixas, chartBairros, chartCivil].forEach(c => {
+                if (c) {
+                    c.options.animation = false;
+                    c.resize();
+                    c.update('none');
+                }
+            });
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        };
+
+        // Eventos
+        document.getElementById('filtroBusca')?.addEventListener('input', aplicarFiltros);
+        document.getElementById('filtroModo')?.addEventListener('change', aplicarFiltros);
+        document.getElementById('filtroSexo')?.addEventListener('change', aplicarFiltros);
+        document.getElementById('btnLimparFiltros')?.addEventListener('click', () => {
+            document.getElementById('filtroBusca').value = '';
+            document.getElementById('filtroModo').value = '';
+            document.getElementById('filtroSexo').value = '';
+            aplicarFiltros();
+        });
+        document.getElementById('btnExportarCSV')?.addEventListener('click', exportarCSV);
+        document.getElementById('btnRecarregar')?.addEventListener('click', carregarDadosBatismo);
+
+        // Inicialização
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', carregarDadosBatismo);
+        } else {
+            carregarDadosBatismo();
+        }
+    </script>
+</body>
+
+</html>
